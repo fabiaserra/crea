@@ -22,6 +22,7 @@ void ofApp::setup() {
     irImage.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
     irOriginal.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
 
+    //Background color
     red = 0; green = 0; blue = 0;
 
     //Kinect parameters
@@ -43,7 +44,7 @@ void ofApp::setup() {
     irMarkerFinder.setMinAreaRadius(minMarkerSize);
     irMarkerFinder.setMaxAreaRadius(maxMarkerSize);
 
-    trackerPersistence = 240;
+    trackerPersistence = 70;
     trackerMaxDistance = 64;
     tracker.setPersistence(trackerPersistence);     // wait for 'trackerPersistence' frames before forgetting something
     tracker.setMaximumDistance(trackerMaxDistance); // an object can move up to 'trackerMaxDistance' pixels per frame
@@ -53,8 +54,10 @@ void ofApp::setup() {
     velocity = 50;
     velocityRnd = 20;
     velocityMotion = 50;
+    immortal = false;
     lifetime = 3;
     lifetimeRnd = 60;
+    emitterSize = 8.0f;
     radius = 5;
     radiusRnd = 20;
     sizeAge = true;
@@ -64,12 +67,17 @@ void ofApp::setup() {
     friction = 0;
     gravity = 5.0;
 
-    emitterSize = 8.0f;
 //    emitterType = POINT;
 
-    //Graphics parameters
+    //Contour parameters
     smoothingSize = 0;
 
+    //Grid particles parameters
+    bool sizeAge2 = false;
+    bool opacityAge2 = false;
+    bool colorAge2 = false;
+    ofColor color(255);
+    particles.setup(true, color, gravity, sizeAge2, opacityAge2, colorAge2, bounce);
 /*
 //    //Init IR markers
 //    nMarkers = 2;
@@ -143,57 +151,34 @@ void ofApp::update() {
         contourFinder.findContours(depthImage);
 
         //Track markers
-        markers = tracker.getFollowers();
+        vector<Marker>& markers = tracker.getFollowers();
         vector<unsigned int> deadLabels = tracker.getDeadLabels();
         vector<unsigned int> newLabels = tracker.getNewLabels();
         vector<unsigned int> currentLabels = tracker.getCurrentLabels();
 
-//        for(int i = 0; i < deadLabels.size(); i++) {
-//            particleSystems.erase(deadLabels[i]);
-//        }
+        //update grid particles
+        particles.update(dt, markers);
 
-//        cout << "dead: ";
-        for(int i = 0; i < deadLabels.size(); i++) {
-//            cout << deadLabels[i] << ", ";
-            particleSystems[deadLabels[i]].killParticles();
+        for(unsigned int i = 0; i < deadLabels.size(); i++) {
+            markersParticles[deadLabels[i]].killParticles();
         }
-//        cout << endl;
 
-//        cout << "current: ";
-        for(int i = 0; i < currentLabels.size(); i++) {
-//            cout << currentLabels[i] << ", ";
-            particleSystems[currentLabels[i]].bornParticles();
+        for(unsigned int i = 0; i < currentLabels.size(); i++) {
+            markersParticles[currentLabels[i]].bornParticles();
         }
-//        cout << endl;
 
-//        cout << "new: ";
-        for(int i = 0; i < newLabels.size(); i++) {
-//            cout << newLabels[i] << ", ";
+        for(unsigned int i = 0; i < newLabels.size(); i++) {
             ParticleSystem newParticleSystem;
-            newParticleSystem.setup(BORN_PARTICLES);
-            newParticleSystem.bornRate = bornRate;
-            newParticleSystem.velocity = velocity;
-            newParticleSystem.velocityRnd = velocityRnd;
-            newParticleSystem.velocityMotion = velocityMotion;
-            newParticleSystem.emitterSize = emitterSize;
-            newParticleSystem.lifetime = lifetime;
-            newParticleSystem.lifetimeRnd = lifetimeRnd;
-            newParticleSystem.radius = radius;
-            newParticleSystem.radiusRnd = radiusRnd;
-            newParticleSystem.sizeAge = sizeAge;
-            newParticleSystem.opacityAge = opacityAge;
-            newParticleSystem.colorAge = colorAge;
-            newParticleSystem.bounce = bounce;
-            newParticleSystem.friction = 1-friction/1000;
-            particleSystems[newLabels[i]] = newParticleSystem;
+            ofColor color;
+            color.setHsb(ofRandom(0, 255), 255, 255);
+            newParticleSystem.setup(bornRate, velocity, velocityRnd, velocityMotion, emitterSize, immortal, lifetime, lifetimeRnd,
+                                    color, radius, radiusRnd, 1-friction/1000, gravity, sizeAge, opacityAge, colorAge, bounce);
+            markersParticles[newLabels[i]] = newParticleSystem;
         }
-//        cout << endl;
 
-//        cout << "markers: ";
-        for(int i = 0; i < markers.size(); i++) {
+        for(unsigned int i = 0; i < markers.size(); i++) {
             unsigned int label = markers[i].getLabel();
-//            cout << label << ", ";
-            particleSystems[label].update(dt, markers[i].smoothPos, markers[i].velocity);
+            markersParticles[label].update(dt, markers[i].smoothPos, markers[i].velocity);
         }
 /*
 //        //Identify IR markers with hungarian algorithm
@@ -259,22 +244,23 @@ void ofApp::draw() {
 
     ofPushMatrix();
 
-	ofScale(reScale, reScale);
+//	ofScale(reScale, reScale);
     ofBackground(red, green, blue, 255);
-    ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+//    ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 
     ofSetColor(255);
-    irImage.draw(0, 0);
+//    irImage.draw(0, 0);
 //    depthImage.draw(0, 0);
 
 //    contourFinder.draw();
 //    irMarkerFinder.draw();
+    particles.draw();
 
-    vector<Marker>& markers = tracker.getFollowers();
-    for(int i = 0; i < markers.size(); i++) {
-        unsigned int label = markers[i].getLabel();
-        particleSystems[label].draw();
-    }
+//    vector<Marker>& markers = tracker.getFollowers();
+//    for(int i = 0; i < markers.size(); i++) {
+//        unsigned int label = markers[i].getLabel();
+//        markersParticles[label].draw();
+//    }
 
 //    //Draw contour shape
 //    for(int i = 0; i < contourFinder.size(); i++) {
@@ -449,6 +435,7 @@ void ofApp::setupGUI3()
 
     gui3->addSpacer();
     gui3->addLabel("Particle");
+    gui3->addToggle("Immortal", &immortal);
     gui3->addSlider("Lifetime", 0.0, 20.0, &lifetime);
     gui3->addSlider("Life Random[%]", 0.0, 100.0, &lifetimeRnd);
     gui3->addSlider("Radius", 1.0, 15.0, &radius);
@@ -511,127 +498,127 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
     if(e.getName() == "Emitter size")
     {
         vector<Marker>& markers = tracker.getFollowers();
-        for(int i = 0; i < markers.size(); i++) {
+        for(unsigned int i = 0; i < markers.size(); i++) {
             unsigned int label = markers[i].getLabel();
-            particleSystems[label].emitterSize = emitterSize;
+            markersParticles[label].emitterSize = emitterSize;
         }
     }
 
     if(e.getName() == "Particles/sec")
     {
         vector<Marker>& markers = tracker.getFollowers();
-        for(int i = 0; i < markers.size(); i++) {
+        for(unsigned int i = 0; i < markers.size(); i++) {
             unsigned int label = markers[i].getLabel();
-            particleSystems[label].bornRate = bornRate;
+            markersParticles[label].bornRate = bornRate;
         }
     }
 
     if(e.getName() == "Velocity")
     {
         vector<Marker>& markers = tracker.getFollowers();
-        for(int i = 0; i < markers.size(); i++) {
+        for(unsigned int i = 0; i < markers.size(); i++) {
             unsigned int label = markers[i].getLabel();
-            particleSystems[label].velocity = velocity;
+            markersParticles[label].velocity = velocity;
         }
     }
 
     if(e.getName() == "Velocity Random[%]")
     {
         vector<Marker>& markers = tracker.getFollowers();
-        for(int i = 0; i < markers.size(); i++) {
+        for(unsigned int i = 0; i < markers.size(); i++) {
             unsigned int label = markers[i].getLabel();
-            particleSystems[label].velocityRnd = velocityRnd;
+            markersParticles[label].velocityRnd = velocityRnd;
         }
     }
 
     if(e.getName() == "Velocity from Motion[%]")
     {
         vector<Marker>& markers = tracker.getFollowers();
-        for(int i = 0; i < markers.size(); i++) {
+        for(unsigned int i = 0; i < markers.size(); i++) {
             unsigned int label = markers[i].getLabel();
-            particleSystems[label].velocityMotion = velocityMotion;
+            markersParticles[label].velocityMotion = velocityMotion;
         }
     }
 
     if(e.getName() == "Lifetime")
     {
         vector<Marker>& markers = tracker.getFollowers();
-        for(int i = 0; i < markers.size(); i++) {
+        for(unsigned int i = 0; i < markers.size(); i++) {
             unsigned int label = markers[i].getLabel();
-            markers[i].dyingTime = lifetime*3;
-            particleSystems[label].lifetime = lifetime;
+            markers[label].dyingTime = lifetime*3;
+            markersParticles[label].lifetime = lifetime;
         }
     }
 
     if(e.getName() == "Lifetime Random[%]")
     {
         vector<Marker>& markers = tracker.getFollowers();
-        for(int i = 0; i < markers.size(); i++) {
+        for(unsigned int i = 0; i < markers.size(); i++) {
             unsigned int label = markers[i].getLabel();
-            particleSystems[label].lifetimeRnd = lifetimeRnd;
+            markersParticles[label].lifetimeRnd = lifetimeRnd;
         }
     }
 
     if(e.getName() == "Radius")
     {
         vector<Marker>& markers = tracker.getFollowers();
-        for(int i = 0; i < markers.size(); i++) {
+        for(unsigned int i = 0; i < markers.size(); i++) {
             unsigned int label = markers[i].getLabel();
-            particleSystems[label].radius = radius;
+            markersParticles[label].radius = radius;
         }
     }
 
     if(e.getName() == "Radius Random[%]")
     {
         vector<Marker>& markers = tracker.getFollowers();
-        for(int i = 0; i < markers.size(); i++) {
+        for(unsigned int i = 0; i < markers.size(); i++) {
             unsigned int label = markers[i].getLabel();
-            particleSystems[label].radiusRnd = radiusRnd;
+            markersParticles[label].radiusRnd = radiusRnd;
         }
     }
 
     if(e.getName() == "Size")
     {
         vector<Marker>& markers = tracker.getFollowers();
-        for(int i = 0; i < markers.size(); i++) {
+        for(unsigned int i = 0; i < markers.size(); i++) {
             unsigned int label = markers[i].getLabel();
-            particleSystems[label].sizeAge = sizeAge;
+            markersParticles[label].sizeAge = sizeAge;
         }
     }
 
     if(e.getName() == "Opacity")
     {
         vector<Marker>& markers = tracker.getFollowers();
-        for(int i = 0; i < markers.size(); i++) {
+        for(unsigned int i = 0; i < markers.size(); i++) {
             unsigned int label = markers[i].getLabel();
-            particleSystems[label].opacityAge = opacityAge;
+            markersParticles[label].opacityAge = opacityAge;
         }
     }
 
     if(e.getName() == "Color")
     {
         vector<Marker>& markers = tracker.getFollowers();
-        for(int i = 0; i < markers.size(); i++) {
+        for(unsigned int i = 0; i < markers.size(); i++) {
             unsigned int label = markers[i].getLabel();
-            particleSystems[label].colorAge = colorAge;
+            markersParticles[label].colorAge = colorAge;
         }
     }
 
     if(e.getName() == "Bounce")
     {
         vector<Marker>& markers = tracker.getFollowers();
-        for(int i = 0; i < markers.size(); i++) {
+        for(unsigned int i = 0; i < markers.size(); i++) {
             unsigned int label = markers[i].getLabel();
-            particleSystems[label].bounce = bounce;
+            markersParticles[label].bounce = bounce;
         }
     }
 
     if(e.getName() == "Friction")
     {
         vector<Marker>& markers = tracker.getFollowers();
-        for(int i = 0; i < markers.size(); i++) {
+        for(unsigned int i = 0; i < markers.size(); i++) {
             unsigned int label = markers[i].getLabel();
-            particleSystems[label].friction = 1-friction/1000;
+            markersParticles[label].friction = 1-friction/1000;
         }
     }
 

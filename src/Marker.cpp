@@ -7,6 +7,7 @@ Marker::Marker()
 {
     startedDying = 0;
     dyingTime = 10;
+    timeDead = 0;
 }
 
 void Marker::setup(const cv::Rect& track) {
@@ -43,9 +44,11 @@ void Marker::draw() {
 
 void Marker::kill() {
 	float currentTime = ofGetElapsedTimef();
+	timeDead = currentTime - startedDying;
+	cout << "ME MATAN!" << endl;
 	if(startedDying == 0) {
 		startedDying = currentTime;
-	} else if(currentTime - startedDying > dyingTime) {
+	} else if(timeDead > dyingTime) {
 		dead = true;
 	}
 }

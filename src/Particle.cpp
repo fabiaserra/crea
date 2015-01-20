@@ -1,6 +1,7 @@
 #include "Particle.h"
 
 Particle::Particle() {
+    immortal = false;
     isAlive = true;
     bounces = true;
     sizeAge = true;
@@ -9,7 +10,7 @@ Particle::Particle() {
     age = 0;
 }
 
-void Particle::setup(float id, ofPoint pos, ofPoint vel, ofColor color, float initialRadius, float lifetime, float friction) {
+void Particle::setup(float id, ofPoint pos, ofPoint vel, ofColor color, float initialRadius, bool immortal, float lifetime, float friction) {
     this->id = id;
     this->pos = pos;
     this->vel = vel;
@@ -17,6 +18,8 @@ void Particle::setup(float id, ofPoint pos, ofPoint vel, ofColor color, float in
     this->initialRadius = initialRadius;
     this->lifetime = lifetime;
     this->friction = friction;
+    this->immortal = immortal;
+
     this->mass = initialRadius * initialRadius * 0.005f;
 
     //alter color for each particle
@@ -26,7 +29,7 @@ void Particle::setup(float id, ofPoint pos, ofPoint vel, ofColor color, float in
     color.setHue(hue);
 }
 
-void Particle::setup(float id, ofPolyline contour, ofPoint vel, ofColor color, float initialRadius, float lifetime, float friction) {
+void Particle::setup(float id, ofPolyline contour, ofPoint vel, ofColor color, float initialRadius, bool immortal, float lifetime, float friction) {
     this->id = id;
     this->contour = contour;
     this->vel = vel;
@@ -34,6 +37,8 @@ void Particle::setup(float id, ofPolyline contour, ofPoint vel, ofColor color, f
     this->initialRadius = initialRadius;
     this->lifetime = lifetime;
     this->friction = friction;
+    this->immortal = immortal;
+
     this->mass = initialRadius * initialRadius * 0.005f;
 
     //create particles only inside contour polyline
@@ -49,7 +54,7 @@ void Particle::setup(float id, ofPolyline contour, ofPoint vel, ofColor color, f
 	}
 }
 
-void Particle::update(float dt, const ofPoint &markerPos) {
+void Particle::update(float dt) {
     if(isAlive)
     {
         //Perlin noise
@@ -63,15 +68,11 @@ void Particle::update(float dt, const ofPoint &markerPos) {
         pos += vel*dt;
         vel *= friction;
 
-        //Direction and distance to particular point
-//        dir = markerPos - pos;
-//        float dist = dir.length();
-//        dir.normalize();
-
         //Update age and check if particle has to die
         age += dt;
         if(age >= lifetime) {
-            isAlive = false;
+            if (immortal) age = 0;
+            else isAlive = false;
         }
 
         //Decrease particle radius with the age
@@ -99,6 +100,45 @@ void Particle::update(float dt, const ofPoint &markerPos) {
             }
         }
     }
+}
+
+void Particle::update(float dt, const ofPoint &markerPos) {
+
+    update(dt);
+
+//    //Direction and distance to particular point
+//    dir = markerPos - pos;
+//    float dist = dir.length();
+//    dir.normalize();
+
+}
+
+void Particle::update(float dt, vector<Marker>& markers) {
+
+    update(dt);
+
+    //find closest marker to particle
+    float dist, minDist = 1000;
+    ofPoint markerPos;
+    color.set(255);
+
+    for(int i = 0; i < markers.size(); i++) {
+        if (markers[i].timeDead == 0)
+        {
+            dist = pos.squareDistance(markers[i].smoothPos);
+            if(dist < minDist)
+            {
+                minDist = dist;
+                markerPos = markers[i].smoothPos;
+                color = markers[i].color;
+            }
+        }
+    }
+//    //Direction and distance to particular point
+//    dir = markerPos - pos;
+//    float dist = dir.length();
+//    dir.normalize();
+
 }
 
 void Particle::draw() {

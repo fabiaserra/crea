@@ -1,8 +1,6 @@
 #pragma once
 #include "ofMain.h"
 #include "ofxCv.h"
-#include "ParticleSystem.h"
-
 
 class Marker : public ofxCv::RectFollower
 {
@@ -24,4 +22,5 @@ class Marker : public ofxCv::RectFollower
 
         float startedDying;
         float dyingTime;
+        float timeDead;
 };
