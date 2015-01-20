@@ -3,7 +3,7 @@
 #include "Particle.h"
 
 enum ParticleMode {GRID_PARTICLES, BORN_PARTICLES, CONTOUR_PARTICLES};
-enum EmitterType {POINT, SPHERE, BOX, GRID, CONTOUR};
+enum EmitterType {POINT, SPHERE, GRID, CONTOUR};
 
 class ParticleSystem
 {
@@ -11,12 +11,12 @@ class ParticleSystem
         ParticleSystem();
 
         void setup(ParticleMode particleMode);
-        void update(float dt, const ofPoint &pos, const ofPoint &vel);
+        void update(float dt, const ofPoint &pos, const ofPoint &markerVel);
         void draw();
 
         void createParticleGrid(int width, int height, int res);
         void addParticles(int n);
-        void addParticles(int n, const ofPoint &pos_, const ofPoint &vel_);
+        void addParticles(int n, const ofPoint &pos, const ofPoint &markerVel);
         void addParticle(int x, int y, float initialRadius);
         void removeParticles(int n);
 
@@ -24,26 +24,38 @@ class ParticleSystem
         void bornParticles();
         void repulseParticles();
 
-        void setBornRate(float bornRate);
-        void setParticleMode(ParticleMode particleMode);
-
         ofPoint randomVector();
-
+        float randomRange(float percentage, float value);
 
         vector<Particle> particles;
 
         int numParticles;
         int totalParticlesCreated;
 
+        //Particles parameters
         float bornRate;
+        float currentBornRate;
+        float velocity;
+        float velocityRnd;
+        float velocityMotion;
         float emitterSize;
-        EmitterType emitterType;
         float lifetime;
         float lifetimeRnd;
+        float radius;
+        float radiusRnd;
+        ofColor color;
+
+        float friction;
+        float gravity;
+        float turbulence;
+
+        bool sizeAge;           //particles change size with increasing age
+        bool opacityAge;        //particles change opacity with increasing age
+        bool colorAge;          //particles change color with increasing age
+        bool bounce;            //particles bounce with the window margins?
 
         bool killingParticles;
 
-        ofColor color;
-
+        EmitterType emitterType;
         ParticleMode particleMode;
 };

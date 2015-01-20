@@ -23,4 +23,5 @@ class Marker : public ofxCv::RectFollower
         ofPolyline all;
 
         float startedDying;
+        float dyingTime;
 };

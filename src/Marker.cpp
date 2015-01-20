@@ -3,11 +3,10 @@
 using namespace ofxCv;
 using namespace cv;
 
-const float dyingTime = 10;
-
 Marker::Marker()
 {
     startedDying = 0;
+    dyingTime = 10;
 }
 
 void Marker::setup(const cv::Rect& track) {

@@ -2,8 +2,8 @@
     <Kind>40</Kind>
     <Name>OFX_UI_WIDGET_CANVAS</Name>
     <IsMinified>0</IsMinified>
-    <XPosition>791.000000000</XPosition>
-    <YPosition>5.000000000</YPosition>
+    <XPosition>795.000000000</XPosition>
+    <YPosition>6.000000000</YPosition>
 </Canvas>
 <Widget>
     <Kind>2</Kind>
@@ -19,14 +19,14 @@
 <Widget>
     <Kind>6</Kind>
     <Name>Threshold range</Name>
-    <HighValue>230.000000000</HighValue>
-    <LowValue>70.000000000</LowValue>
+    <HighValue>243.694595337</HighValue>
+    <LowValue>159.532028198</LowValue>
 </Widget>
 <Widget>
     <Kind>6</Kind>
     <Name>Contour Size</Name>
     <HighValue>4000.000000000</HighValue>
-    <LowValue>20.000000000</LowValue>
+    <LowValue>20.000001907</LowValue>
 </Widget>
 <Widget>
     <Kind>4</Kind>
@@ -36,16 +36,16 @@
 <Widget>
     <Kind>6</Kind>
     <Name>Markers size</Name>
-    <HighValue>1000.000000000</HighValue>
+    <HighValue>350.000000000</HighValue>
     <LowValue>10.000000000</LowValue>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Tracker persistence</Name>
-    <Value>240.000000000</Value>
+    <Value>288.177337646</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Tracker max distance</Name>
-    <Value>64.000000000</Value>
+    <Value>226.822662354</Value>
 </Widget>

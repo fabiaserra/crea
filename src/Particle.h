@@ -28,11 +28,15 @@ class Particle
         float friction;         //decay of the velocity
         float initialRadius;    //radius of the particle when borns
         float radius;           //radius of the particle
+        float opacity;           //radius of the particle
         float noise;            //perlin noise to add some randomness
         float originalHue;
 
         bool isAlive;           //is the particle alive?
         bool bounces;           //particle bounces with the window margins?
+        bool sizeAge;
+        bool opacityAge;
+        bool colorAge;
 
         ofPoint dir;
 };

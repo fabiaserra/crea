@@ -9,14 +9,32 @@ void ParticleSystem::setup(ParticleMode particleMode = BORN_PARTICLES) {
     totalParticlesCreated = 0;
     this->particleMode = particleMode;
     color.setHsb(ofRandom(0, 255), 255, 255);
+    sizeAge = true;
+    opacityAge = true;
+    colorAge = true;
+    bounce = true;
+
+    gravity = 0;
 
     switch(particleMode) {
         case GRID_PARTICLES:
             createParticleGrid(ofGetWidth(), ofGetHeight(), 10);
             break;
+
         case BORN_PARTICLES:
             killingParticles = false;
             bornRate = 5;
+            currentBornRate = bornRate;
+            velocity = 50;
+            velocityRnd = 30;
+            velocityMotion = 50;
+            emitterSize = 8.0f;
+            lifetime = 2;
+            lifetimeRnd = 60;
+            radius = 5;
+            radiusRnd = 20;
+            friction = 0.9f;
+
             break;
     }
 }
@@ -36,9 +54,9 @@ void ParticleSystem::update(float dt, const ofPoint &markerPos, const ofPoint &m
 
     //Born new particles
     if(particleMode == BORN_PARTICLES) {
-        if (killingParticles) bornRate -= 0.5;
-        else bornRate = 5;
-        addParticles(bornRate, markerPos, markerVel);
+        if (killingParticles) currentBornRate -= 0.5;
+        else currentBornRate = bornRate;
+        addParticles(currentBornRate, markerPos, markerVel);
     }
 
     //Update the particles
@@ -77,7 +95,8 @@ void ParticleSystem::addParticles(int n) {
         ofPoint pos(ofRandom(ofGetWidth()), ofRandom(ofGetHeight()));
         ofPoint vel(randomVector()*5.0f);
         float initialRadius = ofRandom(5.0f, 8.0f);
-        float lifetime = ofRandom(1, 4);
+        float lifetimeOffset =  ofRandom( -(lifetimeRnd/100) * lifetime, (lifetimeRnd/100) * lifetime);
+        float lifetime = this->lifetime + lifetimeOffset;
         float friction = ofRandom(0.95f, 0.998f);
 
         newParticle.setup(id, pos, vel, color, initialRadius, lifetime, friction);
@@ -88,18 +107,24 @@ void ParticleSystem::addParticles(int n) {
     }
 }
 
-void ParticleSystem::addParticles(int n, const ofPoint &pos_, const ofPoint &vel_) {
+void ParticleSystem::addParticles(int n, const ofPoint &position, const ofPoint &markerVel) {
     for(int i = 0; i < n; i++) {
         Particle newParticle;
         float id = totalParticlesCreated;
-        ofPoint pos(pos_ + randomVector()*8.0f);
-        ofPoint velOffset = randomVector()*ofRandom(30.0f, 80.0f);
-        ofPoint vel(vel_*ofRandom(3.0f, 6.0f) + velOffset);
-        float initialRadius = 5.0f;
-        float lifetime = ofRandom(1.5, 4.2);
-        float friction = ofRandom(0.99f, 0.9999f);
+        ofPoint pos = position + randomVector()*ofRandom(0, emitterSize);
+//        ofPoint velOffset = randomVector()*ofRandom(30.0f, 80.0f);
+//        ofPoint vel(markerVel*ofRandom(3.0f, 6.0f) + velOffset);
+        ofPoint vel = randomVector()*(velocity+randomRange(velocityRnd, velocity));
+        vel += markerVel*(velocityMotion/100)*6;
+
+        float initialRadius = radius + randomRange(radiusRnd, radius);
+        float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
 
         newParticle.setup(id, pos, vel, color, initialRadius, lifetime, friction);
+        newParticle.bounces = bounce;
+        newParticle.sizeAge = sizeAge;
+        newParticle.opacityAge = opacityAge;
+        newParticle.colorAge = colorAge;
         particles.push_back(newParticle);
 
         numParticles++;
@@ -121,7 +146,6 @@ void ParticleSystem::addParticle(int x, int y, float initialRadius) {
     numParticles++;
     totalParticlesCreated++;
 }
-
 
 void ParticleSystem::removeParticles(int n) {
     for(int i = 0; i < n; i++) {
@@ -147,8 +171,8 @@ void ParticleSystem::repulseParticles() {
                 dir.normalize();
                 float F = 1.0f/distSqrd;
 
-                particles[i].acc += dir * ( F / particles[i].mass );
-                particles[j].acc -= dir * ( F / particles[j].mass );
+                particles[i].acc += dir * (F/particles[i].mass);
+                particles[j].acc -= dir * (F/particles[j].mass);
             }
         }
     }
@@ -157,4 +181,8 @@ void ParticleSystem::repulseParticles() {
 ofPoint ParticleSystem::randomVector() {
     float angle = ofRandom((float)M_PI * 2.0f);
     return ofPoint(cos(angle), sin(angle));
+}
+
+float ParticleSystem::randomRange(float percentage, float value) {
+    return ofRandom(-(percentage/100)*value, (percentage/100)*value);
 }

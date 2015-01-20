@@ -3,6 +3,9 @@
 Particle::Particle() {
     isAlive = true;
     bounces = true;
+    sizeAge = true;
+    opacityAge = true;
+    colorAge = true;
     age = 0;
 }
 
@@ -50,12 +53,12 @@ void Particle::update(float dt, const ofPoint &markerPos) {
     if(isAlive)
     {
         //Perlin noise
-        noise = ofNoise(pos.x*0.005f, pos.y*0.005f, dt*0.1f);
+//        noise = ofNoise(pos.x*0.005f, pos.y*0.005f, dt*0.1f);
 
         //Update position
-        float angle = noise*30.0f;
-        acc = ofPoint(cos(angle), sin(angle)) * age * 0.1;
-        vel += acc;
+//        float angle = noise*30.0f;
+//        acc = ofPoint(cos(angle), sin(angle)) * age * 0.1;
+//        vel += acc;
 //        acc.set(0, 0);
         pos += vel*dt;
         vel *= friction;
@@ -73,6 +76,7 @@ void Particle::update(float dt, const ofPoint &markerPos) {
 
         //Decrease particle radius with the age
         radius = initialRadius * (1.0f - (age/lifetime));
+        opacity = 255 * (1.0f - (age/lifetime));
 
         //Bounce with the window margins
         if(bounces)
@@ -100,12 +104,20 @@ void Particle::update(float dt, const ofPoint &markerPos) {
 void Particle::draw() {
     if(isAlive)
     {
-        float saturation = ofMap(age, 0, lifetime, 255, 0);
-        float hue = ofMap(age, 0, lifetime, originalHue, originalHue-100);
-        color.setSaturation(saturation);
-        color.setHue(hue);
-        ofSetColor(color);
-        ofCircle(pos, radius);
+        if (colorAge)
+        {
+            float saturation = ofMap(age, 0, lifetime, 255, 0);
+            float hue = ofMap(age, 0, lifetime, originalHue, originalHue-100);
+            color.setSaturation(saturation);
+            color.setHue(hue);
+        }
+
+        if (opacityAge) ofSetColor(color, opacity);
+        else ofSetColor(color);
+
+        if (sizeAge) ofCircle(pos, radius);
+        else ofCircle(pos, initialRadius);
+
 //        float length = 15.0f;
 //        ofPoint p1(pos);
 //        ofPoint p2(pos + dir*length);

@@ -29,6 +29,7 @@ class ofApp : public ofBaseApp{
 
 //        vector< vector<int> > computeCostMatrix();
 
+        void setupGUI0();
         void setupGUI1();
         void setupGUI2();
         void setupGUI3();
@@ -67,6 +68,7 @@ class ofApp : public ofBaseApp{
         ofPoint mousePrevPos;
         ofPoint mouseVel;
 //--------------------------------------------------------------
+        ofxUISuperCanvas *gui0;
         ofxUISuperCanvas *gui1;
         ofxUISuperCanvas *gui2;
         ofxUISuperCanvas *gui3;
@@ -82,12 +84,24 @@ class ofApp : public ofBaseApp{
         float trackerPersistence;
         float trackerMaxDistance;
 //--------------------------------------------------------------
+        //Particles parameters
         float bornRate;
-        float lifetime, lifetimeRnd;
-        EmitterType emitterType;
-        ofxUIDropDownList *ddl;
+        float velocity;
+        float velocityRnd;
+        float velocityMotion;
         float emitterSize;
+        float lifetime;
+        float lifetimeRnd;
+        float radius;
+        float radiusRnd;
+        bool sizeAge;
+        bool opacityAge;
+        bool colorAge;
+        bool bounce;
+        float friction;
         float gravity;
+        float turbulence;
+//        EmitterType emitterType;
 //--------------------------------------------------------------
         float smoothingSize;
 };
