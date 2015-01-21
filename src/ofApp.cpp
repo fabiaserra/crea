@@ -14,7 +14,7 @@ void ofApp::setup() {
     reScale = (float)ofGetWidth() / (float)kinect.width;
     time0 = ofGetElapsedTimef();
 
-    //Allocate images
+    //ALLOCATE IMAGES//
     depthImage.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
     depthOriginal.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
     grayThreshNear.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
@@ -22,10 +22,10 @@ void ofApp::setup() {
     irImage.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
     irOriginal.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
 
-    //Background color
+    //BACKGROUND COLOR//
     red = 0; green = 0; blue = 0;
 
-    //Kinect parameters
+    //KINECT PARAMETERS//
     flipKinect = false;
 
     nearClipping = 500;
@@ -49,56 +49,46 @@ void ofApp::setup() {
     tracker.setPersistence(trackerPersistence);     // wait for 'trackerPersistence' frames before forgetting something
     tracker.setMaximumDistance(trackerMaxDistance); // an object can move up to 'trackerMaxDistance' pixels per frame
 
-    //Marker particles parameters
-    bornRate = 5;
-    velocity = 50;
-    velocityRnd = 20;
-    velocityMotion = 50;
-    immortal = false;
-    lifetime = 3;
-    lifetimeRnd = 60;
-    emitterSize = 8.0f;
-    radius = 5;
-    radiusRnd = 20;
-    sizeAge = true;
-    opacityAge = true;
-    colorAge = true;
-    bounce = true;
-    friction = 0;
-    gravity = 5.0;
+    //MARKER PARTICLES//
+    float bornRate = 5;               //Number of particles born per frame
 
-//    emitterType = POINT;
+    float velocity = 50;              //Initial velocity magnitude of newborn particles
+    float velocityRnd = 20;           //Magnitude randomness % of the initial velocity
+    float velocityMotion = 50;        //Marker motion contribution to the initial velocity
 
-    //Contour parameters
-    smoothingSize = 0;
+    float emitterSize = 8.0f;         //Size of the emitter area
+    EmitterType emitterType = POINT;  //Type of emitter
 
-    //Grid particles parameters
+    float lifetime = 3;               //Lifetime of particles
+    float lifetimeRnd = 60;           //Randomness of lifetime
+
+    float radius = 5;                 //Radius of the particles
+    float radiusRnd = 20;             //Randomness of radius
+
+    bool immortal = false;            //Can particles die?
+    bool sizeAge = true;              //Decrease size when particles get older?
+    bool opacityAge = true;           //Decrease opacity when particles get older?
+    bool colorAge = true;             //Change color when particles get older?
+    bool bounce = true;               //Bounce particles with the walls of the window?
+
+    float friction = 0;               //Multiply this value by the velocity every frame
+    float gravity = 5.0f;             //Makes particles fall down in a natural way
+
+    markersParticles.setup(bornRate, velocity, velocityRnd, velocityMotion, emitterSize, immortal, lifetime, lifetimeRnd,
+                           color, radius, radiusRnd, 1-friction/1000, gravity, sizeAge, opacityAge, colorAge, bounce);
+
+    //GRID PARTICLES//
     bool sizeAge2 = false;
     bool opacityAge2 = false;
     bool colorAge2 = false;
     ofColor color(255);
 
-    markersParticles.setup(bornRate, velocity, velocityRnd, velocityMotion, emitterSize, immortal, lifetime, lifetimeRnd,
-                           color, radius, radiusRnd, 1-friction/1000, gravity, sizeAge, opacityAge, colorAge, bounce);
-
     particles.setup(true, color, gravity, sizeAge2, opacityAge2, colorAge2, bounce);
-/*
-//    //Init IR markers
-//    nMarkers = 2;
-//    for(int i = 1; i <= nMarkers; i++)
-//    {
-//        Marker newMarker;
-//        newMarker.setup(i, ofPoint());
-//        markers.push_back(newMarker);
-//    }
 
-//    //Kalman filter
-//    kalman.init(1e-4, 1e-1); // invert of (smoothness, rapidness)
-//    line.setMode(OF_PRIMITIVE_LINE_STRIP);
-//    predicted.setMode(OF_PRIMITIVE_LINE_STRIP);
-//    estimated.setMode(OF_PRIMITIVE_LINE_STRIP);
-//    speed = 0.f;
-*/
+    //DEPTH CONTOUR//
+    smoothingSize = 0;
+
+    //SETUP GUIs//
 	setupGUI0();
 	setupGUI1();
 	setupGUI2();
@@ -160,42 +150,16 @@ void ofApp::update() {
         vector<unsigned int> newLabels = tracker.getNewLabels();
         vector<unsigned int> currentLabels = tracker.getCurrentLabels();
 
-        //update grid particles
-//        particles.update(dt, markers);
-
         //update markers if we loose track of them
         for(unsigned int i = 0; i < markers.size(); i++) {
             markers[i].update(deadLabels, currentLabels);
         }
 
+        //update grid particles
+//        particles.update(dt, markers);
+
+        //update markers particles
         markersParticles.update(dt, markers);
-
-
-//        for(unsigned int i = 0; i < deadLabels.size(); i++) {
-//            markers.
-//                cout << "dead: " << deadLabels[i] << endl;
-////            markersParticles[deadLabels[i]].killParticles();
-//        }
-////
-//        for(unsigned int i = 0; i < currentLabels.size(); i++) {
-//                cout << "current: " << currentLabels[i] << endl;
-////            markersParticles[currentLabels[i]].bornParticles();
-//        }
-//
-//        for(unsigned int i = 0; i < newLabels.size(); i++) {
-//            ParticleSystem newParticleSystem;
-//            ofColor color;
-//            color.setHsb(ofRandom(0, 255), 255, 255);
-//            newParticleSystem.setup(bornRate, velocity, velocityRnd, velocityMotion, emitterSize, immortal, lifetime, lifetimeRnd,
-//                                    color, radius, radiusRnd, 1-friction/1000, gravity, sizeAge, opacityAge, colorAge, bounce);
-//            markersParticles[newLabels[i]] = newParticleSystem;
-//        }
-//
-//        for(unsigned int i = 0; i < markers.size(); i++) {
-//            unsigned int label = markers[i].getLabel();
-//            markersParticles[label].update(dt, markers[i].smoothPos, markers[i].velocity);
-//        }
-/*
 //        //Identify IR markers with hungarian algorithm
 //        if(irMarkerFinder.size() > 0)
 //        {
@@ -269,14 +233,9 @@ void ofApp::draw() {
 
 //    contourFinder.draw();
     irMarkerFinder.draw();
+
 //    particles.draw();
     markersParticles.draw();
-
-//    vector<Marker>& markers = tracker.getFollowers();
-//    for(int i = 0; i < markers.size(); i++) {
-//        unsigned int label = markers[i].getLabel();
-//        markersParticles[label].draw();
-//    }
 
 //    //Draw contour shape
 //    for(int i = 0; i < contourFinder.size(); i++) {
@@ -312,25 +271,6 @@ void ofApp::draw() {
 
     ofPopMatrix();
 }
-
-/*
-//--------------------------------------------------------------
-//vector< vector<int> > ofApp::computeCostMatrix()
-//{
-//    vector< vector<int> > C;
-//    C.resize(nMarkers, vector<int>(irMarkerFinder.size(), 0));
-//
-//    for(int i = 0; i < nMarkers; i++)
-//    {
-//        for(int j = 0; j < irMarkerFinder.size(); j++)
-//        {
-//            C[i][j] = markers[i].distance(toOf(irMarkerFinder.getCentroid(j)));
-//        }
-//    }
-//
-//    return C;
-//}
-*/
 
 //--------------------------------------------------------------
 void ofApp::setupGUI0()

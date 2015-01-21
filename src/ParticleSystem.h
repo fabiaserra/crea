@@ -35,6 +35,10 @@ class ParticleSystem
         int numParticles;
         int totalParticlesCreated;
 
+        ofColor color;
+        ParticleMode particleMode;
+        EmitterType emitterType;
+
         //Particles parameters
         float bornRate;         //Number of particles born per frame
 
@@ -57,9 +61,4 @@ class ParticleSystem
 
         float friction;         //Multiply this value by the velocity every frame
         float gravity;          //Makes particles fall down in a natural way
-
-        ofColor color;
-
-        EmitterType emitterType;
-        ParticleMode particleMode;
 };

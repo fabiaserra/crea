@@ -27,8 +27,6 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
-//        vector< vector<int> > computeCostMatrix();
-
         void setupGUI0();
         void setupGUI1();
         void setupGUI2();
@@ -52,17 +50,6 @@ class ofApp : public ofBaseApp{
 //--------------------------------------------------------------
         float time0;                        //Time value for computing dt
 //--------------------------------------------------------------
-//        int nMarkers;                       //Number of IR markers to track
-//        vector<Marker> newMarkers;          //Markers not yet identified
-//        vector<Marker> markers;             //Markers identified with their unique ID
-//        vector< vector<int> > costMatrix;   //Matrix of the cost (distance) to assign current IDs to each of the non identified markers
-//--------------------------------------------------------------
-//        ofxCv::KalmanPosition kalman;
-//        ofVec2f point;
-//        ofMesh predicted, line, estimated;
-//        float speed;
-//--------------------------------------------------------------
-//        map<int, ParticleSystem> markersParticles;
         ParticleSystem particles;
         ParticleSystem markersParticles;
 //--------------------------------------------------------------
@@ -86,31 +73,32 @@ class ofApp : public ofBaseApp{
         float trackerPersistence;
         float trackerMaxDistance;
 //--------------------------------------------------------------
-        //Markers particles parameters
-        float bornRate;         //Number of particles born per frame
+        //MARKERS PARTICLES//
+        float bornRate;             //Number of particles born per frame
 
-        float velocity;         //Initial velocity magnitude of newborn particles
-        float velocityRnd;      //Magnitude randomness % of the initial velocity
-        float velocityMotion;   //Marker motion contribution to the initial velocity
+        float velocity;             //Initial velocity magnitude of newborn particles
+        float velocityRnd;          //Magnitude randomness % of the initial velocity
+        float velocityMotion;       //Marker motion contribution to the initial velocity
 
-        float emitterSize;      //Size of the emitter area
+        float emitterSize;          //Size of the emitter area
+        EmitterType emitterType;    //Type of emitter
 
-        float lifetime;         //Lifetime of particles
-        float lifetimeRnd;      //Randomness of lifetime
+        float lifetime;             //Lifetime of particles
+        float lifetimeRnd;          //Randomness of lifetime
 
-        float radius;           //Radius of the particles
-        float radiusRnd;        //Randomness of radius
+        float radius;               //Radius of the particles
+        float radiusRnd;            //Randomness of radius
 
-        bool immortal;          //Can particles die?
-        bool sizeAge;           //Decrease size when particles get older?
-        bool opacityAge;        //Decrease opacity when particles get older?
-        bool colorAge;          //Change color when particles get older?
-        bool bounce;            //Bounce particles with the walls of the window?
+        bool immortal;              //Can particles die?
+        bool sizeAge;               //Decrease size when particles get older?
+        bool opacityAge;            //Decrease opacity when particles get older?
+        bool colorAge;              //Change color when particles get older?
+        bool bounce;                //Bounce particles with the walls of the window?
 
-        float friction;         //Multiply this value by the velocity every frame
-        float gravity;          //Makes particles fall down in a natural way
+        float friction;             //Multiply this value by the velocity every frame
+        float gravity;              //Makes particles fall down in a natural way
         float turbulence;
-//        EmitterType emitterType;
 //--------------------------------------------------------------
+        //DEPTH CONTOUR//
         float smoothingSize;
 };
