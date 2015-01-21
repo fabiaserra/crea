@@ -8,6 +8,7 @@ Marker::Marker()
     startedDying = 0;
     dyingTime = 10;
     timeDead = 0;
+    bornRate = 3;
 }
 
 void Marker::setup(const cv::Rect& track) {
@@ -23,6 +24,16 @@ void Marker::update(const cv::Rect& track) {
 	all.addVertex(smoothPos);
 	velocity = smoothPos - previousPos;
 	previousPos = smoothPos;
+}
+
+void Marker::update(vector<unsigned int> deadLabels, vector<unsigned int> currentLabels) {
+    for(unsigned int i = 0; i < deadLabels.size(); i++) {
+        if(deadLabels[i] == label) hasDisappeared = true;
+    }
+
+    for(unsigned int i = 0; i < currentLabels.size(); i++) {
+        if(currentLabels[i] == label) hasDisappeared = false;
+    }
 }
 
 void Marker::draw() {
@@ -45,7 +56,6 @@ void Marker::draw() {
 void Marker::kill() {
 	float currentTime = ofGetElapsedTimef();
 	timeDead = currentTime - startedDying;
-	cout << "ME MATAN!" << endl;
 	if(startedDying == 0) {
 		startedDying = currentTime;
 	} else if(timeDead > dyingTime) {

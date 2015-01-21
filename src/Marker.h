@@ -9,6 +9,7 @@ class Marker : public ofxCv::RectFollower
 
         void setup(const cv::Rect& track);
         void update(const cv::Rect& track);
+        void update(vector<unsigned int> deadLabels, vector<unsigned int> currentLabels);
         void draw();
         void kill();
 
@@ -23,4 +24,8 @@ class Marker : public ofxCv::RectFollower
         float startedDying;
         float dyingTime;
         float timeDead;
+
+        bool hasDisappeared;
+
+        float bornRate;
 };

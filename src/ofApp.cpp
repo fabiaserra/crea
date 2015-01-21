@@ -77,6 +77,10 @@ void ofApp::setup() {
     bool opacityAge2 = false;
     bool colorAge2 = false;
     ofColor color(255);
+
+    markersParticles.setup(bornRate, velocity, velocityRnd, velocityMotion, emitterSize, immortal, lifetime, lifetimeRnd,
+                           color, radius, radiusRnd, 1-friction/1000, gravity, sizeAge, opacityAge, colorAge, bounce);
+
     particles.setup(true, color, gravity, sizeAge2, opacityAge2, colorAge2, bounce);
 /*
 //    //Init IR markers
@@ -157,29 +161,40 @@ void ofApp::update() {
         vector<unsigned int> currentLabels = tracker.getCurrentLabels();
 
         //update grid particles
-        particles.update(dt, markers);
+//        particles.update(dt, markers);
 
-        for(unsigned int i = 0; i < deadLabels.size(); i++) {
-            markersParticles[deadLabels[i]].killParticles();
-        }
-
-        for(unsigned int i = 0; i < currentLabels.size(); i++) {
-            markersParticles[currentLabels[i]].bornParticles();
-        }
-
-        for(unsigned int i = 0; i < newLabels.size(); i++) {
-            ParticleSystem newParticleSystem;
-            ofColor color;
-            color.setHsb(ofRandom(0, 255), 255, 255);
-            newParticleSystem.setup(bornRate, velocity, velocityRnd, velocityMotion, emitterSize, immortal, lifetime, lifetimeRnd,
-                                    color, radius, radiusRnd, 1-friction/1000, gravity, sizeAge, opacityAge, colorAge, bounce);
-            markersParticles[newLabels[i]] = newParticleSystem;
-        }
-
+        //update markers if we loose track of them
         for(unsigned int i = 0; i < markers.size(); i++) {
-            unsigned int label = markers[i].getLabel();
-            markersParticles[label].update(dt, markers[i].smoothPos, markers[i].velocity);
+            markers[i].update(deadLabels, currentLabels);
         }
+
+        markersParticles.update(dt, markers);
+
+
+//        for(unsigned int i = 0; i < deadLabels.size(); i++) {
+//            markers.
+//                cout << "dead: " << deadLabels[i] << endl;
+////            markersParticles[deadLabels[i]].killParticles();
+//        }
+////
+//        for(unsigned int i = 0; i < currentLabels.size(); i++) {
+//                cout << "current: " << currentLabels[i] << endl;
+////            markersParticles[currentLabels[i]].bornParticles();
+//        }
+//
+//        for(unsigned int i = 0; i < newLabels.size(); i++) {
+//            ParticleSystem newParticleSystem;
+//            ofColor color;
+//            color.setHsb(ofRandom(0, 255), 255, 255);
+//            newParticleSystem.setup(bornRate, velocity, velocityRnd, velocityMotion, emitterSize, immortal, lifetime, lifetimeRnd,
+//                                    color, radius, radiusRnd, 1-friction/1000, gravity, sizeAge, opacityAge, colorAge, bounce);
+//            markersParticles[newLabels[i]] = newParticleSystem;
+//        }
+//
+//        for(unsigned int i = 0; i < markers.size(); i++) {
+//            unsigned int label = markers[i].getLabel();
+//            markersParticles[label].update(dt, markers[i].smoothPos, markers[i].velocity);
+//        }
 /*
 //        //Identify IR markers with hungarian algorithm
 //        if(irMarkerFinder.size() > 0)
@@ -249,12 +264,13 @@ void ofApp::draw() {
 //    ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 
     ofSetColor(255);
-//    irImage.draw(0, 0);
+    irImage.draw(0, 0);
 //    depthImage.draw(0, 0);
 
 //    contourFinder.draw();
-//    irMarkerFinder.draw();
-    particles.draw();
+    irMarkerFinder.draw();
+//    particles.draw();
+    markersParticles.draw();
 
 //    vector<Marker>& markers = tracker.getFollowers();
 //    for(int i = 0; i < markers.size(); i++) {
@@ -418,7 +434,7 @@ void ofApp::setupGUI3()
 
     gui3->addSpacer();
     gui3->addLabel("Emitter");
-    gui3->addSlider("Particles/sec", 0.0, 20.0, &bornRate);
+    gui3->addSlider("Particles/sec", 0.0, 20.0, &markersParticles.bornRate);
 
 //    vector<string> types;
 //	types.push_back("Point");
@@ -427,31 +443,31 @@ void ofApp::setupGUI3()
 //    gui3->addLabel("Emitter type:", OFX_UI_FONT_SMALL);
 //    gui3->addRadio("Emitter type", types, OFX_UI_ORIENTATION_VERTICAL);
 
-    gui3->addSlider("Velocity", 0.0, 100.0, &velocity);
-    gui3->addSlider("Velocity Random[%]", 0.0, 100.0, &velocityRnd);
-    gui3->addSlider("Velocity from Motion[%]", 0.0, 100.0, &velocityMotion);
+    gui3->addSlider("Velocity", 0.0, 100.0, &markersParticles.velocity);
+    gui3->addSlider("Velocity Random[%]", 0.0, 100.0, &markersParticles.velocityRnd);
+    gui3->addSlider("Velocity from Motion[%]", 0.0, 100.0, &markersParticles.velocityMotion);
 
-    gui3->addSlider("Emitter size", 0.0, 50.0, &emitterSize);
+    gui3->addSlider("Emitter size", 0.0, 50.0, &markersParticles.emitterSize);
 
     gui3->addSpacer();
     gui3->addLabel("Particle");
-    gui3->addToggle("Immortal", &immortal);
-    gui3->addSlider("Lifetime", 0.0, 20.0, &lifetime);
-    gui3->addSlider("Life Random[%]", 0.0, 100.0, &lifetimeRnd);
-    gui3->addSlider("Radius", 1.0, 15.0, &radius);
-    gui3->addSlider("Radius Random[%]", 0.0, 100.0, &radiusRnd);
+    gui3->addToggle("Immortal", &markersParticles.immortal);
+    gui3->addSlider("Lifetime", 0.0, 20.0, &markersParticles.lifetime);
+    gui3->addSlider("Life Random[%]", 0.0, 100.0, &markersParticles.lifetimeRnd);
+    gui3->addSlider("Radius", 1.0, 15.0, &markersParticles.radius);
+    gui3->addSlider("Radius Random[%]", 0.0, 100.0, &markersParticles.radiusRnd);
 
     gui3->addSpacer();
     gui3->addLabel("Time behaviour");
-    gui3->addToggle("Size", &sizeAge);
-    gui3->addToggle("Opacity", &opacityAge);
-    gui3->addToggle("Color", &colorAge);
-    gui3->addToggle("Bounce", &bounce);
+    gui3->addToggle("Size", &markersParticles.sizeAge);
+    gui3->addToggle("Opacity", &markersParticles.opacityAge);
+    gui3->addToggle("Color", &markersParticles.colorAge);
+    gui3->addToggle("Bounce", &markersParticles.bounce);
 
     gui3->addSpacer();
     gui3->addLabel("Physics");
-    gui3->addSlider("Friction", 0, 100, &friction);
-    gui3->addSlider("Gravity", 0.0, 20.0, &gravity);
+    gui3->addSlider("Friction", 0, 100, &markersParticles.friction);
+    gui3->addSlider("Gravity", 0.0, 20.0, &markersParticles.gravity);
 
     gui3->addSpacer();
 
@@ -489,137 +505,16 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
         tracker.setMaximumDistance(trackerMaxDistance); // an object can move up to 'trackerMaxDistance' pixels per frame
     }
 
-    if(e.getName() == "Emitter type")
-    {
-        ofxUIRadio *radio = (ofxUIRadio *) e.widget;
-        cout << radio->getName() << " value: " << radio->getValue() << " active name: " << radio->getActiveName() << endl;
-    }
+//    if(e.getName() == "Emitter type")
+//    {
+//        ofxUIRadio *radio = (ofxUIRadio *) e.widget;
+//        cout << radio->getName() << " value: " << radio->getValue() << " active name: " << radio->getActiveName() << endl;
+//    }
 
-    if(e.getName() == "Emitter size")
+    if(e.getName() == "Immortal")
     {
-        vector<Marker>& markers = tracker.getFollowers();
-        for(unsigned int i = 0; i < markers.size(); i++) {
-            unsigned int label = markers[i].getLabel();
-            markersParticles[label].emitterSize = emitterSize;
-        }
-    }
-
-    if(e.getName() == "Particles/sec")
-    {
-        vector<Marker>& markers = tracker.getFollowers();
-        for(unsigned int i = 0; i < markers.size(); i++) {
-            unsigned int label = markers[i].getLabel();
-            markersParticles[label].bornRate = bornRate;
-        }
-    }
-
-    if(e.getName() == "Velocity")
-    {
-        vector<Marker>& markers = tracker.getFollowers();
-        for(unsigned int i = 0; i < markers.size(); i++) {
-            unsigned int label = markers[i].getLabel();
-            markersParticles[label].velocity = velocity;
-        }
-    }
-
-    if(e.getName() == "Velocity Random[%]")
-    {
-        vector<Marker>& markers = tracker.getFollowers();
-        for(unsigned int i = 0; i < markers.size(); i++) {
-            unsigned int label = markers[i].getLabel();
-            markersParticles[label].velocityRnd = velocityRnd;
-        }
-    }
-
-    if(e.getName() == "Velocity from Motion[%]")
-    {
-        vector<Marker>& markers = tracker.getFollowers();
-        for(unsigned int i = 0; i < markers.size(); i++) {
-            unsigned int label = markers[i].getLabel();
-            markersParticles[label].velocityMotion = velocityMotion;
-        }
-    }
-
-    if(e.getName() == "Lifetime")
-    {
-        vector<Marker>& markers = tracker.getFollowers();
-        for(unsigned int i = 0; i < markers.size(); i++) {
-            unsigned int label = markers[i].getLabel();
-            markers[label].dyingTime = lifetime*3;
-            markersParticles[label].lifetime = lifetime;
-        }
-    }
-
-    if(e.getName() == "Lifetime Random[%]")
-    {
-        vector<Marker>& markers = tracker.getFollowers();
-        for(unsigned int i = 0; i < markers.size(); i++) {
-            unsigned int label = markers[i].getLabel();
-            markersParticles[label].lifetimeRnd = lifetimeRnd;
-        }
-    }
-
-    if(e.getName() == "Radius")
-    {
-        vector<Marker>& markers = tracker.getFollowers();
-        for(unsigned int i = 0; i < markers.size(); i++) {
-            unsigned int label = markers[i].getLabel();
-            markersParticles[label].radius = radius;
-        }
-    }
-
-    if(e.getName() == "Radius Random[%]")
-    {
-        vector<Marker>& markers = tracker.getFollowers();
-        for(unsigned int i = 0; i < markers.size(); i++) {
-            unsigned int label = markers[i].getLabel();
-            markersParticles[label].radiusRnd = radiusRnd;
-        }
-    }
-
-    if(e.getName() == "Size")
-    {
-        vector<Marker>& markers = tracker.getFollowers();
-        for(unsigned int i = 0; i < markers.size(); i++) {
-            unsigned int label = markers[i].getLabel();
-            markersParticles[label].sizeAge = sizeAge;
-        }
-    }
-
-    if(e.getName() == "Opacity")
-    {
-        vector<Marker>& markers = tracker.getFollowers();
-        for(unsigned int i = 0; i < markers.size(); i++) {
-            unsigned int label = markers[i].getLabel();
-            markersParticles[label].opacityAge = opacityAge;
-        }
-    }
-
-    if(e.getName() == "Color")
-    {
-        vector<Marker>& markers = tracker.getFollowers();
-        for(unsigned int i = 0; i < markers.size(); i++) {
-            unsigned int label = markers[i].getLabel();
-            markersParticles[label].colorAge = colorAge;
-        }
-    }
-
-    if(e.getName() == "Bounce")
-    {
-        vector<Marker>& markers = tracker.getFollowers();
-        for(unsigned int i = 0; i < markers.size(); i++) {
-            unsigned int label = markers[i].getLabel();
-            markersParticles[label].bounce = bounce;
-        }
-    }
-
-    if(e.getName() == "Friction")
-    {
-        vector<Marker>& markers = tracker.getFollowers();
-        for(unsigned int i = 0; i < markers.size(); i++) {
-            unsigned int label = markers[i].getLabel();
-            markersParticles[label].friction = 1-friction/1000;
-        }
+        ofxUIToggle *toggle = (ofxUIToggle *) e.widget;
+        if (toggle->getValue() == false) markersParticles.killParticles();
     }
 
 }

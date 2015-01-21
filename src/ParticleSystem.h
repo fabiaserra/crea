@@ -16,17 +16,15 @@ class ParticleSystem
                    ofColor color, float radius, float radiusRnd, float friction, float gravity, bool sizeAge, bool opacityAge, bool colorAge, bool bounce);
 
         void update(float dt, vector<Marker>& markers);
-        void update(float dt, const ofPoint &pos, const ofPoint &markerVel);
         void draw();
 
         void createParticleGrid(int width, int height, int res);
         void addParticles(int n);
-        void addParticles(int n, const ofPoint &pos, const ofPoint &markerVel);
+        void addParticles(int n, const ofPoint &markerPos, const ofPoint &markerVel, const ofColor &markerColor);
         void addParticle(int x, int y, float initialRadius);
         void removeParticles(int n);
 
         void killParticles();
-        void bornParticles();
         void repulseParticles();
 
         ofPoint randomVector();
@@ -38,22 +36,18 @@ class ParticleSystem
         int totalParticlesCreated;
 
         //Particles parameters
-        ofColor color;
-        float currentBornRate;
+        float bornRate;         //Number of particles born per frame
 
-        float bornRate;
-        float velocity;
-        float velocityRnd;
-        float velocityMotion;
-        float emitterSize;
-        float lifetime;
-        float lifetimeRnd;
-        float radius;
-        float radiusRnd;
+        float velocity;         //Initial velocity magnitude of newborn particles
+        float velocityRnd;      //Magnitude randomness % of the initial velocity
+        float velocityMotion;   //Marker motion contribution to the initial velocity
 
-        float friction;
-        float gravity;
-//        float turbulence;
+        float emitterSize;      //Size of the emitter area
+
+        float lifetime;         //Lifetime of particles
+        float lifetimeRnd;      //Randomness of lifetime
+        float radius;           //Radius of the particles
+        float radiusRnd;        //Randomness of radius
 
         bool immortal;          //can the particles die?
         bool sizeAge;           //particles change size with age?
@@ -61,7 +55,10 @@ class ParticleSystem
         bool colorAge;          //particles change color with age?
         bool bounce;            //particles bounce with the window margins?
 
-        bool killingParticles;
+        float friction;         //Multiply this value by the velocity every frame
+        float gravity;          //Makes particles fall down in a natural way
+
+        ofColor color;
 
         EmitterType emitterType;
         ParticleMode particleMode;

@@ -13,7 +13,7 @@
 <Widget>
     <Kind>4</Kind>
     <Name>Velocity</Name>
-    <Value>44.334976196</Value>
+    <Value>46.305419922</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
@@ -58,17 +58,17 @@
 <Widget>
     <Kind>2</Kind>
     <Name>Size</Name>
-    <Value>0</Value>
+    <Value>1</Value>
 </Widget>
 <Widget>
     <Kind>2</Kind>
     <Name>Opacity</Name>
-    <Value>0</Value>
+    <Value>1</Value>
 </Widget>
 <Widget>
     <Kind>2</Kind>
     <Name>Color</Name>
-    <Value>0</Value>
+    <Value>1</Value>
 </Widget>
 <Widget>
     <Kind>2</Kind>
@@ -78,7 +78,7 @@
 <Widget>
     <Kind>4</Kind>
     <Name>Friction</Name>
-    <Value>0.000000000</Value>
+    <Value>100.000000000</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
