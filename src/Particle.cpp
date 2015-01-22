@@ -77,7 +77,13 @@ void Particle::update(float dt) {
 
         //Decrease particle radius with the age
         radius = initialRadius * (1.0f - (age/lifetime));
+
         opacity = 255 * (1.0f - (age/lifetime));
+
+        if ((age/lifetime) > 0.9f)
+        {
+            if(ofRandomf()>0) opacity *= 0.2;
+        }
 
         //Bounce with the window margins
         if(bounces)

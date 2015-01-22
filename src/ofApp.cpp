@@ -74,6 +74,8 @@ void ofApp::setup() {
     float friction = 0;               //Multiply this value by the velocity every frame
     float gravity = 5.0f;             //Makes particles fall down in a natural way
 
+    ofColor color(255);
+
     markersParticles.setup(bornRate, velocity, velocityRnd, velocityMotion, emitterSize, immortal, lifetime, lifetimeRnd,
                            color, radius, radiusRnd, 1-friction/1000, gravity, sizeAge, opacityAge, colorAge, bounce);
 
@@ -81,7 +83,6 @@ void ofApp::setup() {
     bool sizeAge2 = false;
     bool opacityAge2 = false;
     bool colorAge2 = false;
-    ofColor color(255);
 
     particles.setup(true, color, gravity, sizeAge2, opacityAge2, colorAge2, bounce);
 
@@ -160,61 +161,6 @@ void ofApp::update() {
 
         //update markers particles
         markersParticles.update(dt, markers);
-//        //Identify IR markers with hungarian algorithm
-//        if(irMarkerFinder.size() > 0)
-//        {
-//            costMatrix = computeCostMatrix(); //stores the cost matrix in the variable costMatrix
-//
-//            //initialize the hungarian_problem using the cost matrix
-//            Hungarian hungarian(costMatrix, nMarkers, irMarkerFinder.size(), HUNGARIAN_MODE_MINIMIZE_COST);
-//
-//            fprintf(stderr, "cost-matrix:");
-//            hungarian.print_cost();
-//
-//            //solve the assignement problem
-//            hungarian.solve();
-//
-//            fprintf(stderr, "assignment:");
-//            hungarian.print_assignment();
-//
-//            //Assignment matrix of the non identified markers with the existing markers
-//            vector< vector<int> > assignment = hungarian.assignment();
-//
-//            //Update each of the n markers positions with the assigned IDs
-//            for (int i = 0; i < nMarkers; i++)
-//            {
-//                //markers[i].update(dt);
-//                for(int j = 0; j < irMarkerFinder.size(); j++)
-//                {
-//                    if(assignment[i][j] == 1)
-//                    {
-//                        markers[i].updatePosition(toOf(irMarkerFinder.getCentroid(j)));
-//                        break;
-//                    }
-//                }
-//            }
-//        }
-//
-//        //Kalman Filter
-//        if(irMarkerFinder.size() > 0)
-//        {
-//            ofVec2f curPoint(toOf(irMarkerFinder.getCentroid(0)));
-//            line.addVertex(curPoint);
-//
-//            kalman.update(curPoint);
-//
-//            point = kalman.getPrediction(); // prediction before measurement
-//            predicted.addVertex(point);
-//
-//            estimated.addVertex(kalman.getEstimation()); // corrected estimation after measurement
-//
-//            speed = kalman.getVelocity().length();
-//            int alpha = ofMap(speed, 0, 20, 50, 255, true);
-//            line.addColor(ofColor(255, 255, 255, alpha));
-//            predicted.addColor(ofColor(255, 0, 0, alpha));
-//            estimated.addColor(ofColor(0, 255, 0, alpha));
-//        }
-*/
 	}
 }
 
