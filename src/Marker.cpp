@@ -6,15 +6,14 @@ using namespace cv;
 Marker::Marker()
 {
     startedDying = 0;
-    dyingTime = 10;
-    timeDead = 0;
-    bornRate = 3;
+    dyingTime    = 10;
+    bornRate     = 3;
 }
 
 void Marker::setup(const cv::Rect& track) {
     color.setHsb(ofRandom(0, 255), 255, 255);
-    currentPos = toOf(track).getCenter();
-    smoothPos = currentPos;
+    currentPos  = toOf(track).getCenter();
+    smoothPos   = currentPos;
     previousPos = currentPos;
 }
 
@@ -30,7 +29,6 @@ void Marker::update(vector<unsigned int> deadLabels, vector<unsigned int> curren
     for(unsigned int i = 0; i < deadLabels.size(); i++) {
         if(deadLabels[i] == label) hasDisappeared = true;
     }
-
     for(unsigned int i = 0; i < currentLabels.size(); i++) {
         if(currentLabels[i] == label) hasDisappeared = false;
     }
@@ -55,10 +53,6 @@ void Marker::draw() {
 
 void Marker::kill() {
 	float currentTime = ofGetElapsedTimef();
-	timeDead = currentTime - startedDying;
-	if(startedDying == 0) {
-		startedDying = currentTime;
-	} else if(timeDead > dyingTime) {
-		dead = true;
-	}
+	if(startedDying == 0) startedDying = currentTime;
+	else if((currentTime - startedDying) > dyingTime) dead = true;
 }

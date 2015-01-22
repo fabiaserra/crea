@@ -12,7 +12,7 @@ void ofApp::setup() {
 	kinect.open();
 
     reScale = (float)ofGetWidth() / (float)kinect.width;
-    time0 = ofGetElapsedTimef();
+    time0   = ofGetElapsedTimef();
 
     //ALLOCATE IMAGES//
     depthImage.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
@@ -28,19 +28,19 @@ void ofApp::setup() {
     //KINECT PARAMETERS//
     flipKinect = false;
 
-    nearClipping = 500;
-    farClipping = 4000;
+    nearClipping    = 500;
+    farClipping     = 4000;
 
-    nearThreshold = 230;
-    farThreshold = 70;
-    minContourSize = 20.0;
-    maxContourSize = 4000.0;
+    nearThreshold   = 230;
+    farThreshold    = 70;
+    minContourSize  = 20.0;
+    maxContourSize  = 4000.0;
     contourFinder.setMinAreaRadius(minContourSize);
     contourFinder.setMaxAreaRadius(maxContourSize);
 
-    irThreshold = 80;
-    minMarkerSize = 10.0;
-    maxMarkerSize = 1000.0;
+    irThreshold     = 80;
+    minMarkerSize   = 10.0;
+    maxMarkerSize   = 1000.0;
     irMarkerFinder.setMinAreaRadius(minMarkerSize);
     irMarkerFinder.setMaxAreaRadius(maxMarkerSize);
 
@@ -50,29 +50,25 @@ void ofApp::setup() {
     tracker.setMaximumDistance(trackerMaxDistance); // an object can move up to 'trackerMaxDistance' pixels per frame
 
     //MARKER PARTICLES//
-    float bornRate = 5;               //Number of particles born per frame
+    float bornRate       = 5;        //Number of particles born per frame
+    float velocity       = 50;       //Initial velocity magnitude of newborn particles
+    float velocityRnd    = 20;       //Magnitude randomness % of the initial velocity
+    float velocityMotion = 50;       //Marker motion contribution to the initial velocity
+    float emitterSize    = 8.0f;     //Size of the emitter area
+    EmitterType type     = POINT;    //Type of emitter
+    float lifetime       = 3;        //Lifetime of particles
+    float lifetimeRnd    = 60;       //Randomness of lifetime
+    float radius         = 5;        //Radius of the particles
+    float radiusRnd      = 20;       //Randomness of radius
 
-    float velocity = 50;              //Initial velocity magnitude of newborn particles
-    float velocityRnd = 20;           //Magnitude randomness % of the initial velocity
-    float velocityMotion = 50;        //Marker motion contribution to the initial velocity
+    bool  immortal       = false;    //Can particles die?
+    bool  sizeAge        = true;     //Decrease size when particles get older?
+    bool  opacityAge     = true;     //Decrease opacity when particles get older?
+    bool  colorAge       = true;     //Change color when particles get older?
+    bool  bounce         = true;     //Bounce particles with the walls of the window?
 
-    float emitterSize = 8.0f;         //Size of the emitter area
-    EmitterType emitterType = POINT;  //Type of emitter
-
-    float lifetime = 3;               //Lifetime of particles
-    float lifetimeRnd = 60;           //Randomness of lifetime
-
-    float radius = 5;                 //Radius of the particles
-    float radiusRnd = 20;             //Randomness of radius
-
-    bool immortal = false;            //Can particles die?
-    bool sizeAge = true;              //Decrease size when particles get older?
-    bool opacityAge = true;           //Decrease opacity when particles get older?
-    bool colorAge = true;             //Change color when particles get older?
-    bool bounce = true;               //Bounce particles with the walls of the window?
-
-    float friction = 0;               //Multiply this value by the velocity every frame
-    float gravity = 5.0f;             //Makes particles fall down in a natural way
+    float friction       = 0;        //Multiply this value by the velocity every frame
+    float gravity        = 5.0f;     //Makes particles fall down in a natural way
 
     ofColor color(255);
 
@@ -146,10 +142,10 @@ void ofApp::update() {
         contourFinder.findContours(depthImage);
 
         //Track markers
-        vector<Marker>& markers = tracker.getFollowers();
-        vector<unsigned int> deadLabels = tracker.getDeadLabels();
-        vector<unsigned int> newLabels = tracker.getNewLabels();
-        vector<unsigned int> currentLabels = tracker.getCurrentLabels();
+        vector<Marker>& markers             = tracker.getFollowers();
+        vector<unsigned int> deadLabels     = tracker.getDeadLabels();
+        vector<unsigned int> currentLabels  = tracker.getCurrentLabels();
+//        vector<unsigned int> newLabels      = tracker.getNewLabels();
 
         //update markers if we loose track of them
         for(unsigned int i = 0; i < markers.size(); i++) {

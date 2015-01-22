@@ -53,11 +53,11 @@ class ParticleSystem
         float radius;           //Radius of the particles
         float radiusRnd;        //Randomness of radius
 
-        bool immortal;          //can the particles die?
-        bool sizeAge;           //particles change size with age?
-        bool opacityAge;        //particles change opacity with age?
-        bool colorAge;          //particles change color with age?
-        bool bounce;            //particles bounce with the window margins?
+        bool  immortal;          //can the particles die?
+        bool  sizeAge;           //particles change size with age?
+        bool  opacityAge;        //particles change opacity with age?
+        bool  colorAge;          //particles change color with age?
+        bool  bounce;            //particles bounce with the window margins?
 
         float friction;         //Multiply this value by the velocity every frame
         float gravity;          //Makes particles fall down in a natural way

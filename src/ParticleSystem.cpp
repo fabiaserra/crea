@@ -6,20 +6,20 @@ ParticleSystem::ParticleSystem() {
 
 void ParticleSystem::setup(bool immortal, ofColor color, float gravity, bool sizeAge, bool opacityAge, bool colorAge, bool bounce) {
 
-    particleMode = GRID_PARTICLES;
+    particleMode            = GRID_PARTICLES;
 
-    numParticles = 0;
-    totalParticlesCreated = 0;
+    numParticles            = 0;
+    totalParticlesCreated   = 0;
 
-    this->immortal = immortal;
-    this->color = color;
+    this->immortal          = immortal;
+    this->color             = color;
 
-    this->gravity = gravity;
+    this->gravity           = gravity;
 
-    this->sizeAge = sizeAge;
-    this->opacityAge = opacityAge;
-    this->colorAge = colorAge;
-    this->bounce = bounce;
+    this->sizeAge           = sizeAge;
+    this->opacityAge        = opacityAge;
+    this->colorAge          = colorAge;
+    this->bounce            = bounce;
 
     createParticleGrid(ofGetWidth(), ofGetHeight(), 10);
 }
@@ -27,23 +27,23 @@ void ParticleSystem::setup(bool immortal, ofColor color, float gravity, bool siz
 void ParticleSystem::setup(float bornRate, float velocity, float velocityRnd, float velocityMotion, float emitterSize, bool immortal, float lifetime,
     float lifetimeRnd, ofColor color, float radius, float radiusRnd, float friction, float gravity, bool sizeAge, bool opacityAge, bool colorAge, bool bounce) {
 
-    particleMode = BORN_PARTICLES;
+    particleMode            = BORN_PARTICLES;
 
-    numParticles = 0;
-    totalParticlesCreated = 0;
+    numParticles            = 0;
+    totalParticlesCreated   = 0;
 
-    this->bornRate = bornRate;
-    this->velocity = velocity;
-    this->velocityRnd = velocityRnd;
-    this->velocityMotion = velocityMotion;
-    this->emitterSize = emitterSize;
-    this->immortal = immortal;
-    this->lifetime = lifetime;
-    this->lifetimeRnd = lifetimeRnd;
-    this->color = color;
-    this->radius = radius;
-    this->radiusRnd = radiusRnd;
-    this->friction = friction;
+    this->bornRate          = bornRate;
+    this->velocity          = velocity;
+    this->velocityRnd       = velocityRnd;
+    this->velocityMotion    = velocityMotion;
+    this->emitterSize       = emitterSize;
+    this->immortal          = immortal;
+    this->lifetime          = lifetime;
+    this->lifetimeRnd       = lifetimeRnd;
+    this->color             = color;
+    this->radius            = radius;
+    this->radiusRnd         = radiusRnd;
+    this->friction          = friction;
 
     this->gravity = gravity;
 
@@ -79,8 +79,8 @@ void ParticleSystem::update(float dt, vector<Marker>& markers) {
 
         //Born new particles
         for(unsigned int i = 0; i < markers.size(); i++) {
-            if (markers[i].hasDisappeared) markers[i].bornRate -= 0.5;
-            else markers[i].bornRate = bornRate;
+            if (markers[i].hasDisappeared)  markers[i].bornRate -= 0.5;
+            else                            markers[i].bornRate = bornRate;
             addParticles(markers[i].bornRate, markers[i].smoothPos, markers[i].velocity, markers[i].color);
         }
 
@@ -107,7 +107,7 @@ void ParticleSystem::createParticleGrid(int width, int height, int res) {
 //            float initialRadius = ofRandom(1.0f, 6.0f);
 //            float initialRadius = cos(yi * 0.1f) + sin(xi * 0.1f) + 2.0f;
 //            float initialRadius = (sin(yi * xi) + 1.0f) * 2.0f;
-            float xyOffset = sin( cos( sin( yi * 0.3183f ) + cos( xi * 0.3183f ) ) ) + 1.0f;
+            float xyOffset      = sin( cos( sin( yi * 0.3183f ) + cos( xi * 0.3183f ) ) ) + 1.0f;
             float initialRadius = xyOffset * xyOffset * 1.8f;
             addParticle(xi, yi, initialRadius);
         }
@@ -118,14 +118,14 @@ void ParticleSystem::addParticle(int x, int y, float initialRadius) {
     Particle newParticle;
     float id = totalParticlesCreated;
 
-    ofPoint pos(x, y);
-    ofPoint vel(velocity);
+    ofPoint pos = ofPoint(x, y);
+    ofPoint vel = randomVector()*(velocity+randomRange(velocityRnd, velocity));
 
     newParticle.setup(id, pos, vel, color, initialRadius, immortal, lifetime, 1-friction/1000);
-    newParticle.bounces = bounce;
-    newParticle.sizeAge = sizeAge;
-    newParticle.opacityAge = opacityAge;
-    newParticle.colorAge = colorAge;
+    newParticle.bounces     = bounce;
+    newParticle.sizeAge     = sizeAge;
+    newParticle.opacityAge  = opacityAge;
+    newParticle.colorAge    = colorAge;
     particles.push_back(newParticle);
 
     numParticles++;
@@ -137,17 +137,17 @@ void ParticleSystem::addParticles(int n) {
         Particle newParticle;
         float id = totalParticlesCreated;
 
-        ofPoint pos(ofRandom(ofGetWidth()), ofRandom(ofGetHeight()));
+        ofPoint pos = ofPoint(ofRandom(ofGetWidth()), ofRandom(ofGetHeight()));
         ofPoint vel = randomVector()*(velocity+randomRange(velocityRnd, velocity));
 
         float initialRadius = radius + randomRange(radiusRnd, radius);
-        float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
+        float lifetime      = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
 
         newParticle.setup(id, pos, vel, color, initialRadius, immortal, lifetime, 1-friction/1000);
-        newParticle.bounces = bounce;
-        newParticle.sizeAge = sizeAge;
-        newParticle.opacityAge = opacityAge;
-        newParticle.colorAge = colorAge;
+        newParticle.bounces     = bounce;
+        newParticle.sizeAge     = sizeAge;
+        newParticle.opacityAge  = opacityAge;
+        newParticle.colorAge    = colorAge;
         particles.push_back(newParticle);
 
         numParticles++;
@@ -162,16 +162,16 @@ void ParticleSystem::addParticles(int n, const ofPoint &markerPos, const ofPoint
 
         ofPoint pos = markerPos + randomVector()*ofRandom(0, emitterSize);
         ofPoint vel = randomVector()*(velocity+randomRange(velocityRnd, velocity));
-        vel += markerVel*(velocityMotion/100)*6;
+        vel        += markerVel*(velocityMotion/100)*6;
 
         float initialRadius = radius + randomRange(radiusRnd, radius);
-        float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
+        float lifetime      = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
 
         newParticle.setup(id, pos, vel, markerColor, initialRadius, immortal, lifetime, 1-friction/1000);
-        newParticle.bounces = bounce;
-        newParticle.sizeAge = sizeAge;
-        newParticle.opacityAge = opacityAge;
-        newParticle.colorAge = colorAge;
+        newParticle.bounces     = bounce;
+        newParticle.sizeAge     = sizeAge;
+        newParticle.opacityAge  = opacityAge;
+        newParticle.colorAge    = colorAge;
         particles.push_back(newParticle);
 
         numParticles++;

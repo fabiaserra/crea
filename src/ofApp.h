@@ -36,7 +36,7 @@ class ofApp : public ofBaseApp{
 //--------------------------------------------------------------
         ofxKinect kinect;
 //--------------------------------------------------------------
-        bool flipKinect;
+        bool  flipKinect;
         float reScale;                      //Ratio to scale the Image to full screen
 //--------------------------------------------------------------
         ofImage irImage, irOriginal;
@@ -72,32 +72,6 @@ class ofApp : public ofBaseApp{
         float minMarkerSize, maxMarkerSize;
         float trackerPersistence;
         float trackerMaxDistance;
-//--------------------------------------------------------------
-        //MARKERS PARTICLES//
-        float bornRate;             //Number of particles born per frame
-
-        float velocity;             //Initial velocity magnitude of newborn particles
-        float velocityRnd;          //Magnitude randomness % of the initial velocity
-        float velocityMotion;       //Marker motion contribution to the initial velocity
-
-        float emitterSize;          //Size of the emitter area
-        EmitterType emitterType;    //Type of emitter
-
-        float lifetime;             //Lifetime of particles
-        float lifetimeRnd;          //Randomness of lifetime
-
-        float radius;               //Radius of the particles
-        float radiusRnd;            //Randomness of radius
-
-        bool immortal;              //Can particles die?
-        bool sizeAge;               //Decrease size when particles get older?
-        bool opacityAge;            //Decrease opacity when particles get older?
-        bool colorAge;              //Change color when particles get older?
-        bool bounce;                //Bounce particles with the walls of the window?
-
-        float friction;             //Multiply this value by the velocity every frame
-        float gravity;              //Makes particles fall down in a natural way
-        float turbulence;
 //--------------------------------------------------------------
         //DEPTH CONTOUR//
         float smoothingSize;

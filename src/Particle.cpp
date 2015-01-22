@@ -1,24 +1,25 @@
 #include "Particle.h"
 
 Particle::Particle() {
-    immortal = false;
-    isAlive = true;
-    bounces = true;
-    sizeAge = true;
+    immortal   = false;
+    isAlive    = true;
+    bounces    = true;
+    sizeAge    = true;
     opacityAge = true;
-    colorAge = true;
-    age = 0;
+    colorAge   = true;
+    flickers   = true;
+    age        = 0;
 }
 
 void Particle::setup(float id, ofPoint pos, ofPoint vel, ofColor color, float initialRadius, bool immortal, float lifetime, float friction) {
-    this->id = id;
-    this->pos = pos;
-    this->vel = vel;
-    this->color = color;
+    this->id            = id;
+    this->pos           = pos;
+    this->vel           = vel;
+    this->color         = color;
     this->initialRadius = initialRadius;
-    this->lifetime = lifetime;
-    this->friction = friction;
-    this->immortal = immortal;
+    this->lifetime      = lifetime;
+    this->friction      = friction;
+    this->immortal      = immortal;
 
     this->mass = initialRadius * initialRadius * 0.005f;
 
@@ -31,13 +32,13 @@ void Particle::setup(float id, ofPoint pos, ofPoint vel, ofColor color, float in
 
 void Particle::setup(float id, ofPolyline contour, ofPoint vel, ofColor color, float initialRadius, bool immortal, float lifetime, float friction) {
     this->id = id;
-    this->contour = contour;
-    this->vel = vel;
-    this->color = color;
+    this->contour       = contour;
+    this->vel           = vel;
+    this->color         = color;
     this->initialRadius = initialRadius;
-    this->lifetime = lifetime;
-    this->friction = friction;
-    this->immortal = immortal;
+    this->lifetime      = lifetime;
+    this->friction      = friction;
+    this->immortal      = immortal;
 
     this->mass = initialRadius * initialRadius * 0.005f;
 
@@ -75,17 +76,15 @@ void Particle::update(float dt) {
             else isAlive = false;
         }
 
-        //Decrease particle radius with the age
+        //Decrease particle radius with age
         radius = initialRadius * (1.0f - (age/lifetime));
 
-        opacity = 255 * (1.0f - (age/lifetime));
+        //Change particle opacity with age
+        opacity = 255;
+        if (opacityAge) opacity *= 1.0f - (age/lifetime);
+        if (flickers && (age/lifetime) > 0.94f && ofRandomf() > 0) opacity *= 0.2;
 
-        if ((age/lifetime) > 0.9f)
-        {
-            if(ofRandomf()>0) opacity *= 0.2;
-        }
-
-        //Bounce with the window margins
+        //Bounce particle with the window margins
         if(bounces)
         {
             if(pos.x > ofGetWidth()-radius) {
@@ -129,14 +128,14 @@ void Particle::update(float dt, vector<Marker>& markers) {
     color.set(255);
 
     for(int i = 0; i < markers.size(); i++) {
-        if (markers[i].timeDead == 0)
+        if (markers[i].hasDisappeared)
         {
             dist = pos.squareDistance(markers[i].smoothPos);
             if(dist < minDist)
             {
-                minDist = dist;
+                minDist   = dist;
                 markerPos = markers[i].smoothPos;
-                color = markers[i].color;
+                color     = markers[i].color;
             }
         }
     }
@@ -152,17 +151,16 @@ void Particle::draw() {
     {
         if (colorAge)
         {
-            float saturation = ofMap(age, 0, lifetime, 255, 0);
+            float saturation = ofMap(age, 0, lifetime, 255, 128);
             float hue = ofMap(age, 0, lifetime, originalHue, originalHue-100);
             color.setSaturation(saturation);
             color.setHue(hue);
         }
 
-        if (opacityAge) ofSetColor(color, opacity);
-        else ofSetColor(color);
+        ofSetColor(color, opacity);
 
         if (sizeAge) ofCircle(pos, radius);
-        else ofCircle(pos, initialRadius);
+        else         ofCircle(pos, initialRadius);
 
 //        float length = 15.0f;
 //        ofPoint p1(pos);

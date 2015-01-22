@@ -41,7 +41,7 @@ class Particle
         bool sizeAge;           //particle changes size with age?
         bool opacityAge;        //particle changes opacity with age?
         bool colorAge;          //particle changes color with age?
-        bool flickering;        //particle flickers when about to die?
+        bool flickers;          //particle flickers opacity when about to die?
 
         ofPoint dir;
 };
