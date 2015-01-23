@@ -1,14 +1,14 @@
 #include "Particle.h"
 
 Particle::Particle() {
-    immortal   = false;
-    isAlive    = true;
-    bounces    = true;
-    sizeAge    = true;
-    opacityAge = true;
-    colorAge   = true;
-    flickers   = true;
-    age        = 0;
+    immortal        = false;
+    isAlive         = true;
+    bounces         = true;
+    sizeAge         = true;
+    opacityAge      = true;
+    colorAge        = true;
+    flickersAge     = true;
+    age             = 0;
 }
 
 void Particle::setup(float id, ofPoint pos, ofPoint vel, ofColor color, float initialRadius, bool immortal, float lifetime, float friction) {
@@ -82,7 +82,7 @@ void Particle::update(float dt) {
         //Change particle opacity with age
         opacity = 255;
         if (opacityAge) opacity *= 1.0f - (age/lifetime);
-        if (flickers && (age/lifetime) > 0.94f && ofRandomf() > 0) opacity *= 0.2;
+        if (flickersAge && (age/lifetime) > 0.94f && ofRandomf() > 0.3) opacity *= 0.2;
 
         //Bounce particle with the window margins
         if(bounces)
@@ -107,42 +107,30 @@ void Particle::update(float dt) {
     }
 }
 
-void Particle::update(float dt, const ofPoint &markerPos) {
-
-    update(dt);
-
-//    //Direction and distance to particular point
-//    dir = markerPos - pos;
-//    float dist = dir.length();
-//    dir.normalize();
-
-}
-
 void Particle::update(float dt, vector<Marker>& markers) {
 
     update(dt);
 
     //find closest marker to particle
-    float dist, minDist = 1000;
+    float minDist = 5000;
+    markerDist = 0;
     ofPoint markerPos;
     color.set(255);
 
     for(int i = 0; i < markers.size(); i++) {
-        if (markers[i].hasDisappeared)
+        if (!markers[i].hasDisappeared)
         {
-            dist = pos.squareDistance(markers[i].smoothPos);
-            if(dist < minDist)
+            markerDist = pos.squareDistance(markers[i].smoothPos);
+            if(markerDist < minDist)
             {
-                minDist   = dist;
+                dir       = markers[i].smoothPos - pos;
+                minDist   = markerDist;
                 markerPos = markers[i].smoothPos;
                 color     = markers[i].color;
+                dir.normalize();
             }
         }
     }
-//    //Direction and distance to particular point
-//    dir = markerPos - pos;
-//    float dist = dir.length();
-//    dir.normalize();
 
 }
 
@@ -157,15 +145,24 @@ void Particle::draw() {
             color.setHue(hue);
         }
 
-        ofSetColor(color, opacity);
+//        ofSetColor(color, opacity);
+        ofSetColor(255);
 
-        if (sizeAge) ofCircle(pos, radius);
-        else         ofCircle(pos, initialRadius);
+//        if (sizeAge) ofCircle(pos, radius);
+//        else         ofCircle(pos, initialRadius);
 
-//        float length = 15.0f;
-//        ofPoint p1(pos);
-//        ofPoint p2(pos + dir*length);
-//        ofLine(p1, p2);
+        if (markerDist == 0)
+        {
+            ofCircle(pos, 2);
+        }
+        else
+        {
+            float length = 15.0f;
+            ofPoint p1(pos);
+            ofPoint p2(pos + dir*length);
+            ofLine(p1, p2);
+        }
+
     }
 }
 

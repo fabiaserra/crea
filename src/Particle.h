@@ -10,7 +10,6 @@ class Particle
         void setup(float id, ofPoint pos, ofPoint vel, ofColor color, float initialRadius, bool immortal, float lifetime, float friction);
         void setup(float id, ofPolyline contour, ofPoint vel, ofColor color, float initialRadius, bool immortal, float lifetime, float friction);
         void update(float dt);
-        void update(float dt, const ofPoint &markerPos);
         void update(float dt, vector<Marker>& markers);
         void draw();
 
@@ -35,14 +34,17 @@ class Particle
         float noise;            //perlin noise to add some randomness
         float originalHue;
 
-        bool immortal;          //can the particle die?
-        bool isAlive;           //is the particle alive?
-        bool bounces;           //particle bounces with the window margins?
-        bool sizeAge;           //particle changes size with age?
-        bool opacityAge;        //particle changes opacity with age?
-        bool colorAge;          //particle changes color with age?
-        bool flickers;          //particle flickers opacity when about to die?
+        bool  immortal;          //can the particle die?
+        bool  isAlive;           //is the particle alive?
+        bool  bounces;           //particle bounces with the window margins?
+        bool  sizeAge;           //particle changes size with age?
+        bool  opacityAge;        //particle changes opacity with age?
+        bool  flickersAge;       //particle flickers opacity when about to die?
+        bool  colorAge;          //particle changes color with age?
+
+        float markerDist;
 
         ofPoint dir;
+
 };
 

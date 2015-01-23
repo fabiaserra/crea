@@ -5,9 +5,10 @@ using namespace cv;
 
 Marker::Marker()
 {
-    startedDying = 0;
-    dyingTime    = 10;
-    bornRate     = 3;
+    startedDying    = 0;
+    dyingTime       = 10;
+    bornRate        = 3;
+    hasDisappeared  = false;
 }
 
 void Marker::setup(const cv::Rect& track) {

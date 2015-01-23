@@ -30,7 +30,7 @@ class ofApp : public ofBaseApp{
         void setupGUI0();
         void setupGUI1();
         void setupGUI2();
-        void setupGUI3();
+        void setupGUI3(int i); //we will use the i to be able to create a vector of ParticleSystems
 
         void guiEvent(ofxUIEventArgs &e);
 //--------------------------------------------------------------

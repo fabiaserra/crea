@@ -11,9 +11,9 @@ class ParticleSystem
     public:
         ParticleSystem();
 
-        void setup(bool immortal, ofColor color, float gravity, bool sizeAge, bool opacityAge, bool colorAge, bool bounce);
+        void setup(bool immortal, ofColor color, float gravity, bool sizeAge, bool opacityAge, bool flickersAge, bool colorAge, bool bounce);
         void setup(float bornRate, float velocity, float velocityRnd, float velocityMotion, float emitterSize, bool immortal, float lifetime, float lifetimeRnd,
-                   ofColor color, float radius, float radiusRnd, float friction, float gravity, bool sizeAge, bool opacityAge, bool colorAge, bool bounce);
+                   ofColor color, float radius, float radiusRnd, float friction, float gravity, bool sizeAge, bool opacityAge,  bool flickersAge, bool colorAge, bool bounce);
 
         void update(float dt, vector<Marker>& markers);
         void draw();
@@ -56,6 +56,7 @@ class ParticleSystem
         bool  immortal;          //can the particles die?
         bool  sizeAge;           //particles change size with age?
         bool  opacityAge;        //particles change opacity with age?
+        bool  flickersAge;       //particle flickers opacity when about to die?
         bool  colorAge;          //particles change color with age?
         bool  bounce;            //particles bounce with the window margins?
 

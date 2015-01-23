@@ -64,6 +64,7 @@ void ofApp::setup() {
     bool  immortal       = false;    //Can particles die?
     bool  sizeAge        = true;     //Decrease size when particles get older?
     bool  opacityAge     = true;     //Decrease opacity when particles get older?
+    bool  flickersAge    = true;     //Particle flickers opacity when about to die?
     bool  colorAge       = true;     //Change color when particles get older?
     bool  bounce         = true;     //Bounce particles with the walls of the window?
 
@@ -73,14 +74,15 @@ void ofApp::setup() {
     ofColor color(255);
 
     markersParticles.setup(bornRate, velocity, velocityRnd, velocityMotion, emitterSize, immortal, lifetime, lifetimeRnd,
-                           color, radius, radiusRnd, 1-friction/1000, gravity, sizeAge, opacityAge, colorAge, bounce);
+                           color, radius, radiusRnd, 1-friction/1000, gravity, sizeAge, opacityAge, flickersAge, colorAge, bounce);
 
     //GRID PARTICLES//
-    bool sizeAge2 = false;
-    bool opacityAge2 = false;
-    bool colorAge2 = false;
+    bool sizeAge2     = false;
+    bool opacityAge2  = false;
+    bool flickersAge2 = false;
+    bool colorAge2    = false;
 
-    particles.setup(true, color, gravity, sizeAge2, opacityAge2, colorAge2, bounce);
+    particles.setup(true, color, gravity, sizeAge2, opacityAge2, flickersAge2, colorAge2, bounce);
 
     //DEPTH CONTOUR//
     smoothingSize = 0;
@@ -89,7 +91,7 @@ void ofApp::setup() {
 	setupGUI0();
 	setupGUI1();
 	setupGUI2();
-    setupGUI3();
+    setupGUI3(0);
 }
 
 //--------------------------------------------------------------
@@ -153,10 +155,10 @@ void ofApp::update() {
         }
 
         //update grid particles
-//        particles.update(dt, markers);
+        particles.update(dt, markers);
 
         //update markers particles
-        markersParticles.update(dt, markers);
+//        markersParticles.update(dt, markers);
 	}
 }
 
@@ -174,10 +176,10 @@ void ofApp::draw() {
 //    depthImage.draw(0, 0);
 
 //    contourFinder.draw();
-    irMarkerFinder.draw();
+//    irMarkerFinder.draw();
 
-//    particles.draw();
-    markersParticles.draw();
+    particles.draw();
+//    markersParticles.draw();
 
 //    //Draw contour shape
 //    for(int i = 0; i < contourFinder.size(); i++) {
@@ -308,7 +310,7 @@ void ofApp::setupGUI2()
 }
 
 //--------------------------------------------------------------
-void ofApp::setupGUI3()
+void ofApp::setupGUI3(int i)
 {
     gui3 = new ofxUISuperCanvas("3: PARTICLES");
     gui3->addSpacer();
@@ -343,6 +345,7 @@ void ofApp::setupGUI3()
     gui3->addLabel("Time behaviour");
     gui3->addToggle("Size", &markersParticles.sizeAge);
     gui3->addToggle("Opacity", &markersParticles.opacityAge);
+    gui3->addToggle("Flickers", &markersParticles.flickersAge);
     gui3->addToggle("Color", &markersParticles.colorAge);
     gui3->addToggle("Bounce", &markersParticles.bounce);
 
