@@ -45,6 +45,6 @@ class Particle
         float markerDist;
 
         ofPoint dir;
-
+	
 };
 
