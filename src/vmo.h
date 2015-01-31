@@ -41,6 +41,7 @@
 #include <sstream>
 #include <cmath>
 #include <armadillo>
+#include <cfloat>
 
 #endif /* defined(____vmo__) */
 
@@ -92,9 +93,9 @@ class vmo{
 		// Helper functions
 		int lenCommonSfx(int p1, int p2);
 		float getDistance(vector<float> x, vector<float> y);
+		vector<float> cumsum(vector<float> cw);
 		vector<float> getDistArray(vector<float> x, vector<vector<float> > y);
 		vector<vector<float> > trnIndexing(int n);
 		vector2D encode();
-		vector<float> calculate_ir();
 };
 

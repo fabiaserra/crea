@@ -169,11 +169,24 @@ vector<vector<float> > vmo::trnIndexing(int n){
 
 vector2D vmo::encode(){
 	vector2D code;
-	
-}
-
-vector<float> vmo::_calculate_ir(){
-	
+	int j = 0;
+	int i = j;
+	while (j < nStates - 1) {
+		while (i < nStates - 1 && lrs[i+1]>=(i-j+1)) {
+			i++;
+		}
+		vector1D cw;
+		if (i == j) {
+			i++;
+			cw.push_back(0);
+			cw.push_back(i);
+		}else{
+			cw.push_back(i-j);
+			cw.push_back(sfx[i]-i+j+1);
+		}
+		code.push_back(cw);
+	}
+	return code;
 }
 
 void vmo::addState(vector<float> newData){
@@ -238,13 +251,21 @@ void vmo::getK(){
 	
 }
 
+vector<float> vmo::cumsum(vector<float> cw){
+	vector<float> out;
+	float sum = 0;
+	for(int i = 0; i < cw.size(); i++){
+		sum += cw[i];
+		out.push_back(sum);
+	}
+	return out;
+}
+
 vector<float> vmo::getIR(){
 	vector2D code = encode();
 	vector<float> cw0 (nStates-1, 0.0);
 	vector<float> cw1 (nStates-1, 0.0);
 	vector<float> block (nStates-1, 0.0);
-	vector<float> h0 (nStates-1, 0.0);
-	vector<float> h1 (nStates-1, 0.0);
 	vector<float> ir (nStates-1, 0.0);
 	
 	int j = 0;
@@ -253,30 +274,23 @@ vector<float> vmo::getIR(){
 			cw0[j] = 1.0;
 			cw1[j] = 1.0;
 			block[j] = 1.0;
-			if (j != 0) {
-				h0[j] = h0[j-1] + log(cw0[j]);
-				h1[j] = h1[j-1] + log(cw1[j]);
-			}else{
-				h0[j] = log2f(cw0[j]);
-				h1[j] = log2f(cw1[j]);
-			}
-			h1[j] = h1[j]/block[j];
-			float h = h0[j] - h1[j];
-			ir[j] = (h > 0) ? h:0.0;
  			j++;
 		}else{
 			int len = code[i][0];
 			cw1[j] = 1.0;
 			fill(block.begin()+j, block.begin()+j+len, float(len));
 			j+=len;
-			for (int k = j; k<j+len; k++) {
-				h0[k] = h0[k-1]+log2f(cw0[k]);
-				h1[k] = h1[k-1]+log2f(cw1[k]);
-				h1[k] = h1[k]/blocl[k];
-				float h = h0[k] - h1[k];
-				ir[k] = (h > 0) ? h:0.0;
-			}
 		}
+	}
+	
+	vector<float> h0 = cumsum(cw0);
+	vector<float> h1 = cumsum(cw1);
+	
+	for (int i = 0; i < nStates-1; i++) {
+		h0[i] = log2f(h0[i]+FLT_MIN);
+		h1[i] = log2f(h1[i]+FLT_MIN)/block[i];
+		float tmpIR = h1[i] - h0[i];
+		ir[i] = (tmpIR > 0) ? tmpIR:0.0;
 	}
 	return ir;
 }
