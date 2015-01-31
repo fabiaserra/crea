@@ -8,17 +8,65 @@
 
 #include "vmo.h"
 
-vmo::vmo(){
+vmo::vmo(int dim = 1, float threshold = 0.0){
 	
-	nStates = 0;
-	thresh = 0.1;
-	dim = 1;
+	nStates = 1;
+	this.dim = dim;
+	this.thresh = threshold;
+	// Foward link vector
+	vector1D zeroStateTrn;
+	trn.clear();
+	trn.reserve(INIT_VMO_SIZE);
+	trn.push_back(zeroStateTrn);
+	
+	// Suffix link vector
+	sfx.clear();
+	sfx.assign(INIT_VMO_SIZE, 0);
+	sfx[0] = -1;
+	
+	// Reverse suffix link vector
+	vector1D zeroStateRsfx;
+	rsfx.clear();
+	rsfx.reserve(INIT_VMO_SIZE);
+	rsfx.push_back(zeroStateRsfx);
+	
+	// Longest repeated suffix
+	lrs.clear();
+	lrs.assign(INIT_VMO_SIZE, 0);
+	lrs[0] = 0;
+	
+	// Data vector - symbolized token for time series
+	data.clear();
+	data.assign(INIT_VMO_SIZE, 0);
+	data[0] = -1; //MARK: Might be problematic to initialize 0th state`s symbol as -1.
+	
+	// State cluster vector
+	vector1D zeroStateLatent;
+	latent.clear();
+	latent.reserve(INIT_VMO_K);
+	latent.push_back(zeroStateLatent);
+	
+	// Observation vector
+	vector<float> zeroStateObs(this->dim, 0.0);
+	obs.clear();
+	obs.reserve(INIT_VMO_SIZE);
+	obs.push_back(zeroStateObs);
+	
+	// IR (information rate) vector
+	ir.clear();
+	ir.assign(2000, 0.0);
+	
+	// Maximum LRS
+	//	maxLrs.clear();
+	//	maxLrs.assign(INIT_VMO_SIZE, 0);
+	//	maxLrs[0] = 0;
 }
 
-void vmo::setup(int dim){
+void vmo::setup(int dim = 1, float threshold = 0.0){
 	
+	nStates = 0;
 	this.dim = dim;
-	
+	this.thresh = threshold;
 	// Foward link vector
 	vector1D zeroStateTrn;
 	trn.clear();
@@ -83,8 +131,15 @@ void vmo::reset(){
 //	maxLrs.clear();
 }
 
-int vmo::lenCommonSfx(int ind, int symbol){
-	
+int vmo::lenCommonSfx(int p1, int p2){
+	if (p2 == sfx[p1]) {
+		return lrs[p1];
+	}else{
+		while (sfx[p2] != sfx[p1] && p2 != 0) {
+			p2 = sfx[p2];
+		}
+	}
+	return min(lrs[p2], lrs[p1]);
 }
 
 float vmo::getDistance(vector<float> x, vector<float> y){
@@ -113,6 +168,7 @@ vector<vector<float> > vmo::trnIndexing(int n){
 }
 
 vector2D vmo::encode(){
+	vector2D code;
 	
 }
 
@@ -130,8 +186,8 @@ void vmo::addState(vector<float> newData){
 	lrs.push_back(0);
 	obs.push_back(newData);
 	
-	nStates += 1;
-	int ind = nStates -1; // Local index
+	nStates++;
+	int ind = nStates - 1; // Local index
 	trn[ind-1].push_back(ind);
 	
 	int k = sfx[ind-1];
@@ -182,20 +238,84 @@ void vmo::getK(){
 	
 }
 
-void vmo::getIR(){
+vector<float> vmo::getIR(){
+	vector2D code = encode();
+	vector<float> cw0 (nStates-1, 0.0);
+	vector<float> cw1 (nStates-1, 0.0);
+	vector<float> block (nStates-1, 0.0);
+	vector<float> h0 (nStates-1, 0.0);
+	vector<float> h1 (nStates-1, 0.0);
+	vector<float> ir (nStates-1, 0.0);
 	
+	int j = 0;
+	for (int i = 0; i<code.size(); i++) {
+		if (code[i][0] == 0) {
+			cw0[j] = 1.0;
+			cw1[j] = 1.0;
+			block[j] = 1.0;
+			if (j != 0) {
+				h0[j] = h0[j-1] + log(cw0[j]);
+				h1[j] = h1[j-1] + log(cw1[j]);
+			}else{
+				h0[j] = log2f(cw0[j]);
+				h1[j] = log2f(cw1[j]);
+			}
+			h1[j] = h1[j]/block[j];
+			float h = h0[j] - h1[j];
+			ir[j] = (h > 0) ? h:0.0;
+ 			j++;
+		}else{
+			int len = code[i][0];
+			cw1[j] = 1.0;
+			fill(block.begin()+j, block.begin()+j+len, float(len));
+			j+=len;
+			for (int k = j; k<j+len; k++) {
+				h0[k] = h0[k-1]+log2f(cw0[k]);
+				h1[k] = h1[k-1]+log2f(cw1[k]);
+				h1[k] = h1[k]/blocl[k];
+				float h = h0[k] - h1[k];
+				ir[k] = (h > 0) ? h:0.0;
+			}
+		}
+	}
+	return ir;
+}
+
+float vmo::getTotalIR(){
+	vector<float> irVec = getIR();
+	float irSum = 0.0;
+	for (vector<float>::iterator j = irVec.begin(); j != irVec.end(); ++j) {
+		irSum += *j;
+	}
+	return irSum;
 }
 
 void vmo::print(string attr){
 	
 }
 
-float vmo::findThreshold(vmo oracle, float start, float step, float end){
-	
+float vmo::findThreshold(vector<vector<float> > obs, int dim = 1,float start, float step, float end){
+	float t = start;
+	float ir = 0.0;
+	while (start <= end) {
+		tmpVmo = buildOracle(obs, dim, start);
+		float tmpIr = tmpVmo.getTotalIR();
+		if (tmpIr >= ir) {
+			ir = tmpIr;
+			t = start;
+		}
+		start += step;
+	}
+	return t;
 }
 
-vmo vmo::buildOracle(vector<vector<float> > obs, float threshold){
+vmo vmo::buildOracle(vector<vector<float> > obs, int dim = 1, float threshold = 0.0){
+	oracle = vmo(dim, threshold);
 	
+	for (int i = 0; i<obs.size(); i++) {
+		oracle.addState(obs[i]);
+	}
+	return oracle;
 }
 
 

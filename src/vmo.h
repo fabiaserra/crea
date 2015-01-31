@@ -61,8 +61,9 @@ class vmo{
 		
 		// Getters
 		int getK();
-		int getIR();
-		
+		float getTotalIR();
+		vector<float> getIR();
+	
 		// Ultilities
 		void print(string attr);
 	
@@ -84,12 +85,12 @@ class vmo{
 		float thresh;
 	
 		// Static functions
-		float findThreshold(vmo oracle, float start, float step, float end);
-		vmo buildOracle(vector<vector<float> > obs, float threshold);
+		static float findThreshold(vmo oracle, float start, float step, float end);
+		static vmo buildOracle(vector<vector<float> > obs, float threshold);
 	
 	private:
 		// Helper functions
-		int lenCommonSfx(int ind, int symbol);
+		int lenCommonSfx(int p1, int p2);
 		float getDistance(vector<float> x, vector<float> y);
 		vector<float> getDistArray(vector<float> x, vector<vector<float> > y);
 		vector<vector<float> > trnIndexing(int n);
