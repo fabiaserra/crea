@@ -53,49 +53,70 @@ typedef vector<int> vector1D;
 typedef vector<vector1D> vector2D;
 
 class vmo{
-	public:
-		vmo();
-		// Main functions
-		void setup(int dim);
-		void reset();
-		void addState(vector<float> newData);
-		
-		// Getters
-		int getK();
-		float getTotalIR();
-		vector<float> getIR();
+public:
+	vmo(int dim, float threshold);
+	// Main functions
+	void setup(int dim, float threshold);
+	void reset();
+	void addState(vector<float> newData);
 	
-		// Ultilities
-		void print(string attr);
-	
-		// Attributes
-		vector1D sfx;
-		vector1D lrs;
-		vector1D data;
+	// Getters
+	int getK();
+	float getTotalIR();
+	vector<float> getIR();
+
+	// Ultilities
+	void print(string attr);
+
+	// Attributes
+	vector1D sfx;
+	vector1D lrs;
+	vector1D data;
 //		vector1D maxLrs;
 
-		vector2D trn;
-		vector2D rsfx;
-		vector2D latent;
-	
-		vector<float> ir;
-		vector<vector<float> > obs;
+	vector2D trn;
+	vector2D rsfx;
+	vector2D latent;
 
-		int nStates;
-		int dim;
-		float thresh;
+	vector<float> ir;
+	vector<vector<float> > obs;
+
+	int nStates;
+	int dim;
+	float thresh;
+
+	// Static functions
+	// Construction funcitons
+	static float findThreshold(vector<vector<float> > obs, float start, float step, float end);
+	static vmo buildOracle(vector<vector<float> > obs, float threshold);
+
+	class pttr{
+	public:
+		pttr();
+		int size = 0;
+		vector2D sfxPts;
+		vector1D sfxLen;
+	};
 	
-		// Static functions
-		static float findThreshold(vmo oracle, float start, float step, float end);
-		static vmo buildOracle(vector<vector<float> > obs, float threshold);
+	class belief{
+	public:
+		vector1D path;
+		vector<float> cost;
+	};
 	
-	private:
-		// Helper functions
-		int lenCommonSfx(int p1, int p2);
-		float getDistance(vector<float> x, vector<float> y);
-		vector<float> cumsum(vector<float> cw);
-		vector<float> getDistArray(vector<float> x, vector<vector<float> > y);
-		vector<vector<float> > trnIndexing(int n);
-		vector2D encode();
+	// Analysis functions
+	static vmo::pttr findPttr(vmo oracle, int minLen);
+	static vmo::belief tracking_init(vmo::pttr pttrList, vmo oracle, vector<vector<float> > firstObs);
+	static vmo::belief tracking(vmo::pttr pttrList, vmo oracle, vmo::belief prevState, vector<vector<float> > firstObs);
+	
+private:
+	// Helper functions
+	int lenCommonSfx(int p1, int p2);
+	float getDistance(vector<float> x, vector<float> y);
+	vector<float> cumsum(vector<float> cw);
+	vector<float> getDistArray(vector<float> x, vector<vector<float> > y);
+	vector<vector<float> > trnIndexing(int n);
+	vector2D encode();
+	
 };
 

@@ -8,12 +8,20 @@
 
 #include "vmo.h"
 
+vmo::pttr::pttr(){
+	sfxPts.clear();
+	sfxPts.reserve(INIT_VMO_SIZE);
+	sfxLen.clear();
+	sfxLen.reserve(INIT_VMO_SIZE);
+}
+
 vmo::vmo(int dim = 1, float threshold = 0.0){
 	
 	nStates = 1;
 	this.dim = dim;
 	this.thresh = threshold;
-	// Foward link vector
+	
+	// Forward link vector
 	vector1D zeroStateTrn;
 	trn.clear();
 	trn.reserve(INIT_VMO_SIZE);
@@ -21,8 +29,8 @@ vmo::vmo(int dim = 1, float threshold = 0.0){
 	
 	// Suffix link vector
 	sfx.clear();
-	sfx.assign(INIT_VMO_SIZE, 0);
-	sfx[0] = -1;
+	sfx.reserve(INIT_VMO_SIZE);
+	sfx.push_back(-1);
 	
 	// Reverse suffix link vector
 	vector1D zeroStateRsfx;
@@ -32,13 +40,13 @@ vmo::vmo(int dim = 1, float threshold = 0.0){
 	
 	// Longest repeated suffix
 	lrs.clear();
-	lrs.assign(INIT_VMO_SIZE, 0);
-	lrs[0] = 0;
+	lrs.reserve(INIT_VMO_SIZE);
+	lrs.push_back(0);
 	
 	// Data vector - symbolized token for time series
 	data.clear();
-	data.assign(INIT_VMO_SIZE, 0);
-	data[0] = -1; //MARK: Might be problematic to initialize 0th state`s symbol as -1.
+	data.reserve(INIT_VMO_SIZE);
+	data.push_back(-1); //MARK: Might be problematic to initialize 0th state`s symbol as -1.
 	
 	// State cluster vector
 	vector1D zeroStateLatent;
@@ -54,12 +62,11 @@ vmo::vmo(int dim = 1, float threshold = 0.0){
 	
 	// IR (information rate) vector
 	ir.clear();
-	ir.assign(2000, 0.0);
 	
 	// Maximum LRS
-	//	maxLrs.clear();
-	//	maxLrs.assign(INIT_VMO_SIZE, 0);
-	//	maxLrs[0] = 0;
+//	maxLrs.clear();
+//	maxLrs.assign(INIT_VMO_SIZE, 0);
+//	maxLrs[0] = 0;
 }
 
 void vmo::setup(int dim = 1, float threshold = 0.0){
@@ -75,8 +82,8 @@ void vmo::setup(int dim = 1, float threshold = 0.0){
 	
 	// Suffix link vector
 	sfx.clear();
-	sfx.assign(INIT_VMO_SIZE, 0);
-	sfx[0] = -1;
+	sfx.reserve(INIT_VMO_SIZE);
+	sfx.push_back(-1);
 	
 	// Reverse suffix link vector
 	vector1D zeroStateRsfx;
@@ -86,13 +93,13 @@ void vmo::setup(int dim = 1, float threshold = 0.0){
 	
 	// Longest repeated suffix
 	lrs.clear();
-	lrs.assign(INIT_VMO_SIZE, 0);
-	lrs[0] = 0;
+	lrs.reserve(INIT_VMO_SIZE);
+	lrs.push_back(0);
 	
 	// Data vector - symbolized token for time series
 	data.clear();
-	data.assign(INIT_VMO_SIZE, 0);
-	data[0] = -1; //MARK: Might be problematic to initialize 0th state`s symbol as -1.
+	data.reserve(INIT_VMO_SIZE);
+	data.push_back(-1); //MARK: Might be problematic to initialize 0th state`s symbol as -1.
 	
 	// State cluster vector
 	vector1D zeroStateLatent;
@@ -108,7 +115,6 @@ void vmo::setup(int dim = 1, float threshold = 0.0){
 	
 	// IR (information rate) vector
 	ir.clear();
-	ir.assign(2000, 0.0);
 	
 	// Maximum LRS
 //	maxLrs.clear();
@@ -292,6 +298,7 @@ vector<float> vmo::getIR(){
 		float tmpIR = h1[i] - h0[i];
 		ir[i] = (tmpIR > 0) ? tmpIR:0.0;
 	}
+	this->ir = ir;
 	return ir;
 }
 
@@ -312,7 +319,7 @@ float vmo::findThreshold(vector<vector<float> > obs, int dim = 1,float start, fl
 	float t = start;
 	float ir = 0.0;
 	while (start <= end) {
-		tmpVmo = buildOracle(obs, dim, start);
+		vmo tmpVmo = buildOracle(obs, dim, start);
 		float tmpIr = tmpVmo.getTotalIR();
 		if (tmpIr >= ir) {
 			ir = tmpIr;
@@ -324,12 +331,83 @@ float vmo::findThreshold(vector<vector<float> > obs, int dim = 1,float start, fl
 }
 
 vmo vmo::buildOracle(vector<vector<float> > obs, int dim = 1, float threshold = 0.0){
-	oracle = vmo(dim, threshold);
+	vmo oracle = vmo(dim, threshold);
 	
 	for (int i = 0; i<obs.size(); i++) {
 		oracle.addState(obs[i]);
 	}
 	return oracle;
 }
+
+vmo::pttr vmo::findPttr(vmo oracle, int minLen = 0){
+	pttr pttrList = pttr();
+	int preSfx = -1;
+	
+	for (int i = nStates-1; i > minLen; i--) {
+		int s = sfx[i];
+		vector1D r = rsfx[i];
+		bool pttrFound = false;
+		
+		if (s != 0 &&
+			i - lrs[i]+1 > s &&
+			lrs[i] > minLen) {
+			for (int j = 0; j < pttrList.size; j++) {
+				vector1D tmp;
+				for (int k = 0; k < pttrList.sfxPts[j].size(); k++) {
+					if ((pttrList.sfxPts[j][k]-pttrList.sfxLen[j]) < i &&
+						pttrList.sfxPts[j][k] > i) {
+						tmp.push_back(pttrList.sfxPts[j][k]);
+					}
+				}
+				if (tmp.size() == 0) {
+					if (find(pttrList.sfxPts[j].begin(), pttrList.sfxPts[j].end(), s)!=pttrList.sfxPts[j].end()) {
+						pttrList.sfxPts[j].push_back(i);
+						int lrsLen = min(pttrList.sfxLen[j], lrs[i]);
+						pttrFound = true;
+					}else{
+						pttrFound = false;
+						break;
+					}
+				}
+			}
+			if (preSfx - s != 1 &&
+				!pttrFound) {
+				if (r.size() == 0) {
+					r.push_back(i);
+					r.push_back(s);
+					vector1D lrsVec;
+					for (int k = r.size()-1; k > -1; k--) {
+						lrsVec.push_back(lrs[r[k]]);
+					}
+					int len = *min_element(lrsVec.begin(), lrsVec.end());
+					if (len > minLen) {
+						pttrList.sfxPts.push_back(r);
+						pttrList.sfxLen.push_back(len);
+					}
+				}else{
+					vector1D pts;
+					pts.push_back(i);
+					pts.push_back(s);
+					pttrList.sfxPts.push_back(pts);
+					pttrList.sfxLen.push_back(lrs[i]);
+				}
+			}
+			preSfx = s;
+			
+		}else{
+			preSfx = -1;
+		}
+	}
+	return pttrList;
+}
+
+vmo::belief vmo::tracking_init(vmo::pttr pttrList, vmo oracle, vector<vector<float> > firstObs){
+	
+}
+
+vmo::belief vmo::tracking(vmo::pttr pttrList, vmo oracle, vmo::belief prevState, vector<vector<float> > firstObs){
+	
+}
+
 
 
