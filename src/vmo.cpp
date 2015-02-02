@@ -1,10 +1,31 @@
-//
-//  vmo.cpp
-//  
-//
-//  Created by Six Wang on 1/25/15.
-//
-//
+/*
+ -------------------------------------------------------------------------
+ vmo - Variable Markov Oracle
+ implements the Variable Markov Oracle for time series analysis and
+ generation
+ 
+ copyright 2015 greg surges & Cheng-i Wang
+ 
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ 
+ 
+ vmo.cpp
+ 
+ Original code by Greg Surges.
+ Adapted by Cheng-i Wang on 1/25/15.
+ -------------------------------------------------------------------------
+ */
 
 #include "vmo.h"
 
@@ -15,53 +36,60 @@ vmo::pttr::pttr(){
 	sfxLen.reserve(INIT_VMO_SIZE);
 }
 
-vmo::vmo(int dim = 1, float threshold = 0.0){
-	
-	nStates = 1;
-	this.dim = dim;
-	this.thresh = threshold;
-	
-	// Forward link vector
-	vector1D zeroStateTrn;
-	trn.clear();
-	trn.reserve(INIT_VMO_SIZE);
-	trn.push_back(zeroStateTrn);
-	
-	// Suffix link vector
-	sfx.clear();
-	sfx.reserve(INIT_VMO_SIZE);
-	sfx.push_back(-1);
-	
-	// Reverse suffix link vector
-	vector1D zeroStateRsfx;
-	rsfx.clear();
-	rsfx.reserve(INIT_VMO_SIZE);
-	rsfx.push_back(zeroStateRsfx);
-	
-	// Longest repeated suffix
-	lrs.clear();
-	lrs.reserve(INIT_VMO_SIZE);
-	lrs.push_back(0);
-	
-	// Data vector - symbolized token for time series
-	data.clear();
-	data.reserve(INIT_VMO_SIZE);
-	data.push_back(-1); //MARK: Might be problematic to initialize 0th state`s symbol as -1.
-	
-	// State cluster vector
-	vector1D zeroStateLatent;
-	latent.clear();
-	latent.reserve(INIT_VMO_K);
-	latent.push_back(zeroStateLatent);
-	
-	// Observation vector
-	vector<float> zeroStateObs(this->dim, 0.0);
-	obs.clear();
-	obs.reserve(INIT_VMO_SIZE);
-	obs.push_back(zeroStateObs);
-	
-	// IR (information rate) vector
-	ir.clear();
+vmo::belief::belief(){
+	K = 0;
+	currentIdx = -1;
+	path.clear();
+	cost.clear();
+}
+
+vmo::vmo(){
+//	
+//	nStates = 1;
+//	this.dim = dim;
+//	this.thresh = threshold;
+//	
+//	// Forward link vector
+//	vector1D zeroStateTrn;
+//	trn.clear();
+//	trn.reserve(INIT_VMO_SIZE);
+//	trn.push_back(zeroStateTrn);
+//	
+//	// Suffix link vector
+//	sfx.clear();
+//	sfx.reserve(INIT_VMO_SIZE);
+//	sfx.push_back(-1);
+//	
+//	// Reverse suffix link vector
+//	vector1D zeroStateRsfx;
+//	rsfx.clear();
+//	rsfx.reserve(INIT_VMO_SIZE);
+//	rsfx.push_back(zeroStateRsfx);
+//	
+//	// Longest repeated suffix
+//	lrs.clear();
+//	lrs.reserve(INIT_VMO_SIZE);
+//	lrs.push_back(0);
+//	
+//	// Data vector - symbolized token for time series
+//	data.clear();
+//	data.reserve(INIT_VMO_SIZE);
+//	data.push_back(-1); //MARK: Might be problematic to initialize 0th state`s symbol as -1.
+//	
+//	// State cluster vector
+//	vector1D zeroStateLatent;
+//	latent.clear();
+//	latent.reserve(INIT_VMO_K);
+//	latent.push_back(zeroStateLatent);
+//	
+//	// Observation vector
+//	vector<float> zeroStateObs(this->dim, 0.0);
+//	obs.clear();
+//	obs.reserve(INIT_VMO_SIZE);
+//	obs.push_back(zeroStateObs);
+//	
+//	// IR (information rate) vector
+//	ir.clear();
 	
 	// Maximum LRS
 //	maxLrs.clear();
@@ -332,7 +360,8 @@ float vmo::findThreshold(vector<vector<float> > obs, int dim = 1,float start, fl
 }
 
 vmo vmo::buildOracle(vector<vector<float> > obs, int dim = 1, float threshold = 0.0){
-	vmo oracle = vmo(dim, threshold);
+	vmo oracle = vmo();
+	oracle.setup(dim, threshold);
 	
 	for (int i = 0; i<obs.size(); i++) {
 		oracle.addState(obs[i]);
@@ -341,7 +370,7 @@ vmo vmo::buildOracle(vector<vector<float> > obs, int dim = 1, float threshold = 
 }
 
 vmo::pttr vmo::findPttr(vmo oracle, int minLen = 0){
-	pttr pttrList = pttr();
+	vmo::pttr pttrList = vmo::pttr();
 	int preSfx = -1;
 	
 	for (int i = nStates-1; i > minLen; i--) {
@@ -403,7 +432,7 @@ vmo::pttr vmo::findPttr(vmo oracle, int minLen = 0){
 }
 
 vmo::belief vmo::tracking_init(vmo::pttr pttrList, vmo oracle, vector<float> firstObs){
-	vmo::belief bf;
+	vmo::belief bf = vmo::belief();
 	bf.K = oracle.getK();
 	bf.path.assign(bf.K, 0);
 	bf.cost.assign(bf.K, 0.0);
@@ -434,7 +463,9 @@ vmo::belief vmo::tracking_init(vmo::pttr pttrList, vmo oracle, vector<float> fir
 }
 
 vmo::belief vmo::tracking(vmo::pttr pttrList, vmo oracle, vmo::belief prevBf, vector<float> obs){
-	
+	/*
+	 Real-time tracking function for VMO, not optimized yet.
+	 */
 	vector1D stateCache;
 	vector<float> distCache;
 

@@ -92,6 +92,13 @@ void ofApp::setup() {
 	setupGUI1();
 	setupGUI2();
     setupGUI3(0);
+	
+	//VMO Setup goes here//
+	//1. Load xml files...
+	
+	//2. Processing
+	//2.1 Load file into VMO
+	//2.2 Output pattern list
 }
 
 //--------------------------------------------------------------
@@ -159,6 +166,9 @@ void ofApp::update() {
 
         //update markers particles
 //        markersParticles.update(dt, markers);
+		
+		//Gesture Tracking with VMO here?
+		
 	}
 }
 

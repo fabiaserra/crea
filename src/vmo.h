@@ -4,7 +4,7 @@
  implements the Variable Markov Oracle for time series analysis and 
  generation
  
- copyright 2014 greg surges & Cheng-i Wang
+ copyright 2015 greg surges & Cheng-i Wang
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -43,6 +43,7 @@
 #include <armadillo>
 #include <cfloat>
 
+#include "ofMain.h"
 #endif /* defined(____vmo__) */
 
 const int INIT_VMO_SIZE = 2000;
@@ -54,7 +55,7 @@ typedef vector<vector1D> vector2D;
 
 class vmo{
 public:
-	vmo(int dim, float threshold);
+	vmo();
 	// Main functions
 	void setup(int dim, float threshold);
 	void reset();
@@ -100,6 +101,7 @@ public:
 	
 	class belief{
 	public:
+		belief();
 		int K;
 		int currentIdx;
 		vector1D path;

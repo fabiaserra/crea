@@ -9,6 +9,12 @@
 #include "hungarian.h"
 #include "Marker.h"
 
+// Include VMO files here
+//-----------------------
+#include "vmo.h"
+//-----------------------
+
+
 class ofApp : public ofBaseApp{
 
 	public:
@@ -75,4 +81,10 @@ class ofApp : public ofBaseApp{
 //--------------------------------------------------------------
         //DEPTH CONTOUR//
         float smoothingSize;
+
+//------VMO Declaration-----------------------------------------
+		vmo gesture;
+		vmo::pttr pttrList;
+		vmo::belief currentBf;
+	
 };
