@@ -100,14 +100,16 @@ public:
 	
 	class belief{
 	public:
+		int K;
+		int currentIdx;
 		vector1D path;
 		vector<float> cost;
 	};
 	
 	// Analysis functions
 	static vmo::pttr findPttr(vmo oracle, int minLen);
-	static vmo::belief tracking_init(vmo::pttr pttrList, vmo oracle, vector<vector<float> > firstObs);
-	static vmo::belief tracking(vmo::pttr pttrList, vmo oracle, vmo::belief prevState, vector<vector<float> > firstObs);
+	static vmo::belief tracking_init(vmo::pttr pttrList, vmo oracle, vector<float> firstObs);
+	static vmo::belief tracking(vmo::pttr pttrList, vmo oracle, vmo::belief prevState, vector<float>Obs, int numK);
 	
 private:
 	// Helper functions

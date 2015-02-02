@@ -254,7 +254,8 @@ void vmo::addState(vector<float> newData){
 }
 
 void vmo::getK(){
-	
+	int K = latent.size();
+	return K;
 }
 
 vector<float> vmo::cumsum(vector<float> cw){
@@ -401,12 +402,85 @@ vmo::pttr vmo::findPttr(vmo oracle, int minLen = 0){
 	return pttrList;
 }
 
-vmo::belief vmo::tracking_init(vmo::pttr pttrList, vmo oracle, vector<vector<float> > firstObs){
+vmo::belief vmo::tracking_init(vmo::pttr pttrList, vmo oracle, vector<float> firstObs){
+	vmo::belief bf;
+	bf.K = oracle.getK();
+	bf.path.assign(bf.K, 0);
+	bf.cost.assign(bf.K, 0.0);
 	
+	int firstIdx = -1;
+	float firstCost = FLT_MAX;
+	for (int k = 0; k < bf.K; k++) {
+		float minD = FLT_MAX;
+		int ind = -1;
+		float d = 0.0;
+		for (int i = 0; i < oracle.latent[k].size(); i++) {
+			int sym = oracle.latent[k][i];
+			d = getDistance(firstObs, oracle.obs[sym]);
+			if (d < minD) {
+				minD = d;
+				ind = i;
+			}
+			bf.path[k] = minD;
+			bf.cost[k] = ind;
+		}
+		if (minD < firstCost) {
+			firstCost = minD;
+			firstIdx = ind;
+		}
+	}
+	bf.currentIdx = firstIdx;
+	return bf;
 }
 
-vmo::belief vmo::tracking(vmo::pttr pttrList, vmo oracle, vmo::belief prevState, vector<vector<float> > firstObs){
+vmo::belief vmo::tracking(vmo::pttr pttrList, vmo oracle, vmo::belief prevBf, vector<float> obs){
 	
+	vector1D stateCache;
+	vector<float> distCache;
+
+	int tempIdx = -1;
+	float tempCost = FLT_MAX;
+	int selfTrn = -1;
+	for (int k = 0; k < prevBf.K; k++) {
+		vector1D eta;
+		vector1D b;
+		float minD = FLT_MAX;
+		int ind = -1;
+		
+		// Self-transition
+		selfTrn = oracle.data[prevState.path[k]];
+		for (int i = 0; i < oracle.latent[selfTrn].size(); i++) {
+			float d = getDistance(obs, oracle.obs[oracle.latent[selfTrn][i]]);
+			if (d < minD) {
+				minD = d;
+				ind = i;
+				prevBf.path[k] = minD;
+				prevBf.cost[k] = ind;
+			}
+		}
+		
+		// Possible states from forward links
+		int sym = -1;
+		for (int j = 0; j < oracle.trn[prevState.path[k]].size(); j++) {
+			sym = oracle.data[oracle.trn[prevState.path[k]][j]];
+			float d = 0.0;
+			for (int i = 0; i < oracle.latent[selfTrn].size(); i++) {
+				d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
+				if (d < minD) {
+					minD = d;
+					ind = i;
+					prevBf.path[k] = minD;
+					prevBf.cost[k] = ind;
+				}
+			}
+		}
+		if (minD < tempCost) {
+			tempCost = minD;
+			tempIdx = ind;
+		}
+	}
+	prevBf.currentIdx = tempIdx;
+	return prevBf;
 }
 
 
