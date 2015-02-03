@@ -3,22 +3,21 @@
 using namespace ofxCv;
 using namespace cv;
 
-Marker::Marker()
-{
+Marker::Marker(){
     startedDying    = 0;
-    dyingTime       = 10;
+    dyingTime       = 5;
     bornRate        = 3;
     hasDisappeared  = false;
 }
 
-void Marker::setup(const cv::Rect& track) {
+void Marker::setup(const cv::Rect& track){
     color.setHsb(ofRandom(0, 255), 255, 255);
-    currentPos  = toOf(track).getCenter();
-    smoothPos   = currentPos;
+    currentPos = toOf(track).getCenter();
+    smoothPos = currentPos;
     previousPos = currentPos;
 }
 
-void Marker::update(const cv::Rect& track) {
+void Marker::update(const cv::Rect& track){
 	currentPos = toOf(track).getCenter();
 	smoothPos.interpolate(currentPos, .5);
 	all.addVertex(smoothPos);
@@ -26,20 +25,27 @@ void Marker::update(const cv::Rect& track) {
 	previousPos = smoothPos;
 }
 
-void Marker::update(vector<unsigned int> deadLabels, vector<unsigned int> currentLabels) {
-    for(unsigned int i = 0; i < deadLabels.size(); i++) {
-        if(deadLabels[i] == label) hasDisappeared = true;
+void Marker::update(vector<unsigned int> deadLabels, vector<unsigned int> currentLabels){
+    // Labels that have disappeared but can appear again
+    for(unsigned int i = 0; i < deadLabels.size(); i++){
+        if(deadLabels[i] == label){
+        	hasDisappeared = true;
+        }
     }
-    for(unsigned int i = 0; i < currentLabels.size(); i++) {
-        if(currentLabels[i] == label) hasDisappeared = false;
+
+    // Labels that are currently being tracked
+    for(unsigned int i = 0; i < currentLabels.size(); i++){
+        if(currentLabels[i] == label){
+        	hasDisappeared = false;
+        }
     }
 }
 
-void Marker::draw() {
+void Marker::draw(){
 	ofPushStyle();
 	float size = 16;
 	ofSetColor(255);
-	if(startedDying) {
+	if(startedDying){
 		ofSetColor(ofColor::red);
 		size = ofMap(ofGetElapsedTimef() - startedDying, 0, dyingTime, size, 0, true);
 	}
@@ -52,8 +58,12 @@ void Marker::draw() {
 	ofPopStyle();
 }
 
-void Marker::kill() {
+void Marker::kill(){
 	float currentTime = ofGetElapsedTimef();
-	if(startedDying == 0) startedDying = currentTime;
-	else if((currentTime - startedDying) > dyingTime) dead = true;
+	if(startedDying == 0){
+		startedDying = currentTime;
+	}
+	else if((currentTime - startedDying) > dyingTime){
+		dead = true;
+	}
 }
