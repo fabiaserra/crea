@@ -91,7 +91,14 @@ void ofApp::setup(){
 	setupGUI0();
 	setupGUI1();
 	setupGUI2();
-	setupGUI3(0);
+    setupGUI3(0);
+	
+	//VMO Setup goes here//
+	//1. Load xml files...
+	
+	//2. Processing
+	//2.1 Load file into VMO
+	//2.2 Output pattern list
 }
 
 //--------------------------------------------------------------
@@ -158,6 +165,9 @@ void ofApp::update(){
 
 		// Update markers particles
 		// markersParticles.update(dt, markers);
+
+		//Gesture Tracking with VMO here?
+		
 	}
 }
 
@@ -206,7 +216,7 @@ void ofApp::draw(){
 	// 	ofPolyline contour = contourFinder.getPolyline(i);
 	// 	contour = contour.getSmoothed(5, 0.5);
 	// 	contour.draw();
- // }
+ 	// }
 
 	// // Draw identified IR markers
 	// for (int i = 0; i < markers.size(); i++){
