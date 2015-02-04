@@ -40,7 +40,7 @@
 #include <string>
 #include <sstream>
 #include <cmath>
-#include <armadillo>
+//#include <armadillo>
 #include <cfloat>
 
 #include "ofMain.h"
@@ -64,7 +64,7 @@ public:
 	// Getters
 	int getK();
 	float getTotalIR();
-	vector<float> getIR();
+	float getIR();
 
 	// Ultilities
 	void print(string attr);
@@ -78,6 +78,9 @@ public:
 	vector2D trn;
 	vector2D rsfx;
 	vector2D latent;
+	
+	vector2D pttrCat; // Pattern label
+	vector2D pttrInd; // Pattern sequence index
 
 	vector<float> ir;
 	vector<vector<float> > obs;
@@ -110,8 +113,13 @@ public:
 	
 	// Analysis functions
 	static vmo::pttr findPttr(vmo oracle, int minLen);
+static vector<vector<ofVec2f> > processPttr(vmo oracle, vmo::pttr pttrList);
 	static vmo::belief tracking_init(vmo::pttr pttrList, vmo oracle, vector<float> firstObs);
 	static vmo::belief tracking(vmo::pttr pttrList, vmo oracle, vmo::belief prevState, vector<float>Obs, int numK);
+	
+	// Interface with openFrameworks
+//	static vector<vector<ofPoint> > pttr2Points(vmo::pttr pttrList);
+	
 	
 private:
 	// Helper functions
