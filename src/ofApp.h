@@ -8,6 +8,8 @@
 #include "ParticleSystem.h"
 #include "Marker.h"
 
+#include "Sequence.h"
+
 // Include VMO files here
 //-----------------------
 #include "vmo.h"
@@ -72,6 +74,8 @@ class ofApp : public ofBaseApp{
 		ofxUISuperCanvas *gui5;
 		ofxUISuperCanvas *gui6;
 		//--------------------------------------------------------------
+		ofxUIImageToggle *recordingButton;
+		//--------------------------------------------------------------
         float dim;
         float guiWidth;
         //--------------------------------------------------------------
@@ -85,6 +89,8 @@ class ofApp : public ofBaseApp{
 		float minMarkerSize, maxMarkerSize;
 		float trackerPersistence;
 		float trackerMaxDistance;
+		//--------------------------------------------------------------
+		Sequence sequence;
 		//--------------------------------------------------------------
 		float smoothingSize;
 		//--------------------------------------------------------------

@@ -7,22 +7,33 @@ class Sequence{
 	public:
 		Sequence();
 
-		void setup();
+		void setup(int nMarkers);
 		void update(vector<Marker>& markers);
-
-		void startRecording();
-		void stopRecording();
 		void load(const string path);
-		void save();
+		void save(const string path);
+        void draw(float percent);
+        void drawPatterns(float percent);
 
-		// void eraseGestureFile();
+        void startRecording();
+		void stopRecording();
+		// void deleteRecording();
 
 		//--------------------------------------------------------------
 		ofxXmlSettings xml;
-
+        //--------------------------------------------------------------
 		bool recording;
-
-		ofPolyline line;
-		vector< vector<ofPoint> > sequence;
+		size_t nMarkers;
+        //--------------------------------------------------------------
+        vector<ofPolyline> frames;
+        // Different ideas
+//		vector< vector<ofPoint> > frames;
+//		vector< vector<Marker> > frames;
+//		vector< Frame > frames;
+        //--------------------------------------------------------------
+//		ofPolyline line;
+//        vector< vector<ofPolyine> > patterns;
+//        vector<ofPolyline> previousPoints;
+		//--------------------------------------------------------------
 		int frame_counter;
+		float duration;
 };

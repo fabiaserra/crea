@@ -100,6 +100,9 @@ void ofApp::setup(){
     setupGUI5();
     setupGUI6(0);
 
+    int numMarkers = 2;
+    sequence.setup(numMarkers);
+
 	//VMO Setup goes here//
 	//1. Load xml files...
 
@@ -157,21 +160,28 @@ void ofApp::update(){
 		contourFinder.findContours(depthImage);
 
 		// Track markers
-		vector<Marker>& markers             = tracker.getFollowers();
+		vector<Marker>& tempMarkers         = tracker.getFollowers();   // TODO: assign dead labels to new labels and have a MAX number of markers
 		vector<unsigned int> deadLabels     = tracker.getDeadLabels();
 		vector<unsigned int> currentLabels  = tracker.getCurrentLabels();
 		// vector<unsigned int> newLabels      = tracker.getNewLabels();
 
 		// Update markers if we loose track of them
-		for(unsigned int i = 0; i < markers.size(); i++){
-			markers[i].update(deadLabels, currentLabels);
+		for(unsigned int i = 0; i < tempMarkers.size(); i++){
+			tempMarkers[i].update(deadLabels, currentLabels);
+		}
+
+		// print currentLabels
+		for(unsigned int i = 0; i < tempMarkers.size(); i++){
+			tempMarkers[i].update(deadLabels, currentLabels);
 		}
 
 		// Update grid particles
-		particles.update(dt, markers);
+		particles.update(dt, tempMarkers);
 
 		// Update markers particles
 		// markersParticles.update(dt, markers);
+
+		sequence.update(tempMarkers);
 
 		//Gesture Tracking with VMO here?
 
@@ -187,14 +197,14 @@ void ofApp::draw(){
 	ofBackground(red, green, blue, 255);
 	// ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 
-//	ofSetColor(255);
-//	irImage.draw(0, 0);
+	ofSetColor(255);
+	irImage.draw(0, 0);
 //	depthImage.draw(0, 0);
 
-	// contourFinder.draw();
-	// irMarkerFinder.draw();
+//	contourFinder.draw();
+//	irMarkerFinder.draw();
 
-//	particles.draw();
+	particles.draw();
 //	markersParticles.draw();
 
 	// // Draw contour shape
@@ -225,10 +235,11 @@ void ofApp::draw(){
 	// 	contour.draw();
  	// }
 
-	// // Draw identified IR markers
-	// for (int i = 0; i < markers.size(); i++){
-	// 	markers[i].draw();
-	// }
+//    vector<Marker>& tempMarkers         = tracker.getFollowers();
+//	 // Draw identified IR markers
+//	 for (int i = 0; i < tempMarkers.size(); i++){
+//	     tempMarkers[i].draw();
+//	 }
 
 	ofPopMatrix();
 }
@@ -360,7 +371,7 @@ void ofApp::setupGUI3(){
 	gui3->addLabel("Press '3' to hide panel", OFX_UI_FONT_SMALL);
 
 	gui3->addSpacer();
-	gui3->addImageButton("Record", "GUI/icons/record.png", false, 32, 32);
+	recordingButton = gui3->addImageToggle("Record", "GUI/icons/record.png", false, 32, 32);
 	gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
 //	gui3->addImageButton("Stop", "GUI/icons/record.png", false, 32, 32);
 	gui3->addImageButton("Load", "GUI/icons/open.png", false, 32, 32);
@@ -481,6 +492,39 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         }
 	}
 
+	if(e.getName() == "Record"){
+        ofxUIToggle *toggle = (ofxUIToggle *) e.widget;
+		if (toggle->getValue() == true){
+            sequence.startRecording();
+		}
+		else{
+            sequence.stopRecording();
+		}
+	}
+
+	if(e.getName() == "Save"){
+        ofxUIToggle *toggle = (ofxUIToggle *) e.widget;
+		if (toggle->getValue() == true){
+//            sequence.stopRecording();
+//            recordingButton->setValue(false);
+            ofFileDialogResult result = ofSystemSaveDialog("Sequence xml file name", false);
+            if (result.bSuccess){
+                sequence.save(result.getPath());
+            }
+
+		}
+	}
+
+	if(e.getName() == "Load"){
+        ofxUIToggle *toggle = (ofxUIToggle *) e.widget;
+		if (toggle->getValue() == true){
+            ofFileDialogResult result = ofSystemLoadDialog("Select sequence xml file.", false);
+            if (result.bSuccess){
+                sequence.load(result.getPath());
+            }
+		}
+	}
+
 	if(e.getName() == "Size range"){
 		contourFinder.setMinAreaRadius(minContourSize);
 		contourFinder.setMaxAreaRadius(maxContourSize);
@@ -535,6 +579,12 @@ void ofApp::exit(){
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
 	switch (key){
+
+        case 'f':
+			ofToggleFullscreen();
+			reScale = (float)ofGetWidth() / (float)kinect.width;
+			break;
+
 		case 'h':
 			gui0->toggleVisible();
 			gui1->toggleVisible();
@@ -543,11 +593,6 @@ void ofApp::keyPressed(int key){
 			gui4->toggleVisible();
 			gui5->toggleVisible();
 			gui6->toggleVisible();
-			break;
-
-		case 'f':
-			ofToggleFullscreen();
-			reScale = (float)ofGetWidth() / (float)kinect.width;
 			break;
 
 		case '0':

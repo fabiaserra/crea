@@ -5,27 +5,48 @@ Sequence::Sequence(){
     frame_counter = 0;
 }
 
-void Sequence::setup(){
-
+void Sequence::setup(int nMarkers){
+    this->nMarkers = nMarkers;
 }
 
 void Sequence::update(vector<Marker>& markers){
-	int numMarkers = 2;
-
     if(recording){
         int frameNum = xml.addTag("frame");
         xml.pushTag("frame", frameNum);
         xml.setValue("timestamp", ofGetElapsedTimef(), frameNum);
-        for(int i = 0; i < numMarkers; i++){
+        for(int i = 0; i < nMarkers; i++){
             int numMarker = xml.addTag("marker");
             xml.pushTag("marker", numMarker);
-            xml.setValue("id", i, numMarker);
-            xml.setValue("x", ofGetAppPtr()->mouseX, numMarker);
-            xml.setValue("y", ofGetAppPtr()->mouseY, numMarker);
+//            xml.setValue("id", i, numMarker);
+            xml.setValue("x", markers[i].smoothPos.x, numMarker);
+            xml.setValue("y", markers[i].smoothPos.x, numMarker);
             xml.popTag();
         }
         xml.popTag();
     }
+}
+
+void Sequence::draw(float percent){
+//    if(frames.size()){
+        for(int i = 0; i < nMarkers; i++){
+            ofSetColor(255);
+//            frames[i].draw();
+
+//            float currentIndex = frames[i].getIndexAtPercent(percent);
+//            ofPolyline completed;
+//            for(vector<ofPoint>::iterator it = frames[i].begin(); it != frames[i].begin+currentIndex; it++){
+//               completed.addVertex(*it);
+//            }
+//            completed.close();
+
+//            ofPoint currentPoint = frames[i].getPointAtPercent(percent);
+//            previousPoints[i].addVertex(currentPoint);
+//            previousPoints[i].close();
+
+            ofSetColor(255, 0, 0);
+//            previousPoints[i].draw();
+        }
+//    }
 }
 
 void Sequence::load(const string path){
@@ -34,35 +55,57 @@ void Sequence::load(const string path){
 
     xml.load(path);
 
-    const size_t num_frames = xml.getNumTags("frame");
+    const size_t numFrames = xml.getNumTags("frame");
+    float timestampFirstFrame;
+    float timestampLastFrame;
 
-    sequence.clear();
-    for(size_t frame_index = 0; frame_index < num_frames; frame_index++){
-        xml.pushTag("frame", frame_index);
-        const float timestamp = xml.getValue("timestamp", -1.0);
-        const size_t num_markers = xml.getNumTags("marker");
-        vector<ofPoint> markers;
-        for(size_t marker_index = 0; marker_index < num_markers; marker_index++){
-            xml.pushTag("marker", marker_index);
+    // Set up size of the sequence
+//    frames.resize(nMarkers);
+//    for(int i = 0; i < nMarkers; i++){
+//        frames[i].clear();
+//        frames[i].resize(numFrames);
+//    }
+
+    // Load XML sequence in memory
+    for(size_t frameIndex = 0; frameIndex < numFrames; frameIndex++){
+        xml.pushTag("frame", frameIndex);
+
+        // Frame timestamp
+//        const float timestamp = xml.getValue("timestamp", -1.0);
+        if(frameIndex == 0) timestampFirstFrame = xml.getValue("timestamp", -1.0);;
+        if(frameIndex == numFrames-1) timestampLastFrame = xml.getValue("timestamp", -1.0);;
+
+        // Frame markers positions
+        const size_t nMarkers = xml.getNumTags("marker");
+        for(size_t markerIndex = 0; markerIndex < nMarkers; markerIndex++){
+            xml.pushTag("marker", markerIndex);
             const float px = xml.getValue("x", -1.0);
             const float py = xml.getValue("y", -1.0);
-            markers.push_back(ofPoint(px, py));
+//            frames[i].addVertex(ofPoint(px, py));
             xml.popTag();
         }
         xml.popTag();
-        sequence.push_back(markers);
     }
 
-    line.clear();
-    for(int i = 0; i < sequence.size(); i++){
-        for(int j = 0; j < sequence[i].size(); j++){
-            ofPoint point = sequence[i][j];
-            line.addVertex(point);
-        }
-    }
-    line.close();
+    // Close polylines
+//    for(int i = 0; i < nMarkers; i++){
+//        frames[i].close();
+//    }
+
+    // Duration in seconds of the sequence
+    duration = timestampLastFrame - timestampFirstFrame;
+}
+
+
+void Sequence::save(const string path) {
+    xml.saveFile(path);
 }
 
 void Sequence::startRecording(){
+	xml.clear();
 	recording = true;
+}
+
+void Sequence::stopRecording(){
+	recording = false;
 }

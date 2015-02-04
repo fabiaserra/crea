@@ -10,7 +10,7 @@ class Marker : public ofxCv::RectFollower{
 		void update(const cv::Rect& track);
 		void update(vector<unsigned int> deadLabels, vector<unsigned int> currentLabels);
 		void draw();
-		void kill();   
+		void kill();
 		//--------------------------------------------------------------
 		ofPoint currentPos;
 		ofPoint previousPos;
