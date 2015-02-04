@@ -1,20 +1,33 @@
 /*
  -------------------------------------------------------------------------
  vmo - Variable Markov Oracle
+<<<<<<< HEAD
  implements the Variable Markov Oracle for time series analysis and 
  generation
  
  copyright 2015 greg surges & Cheng-i Wang
  
+=======
+ implements the Variable Markov Oracle for time series analysis and
+ generation
+
+ copyright 2015 greg surges & Cheng-i Wang
+
+>>>>>>> FETCH_HEAD
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
+<<<<<<< HEAD
  
+=======
+
+>>>>>>> FETCH_HEAD
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
+<<<<<<< HEAD
  
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
@@ -22,6 +35,15 @@
 
  vmo.h
  
+=======
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+ vmo.h
+
+>>>>>>> FETCH_HEAD
  Original code by Greg Surges.
  Adapted by Cheng-i Wang on 1/25/15.
  -------------------------------------------------------------------------
@@ -60,11 +82,19 @@ public:
 	void setup(int dim, float threshold);
 	void reset();
 	void addState(vector<float> newData);
+<<<<<<< HEAD
 	
 	// Getters
 	int getK();
 	float getTotalIR();
 	float getIR();
+=======
+
+	// Getters
+	int getK();
+	float getTotalIR();
+	vector<float> getIR();
+>>>>>>> FETCH_HEAD
 
 	// Ultilities
 	void print(string attr);
@@ -78,9 +108,12 @@ public:
 	vector2D trn;
 	vector2D rsfx;
 	vector2D latent;
+<<<<<<< HEAD
 	
 	vector2D pttrCat; // Pattern label
 	vector2D pttrInd; // Pattern sequence index
+=======
+>>>>>>> FETCH_HEAD
 
 	vector<float> ir;
 	vector<vector<float> > obs;
@@ -90,9 +123,18 @@ public:
 	float thresh;
 
 	// Static functions
+<<<<<<< HEAD
 	// Construction funcitons
 	static float findThreshold(vector<vector<float> > obs, int dim,float start, float step, float end);
 	static vmo buildOracle(vector<vector<float> > obs, float threshold);
+=======
+	// Construction functions
+	static float findThreshold(vector<vector<float> > obs, float start, float step, float end);
+	float findThreshold(vector<vector<float> > obs, int dim, float start, float step, float end);
+
+	static vmo buildOracle(vector<vector<float> > obs, float threshold);
+    vmo buildOracle(vector<vector<float> > obs, int dim, float threshold);
+>>>>>>> FETCH_HEAD
 
 	class pttr{
 	public:
@@ -101,7 +143,11 @@ public:
 		vector2D sfxPts;
 		vector1D sfxLen;
 	};
+<<<<<<< HEAD
 	
+=======
+
+>>>>>>> FETCH_HEAD
 	class belief{
 	public:
 		belief();
@@ -110,6 +156,7 @@ public:
 		vector1D path;
 		vector<float> cost;
 	};
+<<<<<<< HEAD
 	
 	// Analysis functions
 	static vmo::pttr findPttr(vmo oracle, int minLen);
@@ -121,6 +168,14 @@ public:
 //	static vector<vector<ofPoint> > pttr2Points(vmo::pttr pttrList);
 	
 	
+=======
+
+	// Analysis functions
+	static vmo::pttr findPttr(vmo oracle, int minLen);
+	static vmo::belief tracking_init(vmo::pttr pttrList, vmo oracle, vector<float> firstObs);
+	static vmo::belief tracking(vmo::pttr pttrList, vmo oracle, vmo::belief prevState, vector<float>Obs, int numK);
+
+>>>>>>> FETCH_HEAD
 private:
 	// Helper functions
 	int lenCommonSfx(int p1, int p2);
@@ -129,6 +184,10 @@ private:
 	vector<float> getDistArray(vector<float> x, vector<vector<float> > y);
 	vector<vector<float> > trnIndexing(int n);
 	vector2D encode();
+<<<<<<< HEAD
 	
+=======
+
+>>>>>>> FETCH_HEAD
 };
 
