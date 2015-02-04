@@ -402,6 +402,7 @@ vmo::pttr vmo::findPttr(vmo oracle, int minLen = 0){
 }
 
 vector<vector<ofVec2f> > processPttr(vmo oracle, vmo::pttr pttrList){
+	
 	vector<vector<ofVec2f> > pattern;
 	vector1D pts;
 	int len;

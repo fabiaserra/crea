@@ -83,8 +83,14 @@ class ofApp : public ofBaseApp{
         float smoothingSize;
 
 //------VMO Declaration-----------------------------------------
-		vmo gesture;
+		vmo seqVmo;
 		vmo::pttr pttrList;
 		vmo::belief currentBf;
+		vmo::belief prevBf;
+	
+		vector<vector<float> > obs;
+		vector<vector<ofVec2f> > patterns;
+		vector<vector<float> > loadXML(); // dummy function
+		bool initStatus;
 	
 };

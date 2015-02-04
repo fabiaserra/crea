@@ -91,7 +91,7 @@ public:
 
 	// Static functions
 	// Construction funcitons
-	static float findThreshold(vector<vector<float> > obs, float start, float step, float end);
+	static float findThreshold(vector<vector<float> > obs, int dim,float start, float step, float end);
 	static vmo buildOracle(vector<vector<float> > obs, float threshold);
 
 	class pttr{
@@ -113,9 +113,9 @@ public:
 	
 	// Analysis functions
 	static vmo::pttr findPttr(vmo oracle, int minLen);
-static vector<vector<ofVec2f> > processPttr(vmo oracle, vmo::pttr pttrList);
+	static vector<vector<ofVec2f> > processPttr(vmo oracle, vmo::pttr pttrList);
 	static vmo::belief tracking_init(vmo::pttr pttrList, vmo oracle, vector<float> firstObs);
-	static vmo::belief tracking(vmo::pttr pttrList, vmo oracle, vmo::belief prevState, vector<float>Obs, int numK);
+	static vmo::belief tracking(vmo::pttr pttrList, vmo oracle, vmo::belief prevState, vector<float>obs);
 	
 	// Interface with openFrameworks
 //	static vector<vector<ofPoint> > pttr2Points(vmo::pttr pttrList);
