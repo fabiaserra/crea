@@ -1,6 +1,7 @@
 #pragma once
 #include "ofMain.h"
 #include "ofxXmlSettings.h"
+#include "Marker.h"
 
 class Sequence{
 	public:
@@ -13,11 +14,15 @@ class Sequence{
 		void stopRecording();
 		void load(const string path);
 		void save();
-		
+
 		// void eraseGestureFile();
 
 		//--------------------------------------------------------------
 		ofxXmlSettings xml;
 
 		bool recording;
+
+		ofPolyline line;
+		vector< vector<ofPoint> > sequence;
+		int frame_counter;
 };

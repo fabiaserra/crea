@@ -1,7 +1,8 @@
 #include "Sequence.h"
 
 Sequence::Sequence(){
-
+    recording = false;
+    frame_counter = 0;
 }
 
 void Sequence::setup(){
@@ -19,8 +20,8 @@ void Sequence::update(vector<Marker>& markers){
             int numMarker = xml.addTag("marker");
             xml.pushTag("marker", numMarker);
             xml.setValue("id", i, numMarker);
-            xml.setValue("x", mouseX, numMarker);
-            xml.setValue("y", mouseY, numMarker);
+            xml.setValue("x", ofGetAppPtr()->mouseX, numMarker);
+            xml.setValue("y", ofGetAppPtr()->mouseY, numMarker);
             xml.popTag();
         }
         xml.popTag();
@@ -28,13 +29,13 @@ void Sequence::update(vector<Marker>& markers){
 }
 
 void Sequence::load(const string path){
-    
+
 	if(!ofFile::doesFileExist(path)) return;
 
     xml.load(path);
-    
+
     const size_t num_frames = xml.getNumTags("frame");
-    
+
     sequence.clear();
     for(size_t frame_index = 0; frame_index < num_frames; frame_index++){
         xml.pushTag("frame", frame_index);
@@ -51,7 +52,7 @@ void Sequence::load(const string path){
         xml.popTag();
         sequence.push_back(markers);
     }
-    
+
     line.clear();
     for(int i = 0; i < sequence.size(); i++){
         for(int j = 0; j < sequence[i].size(); j++){

@@ -8,6 +8,7 @@ void ofApp::setup(){
 
 //    ofEnableBlendMode(OF_BLENDMODE_ADD);
 
+    // OPEN KINECT
 	kinect.init(true); // shows infrared instead of RGB video Image
 	kinect.open();
 
@@ -88,14 +89,20 @@ void ofApp::setup(){
 	smoothingSize = 0;
 
 	// SETUP GUIs
+    dim = 32;
+    guiWidth = 240;
+
 	setupGUI0();
 	setupGUI1();
 	setupGUI2();
-    setupGUI3(0);
-	
+    setupGUI3();
+    setupGUI4();
+    setupGUI5();
+    setupGUI6(0);
+
 	//VMO Setup goes here//
 	//1. Load xml files...
-	
+
 	//2. Processing
 	//2.1 Load file into VMO
 	//2.2 Output pattern list
@@ -167,7 +174,7 @@ void ofApp::update(){
 		// markersParticles.update(dt, markers);
 
 		//Gesture Tracking with VMO here?
-		
+
 	}
 }
 
@@ -175,20 +182,20 @@ void ofApp::update(){
 void ofApp::draw(){
 
 	ofPushMatrix();
-
-	ofScale(reScale, reScale);
+    ofTranslate(guiWidth+10, 0);
+//	ofScale(reScale, reScale);
 	ofBackground(red, green, blue, 255);
 	// ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 
-	ofSetColor(255);
-	irImage.draw(0, 0);
-	depthImage.draw(0, 0);
+//	ofSetColor(255);
+//	irImage.draw(0, 0);
+//	depthImage.draw(0, 0);
 
 	// contourFinder.draw();
 	// irMarkerFinder.draw();
 
-	particles.draw();
-	markersParticles.draw();
+//	particles.draw();
+//	markersParticles.draw();
 
 	// // Draw contour shape
 	// for(int i = 0; i < contourFinder.size(); i++){
@@ -207,7 +214,7 @@ void ofApp::draw(){
 	// 			ofVertex(convexHull.getVertices().at(i).x, convexHull.getVertices().at(i).y);
 	// 		}
 	// 	ofEndShape();
-		
+
 	// 	ofSetColor(255, 0, 0);
 	// 	ofSetLineWidth(3);
 	// 	convexHull.draw(); //if we only want the contour
@@ -228,9 +235,12 @@ void ofApp::draw(){
 
 //--------------------------------------------------------------
 void ofApp::setupGUI0(){
-	gui0 = new ofxUISuperCanvas("MAIN WINDOW", false);
+	gui0 = new ofxUISuperCanvas("MAIN WINDOW", 0, 0, guiWidth, ofGetHeight());
+    gui0->setTheme(OFX_UI_THEME_GRAYDAY);
+
 	gui0->addSpacer();
-	gui0->addLabel("Press panel number to open", OFX_UI_FONT_SMALL);
+	gui0->addLabel("Press panel number to switch", OFX_UI_FONT_SMALL);
+	gui0->addLabel("between menus.", OFX_UI_FONT_SMALL);
 	gui0->addSpacer();
 	gui0->addLabel("Press 'h' to hide GUI", OFX_UI_FONT_SMALL);
 	gui0->addSpacer();
@@ -245,22 +255,39 @@ void ofApp::setupGUI0(){
 	gui0->addSpacer();
 
 	gui0->addSpacer();
-	gui0->addLabel("3: GESTURE FOLLOWER");
+	gui0->addLabel("3: GESTURE SEQUENCE");
 	gui0->addSpacer();
 
 	gui0->addSpacer();
-	gui0->addLabel("4: PARTICLES");
+	gui0->addLabel("4: GESTURE TRACKER");
 	gui0->addSpacer();
+
+    gui0->addSpacer();
+	gui0->addLabel("5: FLUID SOLVER");
+	gui0->addSpacer();
+
+	gui0->addSpacer();
+	gui0->addLabel("6: PARTICLES");
+	gui0->addSpacer();
+
+    gui0->addSpacer();
+    gui0->addImageButton("Save", "GUI/icons/save.png", false, dim, dim);
+    gui0->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+	gui0->addImageButton("Load", "GUI/icons/open.png", false, dim, dim);
+	gui0->addImageButton("Reset", "GUI/icons/reset.png", false, dim, dim);
+	gui0->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+
+    gui0->addSpacer();
 
 	gui0->autoSizeToFitWidgets();
-	gui0->setPosition(795, 6);
 	ofAddListener(gui0->newGUIEvent, this, &ofApp::guiEvent);
-	gui0->loadSettings("gui0Settings.xml");
 }
 
 //--------------------------------------------------------------
 void ofApp::setupGUI1(){
-	gui1 = new ofxUISuperCanvas("1: BASICS");
+	gui1 = new ofxUISuperCanvas("1: BASICS", 0, 0, guiWidth, ofGetHeight());
+	gui1->setTheme(OFX_UI_THEME_GRAYDAY);
+
 	gui1->addSpacer();
 	gui1->addLabel("Press '1' to hide panel", OFX_UI_FONT_SMALL);
 
@@ -273,22 +300,26 @@ void ofApp::setupGUI1(){
 	gui1->addSlider("Green", 0.0, 255.0, &green);
 	gui1->addSlider("Blue", 0.0, 255.0, &blue);
 
+    gui1->addSpacer();
+
 	gui1->autoSizeToFitWidgets();
-	gui1->setPosition(795, 6);
 	gui1->setVisible(false);
 	ofAddListener(gui1->newGUIEvent, this, &ofApp::guiEvent);
-	gui1->loadSettings("gui1Settings.xml");
+	gui1->loadSettings("GUI/gui1Settings.xml");
 }
 
 //--------------------------------------------------------------
 void ofApp::setupGUI2(){
-	gui2 = new ofxUISuperCanvas("2: KINECT");
-	gui2->setVisible(false);
+	gui2 = new ofxUISuperCanvas("2: KINECT", 0, 0, guiWidth, ofGetHeight());
+	gui2->setTheme(OFX_UI_THEME_GRAYDAY);
+
 	gui2->addSpacer();
 	gui2->addLabel("Press '2' to hide panel", OFX_UI_FONT_SMALL);
 
+    gui2->addLabelButton("Reset Kinect", &resetKinect);
+
 	gui2->addSpacer();
-	gui2->addToggle("Flip Kinect", &flipKinect);
+	gui2->addLabelToggle("Flip Kinect", &flipKinect);
 
 	gui2->addSpacer();
 	gui2->addLabel("DEPTH IMAGE");
@@ -311,92 +342,145 @@ void ofApp::setupGUI2(){
 	gui2->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
 	gui2->addImage("IR filtered", &irImage, kinect.width/6, kinect.height/6, true);
 	gui2->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+
 	gui2->addSpacer();
 
 	gui2->autoSizeToFitWidgets();
-	gui2->setPosition(795, 6);
 	gui2->setVisible(false);
 	ofAddListener(gui2->newGUIEvent, this, &ofApp::guiEvent);
-	gui2->loadSettings("gui2Settings.xml");
+	gui2->loadSettings("GUI/gui2Settings.xml");
 }
 
 //--------------------------------------------------------------
 void ofApp::setupGUI3(){
-	gui3 = new ofxUISuperCanvas("3: GESTURE FOLLOWER");
-	gui3->setVisible(false);
+	gui3 = new ofxUISuperCanvas("3: GESTURE SEQUENCE", 0, 0, guiWidth, ofGetHeight());
+    gui3->setTheme(OFX_UI_THEME_GRAYDAY);
+
 	gui3->addSpacer();
 	gui3->addLabel("Press '3' to hide panel", OFX_UI_FONT_SMALL);
 
 	gui3->addSpacer();
-	gui3->addLabelButton("Start recording", &startRecording);
-	gui3->addLabelButton("Stop recording", &stopRecording);
+	gui3->addImageButton("Record", "GUI/icons/record.png", false, 32, 32);
+	gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+//	gui3->addImageButton("Stop", "GUI/icons/record.png", false, 32, 32);
+	gui3->addImageButton("Load", "GUI/icons/open.png", false, 32, 32);
+	gui3->addImageButton("Save", "GUI/icons/save.png", false, 32, 32);
+	gui3->addImageButton("Delete", "GUI/icons/delete.png", false, 32, 32);
+	gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+
+    gui3->addSpacer();
 
 	gui3->autoSizeToFitWidgets();
-	gui3->setPosition(795, 6);
 	gui3->setVisible(false);
 	ofAddListener(gui3->newGUIEvent, this, &ofApp::guiEvent);
-	gui3->loadSettings("gui3Settings.xml");
+	gui3->loadSettings("GUI/gui3Settings.xml");
 }
 
-
-
 //--------------------------------------------------------------
-void ofApp::setupGUI4(int i){
-	gui4 = new ofxUISuperCanvas("4: PARTICLES");
+void ofApp::setupGUI4(){
+	gui4 = new ofxUISuperCanvas("4: GESTURE TRACKER", 0, 0, guiWidth, ofGetHeight());
+	gui4->setTheme(OFX_UI_THEME_GRAYDAY);
+
 	gui4->addSpacer();
 	gui4->addLabel("Press '4' to hide panel", OFX_UI_FONT_SMALL);
 
 	gui4->addSpacer();
-	gui4->addLabel("Emitter");
-	gui4->addSlider("Particles/sec", 0.0, 20.0, &markersParticles.bornRate);
+	gui4->addLabelButton("Start", false);
+	gui4->addLabelButton("Stop", false);
 
-//    vector<string> types;
-//  types.push_back("Point");
-//  types.push_back("Grid");
-//  types.push_back("Contour");
-//    gui4->addLabel("Emitter type:", OFX_UI_FONT_SMALL);
-//    gui4->addRadio("Emitter type", types, OFX_UI_ORIENTATION_VERTICAL);
-
-	gui4->addSlider("Velocity", 0.0, 100.0, &markersParticles.velocity);
-	gui4->addSlider("Velocity Random[%]", 0.0, 100.0, &markersParticles.velocityRnd);
-	gui4->addSlider("Velocity from Motion[%]", 0.0, 100.0, &markersParticles.velocityMotion);
-
-	gui4->addSlider("Emitter size", 0.0, 50.0, &markersParticles.emitterSize);
-
-	gui4->addSpacer();
-	gui4->addLabel("Particle");
-	gui4->addToggle("Immortal", &markersParticles.immortal);
-	gui4->addSlider("Lifetime", 0.0, 20.0, &markersParticles.lifetime);
-	gui4->addSlider("Life Random[%]", 0.0, 100.0, &markersParticles.lifetimeRnd);
-	gui4->addSlider("Radius", 1.0, 15.0, &markersParticles.radius);
-	gui4->addSlider("Radius Random[%]", 0.0, 100.0, &markersParticles.radiusRnd);
-
-	gui4->addSpacer();
-	gui4->addLabel("Time behaviour");
-	gui4->addToggle("Size", &markersParticles.sizeAge);
-	gui4->addToggle("Opacity", &markersParticles.opacityAge);
-	gui4->addToggle("Flickers", &markersParticles.flickersAge);
-	gui4->addToggle("Color", &markersParticles.colorAge);
-	gui4->addToggle("Bounce", &markersParticles.bounce);
-
-	gui4->addSpacer();
-	gui4->addLabel("Physics");
-	gui4->addSlider("Friction", 0, 100, &markersParticles.friction);
-	gui4->addSlider("Gravity", 0.0, 20.0, &markersParticles.gravity);
-
-	gui4->addSpacer();
-
-	gui4->addToggle("OPEN KINECT", bKinectOpen);
-	gui4->setGlobalCanvasWidth(OFX_UI_GLOBAL_CANVAS_WIDTH);
+    gui4->addSpacer();
 
 	gui4->autoSizeToFitWidgets();
-	gui4->setPosition(795, 6);
 	gui4->setVisible(false);
 	ofAddListener(gui4->newGUIEvent, this, &ofApp::guiEvent);
-	gui4->loadSettings("gui4Settings.xml");
+	gui4->loadSettings("GUI/gui4Settings.xml");
+}
+
+//--------------------------------------------------------------
+void ofApp::setupGUI5(){
+	gui5 = new ofxUISuperCanvas("5: FLUID SOLVER", 0, 0, guiWidth, ofGetHeight());
+    gui5->setTheme(OFX_UI_THEME_GRAYDAY);
+
+	gui5->addSpacer();
+	gui5->addLabel("Press '5' to hide panel", OFX_UI_FONT_SMALL);
+
+	gui5->addSpacer();
+	gui5->addLabel("Physics");
+	gui5->addSlider("Friction", 0, 100, &markersParticles.friction);
+
+	gui5->addSpacer();
+
+	gui5->autoSizeToFitWidgets();
+	gui5->setVisible(false);
+	ofAddListener(gui5->newGUIEvent, this, &ofApp::guiEvent);
+	gui5->loadSettings("GUI/gui5Settings.xml");
+}
+
+//--------------------------------------------------------------
+void ofApp::setupGUI6(int i){
+	gui6 = new ofxUISuperCanvas("6: PARTICLES", 0, 0, guiWidth, ofGetHeight());
+	gui6->setTheme(OFX_UI_THEME_GRAYDAY);
+//	gui6->setTheme(OFX_UI_THEME_MINBLACK);
+
+	gui6->addSpacer();
+	gui6->addLabel("Press '6' to hide panel", OFX_UI_FONT_SMALL);
+
+	gui6->addSpacer();
+	gui6->addLabel("Emitter");
+	gui6->addSlider("Particles/sec", 0.0, 20.0, &markersParticles.bornRate);
+
+//    vector<string> types;
+//    types.push_back("Point");
+//    types.push_back("Grid");
+//    types.push_back("Contour");
+//    gui6->addLabel("Emitter type:", OFX_UI_FONT_SMALL);
+//    gui6->addRadio("Emitter type", types, OFX_UI_ORIENTATION_VERTICAL);
+
+	gui6->addSlider("Velocity", 0.0, 100.0, &markersParticles.velocity);
+	gui6->addSlider("Velocity Random[%]", 0.0, 100.0, &markersParticles.velocityRnd);
+	gui6->addSlider("Velocity from Motion[%]", 0.0, 100.0, &markersParticles.velocityMotion);
+
+	gui6->addSlider("Emitter size", 0.0, 60.0, &markersParticles.emitterSize);
+
+	gui6->addSpacer();
+	gui6->addLabel("Particle");
+	gui6->addLabelToggle("Immortal", &markersParticles.immortal);
+	gui6->addSlider("Lifetime", 0.0, 20.0, &markersParticles.lifetime);
+	gui6->addSlider("Life Random[%]", 0.0, 100.0, &markersParticles.lifetimeRnd);
+	gui6->addSlider("Radius", 1.0, 15.0, &markersParticles.radius);
+	gui6->addSlider("Radius Random[%]", 0.0, 100.0, &markersParticles.radiusRnd);
+
+	gui6->addSpacer();
+	gui6->addLabel("Time behaviour");
+	gui6->addLabelToggle("Size", &markersParticles.sizeAge);
+	gui6->addLabelToggle("Opacity", &markersParticles.opacityAge);
+	gui6->addLabelToggle("Flickers", &markersParticles.flickersAge);
+	gui6->addLabelToggle("Color", &markersParticles.colorAge);
+	gui6->addLabelToggle("Bounce", &markersParticles.bounce);
+
+	gui6->addSpacer();
+	gui6->addLabel("Physics");
+	gui6->addSlider("Friction", 0, 100, &markersParticles.friction);
+	gui6->addSlider("Gravity", 0.0, 20.0, &markersParticles.gravity);
+
+	gui6->addSpacer();
+
+	gui6->autoSizeToFitWidgets();
+	gui6->setVisible(false);
+	ofAddListener(gui6->newGUIEvent, this, &ofApp::guiEvent);
+	gui6->loadSettings("GUI/gui6Settings.xml");
 }
 
 void ofApp::guiEvent(ofxUIEventArgs &e){
+	if(e.getName() == "Reset Kinect"){
+        if(resetKinect){
+            kinect.close();
+        }
+        else{
+            kinect.open();
+        }
+	}
+
 	if(e.getName() == "Size range"){
 		contourFinder.setMinAreaRadius(minContourSize);
 		contourFinder.setMaxAreaRadius(maxContourSize);
@@ -431,17 +515,21 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 void ofApp::exit(){
 	kinect.close();
 
-	gui0->saveSettings("gui0Settings.xml");
-	gui1->saveSettings("gui1Settings.xml");
-	gui2->saveSettings("gui2Settings.xml");
-	gui3->saveSettings("gui3Settings.xml");
-	gui4->saveSettings("gui4Settings.xml");
+	gui0->saveSettings("GUI/gui0Settings.xml");
+	gui1->saveSettings("GUI/gui1Settings.xml");
+	gui2->saveSettings("GUI/gui2Settings.xml");
+	gui3->saveSettings("GUI/gui3Settings.xml");
+	gui4->saveSettings("GUI/gui4Settings.xml");
+	gui5->saveSettings("GUI/gui5Settings.xml");
+	gui6->saveSettings("GUI/gui6Settings.xml");
 
 	delete gui0;
 	delete gui1;
 	delete gui2;
 	delete gui3;
 	delete gui4;
+	delete gui5;
+	delete gui6;
 }
 
 //--------------------------------------------------------------
@@ -452,6 +540,9 @@ void ofApp::keyPressed(int key){
 			gui1->toggleVisible();
 			gui2->toggleVisible();
 			gui3->toggleVisible();
+			gui4->toggleVisible();
+			gui5->toggleVisible();
+			gui6->toggleVisible();
 			break;
 
 		case 'f':
@@ -460,11 +551,14 @@ void ofApp::keyPressed(int key){
 			break;
 
 		case '0':
+        case '`':
 			gui0->toggleVisible();
 			gui1->setVisible(false);
 			gui2->setVisible(false);
 			gui3->setVisible(false);
 			gui4->setVisible(false);
+			gui5->setVisible(false);
+			gui6->setVisible(false);
 			break;
 
 		case '1':
@@ -473,6 +567,8 @@ void ofApp::keyPressed(int key){
 			gui2->setVisible(false);
 			gui3->setVisible(false);
 			gui4->setVisible(false);
+			gui5->setVisible(false);
+			gui6->setVisible(false);
 			break;
 
 		case '2':
@@ -481,6 +577,8 @@ void ofApp::keyPressed(int key){
 			gui2->toggleVisible();
 			gui3->setVisible(false);
 			gui4->setVisible(false);
+			gui5->setVisible(false);
+			gui6->setVisible(false);
 			break;
 
 		case '3':
@@ -489,7 +587,9 @@ void ofApp::keyPressed(int key){
 			gui2->setVisible(false);
 			gui3->toggleVisible();
 			gui4->setVisible(false);
-			break;		
+			gui5->setVisible(false);
+			gui6->setVisible(false);
+			break;
 
 		case '4':
 			gui0->setVisible(false);
@@ -497,6 +597,28 @@ void ofApp::keyPressed(int key){
 			gui2->setVisible(false);
 			gui3->setVisible(false);
 			gui4->toggleVisible();
+			gui5->setVisible(false);
+			gui6->setVisible(false);
+			break;
+
+		case '5':
+			gui0->setVisible(false);
+			gui1->setVisible(false);
+			gui2->setVisible(false);
+			gui3->setVisible(false);
+			gui4->setVisible(false);
+			gui5->toggleVisible();
+			gui6->setVisible(false);
+			break;
+
+		case '6':
+			gui0->setVisible(false);
+			gui1->setVisible(false);
+			gui2->setVisible(false);
+			gui3->setVisible(false);
+			gui4->setVisible(false);
+			gui5->setVisible(false);
+			gui6->toggleVisible();
 			break;
 
 		default:
