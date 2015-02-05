@@ -25,15 +25,16 @@ class Sequence{
 		bool sequenceLoaded;
 		size_t nMarkers;
         //--------------------------------------------------------------
-        vector<ofPolyline> frames;
+        vector<ofPolyline> markersPosition;                 // Markers positions through all the sequence
+        vector<ofPolyline> markersPastPoints;               // Percentage completion fragment of the sequence
+
         // Different ideas
 //		vector< vector<ofPoint> > frames;
 //		vector< vector<Marker> > frames;
 //		vector< Frame > frames;
         //--------------------------------------------------------------
-		ofPolyline line;
-        vector< vector<ofPolyline> > patterns;
-        vector<ofPolyline> pastPoints;
+        vector< vector<ofPolyline> > patterns;              // identified patterns from the sequence
+        vector< vector<ofPolyline> > patternsPastPoints;    // Percentage completion fragments of the patterns
 		//--------------------------------------------------------------
 		int frame_counter;
 		float duration;
