@@ -11,7 +11,6 @@ void Sequence::setup(int nMarkers){
 
 void Sequence::update(vector<Marker>& markers){
     if(recording){
-            cout << "recording" << endl;
         int frameNum = xml.addTag("frame");
         xml.pushTag("frame", frameNum);
         xml.setValue("timestamp", ofGetElapsedTimef(), frameNum);
@@ -20,7 +19,7 @@ void Sequence::update(vector<Marker>& markers){
             xml.pushTag("marker", numMarker);
 //            xml.setValue("id", i, numMarker);
             xml.setValue("x", markers[i].smoothPos.x, numMarker);
-            xml.setValue("y", markers[i].smoothPos.x, numMarker);
+            xml.setValue("y", markers[i].smoothPos.y, numMarker);
             xml.popTag();
         }
         xml.popTag();
@@ -28,10 +27,11 @@ void Sequence::update(vector<Marker>& markers){
 }
 
 void Sequence::draw(float percent){
-//    if(frames.size()){
+
+    if(frames.size()){
         for(int i = 0; i < nMarkers; i++){
-            ofSetColor(255);
-//            frames[i].draw();
+            ofSetColor(255, 0, 0);
+            frames[i].draw();
 
 //            float currentIndex = frames[i].getIndexAtPercent(percent);
 //            ofPolyline completed;
@@ -43,11 +43,11 @@ void Sequence::draw(float percent){
 //            ofPoint currentPoint = frames[i].getPointAtPercent(percent);
 //            previousPoints[i].addVertex(currentPoint);
 //            previousPoints[i].close();
-
-            ofSetColor(255, 0, 0);
+//
+//            ofSetColor(255, 0, 0);
 //            previousPoints[i].draw();
         }
-//    }
+    }
 }
 
 void Sequence::load(const string path){
@@ -61,11 +61,11 @@ void Sequence::load(const string path){
     float timestampLastFrame;
 
     // Set up size of the sequence
-//    frames.resize(nMarkers);
-//    for(int i = 0; i < nMarkers; i++){
-//        frames[i].clear();
-//        frames[i].resize(numFrames);
-//    }
+    frames.resize(nMarkers);
+    for(int i = 0; i < nMarkers; i++){
+        frames[i].clear();
+        frames[i].resize(numFrames);
+    }
 
     // Load XML sequence in memory
     for(size_t frameIndex = 0; frameIndex < numFrames; frameIndex++){
@@ -82,16 +82,17 @@ void Sequence::load(const string path){
             xml.pushTag("marker", markerIndex);
             const float px = xml.getValue("x", -1.0);
             const float py = xml.getValue("y", -1.0);
-//            frames[i].addVertex(ofPoint(px, py));
+            frames[markerIndex].addVertex(ofPoint(px, py));
             xml.popTag();
         }
         xml.popTag();
     }
 
     // Close polylines
-//    for(int i = 0; i < nMarkers; i++){
-//        frames[i].close();
-//    }
+    for(int i = 0; i < nMarkers; i++){
+        cout << frames[i].size() << endl;
+        frames[i].close();
+    }
 
     // Duration in seconds of the sequence
     duration = timestampLastFrame - timestampFirstFrame;

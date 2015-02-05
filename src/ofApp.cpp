@@ -215,11 +215,13 @@ void ofApp::draw(){
 	// ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 
 	ofSetColor(255);
-	irImage.draw(0, 0);
+//	irImage.draw(0, 0);
 //	depthImage.draw(0, 0);
 
 //	contourFinder.draw();
-//	irMarkerFinder.draw();
+	irMarkerFinder.draw();
+
+    sequence.draw(50);
 
 //	particles.draw();
 //	markersParticles.draw();
@@ -252,11 +254,11 @@ void ofApp::draw(){
 	// 	contour.draw();
  	// }
 
-//    vector<Marker>& tempMarkers         = tracker.getFollowers();
-//	 // Draw identified IR markers
-//	 for (int i = 0; i < tempMarkers.size(); i++){
-//	     tempMarkers[i].draw();
-//	 }
+    vector<Marker>& tempMarkers         = tracker.getFollowers();
+	 // Draw identified IR markers
+	 for (int i = 0; i < tempMarkers.size(); i++){
+	     tempMarkers[i].draw();
+	 }
 
 	ofPopMatrix();
 }
@@ -388,12 +390,12 @@ void ofApp::setupGUI3(){
 	gui3->addLabel("Press '3' to hide panel", OFX_UI_FONT_SMALL);
 
 	gui3->addSpacer();
-	recordingButton = gui3->addImageToggle("Record", "GUI/icons/record.png", false, 32, 32);
+	recordingButton = gui3->addImageToggle("Record", "GUI/icons/record.png", false, dim, dim);
 	gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-//	gui3->addImageButton("Stop", "GUI/icons/record.png", false, 32, 32);
-	gui3->addImageButton("Load", "GUI/icons/open.png", false, 32, 32);
-	gui3->addImageButton("Save", "GUI/icons/save.png", false, 32, 32);
-	gui3->addImageButton("Delete", "GUI/icons/delete.png", false, 32, 32);
+//	gui3->addImageButton("Stop", "GUI/icons/record.png", false, dim, dim);
+	gui3->addImageButton("Save", "GUI/icons/save.png", false, dim, dim);
+	gui3->addImageButton("Load", "GUI/icons/open.png", false, dim, dim);
+	gui3->addImageButton("Delete", "GUI/icons/delete.png", false, dim, dim);
 	gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui3->addSpacer();
@@ -401,7 +403,7 @@ void ofApp::setupGUI3(){
 	gui3->autoSizeToFitWidgets();
 	gui3->setVisible(false);
 	ofAddListener(gui3->newGUIEvent, this, &ofApp::guiEvent);
-	gui3->loadSettings("GUI/gui3Settings.xml");
+//	gui3->loadSettings("GUI/gui3Settings.xml");
 }
 
 //--------------------------------------------------------------
@@ -413,15 +415,17 @@ void ofApp::setupGUI4(){
 	gui4->addLabel("Press '4' to hide panel", OFX_UI_FONT_SMALL);
 
 	gui4->addSpacer();
-	gui4->addLabelButton("Start", false);
-	gui4->addLabelButton("Stop", false);
+	gui4->addImageButton("Start", "GUI/icons/play.png", false, dim, dim);
+	gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+	gui4->addImageButton("Stop", "GUI/icons/delete.png", false, dim, dim);
+    gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui4->addSpacer();
 
 	gui4->autoSizeToFitWidgets();
 	gui4->setVisible(false);
 	ofAddListener(gui4->newGUIEvent, this, &ofApp::guiEvent);
-	gui4->loadSettings("GUI/gui4Settings.xml");
+//	gui4->loadSettings("GUI/gui4Settings.xml");
 }
 
 //--------------------------------------------------------------
@@ -521,11 +525,11 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 	if(e.getName() == "Save"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
 		if (button->getValue() == true){
-//            sequence.stopRecording();
+            sequence.stopRecording();
             recordingButton->setValue(false);
             ofFileDialogResult result = ofSystemSaveDialog("sequence.xml", "Save sequence file");
             if (result.bSuccess){
-                sequence.save(result.filePath());
+                sequence.save(result.getPath());
             }
 
 		}
@@ -538,6 +542,13 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             if (result.bSuccess){
                 sequence.load(result.getPath());
             }
+		}
+	}
+
+	if(e.getName() == "Start"){
+        ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
+		if (button->getValue() == true){
+            sequence.draw(20);
 		}
 	}
 

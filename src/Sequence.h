@@ -30,9 +30,9 @@ class Sequence{
 //		vector< vector<Marker> > frames;
 //		vector< Frame > frames;
         //--------------------------------------------------------------
-//		ofPolyline line;
-//        vector< vector<ofPolyine> > patterns;
-//        vector<ofPolyline> previousPoints;
+		ofPolyline line;
+        vector< vector<ofPolyline> > patterns;
+        vector<ofPolyline> previousPoints;
 		//--------------------------------------------------------------
 		int frame_counter;
 		float duration;
