@@ -107,11 +107,11 @@ void ofApp::setup(){
 	
 	//VMO Setup goes here//
 	//1. Load xml files...
-	obs.assign(sequence.frames[0].size(), vector<float>(4));
-	for (int i = 0; i < sequence.frames.size(); i++) {
-		for (int j = 0; j < sequence.frames[i].size(); j++) {
-			obs[j][i*2] = sequence.frames[i][j].x;
-			obs[j][i*2+1] = sequence.frames[i][j].y;
+	obs.assign(sequence.markersPosition[0].size(), vector<float>(4));
+	for (int i = 0; i < sequence.markersPosition.size(); i++) {
+		for (int j = 0; j < sequence.markersPosition[i].size(); j++) {
+			obs[j][i*2] = sequence.markersPosition[i][j].x;
+			obs[j][i*2+1] = sequence.markersPosition[i][j].y;
 		}
 	}
 	
@@ -130,20 +130,6 @@ void ofApp::setup(){
 
     testCounter = 0.0;
 
-//	//VMO Setup goes here//
-//	//1. Load xml files...
-//	obs = loadXML();
-//	initStatus = true;
-//	int minLen = 5; // Temporary setting
-//	float start = 0.0, step = 0.01, stop = 2.0;
-//
-//	//2. Processing
-//	//2.1 Load file into VMO
-//	float t = vmo::findThreshold(obs, 4, start, step, stop); // Temporary threshold range and step
-//	seqVmo = vmo::buildOracle(obs, t);
-//	//2.2 Output pattern list
-//	pttrList = vmo::findPttr(seqVmo, minLen);
-//	patterns = vmo::processPttr(seqVmo, pttrList);
 }
 
 //--------------------------------------------------------------
@@ -241,17 +227,6 @@ void ofApp::update(){
 		// Update sequence
 		sequence.update(tempMarkers);
 
-//		//Gesture Tracking with VMO here?
-//		vector<float> firstObs; // Temporary code
-//		if(initStatus){
-//			currentBf = vmo::tracking_init(pttrList, seqVmo, firstObs);
-//			initStatus = false;
-//		}else{
-//			vector<float> obs;
-//			prevBf = currentBf;
-//			currentBf = vmo::tracking(pttrList, seqVmo, prevBf, obs);
-//		}
->>>>>>> fabiaserra/master
 
 	}
 }
