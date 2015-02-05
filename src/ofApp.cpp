@@ -95,7 +95,6 @@ void ofApp::setup(){
 	setupGUI0();
 	setupGUI1();
 	setupGUI2();
-//    setupGUI3(0);
 	setupGUI3();
 	setupGUI4();
 	setupGUI5();
@@ -128,6 +127,23 @@ void ofApp::setup(){
 	//2.2 Output pattern list
 	pttrList = vmo::findPttr(seqVmo, minLen);
 	patterns = vmo::processPttr(seqVmo, pttrList);
+
+    testCounter = 0.0;
+
+//	//VMO Setup goes here//
+//	//1. Load xml files...
+//	obs = loadXML();
+//	initStatus = true;
+//	int minLen = 5; // Temporary setting
+//	float start = 0.0, step = 0.01, stop = 2.0;
+//
+//	//2. Processing
+//	//2.1 Load file into VMO
+//	float t = vmo::findThreshold(obs, 4, start, step, stop); // Temporary threshold range and step
+//	seqVmo = vmo::buildOracle(obs, t);
+//	//2.2 Output pattern list
+//	pttrList = vmo::findPttr(seqVmo, minLen);
+//	patterns = vmo::processPttr(seqVmo, pttrList);
 }
 
 //--------------------------------------------------------------
@@ -194,13 +210,23 @@ void ofApp::update(){
 			tempMarkers[i].update(deadLabels, currentLabels);
 		}
 
+//		// Print currentLabels
+//		cout << "Current:" << endl;
+//		for(unsigned int i = 0; i < currentLabels.size(); i++){
+//            cout << currentLabels[i] << endl;
+//		}
+//
+//		// Print currentLabels
+//		cout << "markers:" << endl;
+//		for(unsigned int i = 0; i < tempMarkers.size(); i++){
+//            cout << tempMarkers[i].getLabel() << endl;
+//		}
+
 		// Update grid particles
 		particles.update(dt, tempMarkers);
 
 		// Update markers particles
 		// markersParticles.update(dt, markers);
-
-		sequence.update(tempMarkers);
 
 		//Gesture Tracking with VMO here?
 		vector<float> firstObs; // Temporary code
@@ -212,6 +238,20 @@ void ofApp::update(){
 			prevBf = currentBf;
 			currentBf = vmo::tracking(pttrList, seqVmo, prevBf, obs);
 		}
+		// Update sequence
+		sequence.update(tempMarkers);
+
+//		//Gesture Tracking with VMO here?
+//		vector<float> firstObs; // Temporary code
+//		if(initStatus){
+//			currentBf = vmo::tracking_init(pttrList, seqVmo, firstObs);
+//			initStatus = false;
+//		}else{
+//			vector<float> obs;
+//			prevBf = currentBf;
+//			currentBf = vmo::tracking(pttrList, seqVmo, prevBf, obs);
+//		}
+>>>>>>> fabiaserra/master
 
 	}
 }
@@ -219,9 +259,10 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-	ofPushMatrix();
+    ofPushMatrix();
     ofTranslate(guiWidth+10, 0);
 //	ofScale(reScale, reScale);
+	ofScale(1.2, 1.2);
 	ofBackground(red, green, blue, 255);
 	// ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 
@@ -271,19 +312,62 @@ void ofApp::draw(){
 	gestureInd = seqVmo.getGestureInd(currentBf.currentIdx);
 	gestureCat = seqVmo.getGestureCat(currentBf.currentIdx);
 	
+	irMarkerFinder.draw();
+
+//    particles.draw();
+//    markersParticles.draw();
+
+//    // TODO: contour.draw()
+//    // Draw contour shape
+//    for(int i = 0; i < contourFinder.size(); i++){
+//        ofFill();
+//        ofSetColor(255);
+//
+//        ofRect(toOf(contourFinder.getBoundingRect(i)));
+//
+//        ofPolyline convexHull = toOf(contourFinder.getConvexHull(i));
+//        convexHull = convexHull.getSmoothed(smoothingSize, 0.5);
+//
+//        ofSetColor(255);
+//        ofBeginShape();
+//        for(int i = 0; i < convexHull.getVertices().size(); i++){
+//            ofVertex(convexHull.getVertices().at(i).x, convexHull.getVertices().at(i).y);
+//        }
+//        ofEndShape();
+//
+//        ofSetColor(255, 0, 0);
+//        ofSetLineWidth(3);
+//        convexHull.draw(); //if we only want the contour
+//
+//        ofSetColor(0);
+//        ofPolyline contour = contourFinder.getPolyline(i);
+//        contour = contour.getSmoothed(5, 0.5);
+//        contour.draw();
+//    }
+
+    vector<Marker>& tempMarkers         = tracker.getFollowers();
+	 // Draw identified IR markers
+	 for (int i = 0; i < tempMarkers.size(); i++){
+	     tempMarkers[i].draw();
+	 }
+
 	ofPopMatrix();
+
+    float percent = testCounter;
+    sequence.draw(percent);
+    if(sequence.sequenceLoaded && testCounter < 0.98) testCounter += 0.001;
+    cout << percent << endl;
 }
 
 //--------------------------------------------------------------
 void ofApp::setupGUI0(){
-	gui0 = new ofxUISuperCanvas("MAIN WINDOW", 0, 0, guiWidth, ofGetHeight());
+	gui0 = new ofxUISuperCanvas("0: MAIN WINDOW", 0, 0, guiWidth, ofGetHeight());
     gui0->setTheme(OFX_UI_THEME_GRAYDAY);
 
 	gui0->addSpacer();
-	gui0->addLabel("Press panel number to switch", OFX_UI_FONT_SMALL);
-	gui0->addLabel("between menus.", OFX_UI_FONT_SMALL);
-	gui0->addSpacer();
-	gui0->addLabel("Press 'h' to hide GUI", OFX_UI_FONT_SMALL);
+	gui0->addLabel("Press panel number 0 to 7 to", OFX_UI_FONT_SMALL);
+	gui0->addLabel("switch between panels and hide", OFX_UI_FONT_SMALL);
+	gui0->addLabel("the current one.", OFX_UI_FONT_SMALL);
 	gui0->addSpacer();
 	gui0->addLabel("Press 'f' to fullscreen", OFX_UI_FONT_SMALL);
 
@@ -304,21 +388,12 @@ void ofApp::setupGUI0(){
 	gui0->addSpacer();
 
     gui0->addSpacer();
-	gui0->addLabel("5: FLUID SOLVER");
+	gui0->addLabel("6: FLUID SOLVER");
 	gui0->addSpacer();
 
 	gui0->addSpacer();
-	gui0->addLabel("6: PARTICLES");
+	gui0->addLabel("7: PARTICLES");
 	gui0->addSpacer();
-
-    gui0->addSpacer();
-    gui0->addImageButton("Save", "GUI/icons/save.png", false, dim, dim);
-    gui0->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-	gui0->addImageButton("Load", "GUI/icons/open.png", false, dim, dim);
-	gui0->addImageButton("Reset", "GUI/icons/reset.png", false, dim, dim);
-	gui0->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-
-    gui0->addSpacer();
 
 	gui0->autoSizeToFitWidgets();
 	ofAddListener(gui0->newGUIEvent, this, &ofApp::guiEvent);
@@ -340,6 +415,15 @@ void ofApp::setupGUI1(){
 	gui1->addSlider("Red", 0.0, 255.0, &red);
 	gui1->addSlider("Green", 0.0, 255.0, &green);
 	gui1->addSlider("Blue", 0.0, 255.0, &blue);
+
+    gui1->addSpacer();
+
+    gui1->addSpacer();
+    gui1->addImageButton("Save", "GUI/icons/save.png", false, dim, dim);
+    gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui1->addImageButton("Load", "GUI/icons/open.png", false, dim, dim);
+    gui1->addImageButton("Reset", "GUI/icons/reset.png", false, dim, dim);
+    gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui1->addSpacer();
 
@@ -366,7 +450,7 @@ void ofApp::setupGUI2(){
 	gui2->addLabel("DEPTH IMAGE");
 	gui2->addRangeSlider("Clipping range", 500, 5000, &nearClipping, &farClipping);
 	gui2->addRangeSlider("Threshold range", 0.0, 255.0, &farThreshold, &nearThreshold);
-	gui2->addRangeSlider("Contour Size", 0.0, (kinect.width * kinect.height)/4, &minContourSize, &maxContourSize);
+	gui2->addRangeSlider("Contour Size", 0.0, (kinect.width * kinect.height)/8, &minContourSize, &maxContourSize);
 	gui2->addImage("Depth original", &depthOriginal, kinect.width/6, kinect.height/6, true);
 	gui2->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
 	gui2->addImage("Depth filtered", &depthImage, kinect.width/6, kinect.height/6, true);
@@ -401,12 +485,12 @@ void ofApp::setupGUI3(){
 	gui3->addLabel("Press '3' to hide panel", OFX_UI_FONT_SMALL);
 
 	gui3->addSpacer();
-	recordingButton = gui3->addImageToggle("Record", "GUI/icons/record.png", false, 32, 32);
+	recordingButton = gui3->addImageToggle("Record", "GUI/icons/record.png", false, dim, dim);
 	gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-//	gui3->addImageButton("Stop", "GUI/icons/record.png", false, 32, 32);
-	gui3->addImageButton("Load", "GUI/icons/open.png", false, 32, 32);
-	gui3->addImageButton("Save", "GUI/icons/save.png", false, 32, 32);
-	gui3->addImageButton("Delete", "GUI/icons/delete.png", false, 32, 32);
+//	gui3->addImageButton("Stop", "GUI/icons/record.png", false, dim, dim);
+	gui3->addImageButton("Save", "GUI/icons/save.png", false, dim, dim);
+	gui3->addImageButton("Load", "GUI/icons/open.png", false, dim, dim);
+	gui3->addImageButton("Delete", "GUI/icons/delete.png", false, dim, dim);
 	gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui3->addSpacer();
@@ -414,7 +498,7 @@ void ofApp::setupGUI3(){
 	gui3->autoSizeToFitWidgets();
 	gui3->setVisible(false);
 	ofAddListener(gui3->newGUIEvent, this, &ofApp::guiEvent);
-	gui3->loadSettings("GUI/gui3Settings.xml");
+//	gui3->loadSettings("GUI/gui3Settings.xml");
 }
 
 //--------------------------------------------------------------
@@ -426,15 +510,17 @@ void ofApp::setupGUI4(){
 	gui4->addLabel("Press '4' to hide panel", OFX_UI_FONT_SMALL);
 
 	gui4->addSpacer();
-	gui4->addLabelButton("Start", false);
-	gui4->addLabelButton("Stop", false);
+	gui4->addImageButton("Start", "GUI/icons/play.png", false, dim, dim);
+	gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+	gui4->addImageButton("Stop", "GUI/icons/delete.png", false, dim, dim);
+    gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui4->addSpacer();
 
 	gui4->autoSizeToFitWidgets();
 	gui4->setVisible(false);
 	ofAddListener(gui4->newGUIEvent, this, &ofApp::guiEvent);
-	gui4->loadSettings("GUI/gui4Settings.xml");
+//	gui4->loadSettings("GUI/gui4Settings.xml");
 }
 
 //--------------------------------------------------------------
@@ -523,8 +609,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 	}
 
 	if(e.getName() == "Record"){
-        ofxUIToggle *toggle = (ofxUIToggle *) e.widget;
-		if (toggle->getValue() == true){
+		if (recordingButton->getValue() == true){
             sequence.startRecording();
 		}
 		else{
@@ -533,11 +618,11 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 	}
 
 	if(e.getName() == "Save"){
-        ofxUIToggle *toggle = (ofxUIToggle *) e.widget;
-		if (toggle->getValue() == true){
-//            sequence.stopRecording();
-//            recordingButton->setValue(false);
-            ofFileDialogResult result = ofSystemSaveDialog("Sequence xml file name", false);
+        ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
+		if (button->getValue() == true){
+            sequence.stopRecording();
+            recordingButton->setValue(false);
+            ofFileDialogResult result = ofSystemSaveDialog("sequence.xml", "Save sequence file");
             if (result.bSuccess){
                 sequence.save(result.getPath());
             }
@@ -546,12 +631,19 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 	}
 
 	if(e.getName() == "Load"){
-        ofxUIToggle *toggle = (ofxUIToggle *) e.widget;
-		if (toggle->getValue() == true){
+        ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
+		if (button->getValue() == true){
             ofFileDialogResult result = ofSystemLoadDialog("Select sequence xml file.", false);
             if (result.bSuccess){
                 sequence.load(result.getPath());
             }
+		}
+	}
+
+	if(e.getName() == "Start"){
+        ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
+		if (button->getValue() == true){
+            sequence.draw(20);
 		}
 	}
 
@@ -614,17 +706,6 @@ void ofApp::keyPressed(int key){
 			ofToggleFullscreen();
 			reScale = (float)ofGetWidth() / (float)kinect.width;
 			break;
-
-		case 'h':
-			gui0->toggleVisible();
-			gui1->toggleVisible();
-			gui2->toggleVisible();
-			gui3->toggleVisible();
-			gui4->toggleVisible();
-			gui5->toggleVisible();
-			gui6->toggleVisible();
-			break;
-
 		case '0':
         case '`':
 			gui0->toggleVisible();

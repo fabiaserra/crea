@@ -6,15 +6,10 @@
 
  copyright 2015 greg surges & Cheng-i Wang
 
- implements the Variable Markov Oracle for time series analysis and
- generation
-
- copyright 2015 greg surges & Cheng-i Wang
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
 
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
@@ -117,6 +112,7 @@ public:
 	static vector<vector<ofVec2f> > processPttr(vmo oracle, vmo::pttr pttrList);
 	static vmo::belief tracking_init(vmo::pttr pttrList, vmo oracle, vector<float> firstObs);
 	static vmo::belief tracking(vmo::pttr pttrList, vmo oracle, vmo::belief prevState, vector<float>obs);
+
 	// Interface with openFrameworks
 //	static vector<vector<ofPoint> > pttr2Points(vmo::pttr pttrList);
 
