@@ -95,20 +95,34 @@ void ofApp::setup(){
 	setupGUI0();
 	setupGUI1();
 	setupGUI2();
-    setupGUI3(0);
+//    setupGUI3(0);
 	setupGUI3();
 	setupGUI4();
 	setupGUI5();
 	setupGUI6(0);
 
+    int numMarkers = 2;
+	string filePath; // Dummy variable
+    sequence.setup(numMarkers);
+	sequence.load(filePath);
+	
 	//VMO Setup goes here//
 	//1. Load xml files...
-	obs = loadXML();
+	obs.assign(sequence.frames[0].size(), vector<float>(4));
+	for (int i = 0; i < sequence.frames.size(); i++) {
+		for (int j = 0; j < sequence.frames[i].size(); j++) {
+			obs[j][i*2] = sequence.frames[i][j].x;
+			obs[j][i*2+1] = sequence.frames[i][j].y;
+		}
+	}
+	
 	initStatus = true;
-	int minLen = 5; // Temporary setting
-	float start = 0.0, step = 0.01, stop = 2.0;
+//	gestureInd = -1;
+//	gestureCat = -1;
 	//2. Processing
 	//2.1 Load file into VMO
+	int minLen = 5; // Temporary setting
+	float start = 0.0, step = 0.01, stop = 2.0;
 	float t = vmo::findThreshold(obs, 4, start, step, stop); // Temporary threshold range and step
 	seqVmo = vmo::buildOracle(obs, t);
 	//2.2 Output pattern list
@@ -165,27 +179,29 @@ void ofApp::update(){
 		contourFinder.findContours(depthImage);
 
 		// Track markers
-		vector<Marker>& markers             = tracker.getFollowers();
+		vector<Marker>& tempMarkers         = tracker.getFollowers();   // TODO: assign dead labels to new labels and have a MAX number of markers
 		vector<unsigned int> deadLabels     = tracker.getDeadLabels();
 		vector<unsigned int> currentLabels  = tracker.getCurrentLabels();
 		// vector<unsigned int> newLabels      = tracker.getNewLabels();
 
 		// Update markers if we loose track of them
-		for(unsigned int i = 0; i < markers.size(); i++){
-			markers[i].update(deadLabels, currentLabels);
+		for(unsigned int i = 0; i < tempMarkers.size(); i++){
+			tempMarkers[i].update(deadLabels, currentLabels);
+		}
+
+		// print currentLabels
+		for(unsigned int i = 0; i < tempMarkers.size(); i++){
+			tempMarkers[i].update(deadLabels, currentLabels);
 		}
 
 		// Update grid particles
-		particles.update(dt, markers);
+		particles.update(dt, tempMarkers);
 
 		// Update markers particles
 		// markersParticles.update(dt, markers);
 
-		//Gesture Tracking with VMO here?
+		sequence.update(tempMarkers);
 
-        //update markers particles
-//        markersParticles.update(dt, markers);
-		
 		//Gesture Tracking with VMO here?
 		vector<float> firstObs; // Temporary code
 		if(initStatus){
@@ -196,7 +212,7 @@ void ofApp::update(){
 			prevBf = currentBf;
 			currentBf = vmo::tracking(pttrList, seqVmo, prevBf, obs);
 		}
-		
+
 	}
 }
 
@@ -209,14 +225,14 @@ void ofApp::draw(){
 	ofBackground(red, green, blue, 255);
 	// ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 
-//	ofSetColor(255);
-//	irImage.draw(0, 0);
+	ofSetColor(255);
+	irImage.draw(0, 0);
 //	depthImage.draw(0, 0);
 
-	// contourFinder.draw();
-	// irMarkerFinder.draw();
+//	contourFinder.draw();
+//	irMarkerFinder.draw();
 
-//	particles.draw();
+	particles.draw();
 //	markersParticles.draw();
 
 	// // Draw contour shape
@@ -247,11 +263,14 @@ void ofApp::draw(){
 	// 	contour.draw();
  	// }
 
-	// // Draw identified IR markers
-	// for (int i = 0; i < markers.size(); i++){
-	// 	markers[i].draw();
-	// }
-
+//    vector<Marker>& tempMarkers         = tracker.getFollowers();
+//	 // Draw identified IR markers
+//	 for (int i = 0; i < tempMarkers.size(); i++){
+//	     tempMarkers[i].draw();
+//	 }
+	gestureInd = seqVmo.getGestureInd(currentBf.currentIdx);
+	gestureCat = seqVmo.getGestureCat(currentBf.currentIdx);
+	
 	ofPopMatrix();
 }
 
@@ -382,7 +401,7 @@ void ofApp::setupGUI3(){
 	gui3->addLabel("Press '3' to hide panel", OFX_UI_FONT_SMALL);
 
 	gui3->addSpacer();
-	gui3->addImageButton("Record", "GUI/icons/record.png", false, 32, 32);
+	recordingButton = gui3->addImageToggle("Record", "GUI/icons/record.png", false, 32, 32);
 	gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
 //	gui3->addImageButton("Stop", "GUI/icons/record.png", false, 32, 32);
 	gui3->addImageButton("Load", "GUI/icons/open.png", false, 32, 32);
@@ -503,6 +522,39 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         }
 	}
 
+	if(e.getName() == "Record"){
+        ofxUIToggle *toggle = (ofxUIToggle *) e.widget;
+		if (toggle->getValue() == true){
+            sequence.startRecording();
+		}
+		else{
+            sequence.stopRecording();
+		}
+	}
+
+	if(e.getName() == "Save"){
+        ofxUIToggle *toggle = (ofxUIToggle *) e.widget;
+		if (toggle->getValue() == true){
+//            sequence.stopRecording();
+//            recordingButton->setValue(false);
+            ofFileDialogResult result = ofSystemSaveDialog("Sequence xml file name", false);
+            if (result.bSuccess){
+                sequence.save(result.getPath());
+            }
+
+		}
+	}
+
+	if(e.getName() == "Load"){
+        ofxUIToggle *toggle = (ofxUIToggle *) e.widget;
+		if (toggle->getValue() == true){
+            ofFileDialogResult result = ofSystemLoadDialog("Select sequence xml file.", false);
+            if (result.bSuccess){
+                sequence.load(result.getPath());
+            }
+		}
+	}
+
 	if(e.getName() == "Size range"){
 		contourFinder.setMinAreaRadius(minContourSize);
 		contourFinder.setMaxAreaRadius(maxContourSize);
@@ -557,6 +609,12 @@ void ofApp::exit(){
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
 	switch (key){
+
+        case 'f':
+			ofToggleFullscreen();
+			reScale = (float)ofGetWidth() / (float)kinect.width;
+			break;
+
 		case 'h':
 			gui0->toggleVisible();
 			gui1->toggleVisible();
@@ -565,11 +623,6 @@ void ofApp::keyPressed(int key){
 			gui4->toggleVisible();
 			gui5->toggleVisible();
 			gui6->toggleVisible();
-			break;
-
-		case 'f':
-			ofToggleFullscreen();
-			reScale = (float)ofGetWidth() / (float)kinect.width;
 			break;
 
 		case '0':
