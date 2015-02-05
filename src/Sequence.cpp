@@ -96,33 +96,39 @@ void Sequence::drawPattern(int patternPosition, int patternIndex, float percent,
         if(highlight) opacity = 255;
         else          opacity = 60;
 
+        // Background pattern window box
         ofSetColor(0);
         ofFill();
         ofRect(0, 0, width, height);
 
+        // Contour pattern window box
         ofSetColor(255, opacity);
         ofSetLineWidth(2);
         ofNoFill();
         ofRect(0, 0, width, height);
 
         for(int markerIndex = 0; markerIndex < patterns[patternIndex].size(); markerIndex++){
-            ofSetColor(255, opacity);
+            // Pattern lines
+            ofSetColor(120, opacity);
             ofSetLineWidth(2);
             patterns[patternIndex][markerIndex].draw();
 
             ofPoint currentPoint = patterns[patternIndex][markerIndex].getPointAtPercent(percent);
             patternsPastPoints[patternIndex][markerIndex].addVertex(currentPoint);
 
-            ofSetColor(0, 255, 0, opacity);
+            // Pattern already processed lines
+            ofSetColor(255, opacity);
             ofSetLineWidth(3);
             patternsPastPoints[patternIndex][markerIndex].draw();
 
-            ofSetColor(255, 0, 0, opacity);
+            // Pattern current processing point
+            ofSetColor(240, 0, 20, opacity);
             ofCircle(currentPoint, 10);
         }
 
-        ofSetColor(255, opacity);
-        verdana.drawString(ofToString(patternIndex), 30, 100);
+        // Pattern label number
+        ofSetColor(255, opacity+30);
+        verdana.drawString(ofToString(patternIndex+1), 30, 100);
 
     ofPopMatrix();
 }

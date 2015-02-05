@@ -23,7 +23,6 @@ class Contour
         bool drawConvexHullLine;
         bool drawContourLine;
 
-
     protected:
     private:
 };

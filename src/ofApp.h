@@ -50,8 +50,8 @@ class ofApp : public ofBaseApp{
 		//--------------------------------------------------------------
 		ofxKinect kinect;
 		//--------------------------------------------------------------
-		bool  flipKinect;
-		bool  resetKinect;
+		bool  flipKinect;       // Flip kinect image
+		bool  resetKinect;      // Reset kinect
 		float reScale;          // Ratio to scale the Image to full screen
 		//--------------------------------------------------------------
 		ofImage irImage, irOriginal;
@@ -67,8 +67,11 @@ class ofApp : public ofBaseApp{
 		ParticleSystem particles;
 		ParticleSystem markersParticles;
 		//--------------------------------------------------------------
-        Contour contour;
+        Contour contour;        // User silhouette contour
 		//--------------------------------------------------------------
+		Sequence sequence;      // Gestures sequence
+		float testCounter;
+        //--------------------------------------------------------------
 		ofxUISuperCanvas *gui0;
 		ofxUISuperCanvas *gui1;
 		ofxUISuperCanvas *gui2;
@@ -77,9 +80,9 @@ class ofApp : public ofBaseApp{
 		ofxUISuperCanvas *gui5;
 		ofxUISuperCanvas *gui6;
 		//--------------------------------------------------------------
-		ofxUIImageToggle *recordingButton;
+		ofxUIImageToggle *recordingButton;  // Button to record gestures sequence
 		//--------------------------------------------------------------
-        float dim;
+        float dim;              // Size of GUI elements
         float guiWidth;
         //--------------------------------------------------------------
 		float red, green, blue;
@@ -93,10 +96,7 @@ class ofApp : public ofBaseApp{
 		float trackerPersistence;
 		float trackerMaxDistance;
 		//--------------------------------------------------------------
-		Sequence sequence;
-		float testCounter;
-		//--------------------------------------------------------------
-		float smoothingSize;
+//		float smoothingSize;
 		//--------------------------------------------------------------
 
         //------VMO Declaration-----------------------------------------
