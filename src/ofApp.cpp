@@ -103,6 +103,8 @@ void ofApp::setup(){
     int numMarkers = 2;
     sequence.setup(numMarkers);
 
+    testCounter = 0.0;
+
 //	//VMO Setup goes here//
 //	//1. Load xml files...
 //	obs = loadXML();
@@ -178,10 +180,17 @@ void ofApp::update(){
 			tempMarkers[i].update(deadLabels, currentLabels);
 		}
 
-		// print currentLabels
-		for(unsigned int i = 0; i < tempMarkers.size(); i++){
-			tempMarkers[i].update(deadLabels, currentLabels);
-		}
+//		// Print currentLabels
+//		cout << "Current:" << endl;
+//		for(unsigned int i = 0; i < currentLabels.size(); i++){
+//            cout << currentLabels[i] << endl;
+//		}
+//
+//		// Print currentLabels
+//		cout << "markers:" << endl;
+//		for(unsigned int i = 0; i < tempMarkers.size(); i++){
+//            cout << tempMarkers[i].getLabel() << endl;
+//		}
 
 		// Update grid particles
 		particles.update(dt, tempMarkers);
@@ -189,6 +198,7 @@ void ofApp::update(){
 		// Update markers particles
 		// markersParticles.update(dt, markers);
 
+		// Update sequence
 		sequence.update(tempMarkers);
 
 //		//Gesture Tracking with VMO here?
@@ -221,7 +231,9 @@ void ofApp::draw(){
 //	contourFinder.draw();
 	irMarkerFinder.draw();
 
-    sequence.draw(50);
+    float percent = testCounter;
+    sequence.draw(percent);
+    if(sequence.sequenceLoaded && testCounter < 0.98) testCounter += 0.001;
 
 //	particles.draw();
 //	markersParticles.draw();

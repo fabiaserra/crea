@@ -22,6 +22,7 @@ class Sequence{
 		ofxXmlSettings xml;
         //--------------------------------------------------------------
 		bool recording;
+		bool sequenceLoaded;
 		size_t nMarkers;
         //--------------------------------------------------------------
         vector<ofPolyline> frames;
@@ -32,7 +33,7 @@ class Sequence{
         //--------------------------------------------------------------
 		ofPolyline line;
         vector< vector<ofPolyline> > patterns;
-        vector<ofPolyline> previousPoints;
+        vector<ofPolyline> pastPoints;
 		//--------------------------------------------------------------
 		int frame_counter;
 		float duration;

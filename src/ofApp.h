@@ -91,6 +91,7 @@ class ofApp : public ofBaseApp{
 		float trackerMaxDistance;
 		//--------------------------------------------------------------
 		Sequence sequence;
+		float testCounter;
 		//--------------------------------------------------------------
 		float smoothingSize;
 		//--------------------------------------------------------------
