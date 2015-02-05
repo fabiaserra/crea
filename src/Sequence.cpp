@@ -31,6 +31,7 @@ void Sequence::update(vector<Marker>& markers){
 }
 
 void Sequence::draw(float percent){
+
     if(sequenceLoaded){
 //        for(int markerIndex = 0; markerIndex < nMarkers; markerIndex++){
 //            if(markerIndex == 0) ofSetColor(255, 0, 0);
@@ -46,7 +47,7 @@ void Sequence::draw(float percent){
 //            ofCircle(currentPoint, 3);
 //        }
 
-
+        // if patterns identified...
         for(int patternIndex = 0; patternIndex < patterns.size(); patternIndex++){
             int patternPosition = patternIndex + 1;
             bool highlight = false;
@@ -82,6 +83,12 @@ void Sequence::drawPattern(int patternPosition, int patternIndex, float percent,
                 break;
             case 4:
                 ofTranslate(width+margin, height+margin);
+                break;
+            case 5:
+                ofTranslate(0, 2*(height+margin));
+                break;
+            case 6:
+                ofTranslate(width+margin, 2*(height+margin));
                 break;
         }
 
@@ -125,7 +132,6 @@ void Sequence::load(const string path){
 	if(!ofFile::doesFileExist(path)) return;
 
     if(!xml.load(path)) return;
-
 
     // Initialize polylines sequence
     markersPosition.clear();

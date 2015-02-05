@@ -5,8 +5,9 @@
 #include "ofxCv.h"
 #include "ofxKinect.h"
 
-#include "ParticleSystem.h"
 #include "Marker.h"
+#include "ParticleSystem.h"
+#include "Contour.h"
 
 #include "Sequence.h"
 
@@ -44,6 +45,8 @@ class ofApp : public ofBaseApp{
 
 		void guiEvent(ofxUIEventArgs &e);
 
+        //--------------------------------------------------------------
+		float time0;            // Time value for computing dt
 		//--------------------------------------------------------------
 		ofxKinect kinect;
 		//--------------------------------------------------------------
@@ -60,11 +63,11 @@ class ofApp : public ofBaseApp{
 		ofxCv::ContourFinder irMarkerFinder;
 		ofxCv::RectTrackerFollower<Marker> tracker;
 		//--------------------------------------------------------------
-		float time0;            // Time value for computing dt
-		//--------------------------------------------------------------
 		// TODO: vector<ParticleSystem> particles
 		ParticleSystem particles;
 		ParticleSystem markersParticles;
+		//--------------------------------------------------------------
+        Contour contour;
 		//--------------------------------------------------------------
 		ofxUISuperCanvas *gui0;
 		ofxUISuperCanvas *gui1;

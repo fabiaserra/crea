@@ -87,6 +87,7 @@ void ofApp::setup(){
 
 	// DEPTH CONTOUR
 	smoothingSize = 0;
+	contour.setup();
 
 	// SETUP GUIs
     dim = 32;
@@ -100,6 +101,7 @@ void ofApp::setup(){
 	setupGUI5();
 	setupGUI6(0);
 
+    // SEQUENCE
     int numMarkers = 2;
     sequence.setup(numMarkers);
 
@@ -168,6 +170,7 @@ void ofApp::update(){
 
 		// Contour Finder in the depth Image
 		contourFinder.findContours(depthImage);
+		contour.update(contourFinder);
 
 		// Track markers
 		vector<Marker>& tempMarkers         = tracker.getFollowers();   // TODO: assign dead labels to new labels and have a MAX number of markers
@@ -186,7 +189,7 @@ void ofApp::update(){
 //            cout << currentLabels[i] << endl;
 //		}
 //
-//		// Print currentLabels
+//		// Print markers
 //		cout << "markers:" << endl;
 //		for(unsigned int i = 0; i < tempMarkers.size(); i++){
 //            cout << tempMarkers[i].getLabel() << endl;
@@ -226,55 +229,28 @@ void ofApp::draw(){
 	// ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 
 	ofSetColor(255);
-	irImage.draw(0, 0);
+//	irImage.draw(0, 0);
 //	depthImage.draw(0, 0);
 
 //	contourFinder.draw();
-	irMarkerFinder.draw();
+//	irMarkerFinder.draw();
 
 //    particles.draw();
 //    markersParticles.draw();
 
-//    // TODO: contour.draw()
-//    // Draw contour shape
-//    for(int i = 0; i < contourFinder.size(); i++){
-//        ofFill();
-//        ofSetColor(255);
-//
-//        ofRect(toOf(contourFinder.getBoundingRect(i)));
-//
-//        ofPolyline convexHull = toOf(contourFinder.getConvexHull(i));
-//        convexHull = convexHull.getSmoothed(smoothingSize, 0.5);
-//
-//        ofSetColor(255);
-//        ofBeginShape();
-//        for(int i = 0; i < convexHull.getVertices().size(); i++){
-//            ofVertex(convexHull.getVertices().at(i).x, convexHull.getVertices().at(i).y);
-//        }
-//        ofEndShape();
-//
-//        ofSetColor(255, 0, 0);
-//        ofSetLineWidth(3);
-//        convexHull.draw(); //if we only want the contour
-//
-//        ofSetColor(0);
-//        ofPolyline contour = contourFinder.getPolyline(i);
-//        contour = contour.getSmoothed(5, 0.5);
-//        contour.draw();
-//    }
+    contour.draw();
 
-    vector<Marker>& tempMarkers         = tracker.getFollowers();
-	 // Draw identified IR markers
-	 for (int i = 0; i < tempMarkers.size(); i++){
-	     tempMarkers[i].draw();
-	 }
+//    vector<Marker>& tempMarkers         = tracker.getFollowers();
+//	 // Draw identified IR markers
+//	 for (int i = 0; i < tempMarkers.size(); i++){
+//	     tempMarkers[i].draw();
+//	 }
 
 	ofPopMatrix();
 
     float percent = testCounter;
     sequence.draw(percent);
     if(sequence.sequenceLoaded && testCounter < 0.98) testCounter += 0.001;
-    cout << percent << endl;
 }
 
 //--------------------------------------------------------------
