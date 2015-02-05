@@ -42,16 +42,16 @@ void Sequence::update(vector<Marker>& markers){
 
 void Sequence::draw(float percent){
     if(sequenceLoaded){
-        for(int i = 0; i < nMarkers; i++){
-            if(i == 0) ofSetColor(255, 0, 0);
-            if(i == 1) ofSetColor(0, 255, 0);
-            frames[i].draw();
+        for(int markerIndex = 0; markerIndex < nMarkers; markerIndex++){
+            if(markerIndex == 0) ofSetColor(255, 0, 0);
+            if(markerIndex == 1) ofSetColor(0, 255, 0);
+            frames[markerIndex].draw();
 
-            ofPoint currentPoint = frames[i].getPointAtPercent(percent);
-            pastPoints[i].addVertex(currentPoint);
+            ofPoint currentPoint = frames[markerIndex].getPointAtPercent(percent);
+            pastPoints[markerIndex].addVertex(currentPoint);
 
             ofSetColor(0, 255, 0);
-            pastPoints[i].draw();
+            pastPoints[markerIndex].draw();
 
             ofCircle(currentPoint, 3);
         }
@@ -65,9 +65,9 @@ void Sequence::load(const string path){
     if(!xml.load(path)) return;
 
     // Clear polylines
-    for(int i = 0; i < nMarkers; i++){
-        frames[i].clear();
-        pastPoints[i].clear();
+    for(int markerIndex = 0; markerIndex < nMarkers; markerIndex++){
+        frames[markerIndex].clear();
+        pastPoints[markerIndex].clear();
     }
 
     // Load XML sequence in memory
@@ -96,13 +96,32 @@ void Sequence::load(const string path){
         xml.popTag();
     }
 
-    // Debug vertices of the sequence
+    // Debug: print vertices of the sequence
 //    for(int i = 0; i < nMarkers; i++){
 //        vector<ofPoint> vertices = frames[i].getVertices();
 //        for(int j = 0; j < vertices.size(); j++){
 //           cout << j << ": " << vertices[j].x << " " << vertices[j].y << endl;
 //        }
 //    }
+
+    patterns.clear();
+
+    // Break sequence in n fragments
+    int nPatterns = 4;
+    for(int patternIndex = 1; patternIndex <= nPatterns; patternIndex++){
+        vector<ofPolyline> newPattern;
+        for(int markerIndex = 0; markerIndex < frames.size(); markerIndex++){
+            ofPolyline newPolyline;
+            int cutIndex = frames[markerIndex].getIndexAtPercent(patternIndex * 1/nPatterns);
+            for(int i = 0; i < cutIndex; i++){
+                newPolyline.addVertex(frames[markerIndex].getVertices().at(i));
+            }
+            newPattern.push_back(newPolyline);
+        }
+        patterns.push_back(newPattern);
+    }
+
+    cout << patterns.size() << endl;
 
     // Duration in seconds of the sequence
     duration = timestampLastFrame - timestampFirstFrame;

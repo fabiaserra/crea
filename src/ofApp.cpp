@@ -218,7 +218,7 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-	ofPushMatrix();
+    ofPushMatrix();
     ofTranslate(guiWidth+10, 0);
 //	ofScale(reScale, reScale);
 	ofBackground(red, green, blue, 255);
@@ -235,36 +235,35 @@ void ofApp::draw(){
     sequence.draw(percent);
     if(sequence.sequenceLoaded && testCounter < 0.98) testCounter += 0.001;
 
-//	particles.draw();
-//	markersParticles.draw();
+//    particles.draw();
+//    markersParticles.draw();
 
-	// // Draw contour shape
-	// for(int i = 0; i < contourFinder.size(); i++){
-	// 	ofFill();
-	// 	ofSetColor(255);
-
-	// 	ofRect(toOf(contourFinder.getBoundingRect(i)));
-
-	// 	ofPolyline convexHull = toOf(contourFinder.getConvexHull(i));
-	// 	convexHull = convexHull.getSmoothed(smoothingSize, 0.5);
-
-
-	// 	ofSetColor(255);
-	// 	ofBeginShape();
-	// 		for(int i = 0; i < convexHull.getVertices().size(); i++){
-	// 			ofVertex(convexHull.getVertices().at(i).x, convexHull.getVertices().at(i).y);
-	// 		}
-	// 	ofEndShape();
-
-	// 	ofSetColor(255, 0, 0);
-	// 	ofSetLineWidth(3);
-	// 	convexHull.draw(); //if we only want the contour
-
-	// 	ofSetColor(0);
-	// 	ofPolyline contour = contourFinder.getPolyline(i);
-	// 	contour = contour.getSmoothed(5, 0.5);
-	// 	contour.draw();
- 	// }
+//    // Draw contour shape
+//    for(int i = 0; i < contourFinder.size(); i++){
+//        ofFill();
+//        ofSetColor(255);
+//
+//        ofRect(toOf(contourFinder.getBoundingRect(i)));
+//
+//        ofPolyline convexHull = toOf(contourFinder.getConvexHull(i));
+//        convexHull = convexHull.getSmoothed(smoothingSize, 0.5);
+//
+//        ofSetColor(255);
+//        ofBeginShape();
+//        for(int i = 0; i < convexHull.getVertices().size(); i++){
+//            ofVertex(convexHull.getVertices().at(i).x, convexHull.getVertices().at(i).y);
+//        }
+//        ofEndShape();
+//
+//        ofSetColor(255, 0, 0);
+//        ofSetLineWidth(3);
+//        convexHull.draw(); //if we only want the contour
+//
+//        ofSetColor(0);
+//        ofPolyline contour = contourFinder.getPolyline(i);
+//        contour = contour.getSmoothed(5, 0.5);
+//        contour.draw();
+//    }
 
     vector<Marker>& tempMarkers         = tracker.getFollowers();
 	 // Draw identified IR markers
