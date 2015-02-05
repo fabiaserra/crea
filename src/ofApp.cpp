@@ -95,7 +95,6 @@ void ofApp::setup(){
 	setupGUI0();
 	setupGUI1();
 	setupGUI2();
-    setupGUI3(0);
 	setupGUI3();
 	setupGUI4();
 	setupGUI5();
@@ -104,19 +103,20 @@ void ofApp::setup(){
     int numMarkers = 2;
     sequence.setup(numMarkers);
 
-	//VMO Setup goes here//
-	//1. Load xml files...
-	obs = loadXML();
-	initStatus = true;
-	int minLen = 5; // Temporary setting
-	float start = 0.0, step = 0.01, stop = 2.0;
-	//2. Processing
-	//2.1 Load file into VMO
-	float t = vmo::findThreshold(obs, 4, start, step, stop); // Temporary threshold range and step
-	seqVmo = vmo::buildOracle(obs, t);
-	//2.2 Output pattern list
-	pttrList = vmo::findPttr(seqVmo, minLen);
-	patterns = vmo::processPttr(seqVmo, pttrList);
+//	//VMO Setup goes here//
+//	//1. Load xml files...
+//	obs = loadXML();
+//	initStatus = true;
+//	int minLen = 5; // Temporary setting
+//	float start = 0.0, step = 0.01, stop = 2.0;
+//
+//	//2. Processing
+//	//2.1 Load file into VMO
+//	float t = vmo::findThreshold(obs, 4, start, step, stop); // Temporary threshold range and step
+//	seqVmo = vmo::buildOracle(obs, t);
+//	//2.2 Output pattern list
+//	pttrList = vmo::findPttr(seqVmo, minLen);
+//	patterns = vmo::processPttr(seqVmo, pttrList);
 }
 
 //--------------------------------------------------------------
@@ -191,16 +191,16 @@ void ofApp::update(){
 
 		sequence.update(tempMarkers);
 
-		//Gesture Tracking with VMO here?
-		vector<float> firstObs; // Temporary code
-		if(initStatus){
-			currentBf = vmo::tracking_init(pttrList, seqVmo, firstObs);
-			initStatus = false;
-		}else{
-			vector<float> obs;
-			prevBf = currentBf;
-			currentBf = vmo::tracking(pttrList, seqVmo, prevBf, obs);
-		}
+//		//Gesture Tracking with VMO here?
+//		vector<float> firstObs; // Temporary code
+//		if(initStatus){
+//			currentBf = vmo::tracking_init(pttrList, seqVmo, firstObs);
+//			initStatus = false;
+//		}else{
+//			vector<float> obs;
+//			prevBf = currentBf;
+//			currentBf = vmo::tracking(pttrList, seqVmo, prevBf, obs);
+//		}
 
 	}
 }
@@ -221,7 +221,7 @@ void ofApp::draw(){
 //	contourFinder.draw();
 //	irMarkerFinder.draw();
 
-	particles.draw();
+//	particles.draw();
 //	markersParticles.draw();
 
 	// // Draw contour shape
@@ -510,8 +510,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 	}
 
 	if(e.getName() == "Record"){
-        ofxUIToggle *toggle = (ofxUIToggle *) e.widget;
-		if (toggle->getValue() == true){
+		if (recordingButton->getValue() == true){
             sequence.startRecording();
 		}
 		else{
@@ -520,21 +519,21 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 	}
 
 	if(e.getName() == "Save"){
-        ofxUIToggle *toggle = (ofxUIToggle *) e.widget;
-		if (toggle->getValue() == true){
+        ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
+		if (button->getValue() == true){
 //            sequence.stopRecording();
-//            recordingButton->setValue(false);
-            ofFileDialogResult result = ofSystemSaveDialog("Sequence xml file name", false);
+            recordingButton->setValue(false);
+            ofFileDialogResult result = ofSystemSaveDialog("sequence.xml", "Save sequence file");
             if (result.bSuccess){
-                sequence.save(result.getPath());
+                sequence.save(result.filePath());
             }
 
 		}
 	}
 
 	if(e.getName() == "Load"){
-        ofxUIToggle *toggle = (ofxUIToggle *) e.widget;
-		if (toggle->getValue() == true){
+        ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
+		if (button->getValue() == true){
             ofFileDialogResult result = ofSystemLoadDialog("Select sequence xml file.", false);
             if (result.bSuccess){
                 sequence.load(result.getPath());

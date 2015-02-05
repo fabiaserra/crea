@@ -11,6 +11,7 @@ void Sequence::setup(int nMarkers){
 
 void Sequence::update(vector<Marker>& markers){
     if(recording){
+            cout << "recording" << endl;
         int frameNum = xml.addTag("frame");
         xml.pushTag("frame", frameNum);
         xml.setValue("timestamp", ofGetElapsedTimef(), frameNum);
@@ -53,7 +54,7 @@ void Sequence::load(const string path){
 
 	if(!ofFile::doesFileExist(path)) return;
 
-    xml.load(path);
+    if(!xml.load(path)) return;
 
     const size_t numFrames = xml.getNumTags("frame");
     float timestampFirstFrame;
