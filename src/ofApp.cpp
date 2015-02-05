@@ -192,11 +192,6 @@ void ofApp::update(){
 		sequence.update(tempMarkers);
 
 		//Gesture Tracking with VMO here?
-
-        //update markers particles
-//        markersParticles.update(dt, markers);
-		
-		//Gesture Tracking with VMO here?
 		vector<float> firstObs; // Temporary code
 		if(initStatus){
 			currentBf = vmo::tracking_init(pttrList, seqVmo, firstObs);
@@ -206,7 +201,7 @@ void ofApp::update(){
 			prevBf = currentBf;
 			currentBf = vmo::tracking(pttrList, seqVmo, prevBf, obs);
 		}
-		
+
 	}
 }
 
