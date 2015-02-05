@@ -30,6 +30,7 @@ void Sequence::update(vector<Marker>& markers){
     }
 }
 
+//void Sequence::draw(float percent, vector<int> highlightedIndexes){
 void Sequence::draw(float percent){
 
     if(sequenceLoaded){
@@ -156,7 +157,7 @@ void Sequence::load(const string path){
     // Load XML sequence in memory
 
     // Number of frames of the sequence
-    const size_t numFrames = xml.getNumTags("frame");
+    numFrames = xml.getNumTags("frame");
     float timestampFirstFrame;
     float timestampLastFrame;
 

@@ -38,6 +38,7 @@ class Sequence{
 		//--------------------------------------------------------------
 		int frame_counter;
 		float duration;
+		size_t numFrames;
 		//--------------------------------------------------------------
 		ofTrueTypeFont	verdana;
 };

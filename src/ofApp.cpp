@@ -297,6 +297,7 @@ void ofApp::setupGUI0(){
 void ofApp::setupGUI1(){
 	gui1 = new ofxUISuperCanvas("1: BASICS", 0, 0, guiWidth, ofGetHeight());
 	gui1->setTheme(OFX_UI_THEME_GRAYDAY);
+    gui1->setTriggerWidgetsUponLoad(true);
 
 	gui1->addSpacer();
 	gui1->addLabel("Press '1' to hide panel", OFX_UI_FONT_SMALL);
@@ -550,9 +551,10 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 		}
 	}
 
-	if(e.getName() == "Start sequence"){
+	if(e.getName() == "Start vmo"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
 		if (button->getValue() == true){
+
 //            sequence.draw(0);
 		}
 	}
