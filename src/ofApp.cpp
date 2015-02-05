@@ -221,23 +221,21 @@ void ofApp::draw(){
     ofPushMatrix();
     ofTranslate(guiWidth+10, 0);
 //	ofScale(reScale, reScale);
+	ofScale(1.2, 1.2);
 	ofBackground(red, green, blue, 255);
 	// ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 
 	ofSetColor(255);
-//	irImage.draw(0, 0);
+	irImage.draw(0, 0);
 //	depthImage.draw(0, 0);
 
 //	contourFinder.draw();
 	irMarkerFinder.draw();
 
-    float percent = testCounter;
-    sequence.draw(percent);
-    if(sequence.sequenceLoaded && testCounter < 0.98) testCounter += 0.001;
-
 //    particles.draw();
 //    markersParticles.draw();
 
+//    // TODO: contour.draw()
 //    // Draw contour shape
 //    for(int i = 0; i < contourFinder.size(); i++){
 //        ofFill();
@@ -272,18 +270,22 @@ void ofApp::draw(){
 	 }
 
 	ofPopMatrix();
+
+    float percent = testCounter;
+    sequence.draw(percent);
+    if(sequence.sequenceLoaded && testCounter < 0.98) testCounter += 0.001;
+    cout << percent << endl;
 }
 
 //--------------------------------------------------------------
 void ofApp::setupGUI0(){
-	gui0 = new ofxUISuperCanvas("MAIN WINDOW", 0, 0, guiWidth, ofGetHeight());
+	gui0 = new ofxUISuperCanvas("0: MAIN WINDOW", 0, 0, guiWidth, ofGetHeight());
     gui0->setTheme(OFX_UI_THEME_GRAYDAY);
 
 	gui0->addSpacer();
-	gui0->addLabel("Press panel number to switch", OFX_UI_FONT_SMALL);
-	gui0->addLabel("between menus.", OFX_UI_FONT_SMALL);
-	gui0->addSpacer();
-	gui0->addLabel("Press 'h' to hide GUI", OFX_UI_FONT_SMALL);
+	gui0->addLabel("Press panel number 0 to 7 to", OFX_UI_FONT_SMALL);
+	gui0->addLabel("switch between panels and hide", OFX_UI_FONT_SMALL);
+	gui0->addLabel("the current one.", OFX_UI_FONT_SMALL);
 	gui0->addSpacer();
 	gui0->addLabel("Press 'f' to fullscreen", OFX_UI_FONT_SMALL);
 
@@ -304,21 +306,12 @@ void ofApp::setupGUI0(){
 	gui0->addSpacer();
 
     gui0->addSpacer();
-	gui0->addLabel("5: FLUID SOLVER");
+	gui0->addLabel("6: FLUID SOLVER");
 	gui0->addSpacer();
 
 	gui0->addSpacer();
-	gui0->addLabel("6: PARTICLES");
+	gui0->addLabel("7: PARTICLES");
 	gui0->addSpacer();
-
-    gui0->addSpacer();
-    gui0->addImageButton("Save", "GUI/icons/save.png", false, dim, dim);
-    gui0->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-	gui0->addImageButton("Load", "GUI/icons/open.png", false, dim, dim);
-	gui0->addImageButton("Reset", "GUI/icons/reset.png", false, dim, dim);
-	gui0->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-
-    gui0->addSpacer();
 
 	gui0->autoSizeToFitWidgets();
 	ofAddListener(gui0->newGUIEvent, this, &ofApp::guiEvent);
@@ -340,6 +333,15 @@ void ofApp::setupGUI1(){
 	gui1->addSlider("Red", 0.0, 255.0, &red);
 	gui1->addSlider("Green", 0.0, 255.0, &green);
 	gui1->addSlider("Blue", 0.0, 255.0, &blue);
+
+    gui1->addSpacer();
+
+    gui1->addSpacer();
+    gui1->addImageButton("Save", "GUI/icons/save.png", false, dim, dim);
+    gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui1->addImageButton("Load", "GUI/icons/open.png", false, dim, dim);
+    gui1->addImageButton("Reset", "GUI/icons/reset.png", false, dim, dim);
+    gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui1->addSpacer();
 
@@ -366,7 +368,7 @@ void ofApp::setupGUI2(){
 	gui2->addLabel("DEPTH IMAGE");
 	gui2->addRangeSlider("Clipping range", 500, 5000, &nearClipping, &farClipping);
 	gui2->addRangeSlider("Threshold range", 0.0, 255.0, &farThreshold, &nearThreshold);
-	gui2->addRangeSlider("Contour Size", 0.0, (kinect.width * kinect.height)/4, &minContourSize, &maxContourSize);
+	gui2->addRangeSlider("Contour Size", 0.0, (kinect.width * kinect.height)/8, &minContourSize, &maxContourSize);
 	gui2->addImage("Depth original", &depthOriginal, kinect.width/6, kinect.height/6, true);
 	gui2->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
 	gui2->addImage("Depth filtered", &depthImage, kinect.width/6, kinect.height/6, true);
@@ -621,16 +623,6 @@ void ofApp::keyPressed(int key){
         case 'f':
 			ofToggleFullscreen();
 			reScale = (float)ofGetWidth() / (float)kinect.width;
-			break;
-
-		case 'h':
-			gui0->toggleVisible();
-			gui1->toggleVisible();
-			gui2->toggleVisible();
-			gui3->toggleVisible();
-			gui4->toggleVisible();
-			gui5->toggleVisible();
-			gui6->toggleVisible();
 			break;
 
 		case '0':

@@ -12,7 +12,7 @@ class Sequence{
 		void load(const string path);
 		void save(const string path);
         void draw(float percent);
-        void drawPatterns(float percent);
+        void drawPattern(int patternPosition, int patternIndex, float percent, bool highlight);
 
         void startRecording();
 		void stopRecording();
@@ -38,4 +38,6 @@ class Sequence{
 		//--------------------------------------------------------------
 		int frame_counter;
 		float duration;
+		//--------------------------------------------------------------
+		ofTrueTypeFont	verdana;
 };
