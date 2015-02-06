@@ -5,8 +5,8 @@
 #include "ofxCv.h"
 #include "ofxKinect.h"
 
-#include "Marker.h"
 #include "ParticleSystem.h"
+#include "irMarker.h"
 #include "Contour.h"
 
 #include "Sequence.h"
@@ -99,15 +99,18 @@ class ofApp : public ofBaseApp{
 //		float smoothingSize;
 		//--------------------------------------------------------------
 
-        //------VMO Declaration-----------------------------------------
-//		vmo seqVmo;
-//		vmo::pttr pttrList;
-//		vmo::belief currentBf;
-//		vmo::belief prevBf;
-//
-//		vector<vector<float> > obs;
-//		vector<vector<ofVec2f> > patterns;
-//		vector<vector<float> > loadXML(); // dummy function
-//		bool initStatus;
+		//------VMO Declaration-----------------------------------------
+		vmo seqVmo;
+		vmo::pttr pttrList;
+		vmo::belief currentBf;
+		vmo::belief prevBf;
 
+//		vector<ofPoint>& loadedFrames;
+		vector<vector<float> > obs;
+//		vector<vector<ofPolyline> > patterns;
+		vector<vector<float> > loadXML(); // dummy function
+		bool initStatus;
+        bool stopTracking;
+		int *gestureInd;
+		int *gestureCat;
 };

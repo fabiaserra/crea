@@ -67,7 +67,7 @@ void ParticleSystem::setup(float bornRate, float velocity, float velocityRnd, fl
 	this->bounce            = bounce;
 }
 
-void ParticleSystem::update(float dt, vector<Marker>& markers){
+void ParticleSystem::update(float dt, vector<irMarker>& markers){
 
 	if(particleMode == GRID_PARTICLES){
 		// Update the particles

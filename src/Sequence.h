@@ -1,14 +1,14 @@
 #pragma once
 #include "ofMain.h"
 #include "ofxXmlSettings.h"
-#include "Marker.h"
+#include "irMarker.h"
 
 class Sequence{
 	public:
 		Sequence();
 
 		void setup(int nMarkers);
-		void update(vector<Marker>& markers);
+		void update(vector<irMarker>& markers);
 		void load(const string path);
 		void save(const string path);
         void draw(float percent);

@@ -9,11 +9,11 @@ Sequence::Sequence(){
 void Sequence::setup(int nMarkers){
     this->nMarkers = nMarkers;
 
-    verdana.loadFont("Fonts/verdana.ttf", 80, true, true);
+    verdana.loadFont("fonts/verdana.ttf", 80, true, true);
 
 }
 
-void Sequence::update(vector<Marker>& markers){
+void Sequence::update(vector<irMarker>& markers){
     if(recording){
         int frameNum = xml.addTag("frame");
         xml.pushTag("frame", frameNum);
@@ -184,7 +184,7 @@ void Sequence::load(const string path){
     for(int i = 0; i < nMarkers; i++){
         vector<ofPoint> vertices = markersPosition[i].getVertices();
         for(int j = 0; j < vertices.size(); j++){
-           cout << j << ": " << vertices[j].x << " " << vertices[j].y << endl;
+//           cout << j << ": " << vertices[j].x << " " << vertices[j].y << endl;
         }
     }
 

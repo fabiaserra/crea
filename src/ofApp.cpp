@@ -87,7 +87,7 @@ void ofApp::setup(){
 
 	// DEPTH CONTOUR
 //	smoothingSize = 0;
-	contour.setup();
+//	contour.setup();
 
 	// SETUP GUIs
     dim = 32;
@@ -104,23 +104,36 @@ void ofApp::setup(){
     // SEQUENCE
     int numMarkers = 2;
     sequence.setup(numMarkers);
+	sequence.load("sequences/sequence.xml");
 
     testCounter = 0.0;
 
-//	//VMO Setup goes here//
-//	//1. Load xml files...
-//	obs = loadXML();
-//	initStatus = true;
-//	int minLen = 5; // Temporary setting
-//	float start = 0.0, step = 0.01, stop = 2.0;
-//
-//	//2. Processing
-//	//2.1 Load file into VMO
-//	float t = vmo::findThreshold(obs, 4, start, step, stop); // Temporary threshold range and step
-//	seqVmo = vmo::buildOracle(obs, t);
-//	//2.2 Output pattern list
+	//VMO Setup goes here//
+	//1. Load xml files...
+	obs.assign(sequence.numFrames, vector<float>(4));
+	for (int i = 0; i < sequence.markersPosition.size(); i++) {
+		for (int j = 0; j < sequence.markersPosition[i].size(); j++) {
+			obs[j][i*2] = sequence.markersPosition[i][j].x;
+			obs[j][i*2+1] = sequence.markersPosition[i][j].y;
+		}
+	}
+
+	initStatus = true;
+    stopTracking = true;
+//	gestureInd = -1;
+//	gestureCat = -1;
+	//2. Processing
+	//2.1 Load file into VMO
+	int minLen = 5; // Temporary setting
+	float start = 0.0, step = 0.01, stop = 2.0;
+	float t = vmo::findThreshold(obs, 4, start, step, stop); // Temporary threshold range and step
+	seqVmo = vmo::buildOracle(obs, numMarkers*2 ,t);
+//	2.2 Output pattern list
 //	pttrList = vmo::findPttr(seqVmo, minLen);
 //	patterns = vmo::processPttr(seqVmo, pttrList);
+
+//    sequence.patterns = vmo::processPttr(seqVmo, pttrList);
+
 }
 
 //--------------------------------------------------------------
@@ -170,10 +183,9 @@ void ofApp::update(){
 
 		// Contour Finder in the depth Image
 		contourFinder.findContours(depthImage);
-		contour.update(contourFinder);
 
 		// Track markers
-		vector<Marker>& tempMarkers         = tracker.getFollowers();   // TODO: assign dead labels to new labels and have a MAX number of markers
+		vector<irMarker>& tempMarkers         = tracker.getFollowers();   // TODO: assign dead labels to new labels and have a MAX number of markers
 		vector<unsigned int> deadLabels     = tracker.getDeadLabels();
 		vector<unsigned int> currentLabels  = tracker.getCurrentLabels();
 		// vector<unsigned int> newLabels      = tracker.getNewLabels();
@@ -199,21 +211,30 @@ void ofApp::update(){
 //		particles.update(dt, tempMarkers);
 
 		// Update markers particles
-		 markersParticles.update(dt, tempMarkers);
+        markersParticles.update(dt, tempMarkers);
 
-		// Update sequence
+		// Update sequence when recording
 		sequence.update(tempMarkers);
 
-//		//Gesture Tracking with VMO here?
-//		vector<float> firstObs; // Temporary code
-//		if(initStatus){
-//			currentBf = vmo::tracking_init(pttrList, seqVmo, firstObs);
-//			initStatus = false;
-//		}else{
-//			vector<float> obs;
-//			prevBf = currentBf;
-//			currentBf = vmo::tracking(pttrList, seqVmo, prevBf, obs);
-//		}
+		//Gesture Tracking with VMO here?
+
+//        if (tempMarkers.size()>1){
+//            if (!stopTracking){
+//                vector<float> obs; // Temporary code
+//                for(unsigned int i = 0; i < 2; i++){
+//                    obs.push_back(tempMarkers[i].smoothPos.x);
+//                    obs.push_back(tempMarkers[i].smoothPos.y);
+//                }
+//                if(initStatus){
+//                    currentBf = vmo::tracking_init(pttrList, seqVmo, obs);
+//                    initStatus = false;
+//                }else{
+//                    vector<float> obs;
+//                    prevBf = currentBf;
+//                    currentBf = vmo::tracking(pttrList, seqVmo, prevBf, obs);
+//                }
+//            }
+//        }
 
 	}
 }
@@ -247,6 +268,13 @@ void ofApp::draw(){
     }
 
 	ofPopMatrix();
+
+//    gestureInd = seqVmo.getGestureInd(currentBf.currentIdx);
+//    gestureCat = seqVmo.getGestureCat(currentBf.currentIdx);
+
+//    float idx = float(gestureInd[0]);
+//    float len = float(pttrList.sfxLen[gestureCat[0]-1]);
+//    float percent = ofMap(idx, 1.0, len, 0.0, 1.0);
 
     float percent = testCounter;
     sequence.draw(percent);
@@ -282,11 +310,11 @@ void ofApp::setupGUI0(){
 	gui0->addSpacer();
 
     gui0->addSpacer();
-	gui0->addLabel("6: FLUID SOLVER");
+	gui0->addLabel("5: FLUID SOLVER");
 	gui0->addSpacer();
 
 	gui0->addSpacer();
-	gui0->addLabel("7: PARTICLES");
+	gui0->addLabel("6: PARTICLES");
 	gui0->addSpacer();
 
 	gui0->autoSizeToFitWidgets();
@@ -398,11 +426,12 @@ void ofApp::setupGUI3(){
 	gui3->addLabel("Press '3' to hide panel", OFX_UI_FONT_SMALL);
 
 	gui3->addSpacer();
-	recordingButton = gui3->addImageToggle("Record sequence", "gui/icons/record.png", false, dim, dim);
+	recordingButton = gui3->addImageToggle("Record", "gui/icons/record.png", false, dim, dim);
 	gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-	gui3->addImageButton("Save sequence", "gui/icons/save.png", false, dim, dim);
-	gui3->addImageButton("Load sequence", "gui/icons/open.png", false, dim, dim);
-	gui3->addImageButton("Delete sequence", "gui/icons/delete.png", false, dim, dim);
+//	gui3->addImageButton("Stop", "gui/icons/record.png", false, dim, dim);
+	gui3->addImageButton("Save", "gui/icons/save.png", false, dim, dim);
+	gui3->addImageButton("Load", "gui/icons/open.png", false, dim, dim);
+	gui3->addImageButton("Delete", "gui/icons/delete.png", false, dim, dim);
 	gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui3->addSpacer();
@@ -422,9 +451,9 @@ void ofApp::setupGUI4(){
 	gui4->addLabel("Press '4' to hide panel", OFX_UI_FONT_SMALL);
 
 	gui4->addSpacer();
-	gui4->addImageButton("Start", "gui/icons/play.png", false, dim, dim);
+	gui4->addImageButton("Start vmo", "gui/icons/play.png", false, dim, dim);
 	gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-	gui4->addImageButton("Stop", "gui/icons/delete.png", false, dim, dim);
+	gui4->addImageButton("Stop vmo", "gui/icons/delete.png", false, dim, dim);
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui4->addSpacer();
@@ -520,7 +549,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         }
 	}
 
-	if(e.getName() == "Record sequence"){
+	if(e.getName() == "Record"){
 		if (recordingButton->getValue() == true){
             sequence.startRecording();
 		}
@@ -529,7 +558,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 		}
 	}
 
-	if(e.getName() == "Save sequence"){
+	if(e.getName() == "Save"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
 		if (button->getValue() == true){
             sequence.stopRecording();
@@ -538,14 +567,16 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             if (result.bSuccess){
                 sequence.save(result.getPath());
             }
+
 		}
 	}
 
-	if(e.getName() == "Load sequence"){
+	if(e.getName() == "Load"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
 		if (button->getValue() == true){
             ofFileDialogResult result = ofSystemLoadDialog("Select sequence xml file.", false);
             if (result.bSuccess){
+                    cout << result.getPath() << endl;
                 sequence.load(result.getPath());
             }
 		}
@@ -554,12 +585,19 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 	if(e.getName() == "Start vmo"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
 		if (button->getValue() == true){
-
-//            sequence.draw(0);
+            initStatus = true;
+            stopTracking = false;
 		}
 	}
 
-	if(e.getName() == "Size range"){
+    if(e.getName() == "Stop vmo"){
+        ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
+        if (button->getValue() == true){
+            stopTracking = true;
+        }
+    }
+
+    if(e.getName() == "Size range"){
 		contourFinder.setMinAreaRadius(minContourSize);
 		contourFinder.setMaxAreaRadius(maxContourSize);
 	}

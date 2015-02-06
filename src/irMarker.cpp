@@ -1,23 +1,23 @@
-#include "Marker.h"
+#include "irMarker.h"
 
 using namespace ofxCv;
 using namespace cv;
 
-Marker::Marker(){
+irMarker::irMarker(){
     startedDying    = 0;
     dyingTime       = 5;
     bornRate        = 3;
     hasDisappeared  = false;
 }
 
-void Marker::setup(const cv::Rect& track){
+void irMarker::setup(const cv::Rect& track){
     color.setHsb(ofRandom(0, 255), 255, 255);
     currentPos = toOf(track).getCenter();
     smoothPos = currentPos;
     previousPos = currentPos;
 }
 
-void Marker::update(const cv::Rect& track){
+void irMarker::update(const cv::Rect& track){
 	currentPos = toOf(track).getCenter();
 	smoothPos.interpolate(currentPos, .5);
 	all.addVertex(smoothPos);
@@ -25,7 +25,7 @@ void Marker::update(const cv::Rect& track){
 	previousPos = smoothPos;
 }
 
-void Marker::update(vector<unsigned int> deadLabels, vector<unsigned int> currentLabels){
+void irMarker::updateLabels(vector<unsigned int> deadLabels, vector<unsigned int> currentLabels){
     // Labels that have disappeared but can appear again
     for(unsigned int i = 0; i < deadLabels.size(); i++){
         if(deadLabels[i] == label){
@@ -41,7 +41,7 @@ void Marker::update(vector<unsigned int> deadLabels, vector<unsigned int> curren
     }
 }
 
-void Marker::draw(){
+void irMarker::draw(){
 	ofPushStyle();
 	float size = 16;
 	ofSetColor(255);
@@ -58,7 +58,7 @@ void Marker::draw(){
 	ofPopStyle();
 }
 
-void Marker::kill(){
+void irMarker::kill(){
 	float currentTime = ofGetElapsedTimef();
 	if(startedDying == 0){
 		startedDying = currentTime;
