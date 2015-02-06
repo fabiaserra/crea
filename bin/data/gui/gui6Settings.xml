@@ -2,48 +2,48 @@
     <Kind>40</Kind>
     <Name>OFX_UI_WIDGET_CANVAS</Name>
     <IsMinified>0</IsMinified>
-    <XPosition>795.000000000</XPosition>
-    <YPosition>6.000000000</YPosition>
+    <XPosition>0.000000000</XPosition>
+    <YPosition>0.000000000</YPosition>
 </Canvas>
 <Widget>
     <Kind>4</Kind>
     <Name>Particles/sec</Name>
-    <Value>3.448276043</Value>
+    <Value>5.000000000</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Velocity</Name>
-    <Value>46.305419922</Value>
+    <Value>50.000000000</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Velocity Random[%]</Name>
-    <Value>57.635467529</Value>
+    <Value>20.000000000</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Velocity from Motion[%]</Name>
-    <Value>60.098522186</Value>
+    <Value>50.000000000</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Emitter size</Name>
-    <Value>0.000000000</Value>
+    <Value>8.000000000</Value>
 </Widget>
 <Widget>
-    <Kind>2</Kind>
+    <Kind>17</Kind>
     <Name>Immortal</Name>
     <Value>0</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Lifetime</Name>
-    <Value>4.926108360</Value>
+    <Value>3.000000000</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Life Random[%]</Name>
-    <Value>38.423645020</Value>
+    <Value>60.000003815</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
@@ -56,34 +56,34 @@
     <Value>20.000000000</Value>
 </Widget>
 <Widget>
-    <Kind>2</Kind>
+    <Kind>17</Kind>
     <Name>Size</Name>
-    <Value>0</Value>
+    <Value>1</Value>
 </Widget>
 <Widget>
-    <Kind>2</Kind>
+    <Kind>17</Kind>
     <Name>Opacity</Name>
-    <Value>0</Value>
+    <Value>1</Value>
 </Widget>
 <Widget>
-    <Kind>2</Kind>
+    <Kind>17</Kind>
     <Name>Flickers</Name>
     <Value>0</Value>
 </Widget>
 <Widget>
-    <Kind>2</Kind>
+    <Kind>17</Kind>
     <Name>Color</Name>
-    <Value>0</Value>
+    <Value>1</Value>
 </Widget>
 <Widget>
-    <Kind>2</Kind>
+    <Kind>17</Kind>
     <Name>Bounce</Name>
-    <Value>0</Value>
+    <Value>1</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Friction</Name>
-    <Value>3.940886736</Value>
+    <Value>1.000000000</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>

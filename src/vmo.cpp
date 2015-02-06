@@ -30,6 +30,7 @@
 #include "vmo.h"
 
 vmo::pttr::pttr(){
+    size = 0;
 	sfxPts.clear();
 	sfxPts.reserve(INIT_VMO_SIZE);
 	sfxLen.clear();
@@ -48,7 +49,7 @@ vmo::vmo(){
 
 void vmo::setup(int dim = 1, float threshold = 0.0){
 
-	nStates = 0;
+	nStates = 1;
 	this->dim = dim;
 	this->thresh = threshold;
 
@@ -68,7 +69,7 @@ void vmo::setup(int dim = 1, float threshold = 0.0){
 	data.push_back(-1); //MARK: Might be problematic to initialize 0th state`s symbol as -1.
 
 	// Foward link vector
-	vector1D zeroStateTrn;
+	vector1D zeroStateTrn(0);
 	trn.clear();
 	trn.reserve(INIT_VMO_SIZE);
 	trn.push_back(zeroStateTrn);
@@ -140,7 +141,7 @@ int vmo::lenCommonSfx(int p1, int p2){
 	return min(lrs[p2], lrs[p1]);
 }
 
-float vmo::getDistance(vector<float> x, vector<float> y){
+float vmo::getDistance(vector<float> &x, vector<float> &y){
 	float d = 0.0;
 	for (int i = 0; i < x.size(); i++) {
 		d += (x[i]-y[i]) * (x[i]-y[i]);
@@ -149,31 +150,34 @@ float vmo::getDistance(vector<float> x, vector<float> y){
 	return d;
 }
 
-vector<float> vmo::getDistArray(vector<float> x, vector<vector<float> > y){
-	vector<float> dvec(x.size(), 0.0);
+vector<float> vmo::getDistArray(vector<float> &x, vector< vector<float> > &y){
+	vector<float> dvec(y.size(), 0.0);
 	for (int i = 0; i < y.size(); i++) {
-		dvec[i] = getDistance(x, y[i]);
+		dvec[i] = vmo::getDistance(x, y[i]);
 	}
 	return dvec;
 }
 
-vector<vector<float> > vmo::trnIndexing(int n){
-	vector<vector<float> > temp(trn[n].size(), vector<float>(dim, 0.0));
-	for (int i = 0; i < trn[n].size(); i++) {
-		temp[i] = obs[trn[n][i]];
-	}
-	return temp;
-}
+//vector<vector<float> >& vmo::trnIndexing(int n){
+//	vector<vector<float> > temp(trn[n].size(), vector<float>(dim, 0.0));
+//	for (int i = 0; i < trn[n].size(); i++) {
+//		temp[i] = obs[trn[n][i]];
+//	}
+//	return temp;
+//}
 
 vector2D vmo::encode(){
 	vector2D code;
+	code.clear();
+	code.reserve(nStates);
 	int j = 0;
 	int i = j;
 	while (j < nStates - 1) {
 		while (i < nStates - 1 && lrs[i+1]>=(i-j+1)) {
 			i++;
 		}
-		vector1D cw;
+		vector1D cw(2);
+		cw.clear();
 		if (i == j) {
 			i++;
 			cw.push_back(0);
@@ -182,12 +186,13 @@ vector2D vmo::encode(){
 			cw.push_back(i-j);
 			cw.push_back(sfx[i]-i+j+1);
 		}
+		j = i;
 		code.push_back(cw);
 	}
 	return code;
 }
 
-void vmo::addState(vector<float> newData){
+void vmo::addState(vector<float>& newData){
 	// Add a new state to VMO
 
 	// Update attributes
@@ -205,17 +210,19 @@ void vmo::addState(vector<float> newData){
 	trn[ind-1].push_back(ind);
 
 	int k = sfx[ind-1];
-	int piOne = ind - 1;
+	int piOne = ind-1;
 
 	int sfxCandidate = 0;
-	vector1D trnList;
-	vector<float> trnVec;
 
 	while (k >= 0) {
-		trnList.clear();
-		trnVec.clear();
-
-		vector<float> dvec = getDistArray(newData, trnIndexing(k));
+		vector1D trnList(0);
+		vector<float> trnVec(0);
+//        vector<vector<float> >& tmp = vmo::trnIndexing(k);
+		vector<vector<float> > tmp(trn[k].size(), vector<float>(dim, 0.0));
+		for (int i = 0; i < trn[k].size(); i++) {
+			tmp[i] = obs[trn[k][i]];
+		}
+        vector<float> dvec = vmo::getDistArray(newData, tmp);
 		for (int i = 0; i < dvec.size(); i++) {
 			if (dvec[i] < thresh) {
 				trnList.push_back(i);
@@ -231,6 +238,8 @@ void vmo::addState(vector<float> newData){
 			sfxCandidate = trn[k][trnList[argmin]];
 			break;
 		}
+//		tmp.clear();
+//		dvec.clear();
 	}
 
 	if (k == -1) {
@@ -248,7 +257,7 @@ void vmo::addState(vector<float> newData){
 	rsfx[sfx[ind]].push_back(ind);
 }
 
-void vmo::getK(){
+int vmo::getK(){
 	int K = latent.size();
 	return K;
 }
@@ -300,20 +309,11 @@ float vmo::getIR(){
 	return irSum;
 }
 
-float vmo::getTotalIR(){
-	vector<float> irVec = getIR();
-	float irSum = 0.0;
-	for (vector<float>::iterator j = irVec.begin(); j != irVec.end(); ++j) {
-		irSum += *j;
-	}
-	return irSum;
-}
-
 void vmo::print(string attr){
 
 }
 
-float vmo::findThreshold(vector<vector<float> > obs, int dim = 1,float start, float step, float end){
+float vmo::findThreshold(vector<vector<float> > &obs, int dim = 1,float start = 0.0, float step = 0.01, float end = 2.0){
 	float t = start;
 	float ir = 0.0;
 	while (start <= end) {
@@ -328,7 +328,7 @@ float vmo::findThreshold(vector<vector<float> > obs, int dim = 1,float start, fl
 	return t;
 }
 
-vmo vmo::buildOracle(vector<vector<float> > obs, int dim = 1, float threshold = 0.0){
+vmo vmo::buildOracle(vector<vector<float> > &obs, int dim = 1, float threshold = 0.0){
 	vmo oracle = vmo();
 	oracle.setup(dim, threshold);
 
@@ -342,7 +342,7 @@ vmo::pttr vmo::findPttr(vmo oracle, int minLen = 0){
 	vmo::pttr pttrList = vmo::pttr();
 	int preSfx = -1;
 
-	for (int i = nStates-1; i > minLen; i--) {
+	for (int i = oracle.nStates-1; i > minLen; i--) {
 		int s = oracle.sfx[i];
 		vector1D r = oracle.rsfx[i];
 		bool pttrFound = false;
@@ -376,7 +376,7 @@ vmo::pttr vmo::findPttr(vmo oracle, int minLen = 0){
 					r.push_back(s);
 					vector1D lrsVec;
 					for (int k = r.size()-1; k > -1; k--) {
-						lrsVec.push_back(lrs[r[k]]);
+						lrsVec.push_back(oracle.lrs[r[k]]);
 					}
 					int len = *min_element(lrsVec.begin(), lrsVec.end());
 					if (len > minLen) {
@@ -401,36 +401,40 @@ vmo::pttr vmo::findPttr(vmo oracle, int minLen = 0){
 	return pttrList;
 }
 
-vector<vector<ofVec2f> > processPttr(vmo oracle, vmo::pttr pttrList){
+vector< vector<ofPolyline> > vmo::processPttr(vmo oracle, vmo::pttr pttrList){
 
-	vector<vector<ofVec2f> > pattern;
+	vector< vector<ofPolyline> > pattern;
 	vector1D pts;
 	int len;
 	for (int i = 0; i < pttrList.size; i++) {
 		pts = pttrList.sfxPts[i];
 		len = pttrList.sfxLen[i];
 		int cat = i+1;
-		vector<ofVec2f> ges1(0);
-		vector<ofVec2f> ges2(0);
-		pattern.push_back(ges1);
-		pattern.push_back(gee2);
+		ofPolyline ges1;
+		ofPolyline ges2;
+        vector<ofPolyline> ges;
+        ges1.resize(len);
+        ges2.resize(len);
+        ges.push_back(ges1);
+        ges.push_back(ges2);
 		for (int j = 0; j<pts.size(); j++) {
 			int ind = 1;
-			pattern[i].assign(len, ofVec2f(0.0,0.0));
 			for (int k = pts[j]; k > pts[j]-len; k--) {
 				oracle.pttrCat[k].push_back(cat);
 				oracle.pttrInd[k].push_back(ind);
 
-				for (int d = 0; d < oracle.dim; d+=2) {
-					pattern[i+d/2][k].x = (pattern[i][k].x*float(ind-1)/float(ind))
-										+ oracle.obs[k][d]/float(ind);
-					pattern[i+d/2][k].y = (pattern[i][k].y*float(ind-1)/float(ind))
-										+ oracle.obs[k][d+1]/float(ind);
+				for (int d = 0; d < 2; d++) {
+					ges[d][k].x = (ges[d][k].x*float(ind-1)/float(ind))
+                                    + oracle.obs[k][d*2]/float(ind);
+					ges[d][k].y = (ges[d][k].y*float(ind-1)/float(ind))
+                                    + oracle.obs[k][d*2+1]/float(ind);
 				}
 				ind++;
 			}
 		}
+        pattern.push_back(ges);
 	}
+    
 	return pattern;
 }
 
@@ -449,7 +453,7 @@ vmo::belief vmo::tracking_init(vmo::pttr pttrList, vmo oracle, vector<float> fir
 		float d = 0.0;
 		for (int i = 0; i < oracle.latent[k].size(); i++) {
 			int sym = oracle.latent[k][i];
-			d = getDistance(firstObs, oracle.obs[sym]);
+            d = getDistance(firstObs, oracle.obs[sym]);
 			if (d < minD) {
 				minD = d;
 				ind = i;
@@ -483,7 +487,7 @@ vmo::belief vmo::tracking(vmo::pttr pttrList, vmo oracle, vmo::belief prevBf, ve
 		int ind = -1;
 
 		// Self-transition
-		selfTrn = oracle.data[prevState.path[k]];
+		selfTrn = oracle.data[prevBf.path[k]];
 		for (int i = 0; i < oracle.latent[selfTrn].size(); i++) {
 			float d = getDistance(obs, oracle.obs[oracle.latent[selfTrn][i]]);
 			if (d < minD) {
@@ -496,8 +500,8 @@ vmo::belief vmo::tracking(vmo::pttr pttrList, vmo oracle, vmo::belief prevBf, ve
 
 		// Possible states from forward links
 		int sym = -1;
-		for (int j = 0; j < oracle.trn[prevState.path[k]].size(); j++) {
-			sym = oracle.data[oracle.trn[prevState.path[k]][j]];
+		for (int j = 0; j < oracle.trn[prevBf.path[k]].size(); j++) {
+			sym = oracle.data[oracle.trn[prevBf.path[k]][j]];
 			float d = 0.0;
 			for (int i = 0; i < oracle.latent[selfTrn].size(); i++) {
 				d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
@@ -519,18 +523,30 @@ vmo::belief vmo::tracking(vmo::pttr pttrList, vmo oracle, vmo::belief prevBf, ve
 }
 
 int* vmo::getGestureCat(int ind){
-	int* temp = new int[pttrCat[ind].size()];
-	for (int i = 0; i < pttrCat[ind].size(); i++) {
-		temp[i] = pttrCat[ind][i];
-	}
-	return temp
+    int* temp;
+    if (pttrCat[ind].size() == 0 ){
+        temp = new int[1];
+        temp[0] = -1;
+    }else{
+        temp = new int[pttrCat[ind].size()];
+        for (int i = 0; i < pttrCat[ind].size(); i++) {
+            temp[i] = pttrCat[ind][i];
+        }
+    }
+    return temp;
 }
 
 int* vmo::getGestureInd(int ind){
-	int* temp = new int[pttrInd[ind].size()];
-	for (int i = 0; i < pttrInd[ind].size(); i++) {
-		temp[i] = pttrInd[ind][i];
-	}
-	return temp
+    int* temp;
+    if (pttrInd[ind].size()==0){
+        temp = new int[1];
+        temp[0] = -1;
+    }else{
+        temp = new int[pttrInd[ind].size()];
+        for (int i = 0; i < pttrInd[ind].size(); i++) {
+            temp[i] = pttrInd[ind][i];
+        }
+    }
+    return temp;
 }
 

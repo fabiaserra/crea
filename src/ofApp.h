@@ -6,7 +6,7 @@
 #include "ofxKinect.h"
 
 #include "ParticleSystem.h"
-#include "Marker.h"
+#include "irMarker.h"
 
 #include "Sequence.h"
 
@@ -58,7 +58,7 @@ class ofApp : public ofBaseApp{
 		//--------------------------------------------------------------
 		ofxCv::ContourFinder contourFinder;
 		ofxCv::ContourFinder irMarkerFinder;
-		ofxCv::RectTrackerFollower<Marker> tracker;
+		ofxCv::RectTrackerFollower<irMarker> tracker;
 		//--------------------------------------------------------------
 		float time0;            // Time value for computing dt
 		//--------------------------------------------------------------
@@ -107,11 +107,12 @@ class ofApp : public ofBaseApp{
 		vmo::belief currentBf;
 		vmo::belief prevBf;
 	
-		vector<ofPoint>& loadedFrames;
+//		vector<ofPoint>& loadedFrames;
 		vector<vector<float> > obs;
-		vector<vector<ofVec2f> > patterns;
+//		vector<vector<ofPolyline> > patterns;
 		vector<vector<float> > loadXML(); // dummy function
 		bool initStatus;
+        bool stopTracking;
 		int *gestureInd;
 		int *gestureCat;
 };

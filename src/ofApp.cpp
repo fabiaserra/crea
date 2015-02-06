@@ -86,7 +86,8 @@ void ofApp::setup(){
 	particles.setup(true, color, gravity, sizeAge2, opacityAge2, flickersAge2, colorAge2, bounce);
 
 	// DEPTH CONTOUR
-	smoothingSize = 0;
+//	smoothingSize = 0;
+//	contour.setup();
 
 	// SETUP GUIs
     dim = 32;
@@ -100,22 +101,25 @@ void ofApp::setup(){
 	setupGUI5();
 	setupGUI6(0);
 
+    // SEQUENCE
     int numMarkers = 2;
-	string filePath; // Dummy variable
     sequence.setup(numMarkers);
-	sequence.load(filePath);
-	
+	sequence.load("sequences/sequence.xml");
+
+    testCounter = 0.0;
+
 	//VMO Setup goes here//
 	//1. Load xml files...
-	obs.assign(sequence.markersPosition[0].size(), vector<float>(4));
+	obs.assign(sequence.numFrames, vector<float>(4));
 	for (int i = 0; i < sequence.markersPosition.size(); i++) {
 		for (int j = 0; j < sequence.markersPosition[i].size(); j++) {
 			obs[j][i*2] = sequence.markersPosition[i][j].x;
 			obs[j][i*2+1] = sequence.markersPosition[i][j].y;
 		}
 	}
-	
+
 	initStatus = true;
+    stopTracking = true;
 //	gestureInd = -1;
 //	gestureCat = -1;
 	//2. Processing
@@ -123,12 +127,12 @@ void ofApp::setup(){
 	int minLen = 5; // Temporary setting
 	float start = 0.0, step = 0.01, stop = 2.0;
 	float t = vmo::findThreshold(obs, 4, start, step, stop); // Temporary threshold range and step
-	seqVmo = vmo::buildOracle(obs, t);
-	//2.2 Output pattern list
+	seqVmo = vmo::buildOracle(obs, numMarkers*2 ,t);
+//	2.2 Output pattern list
 	pttrList = vmo::findPttr(seqVmo, minLen);
-	patterns = vmo::processPttr(seqVmo, pttrList);
+//	patterns = vmo::processPttr(seqVmo, pttrList);
 
-    testCounter = 0.0;
+    sequence.patterns = vmo::processPttr(seqVmo, pttrList);
 
 }
 
@@ -181,32 +185,15 @@ void ofApp::update(){
 		contourFinder.findContours(depthImage);
 
 		// Track markers
-		vector<Marker>& tempMarkers         = tracker.getFollowers();   // TODO: assign dead labels to new labels and have a MAX number of markers
+		vector<irMarker>& tempMarkers         = tracker.getFollowers();   // TODO: assign dead labels to new labels and have a MAX number of markers
 		vector<unsigned int> deadLabels     = tracker.getDeadLabels();
 		vector<unsigned int> currentLabels  = tracker.getCurrentLabels();
 		// vector<unsigned int> newLabels      = tracker.getNewLabels();
 
 		// Update markers if we loose track of them
 		for(unsigned int i = 0; i < tempMarkers.size(); i++){
-			tempMarkers[i].update(deadLabels, currentLabels);
+			tempMarkers[i].updateLabels(deadLabels, currentLabels);
 		}
-
-		// print currentLabels
-		for(unsigned int i = 0; i < tempMarkers.size(); i++){
-			tempMarkers[i].update(deadLabels, currentLabels);
-		}
-
-//		// Print currentLabels
-//		cout << "Current:" << endl;
-//		for(unsigned int i = 0; i < currentLabels.size(); i++){
-//            cout << currentLabels[i] << endl;
-//		}
-//
-//		// Print currentLabels
-//		cout << "markers:" << endl;
-//		for(unsigned int i = 0; i < tempMarkers.size(); i++){
-//            cout << tempMarkers[i].getLabel() << endl;
-//		}
 
 		// Update grid particles
 		particles.update(dt, tempMarkers);
@@ -215,19 +202,27 @@ void ofApp::update(){
 		// markersParticles.update(dt, markers);
 
 		//Gesture Tracking with VMO here?
-		vector<float> firstObs; // Temporary code
-		if(initStatus){
-			currentBf = vmo::tracking_init(pttrList, seqVmo, firstObs);
-			initStatus = false;
-		}else{
-			vector<float> obs;
-			prevBf = currentBf;
-			currentBf = vmo::tracking(pttrList, seqVmo, prevBf, obs);
-		}
-		// Update sequence
+
+//        if (tempMarkers.size()>1){
+//            if (!stopTracking){
+//                vector<float> obs; // Temporary code
+//                for(unsigned int i = 0; i < 2; i++){
+//                    obs.push_back(tempMarkers[i].smoothPos.x);
+//                    obs.push_back(tempMarkers[i].smoothPos.y);
+//                }
+//                if(initStatus){
+//                    currentBf = vmo::tracking_init(pttrList, seqVmo, obs);
+//                    initStatus = false;
+//                }else{
+//                    vector<float> obs;
+//                    prevBf = currentBf;
+//                    currentBf = vmo::tracking(pttrList, seqVmo, prevBf, obs);
+//                }
+//            }
+//        }
+
+        // Update sequence
 		sequence.update(tempMarkers);
-
-
 	}
 }
 
@@ -248,79 +243,10 @@ void ofApp::draw(){
 //	contourFinder.draw();
 //	irMarkerFinder.draw();
 
-	particles.draw();
-//	markersParticles.draw();
-
-	// // Draw contour shape
-	// for(int i = 0; i < contourFinder.size(); i++){
-	// 	ofFill();
-	// 	ofSetColor(255);
-
-	// 	ofRect(toOf(contourFinder.getBoundingRect(i)));
-
-	// 	ofPolyline convexHull = toOf(contourFinder.getConvexHull(i));
-	// 	convexHull = convexHull.getSmoothed(smoothingSize, 0.5);
-
-
-	// 	ofSetColor(255);
-	// 	ofBeginShape();
-	// 		for(int i = 0; i < convexHull.getVertices().size(); i++){
-	// 			ofVertex(convexHull.getVertices().at(i).x, convexHull.getVertices().at(i).y);
-	// 		}
-	// 	ofEndShape();
-
-	// 	ofSetColor(255, 0, 0);
-	// 	ofSetLineWidth(3);
-	// 	convexHull.draw(); //if we only want the contour
-
-	// 	ofSetColor(0);
-	// 	ofPolyline contour = contourFinder.getPolyline(i);
-	// 	contour = contour.getSmoothed(5, 0.5);
-	// 	contour.draw();
- 	// }
-
-//    vector<Marker>& tempMarkers         = tracker.getFollowers();
-//	 // Draw identified IR markers
-//	 for (int i = 0; i < tempMarkers.size(); i++){
-//	     tempMarkers[i].draw();
-//	 }
-	gestureInd = seqVmo.getGestureInd(currentBf.currentIdx);
-	gestureCat = seqVmo.getGestureCat(currentBf.currentIdx);
-	
-	irMarkerFinder.draw();
-
 //    particles.draw();
 //    markersParticles.draw();
 
-//    // TODO: contour.draw()
-//    // Draw contour shape
-//    for(int i = 0; i < contourFinder.size(); i++){
-//        ofFill();
-//        ofSetColor(255);
-//
-//        ofRect(toOf(contourFinder.getBoundingRect(i)));
-//
-//        ofPolyline convexHull = toOf(contourFinder.getConvexHull(i));
-//        convexHull = convexHull.getSmoothed(smoothingSize, 0.5);
-//
-//        ofSetColor(255);
-//        ofBeginShape();
-//        for(int i = 0; i < convexHull.getVertices().size(); i++){
-//            ofVertex(convexHull.getVertices().at(i).x, convexHull.getVertices().at(i).y);
-//        }
-//        ofEndShape();
-//
-//        ofSetColor(255, 0, 0);
-//        ofSetLineWidth(3);
-//        convexHull.draw(); //if we only want the contour
-//
-//        ofSetColor(0);
-//        ofPolyline contour = contourFinder.getPolyline(i);
-//        contour = contour.getSmoothed(5, 0.5);
-//        contour.draw();
-//    }
-
-    vector<Marker>& tempMarkers         = tracker.getFollowers();
+    vector<irMarker>& tempMarkers         = tracker.getFollowers();
 	 // Draw identified IR markers
 	 for (int i = 0; i < tempMarkers.size(); i++){
 	     tempMarkers[i].draw();
@@ -328,10 +254,16 @@ void ofApp::draw(){
 
 	ofPopMatrix();
 
+//    gestureInd = seqVmo.getGestureInd(currentBf.currentIdx);
+//    gestureCat = seqVmo.getGestureCat(currentBf.currentIdx);
+
+//    float idx = float(gestureInd[0]);
+//    float len = float(pttrList.sfxLen[gestureCat[0]-1]);
+//    float percent = ofMap(idx, 1.0, len, 0.0, 1.0);
+
     float percent = testCounter;
     sequence.draw(percent);
     if(sequence.sequenceLoaded && testCounter < 0.98) testCounter += 0.001;
-    cout << percent << endl;
 }
 
 //--------------------------------------------------------------
@@ -363,11 +295,11 @@ void ofApp::setupGUI0(){
 	gui0->addSpacer();
 
     gui0->addSpacer();
-	gui0->addLabel("6: FLUID SOLVER");
+	gui0->addLabel("5: FLUID SOLVER");
 	gui0->addSpacer();
 
 	gui0->addSpacer();
-	gui0->addLabel("7: PARTICLES");
+	gui0->addLabel("6: PARTICLES");
 	gui0->addSpacer();
 
 	gui0->autoSizeToFitWidgets();
@@ -378,6 +310,7 @@ void ofApp::setupGUI0(){
 void ofApp::setupGUI1(){
 	gui1 = new ofxUISuperCanvas("1: BASICS", 0, 0, guiWidth, ofGetHeight());
 	gui1->setTheme(OFX_UI_THEME_GRAYDAY);
+    gui1->setTriggerWidgetsUponLoad(true);
 
 	gui1->addSpacer();
 	gui1->addLabel("Press '1' to hide panel", OFX_UI_FONT_SMALL);
@@ -392,20 +325,38 @@ void ofApp::setupGUI1(){
 	gui1->addSlider("Blue", 0.0, 255.0, &blue);
 
     gui1->addSpacer();
+    gui1->addLabel("SETTINGS");
+    gui1->addImageButton("Save Settings", "gui/icons/save.png", false, dim, dim);
+    gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui1->addImageButton("Load Settings", "gui/icons/open.png", false, dim, dim);
+    gui1->addImageButton("Reset Settings", "gui/icons/reset.png", false, dim, dim);
+    gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui1->addSpacer();
-    gui1->addImageButton("Save", "GUI/icons/save.png", false, dim, dim);
-    gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui1->addImageButton("Load", "GUI/icons/open.png", false, dim, dim);
-    gui1->addImageButton("Reset", "GUI/icons/reset.png", false, dim, dim);
-    gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+
+	gui1->addLabel("GUI THEME");
+    vector<string> themes;
+    themes.push_back("DEFAULT");
+    themes.push_back("HIPSTER");
+    themes.push_back("GRAYDAY");
+    themes.push_back("RUSTIC");
+    themes.push_back("LIMESTONE");
+    themes.push_back("VEGAN");
+    themes.push_back("BLUEBLUE");
+    themes.push_back("COOLCLAY");
+    themes.push_back("SPEARMINT");
+    themes.push_back("PEPTOBISMOL");
+    themes.push_back("MIDNIGHT");
+    themes.push_back("BERLIN");
+
+    gui1->addRadio("GUI Theme", themes, OFX_UI_ORIENTATION_VERTICAL);
 
     gui1->addSpacer();
 
 	gui1->autoSizeToFitWidgets();
 	gui1->setVisible(false);
 	ofAddListener(gui1->newGUIEvent, this, &ofApp::guiEvent);
-	gui1->loadSettings("GUI/gui1Settings.xml");
+	gui1->loadSettings("gui/gui1Settings.xml");
 }
 
 //--------------------------------------------------------------
@@ -448,7 +399,7 @@ void ofApp::setupGUI2(){
 	gui2->autoSizeToFitWidgets();
 	gui2->setVisible(false);
 	ofAddListener(gui2->newGUIEvent, this, &ofApp::guiEvent);
-	gui2->loadSettings("GUI/gui2Settings.xml");
+	gui2->loadSettings("gui/gui2Settings.xml");
 }
 
 //--------------------------------------------------------------
@@ -460,12 +411,12 @@ void ofApp::setupGUI3(){
 	gui3->addLabel("Press '3' to hide panel", OFX_UI_FONT_SMALL);
 
 	gui3->addSpacer();
-	recordingButton = gui3->addImageToggle("Record", "GUI/icons/record.png", false, dim, dim);
+	recordingButton = gui3->addImageToggle("Record", "gui/icons/record.png", false, dim, dim);
 	gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-//	gui3->addImageButton("Stop", "GUI/icons/record.png", false, dim, dim);
-	gui3->addImageButton("Save", "GUI/icons/save.png", false, dim, dim);
-	gui3->addImageButton("Load", "GUI/icons/open.png", false, dim, dim);
-	gui3->addImageButton("Delete", "GUI/icons/delete.png", false, dim, dim);
+//	gui3->addImageButton("Stop", "gui/icons/record.png", false, dim, dim);
+	gui3->addImageButton("Save", "gui/icons/save.png", false, dim, dim);
+	gui3->addImageButton("Load", "gui/icons/open.png", false, dim, dim);
+	gui3->addImageButton("Delete", "gui/icons/delete.png", false, dim, dim);
 	gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui3->addSpacer();
@@ -473,7 +424,7 @@ void ofApp::setupGUI3(){
 	gui3->autoSizeToFitWidgets();
 	gui3->setVisible(false);
 	ofAddListener(gui3->newGUIEvent, this, &ofApp::guiEvent);
-//	gui3->loadSettings("GUI/gui3Settings.xml");
+//	gui3->loadSettings("gui/gui3Settings.xml");
 }
 
 //--------------------------------------------------------------
@@ -485,9 +436,9 @@ void ofApp::setupGUI4(){
 	gui4->addLabel("Press '4' to hide panel", OFX_UI_FONT_SMALL);
 
 	gui4->addSpacer();
-	gui4->addImageButton("Start", "GUI/icons/play.png", false, dim, dim);
+	gui4->addImageButton("Start vmo", "gui/icons/play.png", false, dim, dim);
 	gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-	gui4->addImageButton("Stop", "GUI/icons/delete.png", false, dim, dim);
+	gui4->addImageButton("Stop vmo", "gui/icons/delete.png", false, dim, dim);
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui4->addSpacer();
@@ -495,7 +446,7 @@ void ofApp::setupGUI4(){
 	gui4->autoSizeToFitWidgets();
 	gui4->setVisible(false);
 	ofAddListener(gui4->newGUIEvent, this, &ofApp::guiEvent);
-//	gui4->loadSettings("GUI/gui4Settings.xml");
+//	gui4->loadSettings("gui/gui4Settings.xml");
 }
 
 //--------------------------------------------------------------
@@ -515,7 +466,7 @@ void ofApp::setupGUI5(){
 	gui5->autoSizeToFitWidgets();
 	gui5->setVisible(false);
 	ofAddListener(gui5->newGUIEvent, this, &ofApp::guiEvent);
-	gui5->loadSettings("GUI/gui5Settings.xml");
+	gui5->loadSettings("gui/gui5Settings.xml");
 }
 
 //--------------------------------------------------------------
@@ -570,7 +521,7 @@ void ofApp::setupGUI6(int i){
 	gui6->autoSizeToFitWidgets();
 	gui6->setVisible(false);
 	ofAddListener(gui6->newGUIEvent, this, &ofApp::guiEvent);
-	gui6->loadSettings("GUI/gui6Settings.xml");
+	gui6->loadSettings("gui/gui6Settings.xml");
 }
 
 void ofApp::guiEvent(ofxUIEventArgs &e){
@@ -610,19 +561,28 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 		if (button->getValue() == true){
             ofFileDialogResult result = ofSystemLoadDialog("Select sequence xml file.", false);
             if (result.bSuccess){
+                    cout << result.getPath() << endl;
                 sequence.load(result.getPath());
             }
 		}
 	}
 
-	if(e.getName() == "Start"){
+	if(e.getName() == "Start vmo"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
 		if (button->getValue() == true){
-            sequence.draw(20);
+            initStatus = true;
+            stopTracking = false;
 		}
 	}
 
-	if(e.getName() == "Size range"){
+    if(e.getName() == "Stop vmo"){
+        ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
+        if (button->getValue() == true){
+            stopTracking = true;
+        }
+    }
+
+    if(e.getName() == "Size range"){
 		contourFinder.setMinAreaRadius(minContourSize);
 		contourFinder.setMaxAreaRadius(maxContourSize);
 	}
@@ -645,6 +605,33 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 	// 	cout << radio->getName() << " value: " << radio->getValue() << " active name: " << radio->getActiveName() << endl;
 	// }
 
+	 if(e.getName() == "GUI Theme"){
+	 	ofxUIRadio *radio = (ofxUIRadio *) e.widget;
+
+        int theme;
+        string name = radio->getActiveName();
+        if (name == "DEFAULT")      theme = OFX_UI_THEME_DEFAULT;
+        if (name == "HIPSTER")      theme = OFX_UI_THEME_HIPSTER;
+        if (name == "GRAYDAY")      theme = OFX_UI_THEME_GRAYDAY;
+        if (name == "RUSTIC")       theme = OFX_UI_THEME_RUSTIC;
+        if (name == "LIMESTONE")    theme = OFX_UI_THEME_LIMESTONE;
+        if (name == "VEGAN")        theme = OFX_UI_THEME_VEGAN;
+        if (name == "BLUEBLUE")     theme = OFX_UI_THEME_BLUEBLUE;
+        if (name == "COOLCLAY")     theme = OFX_UI_THEME_COOLCLAY;
+        if (name == "SPEARMINT")    theme = OFX_UI_THEME_SPEARMINT;
+        if (name == "PEPTOBISMOL")  theme = OFX_UI_THEME_PEPTOBISMOL;
+        if (name == "MIDNIGHT")     theme = OFX_UI_THEME_MIDNIGHT;
+        if (name == "BERLIN")       theme = OFX_UI_THEME_BERLIN;
+
+        gui0->setTheme(theme);
+        gui1->setTheme(theme);
+        gui2->setTheme(theme);
+        gui3->setTheme(theme);
+        gui4->setTheme(theme);
+        gui5->setTheme(theme);
+        gui6->setTheme(theme);
+	 }
+
 	if(e.getName() == "Immortal"){
 		ofxUIToggle *toggle = (ofxUIToggle *) e.widget;
 		if (toggle->getValue() == false) markersParticles.killParticles();
@@ -656,13 +643,13 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 void ofApp::exit(){
 	kinect.close();
 
-	gui0->saveSettings("GUI/gui0Settings.xml");
-	gui1->saveSettings("GUI/gui1Settings.xml");
-	gui2->saveSettings("GUI/gui2Settings.xml");
-	gui3->saveSettings("GUI/gui3Settings.xml");
-	gui4->saveSettings("GUI/gui4Settings.xml");
-	gui5->saveSettings("GUI/gui5Settings.xml");
-	gui6->saveSettings("GUI/gui6Settings.xml");
+	gui0->saveSettings("gui/gui0Settings.xml");
+	gui1->saveSettings("gui/gui1Settings.xml");
+	gui2->saveSettings("gui/gui2Settings.xml");
+	gui3->saveSettings("gui/gui3Settings.xml");
+	gui4->saveSettings("gui/gui4Settings.xml");
+	gui5->saveSettings("gui/gui5Settings.xml");
+	gui6->saveSettings("gui/gui6Settings.xml");
 
 	delete gui0;
 	delete gui1;
@@ -681,6 +668,7 @@ void ofApp::keyPressed(int key){
 			ofToggleFullscreen();
 			reScale = (float)ofGetWidth() / (float)kinect.width;
 			break;
+
 		case '0':
         case '`':
 			gui0->toggleVisible();

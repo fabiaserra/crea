@@ -1,6 +1,6 @@
 #pragma once
 #include "ofMain.h"
-#include "Marker.h"
+#include "irMarker.h"
 
 class Particle
 {
@@ -10,7 +10,7 @@ class Particle
 		void setup(float id, ofPoint pos, ofPoint vel, ofColor color, float initialRadius, bool immortal, float lifetime, float friction);
 		void setup(float id, ofPolyline contour, ofPoint vel, ofColor color, float initialRadius, bool immortal, float lifetime, float friction);
 		void update(float dt);
-		void update(float dt, vector<Marker>& markers);
+		void update(float dt, vector<irMarker>& markers);
 		void draw();
 		void kill();
 //--------------------------------------------------------------

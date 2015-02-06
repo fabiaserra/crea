@@ -110,7 +110,7 @@ void Particle::update(float dt){
 	}
 }
 
-void Particle::update(float dt, vector<Marker>& markers){
+void Particle::update(float dt, vector<irMarker>& markers){
 
 	update(dt);
 

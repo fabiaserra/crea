@@ -8,10 +8,12 @@ Sequence::Sequence(){
 
 void Sequence::setup(int nMarkers){
     this->nMarkers = nMarkers;
-    verdana.loadFont("Fonts/verdana.ttf", 80, true, true);
+
+    verdana.loadFont("fonts/verdana.ttf", 80, true, true);
+
 }
 
-void Sequence::update(vector<Marker>& markers){
+void Sequence::update(vector<irMarker>& markers){
     if(recording){
         int frameNum = xml.addTag("frame");
         xml.pushTag("frame", frameNum);
@@ -28,7 +30,9 @@ void Sequence::update(vector<Marker>& markers){
     }
 }
 
+//void Sequence::draw(float percent, vector<int> highlightedIndexes){
 void Sequence::draw(float percent){
+
     if(sequenceLoaded){
 //        for(int markerIndex = 0; markerIndex < nMarkers; markerIndex++){
 //            if(markerIndex == 0) ofSetColor(255, 0, 0);
@@ -44,7 +48,7 @@ void Sequence::draw(float percent){
 //            ofCircle(currentPoint, 3);
 //        }
 
-
+        // if patterns identified...
         for(int patternIndex = 0; patternIndex < patterns.size(); patternIndex++){
             int patternPosition = patternIndex + 1;
             bool highlight = false;
@@ -81,46 +85,62 @@ void Sequence::drawPattern(int patternPosition, int patternIndex, float percent,
             case 4:
                 ofTranslate(width+margin, height+margin);
                 break;
+            case 5:
+                ofTranslate(0, 2*(height+margin));
+                break;
+            case 6:
+                ofTranslate(width+margin, 2*(height+margin));
+                break;
         }
 
         int opacity;
         if(highlight) opacity = 255;
         else          opacity = 60;
 
+        // Background pattern window box
         ofSetColor(0);
         ofFill();
         ofRect(0, 0, width, height);
 
+        // Contour pattern window box
         ofSetColor(255, opacity);
         ofSetLineWidth(2);
         ofNoFill();
         ofRect(0, 0, width, height);
 
         for(int markerIndex = 0; markerIndex < patterns[patternIndex].size(); markerIndex++){
-            ofSetColor(255, opacity);
+            // Pattern lines
+            ofSetColor(120, opacity);
             ofSetLineWidth(2);
             patterns[patternIndex][markerIndex].draw();
 
             ofPoint currentPoint = patterns[patternIndex][markerIndex].getPointAtPercent(percent);
             patternsPastPoints[patternIndex][markerIndex].addVertex(currentPoint);
 
-            ofSetColor(0, 255, 0, opacity);
+            // Pattern already processed lines
+            ofSetColor(255, opacity);
             ofSetLineWidth(3);
             patternsPastPoints[patternIndex][markerIndex].draw();
 
-            ofSetColor(255, 0, 0, opacity);
+            // Pattern current processing point
+            ofSetColor(240, 0, 20, opacity);
             ofCircle(currentPoint, 10);
         }
 
-        ofSetColor(255, opacity);
-        verdana.drawString(ofToString(patternIndex), 30, 100);
+        // Pattern label number
+        ofSetColor(255, opacity+30);
+        verdana.drawString(ofToString(patternIndex+1), 30, 100);
 
     ofPopMatrix();
 }
 
 void Sequence::load(const string path){
 
-	if(!ofFile::doesFileExist(path)) return;
+	if(!ofFile::doesFileExist(path))
+    {
+        cout << "FILE DOES NOT EXIST"<< endl;
+        return;
+    }
 
     if(!xml.load(path)) return;
 
@@ -141,7 +161,7 @@ void Sequence::load(const string path){
     // Load XML sequence in memory
 
     // Number of frames of the sequence
-    const size_t numFrames = xml.getNumTags("frame");
+    numFrames = xml.getNumTags("frame");
     float timestampFirstFrame;
     float timestampLastFrame;
 
@@ -168,7 +188,7 @@ void Sequence::load(const string path){
     for(int i = 0; i < nMarkers; i++){
         vector<ofPoint> vertices = markersPosition[i].getVertices();
         for(int j = 0; j < vertices.size(); j++){
-           cout << j << ": " << vertices[j].x << " " << vertices[j].y << endl;
+//           cout << j << ": " << vertices[j].x << " " << vertices[j].y << endl;
         }
     }
 

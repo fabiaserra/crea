@@ -53,7 +53,7 @@ public:
 	// Main functions
 	void setup(int dim, float threshold);
 	void reset();
-	void addState(vector<float> newData);
+	void addState(vector<float>& newData);
 
 	// Getters
 	int getK();
@@ -87,8 +87,8 @@ public:
 
 	// Static functions
 	// Construction funcitons
-	static float findThreshold(vector<vector<float> > obs, int dim,float start, float step, float end);
-	static vmo buildOracle(vector<vector<float> > obs, float threshold);
+	static float findThreshold(vector<vector<float> > &obs, int dim,float start, float step, float end);
+	static vmo buildOracle(vector<vector<float> > &obs, int dim, float threshold);
 
 	class pttr{
 	public:
@@ -109,7 +109,7 @@ public:
 
 	// Analysis functions
 	static vmo::pttr findPttr(vmo oracle, int minLen);
-	static vector<vector<ofVec2f> > processPttr(vmo oracle, vmo::pttr pttrList);
+	static vector< vector<ofPolyline> > processPttr(vmo oracle, vmo::pttr pttrList);
 	static vmo::belief tracking_init(vmo::pttr pttrList, vmo oracle, vector<float> firstObs);
 	static vmo::belief tracking(vmo::pttr pttrList, vmo oracle, vmo::belief prevState, vector<float>obs);
 
@@ -118,11 +118,12 @@ public:
 
 private:
 	// Helper functions
-	int lenCommonSfx(int p1, int p2);
-	float getDistance(vector<float> x, vector<float> y);
+    static float getDistance(vector<float> &x, vector<float> &y);
+	static vector<float> getDistArray(vector<float> &x, vector<vector<float> > &y);
+
+    int lenCommonSfx(int p1, int p2);
 	vector<float> cumsum(vector<float> cw);
-	vector<float> getDistArray(vector<float> x, vector<vector<float> > y);
-	vector<vector<float> > trnIndexing(int n);
+	vector<vector<float> >& trnIndexing(int n);
 	vector2D encode();
 };
 

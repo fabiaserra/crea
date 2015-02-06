@@ -1,7 +1,7 @@
 #pragma once
 #include "ofMain.h"
 #include "Particle.h"
-#include "Marker.h"
+#include "irMarker.h"
 
 enum ParticleMode {GRID_PARTICLES, BORN_PARTICLES, CONTOUR_PARTICLES};
 enum EmitterType {POINT, SPHERE, GRID, CONTOUR};
@@ -18,7 +18,7 @@ class ParticleSystem
 				   float friction, float gravity, bool sizeAge, bool opacityAge,  bool flickersAge, bool colorAge, 
 				   bool bounce);
 
-		void update(float dt, vector<Marker>& markers);
+		void update(float dt, vector<irMarker>& markers);
 		void draw();
 
 		void createParticleGrid(int width, int height, int res);
