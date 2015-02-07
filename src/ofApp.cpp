@@ -237,9 +237,6 @@ void ofApp::update(){
 //                }
 //            }
 //        }
-
-        // Update sequence
-		sequence.update(tempMarkers);
 	}
 }
 
