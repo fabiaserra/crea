@@ -63,7 +63,11 @@ void Sequence::draw(float percent, vector<int> highlightedIndices){
 
 void Sequence::load(const string path){
 
-	if(!ofFile::doesFileExist(path)) return;
+	if(!ofFile::doesFileExist(path))
+    {
+        cout << "FILE DOES NOT EXIST"<< endl;
+        return;
+    }
 
     if(!xml.load(path)) return;
 
