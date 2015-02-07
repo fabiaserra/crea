@@ -108,10 +108,14 @@ public:
 	};
 
 	// Analysis functions
-	static vmo::pttr findPttr(vmo oracle, int minLen);
-	static vector< vector<ofPolyline> > processPttr(vmo oracle, vmo::pttr pttrList);
-	static vmo::belief tracking_init(vmo::pttr pttrList, vmo oracle, vector<float> firstObs);
-	static vmo::belief tracking(vmo::pttr pttrList, vmo oracle, vmo::belief prevState, vector<float>obs);
+	static vmo::pttr findPttr(const vmo& oracle, int minLen);
+	static vector< vector<ofPolyline> > processPttr(vmo& oracle, const vmo::pttr& pttrList);
+	static vmo::belief tracking_init(vmo& oracle,
+									 const vmo::pttr& pttrList,
+									 vector<float> &firstObs);
+	static vmo::belief tracking(vmo& oracle,
+								const vmo::pttr& pttrList,
+								vmo::belief& prevState, vector<float> &obs);
 
 	// Interface with openFrameworks
 //	static vector<vector<ofPoint> > pttr2Points(vmo::pttr pttrList);

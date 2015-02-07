@@ -128,8 +128,8 @@ void ofApp::setup(){
 //	gestureCat = -1;
 	//2. Processing
 	//2.1 Load file into VMO
-	int minLen = 5; // Temporary setting
-	float start = 0.0, step = 0.01, stop = 2.0;
+	int minLen = 1; // Temporary setting
+	float start = 0.0, step = 0.05, stop = 5.0;
 	float t = vmo::findThreshold(obs, 4, start, step, stop); // Temporary threshold range and step
 	seqVmo = vmo::buildOracle(obs, numMarkers*2 ,t);
 //	2.2 Output pattern list
@@ -239,6 +239,10 @@ void ofApp::update(){
 //                }
 //            }
 //        }
+
+        // Update sequence
+//		sequence.update(tempMarkers);
+
 	}
 }
 
