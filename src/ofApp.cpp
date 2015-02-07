@@ -83,7 +83,7 @@ void ofApp::setup(){
 	bool flickersAge2 = false;
 	bool colorAge2    = false;
 
-	particles.setup(true, color, gravity, sizeAge2, opacityAge2, flickersAge2, colorAge2, bounce);
+//	particles.setup(true, color, gravity, sizeAge2, opacityAge2, flickersAge2, colorAge2, bounce);
 
 	// DEPTH CONTOUR
 //	smoothingSize = 0;
@@ -92,6 +92,7 @@ void ofApp::setup(){
 	// SETUP GUIs
     dim = 32;
     guiWidth = 240;
+    theme = OFX_UI_THEME_GRAYDAY;
 
 	setupGUI0();
 	setupGUI1();
@@ -124,10 +125,10 @@ void ofApp::setup(){
 //	gestureCat = -1;
 	//2. Processing
 	//2.1 Load file into VMO
-	int minLen = 5; // Temporary setting
-	float start = 0.0, step = 0.01, stop = 2.0;
-	float t = vmo::findThreshold(obs, 4, start, step, stop); // Temporary threshold range and step
-	seqVmo = vmo::buildOracle(obs, numMarkers*2 ,t);
+//	int minLen = 5; // Temporary setting
+//	float start = 0.0, step = 0.01, stop = 2.0;
+//	float t = vmo::findThreshold(obs, 4, start, step, stop); // Temporary threshold range and step
+//	seqVmo = vmo::buildOracle(obs, numMarkers*2 ,t);
 //	2.2 Output pattern list
 //	pttrList = vmo::findPttr(seqVmo, minLen);
 //	patterns = vmo::processPttr(seqVmo, pttrList);
@@ -192,7 +193,7 @@ void ofApp::update(){
 
 		// Update markers if we loose track of them
 		for(unsigned int i = 0; i < tempMarkers.size(); i++){
-			tempMarkers[i].update(deadLabels, currentLabels);
+			tempMarkers[i].updateLabels(deadLabels, currentLabels);
 		}
 
 //		// Print currentLabels
@@ -201,7 +202,7 @@ void ofApp::update(){
 //            cout << currentLabels[i] << endl;
 //		}
 //
-//		// Print markers
+		// Print markers for debug
 //		cout << "markers:" << endl;
 //		for(unsigned int i = 0; i < tempMarkers.size(); i++){
 //            cout << tempMarkers[i].getLabel() << endl;
@@ -212,9 +213,10 @@ void ofApp::update(){
 
 		// Update markers particles
         markersParticles.update(dt, tempMarkers);
+//        cout << markersParticles.numParticles << endl;
 
-		// Update sequence when recording
-		sequence.update(tempMarkers);
+		// Record sequence when recording button is true
+		if(recordingButton->getValue() == true) sequence.record(tempMarkers);
 
 		//Gesture Tracking with VMO here?
 
@@ -254,18 +256,18 @@ void ofApp::draw(){
 //    depthImage.draw(0, 0);
 
 //    contourFinder.draw();
-    irMarkerFinder.draw();
+//    irMarkerFinder.draw();
 
 //    particles.draw();
-//    markersParticles.draw();
+    markersParticles.draw();
 
 //    contour.draw();
 
-    vector<Marker>& tempMarkers         = tracker.getFollowers();
-    // Draw identified IR markers
-    for (int i = 0; i < tempMarkers.size(); i++){
-        tempMarkers[i].draw();
-    }
+//    vector<irMarker>& tempMarkers         = tracker.getFollowers();
+//    // Draw identified IR markers
+//    for (int i = 0; i < tempMarkers.size(); i++){
+//        tempMarkers[i].draw();
+//    }
 
 	ofPopMatrix();
 
@@ -284,7 +286,7 @@ void ofApp::draw(){
 //--------------------------------------------------------------
 void ofApp::setupGUI0(){
 	gui0 = new ofxUISuperCanvas("0: MAIN WINDOW", 0, 0, guiWidth, ofGetHeight());
-    gui0->setTheme(OFX_UI_THEME_GRAYDAY);
+    gui0->setTheme(theme);
 
 	gui0->addSpacer();
 	gui0->addLabel("Press panel number 0 to 7 to", OFX_UI_FONT_SMALL);
@@ -324,7 +326,7 @@ void ofApp::setupGUI0(){
 //--------------------------------------------------------------
 void ofApp::setupGUI1(){
 	gui1 = new ofxUISuperCanvas("1: BASICS", 0, 0, guiWidth, ofGetHeight());
-	gui1->setTheme(OFX_UI_THEME_GRAYDAY);
+	gui1->setTheme(theme);
     gui1->setTriggerWidgetsUponLoad(true);
 
 	gui1->addSpacer();
@@ -364,20 +366,21 @@ void ofApp::setupGUI1(){
     themes.push_back("MIDNIGHT");
     themes.push_back("BERLIN");
 
-    gui1->addRadio("GUI Theme", themes, OFX_UI_ORIENTATION_VERTICAL);
+    guiThemes = gui1->addRadio("GUI Theme", themes, OFX_UI_ORIENTATION_VERTICAL);
+    guiThemes->activateToggle("GRAYDAY");
 
     gui1->addSpacer();
 
 	gui1->autoSizeToFitWidgets();
 	gui1->setVisible(false);
 	ofAddListener(gui1->newGUIEvent, this, &ofApp::guiEvent);
-	gui1->loadSettings("gui/gui1Settings.xml");
+    gui1->loadSettings("gui/gui1Settings.xml");
 }
 
 //--------------------------------------------------------------
 void ofApp::setupGUI2(){
 	gui2 = new ofxUISuperCanvas("2: KINECT", 0, 0, guiWidth, ofGetHeight());
-	gui2->setTheme(OFX_UI_THEME_GRAYDAY);
+	gui2->setTheme(theme);
 
 	gui2->addSpacer();
 	gui2->addLabel("Press '2' to hide panel", OFX_UI_FONT_SMALL);
@@ -420,21 +423,20 @@ void ofApp::setupGUI2(){
 //--------------------------------------------------------------
 void ofApp::setupGUI3(){
 	gui3 = new ofxUISuperCanvas("3: GESTURE SEQUENCE", 0, 0, guiWidth, ofGetHeight());
-    gui3->setTheme(OFX_UI_THEME_GRAYDAY);
+    gui3->setTheme(theme);
 
 	gui3->addSpacer();
 	gui3->addLabel("Press '3' to hide panel", OFX_UI_FONT_SMALL);
 
 	gui3->addSpacer();
-	recordingButton = gui3->addImageToggle("Record", "gui/icons/record.png", false, dim, dim);
+	recordingButton = gui3->addImageToggle("Record sequence", "gui/icons/record.png", false, dim, dim);
 	gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-//	gui3->addImageButton("Stop", "gui/icons/record.png", false, dim, dim);
-	gui3->addImageButton("Save", "gui/icons/save.png", false, dim, dim);
-	gui3->addImageButton("Load", "gui/icons/open.png", false, dim, dim);
-	gui3->addImageButton("Delete", "gui/icons/delete.png", false, dim, dim);
+	gui3->addImageButton("Save sequence", "gui/icons/save.png", false, dim, dim);
+	gui3->addImageButton("Load sequence", "gui/icons/open.png", false, dim, dim);
 	gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui3->addSpacer();
+    gui3->addToggle("Show patterns", &sequence.drawPatterns);
 
 	gui3->autoSizeToFitWidgets();
 	gui3->setVisible(false);
@@ -445,7 +447,7 @@ void ofApp::setupGUI3(){
 //--------------------------------------------------------------
 void ofApp::setupGUI4(){
 	gui4 = new ofxUISuperCanvas("4: GESTURE TRACKER", 0, 0, guiWidth, ofGetHeight());
-	gui4->setTheme(OFX_UI_THEME_GRAYDAY);
+	gui4->setTheme(theme);
 
 	gui4->addSpacer();
 	gui4->addLabel("Press '4' to hide panel", OFX_UI_FONT_SMALL);
@@ -467,7 +469,7 @@ void ofApp::setupGUI4(){
 //--------------------------------------------------------------
 void ofApp::setupGUI5(){
 	gui5 = new ofxUISuperCanvas("5: FLUID SOLVER", 0, 0, guiWidth, ofGetHeight());
-    gui5->setTheme(OFX_UI_THEME_GRAYDAY);
+    gui5->setTheme(theme);
 
 	gui5->addSpacer();
 	gui5->addLabel("Press '5' to hide panel", OFX_UI_FONT_SMALL);
@@ -487,8 +489,7 @@ void ofApp::setupGUI5(){
 //--------------------------------------------------------------
 void ofApp::setupGUI6(int i){
 	gui6 = new ofxUISuperCanvas("6: PARTICLES", 0, 0, guiWidth, ofGetHeight());
-	gui6->setTheme(OFX_UI_THEME_GRAYDAY);
-//	gui6->setTheme(OFX_UI_THEME_MINBLACK);
+	gui6->setTheme(theme);
 
 	gui6->addSpacer();
 	gui6->addLabel("Press '6' to hide panel", OFX_UI_FONT_SMALL);
@@ -512,7 +513,7 @@ void ofApp::setupGUI6(int i){
 
 	gui6->addSpacer();
 	gui6->addLabel("Particle");
-	gui6->addLabelToggle("Immortal", &markersParticles.immortal);
+	gui6->addToggle("Immortal", &markersParticles.immortal);
 	gui6->addSlider("Lifetime", 0.0, 20.0, &markersParticles.lifetime);
 	gui6->addSlider("Life Random[%]", 0.0, 100.0, &markersParticles.lifetimeRnd);
 	gui6->addSlider("Radius", 1.0, 15.0, &markersParticles.radius);
@@ -520,11 +521,11 @@ void ofApp::setupGUI6(int i){
 
 	gui6->addSpacer();
 	gui6->addLabel("Time behaviour");
-	gui6->addLabelToggle("Size", &markersParticles.sizeAge);
-	gui6->addLabelToggle("Opacity", &markersParticles.opacityAge);
-	gui6->addLabelToggle("Flickers", &markersParticles.flickersAge);
-	gui6->addLabelToggle("Color", &markersParticles.colorAge);
-	gui6->addLabelToggle("Bounce", &markersParticles.bounce);
+	gui6->addToggle("Size", &markersParticles.sizeAge);
+	gui6->addToggle("Opacity", &markersParticles.opacityAge);
+	gui6->addToggle("Flickers", &markersParticles.flickersAge);
+	gui6->addToggle("Color", &markersParticles.colorAge);
+	gui6->addToggle("Bounce", &markersParticles.bounce);
 
 	gui6->addSpacer();
 	gui6->addLabel("Physics");
@@ -549,19 +550,15 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         }
 	}
 
-	if(e.getName() == "Record"){
+	if(e.getName() == "Record sequence"){
 		if (recordingButton->getValue() == true){
             sequence.startRecording();
 		}
-		else{
-            sequence.stopRecording();
-		}
 	}
 
-	if(e.getName() == "Save"){
+	if(e.getName() == "Save sequence"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
 		if (button->getValue() == true){
-            sequence.stopRecording();
             recordingButton->setValue(false);
             ofFileDialogResult result = ofSystemSaveDialog("sequence.xml", "Save sequence file");
             if (result.bSuccess){
@@ -571,12 +568,11 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 		}
 	}
 
-	if(e.getName() == "Load"){
+	if(e.getName() == "Load sequence"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
 		if (button->getValue() == true){
-            ofFileDialogResult result = ofSystemLoadDialog("Select sequence xml file.", false);
+            ofFileDialogResult result = ofSystemLoadDialog("Select sequence xml file.", false, "sequences/");
             if (result.bSuccess){
-                    cout << result.getPath() << endl;
                 sequence.load(result.getPath());
             }
 		}
@@ -623,7 +619,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 	 if(e.getName() == "GUI Theme"){
 	 	ofxUIRadio *radio = (ofxUIRadio *) e.widget;
 
-        int theme;
+
         string name = radio->getActiveName();
         if (name == "DEFAULT")      theme = OFX_UI_THEME_DEFAULT;
         if (name == "HIPSTER")      theme = OFX_UI_THEME_HIPSTER;
@@ -651,7 +647,6 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 		ofxUIToggle *toggle = (ofxUIToggle *) e.widget;
 		if (toggle->getValue() == false) markersParticles.killParticles();
 	}
-
 }
 
 //--------------------------------------------------------------
@@ -693,6 +688,7 @@ void ofApp::keyPressed(int key){
 			gui4->setVisible(false);
 			gui5->setVisible(false);
 			gui6->setVisible(false);
+			sequence.drawPatterns = false;
 			break;
 
 		case '1':
@@ -703,6 +699,7 @@ void ofApp::keyPressed(int key){
 			gui4->setVisible(false);
 			gui5->setVisible(false);
 			gui6->setVisible(false);
+			sequence.drawPatterns = false;
 			break;
 
 		case '2':
@@ -713,6 +710,7 @@ void ofApp::keyPressed(int key){
 			gui4->setVisible(false);
 			gui5->setVisible(false);
 			gui6->setVisible(false);
+			sequence.drawPatterns = false;
 			break;
 
 		case '3':
@@ -723,6 +721,8 @@ void ofApp::keyPressed(int key){
 			gui4->setVisible(false);
 			gui5->setVisible(false);
 			gui6->setVisible(false);
+            if(gui3->isVisible()) sequence.drawPatterns = true;
+            else sequence.drawPatterns = false;
 			break;
 
 		case '4':
@@ -733,6 +733,8 @@ void ofApp::keyPressed(int key){
 			gui4->toggleVisible();
 			gui5->setVisible(false);
 			gui6->setVisible(false);
+            if(gui4->isVisible()) sequence.drawPatterns = true;
+            else sequence.drawPatterns = false;
 			break;
 
 		case '5':
@@ -753,6 +755,7 @@ void ofApp::keyPressed(int key){
 			gui4->setVisible(false);
 			gui5->setVisible(false);
 			gui6->toggleVisible();
+			sequence.drawPatterns = false;
 			break;
 
 		default:

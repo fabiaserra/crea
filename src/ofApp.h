@@ -61,7 +61,7 @@ class ofApp : public ofBaseApp{
 		//--------------------------------------------------------------
 		ofxCv::ContourFinder contourFinder;
 		ofxCv::ContourFinder irMarkerFinder;
-		ofxCv::RectTrackerFollower<Marker> tracker;
+		ofxCv::RectTrackerFollower<irMarker> tracker;
 		//--------------------------------------------------------------
 		// TODO: vector<ParticleSystem> particles
 		ParticleSystem particles;
@@ -81,6 +81,8 @@ class ofApp : public ofBaseApp{
 		ofxUISuperCanvas *gui6;
 		//--------------------------------------------------------------
 		ofxUIImageToggle *recordingButton;  // Button to record gestures sequence
+		ofxUIRadio *guiThemes;  // Button to record gestures sequence
+		int theme;
 		//--------------------------------------------------------------
         float dim;              // Size of GUI elements
         float guiWidth;

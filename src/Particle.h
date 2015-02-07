@@ -40,6 +40,8 @@ class Particle
 		bool  opacityAge;        // Particle changes opacity with age?
 		bool  flickersAge;       // Particle flickers opacity when about to die?
 		bool  colorAge;          // Particle changes color with age?
+		bool  drawContour;       // Draw only contour of the particle
+		bool  drawShapes;        // Draw other shapes as particles
 // --------------------------------------------------------------
 		float markerDist;
 		ofPoint dir;
