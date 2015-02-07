@@ -102,6 +102,8 @@ void ofApp::setup(){
 	setupGUI5();
 	setupGUI6(0);
 
+	loadGUISettings("settings/lastSettings.xml");
+
     // SEQUENCE
     int numMarkers = 2;
     sequence.setup(numMarkers);
@@ -736,7 +738,7 @@ void ofApp::saveGUISettings(const string path){
 //--------------------------------------------------------------
 void ofApp::loadGUISettings(const string path){
     ofxXmlSettings *XML = new ofxXmlSettings();
-    XML->loadFile(path);
+    if(!XML->loadFile(path)) return;
     int guiIndex = 0;
 
     for(vector<ofxUISuperCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it)
@@ -766,13 +768,7 @@ void ofApp::loadGUISettings(const string path){
 void ofApp::exit(){
 	kinect.close();
 
-//	gui0->saveSettings("gui/gui0Settings.xml");
-//	gui1->saveSettings("gui/gui1Settings.xml");
-//	gui2->saveSettings("gui/gui2Settings.xml");
-//	gui3->saveSettings("gui/gui3Settings.xml");
-//	gui4->saveSettings("gui/gui4Settings.xml");
-//	gui5->saveSettings("gui/gui5Settings.xml");
-//	gui6->saveSettings("gui/gui6Settings.xml");
+    saveGUISettings("settings/lastSettings.xml");
 
 	delete gui0;
 	delete gui1;
