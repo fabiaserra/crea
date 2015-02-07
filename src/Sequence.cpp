@@ -1,8 +1,8 @@
 #include "Sequence.h"
 
 Sequence::Sequence(){
-    recording = false;
     sequenceLoaded = false;
+    drawPatterns = false;
     frame_counter = 0;
 }
 
@@ -13,21 +13,19 @@ void Sequence::setup(int nMarkers){
 
 }
 
-void Sequence::update(vector<irMarker>& markers){
-    if(recording){
-        int frameNum = xml.addTag("frame");
-        xml.pushTag("frame", frameNum);
-        xml.setValue("timestamp", ofGetElapsedTimef(), frameNum);
-        for(int i = 0; i < nMarkers; i++){
-            int numMarker = xml.addTag("marker");
-            xml.pushTag("marker", numMarker);
-//            xml.setValue("id", i, numMarker);
-            xml.setValue("x", markers[i].smoothPos.x, numMarker);
-            xml.setValue("y", markers[i].smoothPos.y, numMarker);
-            xml.popTag();
-        }
+void Sequence::record(vector<irMarker>& markers){
+    int frameNum = xml.addTag("frame");
+    xml.pushTag("frame", frameNum);
+    xml.setValue("timestamp", ofGetElapsedTimef(), frameNum);
+    for(int i = 0; i < nMarkers; i++){
+        int numMarker = xml.addTag("marker");
+        xml.pushTag("marker", numMarker);
+//        xml.setValue("id", i, numMarker);
+        xml.setValue("x", markers[i].smoothPos.x, numMarker);
+        xml.setValue("y", markers[i].smoothPos.y, numMarker);
         xml.popTag();
     }
+    xml.popTag();
 }
 
 //void Sequence::draw(float percent, vector<int> highlightedIndexes){
@@ -49,89 +47,16 @@ void Sequence::draw(float percent){
 //        }
 
         // if patterns identified...
-        for(int patternIndex = 0; patternIndex < patterns.size(); patternIndex++){
-            int patternPosition = patternIndex + 1;
-            bool highlight = false;
-            if(patternIndex == 1) highlight = true;
-            drawPattern(patternPosition, patternIndex, percent, highlight);
+        if (drawPatterns){
+            for(int patternIndex = 0; patternIndex < patterns.size(); patternIndex++){
+                int patternPosition = patternIndex + 1;
+                bool highlight = false;
+                if(patternIndex == 1) highlight = true;
+                drawPattern(patternPosition, patternIndex, percent, highlight);
+            }
         }
 
     }
-}
-
-void Sequence::drawPattern(int patternPosition, int patternIndex, float percent, bool highlight){
-
-    // Drawing window parameters
-    float width = 640.0;
-    float height = 480.0;
-    float scale = 5.8;
-    float margin = 50.0;
-    float guiHeight = 1000;
-
-    ofPushMatrix();
-
-        ofScale(1.0/scale, 1.0/scale);
-        ofTranslate(margin, guiHeight);
-        switch(patternPosition){
-            case 1:
-                ofTranslate(0, 0);
-                break;
-            case 2:
-                ofTranslate(width+margin, 0);
-                break;
-            case 3:
-                ofTranslate(0, height+margin);
-                break;
-            case 4:
-                ofTranslate(width+margin, height+margin);
-                break;
-            case 5:
-                ofTranslate(0, 2*(height+margin));
-                break;
-            case 6:
-                ofTranslate(width+margin, 2*(height+margin));
-                break;
-        }
-
-        int opacity;
-        if(highlight) opacity = 255;
-        else          opacity = 60;
-
-        // Background pattern window box
-        ofSetColor(0);
-        ofFill();
-        ofRect(0, 0, width, height);
-
-        // Contour pattern window box
-        ofSetColor(255, opacity);
-        ofSetLineWidth(2);
-        ofNoFill();
-        ofRect(0, 0, width, height);
-
-        for(int markerIndex = 0; markerIndex < patterns[patternIndex].size(); markerIndex++){
-            // Pattern lines
-            ofSetColor(120, opacity);
-            ofSetLineWidth(2);
-            patterns[patternIndex][markerIndex].draw();
-
-            ofPoint currentPoint = patterns[patternIndex][markerIndex].getPointAtPercent(percent);
-            patternsPastPoints[patternIndex][markerIndex].addVertex(currentPoint);
-
-            // Pattern already processed lines
-            ofSetColor(255, opacity);
-            ofSetLineWidth(3);
-            patternsPastPoints[patternIndex][markerIndex].draw();
-
-            // Pattern current processing point
-            ofSetColor(240, 0, 20, opacity);
-            ofCircle(currentPoint, 10);
-        }
-
-        // Pattern label number
-        ofSetColor(255, opacity+30);
-        verdana.drawString(ofToString(patternIndex+1), 30, 100);
-
-    ofPopMatrix();
 }
 
 void Sequence::load(const string path){
@@ -192,7 +117,7 @@ void Sequence::load(const string path){
         }
     }
 
-    int nPatterns = 4;
+    int nPatterns = 14;
 
     // Clear and initialize memory of polylines patterns
     patterns.clear();
@@ -234,6 +159,69 @@ void Sequence::load(const string path){
     sequenceLoaded = true;
 }
 
+void Sequence::drawPattern(int patternPosition, int patternIndex, float percent, bool highlight){
+
+    // Drawing window parameters
+    float width = 640.0;
+    float height = 480.0;
+    float scale = 5.6;
+    float margin = 40.0;
+    float guiHeight = 680;
+
+    ofPushMatrix();
+
+        ofScale(1.0/scale, 1.0/scale);
+        ofTranslate(0, guiHeight);
+
+        // Position window pattern
+        if(patternPosition%2 == 0){
+            ofTranslate(width+margin, (patternPosition/2 - 1) * (height+margin));
+        }
+        else{
+            ofTranslate(0, ((patternPosition+1)/2 - 1) * (height+margin));
+        }
+
+        int opacity;
+        if(highlight) opacity = 255;
+        else          opacity = 60;
+
+        // Background pattern window box
+        ofSetColor(0);
+        ofFill();
+        ofRect(0, 0, width, height);
+
+        // Contour pattern window box
+        ofSetColor(255, opacity);
+        ofSetLineWidth(2);
+        ofNoFill();
+        ofRect(0, 0, width, height);
+
+        for(int markerIndex = 0; markerIndex < patterns[patternIndex].size(); markerIndex++){
+            // Pattern lines
+            ofSetColor(120, opacity);
+            ofSetLineWidth(2);
+            patterns[patternIndex][markerIndex].draw();
+
+            ofPoint currentPoint = patterns[patternIndex][markerIndex].getPointAtPercent(percent);
+            patternsPastPoints[patternIndex][markerIndex].addVertex(currentPoint);
+
+            // Pattern already processed lines
+            ofSetColor(255, opacity);
+            ofSetLineWidth(3);
+            patternsPastPoints[patternIndex][markerIndex].draw();
+
+            // Pattern current processing point
+            ofSetColor(240, 0, 20, opacity);
+            ofCircle(currentPoint, 10);
+        }
+
+        // Pattern label number
+        ofSetColor(255, opacity+30);
+        verdana.drawString(ofToString(patternIndex+1), 30, 100);
+
+    ofPopMatrix();
+}
+
 
 void Sequence::save(const string path) {
     xml.saveFile(path);
@@ -241,9 +229,5 @@ void Sequence::save(const string path) {
 
 void Sequence::startRecording(){
 	xml.clear();
-	recording = true;
 }
 
-void Sequence::stopRecording(){
-	recording = false;
-}

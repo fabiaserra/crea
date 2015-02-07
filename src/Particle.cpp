@@ -8,10 +8,12 @@ Particle::Particle(){
 	opacityAge 	= true;
 	colorAge 	= true;
 	flickersAge = true;
+	drawContour = true;
+	drawShapes  = false;
 	age 		= 0;
 }
 
-void Particle::setup(float id, ofPoint pos, ofPoint vel, ofColor color, float initialRadius, bool immortal, 
+void Particle::setup(float id, ofPoint pos, ofPoint vel, ofColor color, float initialRadius, bool immortal,
 					 float lifetime, float friction){
 	this->id = id;
 	this->pos = pos;
@@ -148,23 +150,29 @@ void Particle::draw(){
 		ofSetColor(255);
 
 		// Draw circles
-		// if (sizeAge){
-		// 	ofCircle(pos, radius);
-		// } 
-		// else{
-		// 	ofCircle(pos, initialRadius);
-		// }
+		if(drawContour){
+            ofNoFill();
+            ofSetLineWidth(1);
+		}
+		else ofFill();
 
-		// Draw arrows
-		if (markerDist == 0){
-			ofCircle(pos, 2);
-		}
-		else{
-			float length = 15.0f;
-			ofPoint p1(pos);
-			ofPoint p2(pos + dir*length);
-			ofLine(p1, p2);
-		}
+		if (sizeAge){
+		    ofCircle(pos, radius);
+        }
+        else{
+            ofCircle(pos, initialRadius);
+        }
+
+//		// Draw arrows
+//		if (markerDist == 0){
+//			ofCircle(pos, 2);
+//		}
+//		else{
+//			float length = 15.0f;
+//			ofPoint p1(pos);
+//			ofPoint p2(pos + dir*length);
+//			ofLine(p1, p2);
+//		}
 	}
 }
 

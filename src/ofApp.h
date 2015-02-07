@@ -7,6 +7,7 @@
 
 #include "ParticleSystem.h"
 #include "irMarker.h"
+#include "Contour.h"
 
 #include "Sequence.h"
 
@@ -44,11 +45,13 @@ class ofApp : public ofBaseApp{
 
 		void guiEvent(ofxUIEventArgs &e);
 
+        //--------------------------------------------------------------
+		float time0;            // Time value for computing dt
 		//--------------------------------------------------------------
 		ofxKinect kinect;
 		//--------------------------------------------------------------
-		bool  flipKinect;
-		bool  resetKinect;
+		bool  flipKinect;       // Flip kinect image
+		bool  resetKinect;      // Reset kinect
 		float reScale;          // Ratio to scale the Image to full screen
 		//--------------------------------------------------------------
 		ofImage irImage, irOriginal;
@@ -60,12 +63,15 @@ class ofApp : public ofBaseApp{
 		ofxCv::ContourFinder irMarkerFinder;
 		ofxCv::RectTrackerFollower<irMarker> tracker;
 		//--------------------------------------------------------------
-		float time0;            // Time value for computing dt
-		//--------------------------------------------------------------
 		// TODO: vector<ParticleSystem> particles
 		ParticleSystem particles;
 		ParticleSystem markersParticles;
 		//--------------------------------------------------------------
+        Contour contour;        // User silhouette contour
+		//--------------------------------------------------------------
+		Sequence sequence;      // Gestures sequence
+		float testCounter;
+        //--------------------------------------------------------------
 		ofxUISuperCanvas *gui0;
 		ofxUISuperCanvas *gui1;
 		ofxUISuperCanvas *gui2;
@@ -74,9 +80,11 @@ class ofApp : public ofBaseApp{
 		ofxUISuperCanvas *gui5;
 		ofxUISuperCanvas *gui6;
 		//--------------------------------------------------------------
-		ofxUIImageToggle *recordingButton;
+		ofxUIImageToggle *recordingButton;  // Button to record gestures sequence
+		ofxUIRadio *guiThemes;  // Button to record gestures sequence
+		int theme;
 		//--------------------------------------------------------------
-        float dim;
+        float dim;              // Size of GUI elements
         float guiWidth;
         //--------------------------------------------------------------
 		float red, green, blue;
@@ -90,23 +98,15 @@ class ofApp : public ofBaseApp{
 		float trackerPersistence;
 		float trackerMaxDistance;
 		//--------------------------------------------------------------
-		Sequence sequence;
-		float testCounter;
+//		float smoothingSize;
 		//--------------------------------------------------------------
-		float smoothingSize;
-		//--------------------------------------------------------------
-
-		//--------------------------------------------------------------
-        ofPoint mousePos;
-        ofPoint mousePrevPos;
-        ofPoint mouseVel;
 
 		//------VMO Declaration-----------------------------------------
 		vmo seqVmo;
 		vmo::pttr pttrList;
 		vmo::belief currentBf;
 		vmo::belief prevBf;
-	
+
 //		vector<ofPoint>& loadedFrames;
 		vector<vector<float> > obs;
 //		vector<vector<ofPolyline> > patterns;

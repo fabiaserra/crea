@@ -8,7 +8,7 @@ class Sequence{
 		Sequence();
 
 		void setup(int nMarkers);
-		void update(vector<irMarker>& markers);
+		void record(vector<irMarker>& markers);
 		void load(const string path);
 		void save(const string path);
         void draw(float percent);
@@ -21,16 +21,17 @@ class Sequence{
 		//--------------------------------------------------------------
 		ofxXmlSettings xml;
         //--------------------------------------------------------------
-		bool recording;
 		bool sequenceLoaded;
+		bool drawPatterns;
+		//--------------------------------------------------------------
 		size_t nMarkers;
         //--------------------------------------------------------------
         vector<ofPolyline> markersPosition;                 // Markers positions through all the sequence
         vector<ofPolyline> markersPastPoints;               // Percentage completion fragment of the sequence
 
-        // Different ideas
-//		vector< vector<ofPoint> > frames;
-//		vector< vector<Marker> > frames;
+        // Other ideas
+//		vector< vector<ofPoint> > markersPosition;
+//		vector< vector<Marker> > markersPosition;
 //		vector< Frame > frames;
         //--------------------------------------------------------------
         vector< vector<ofPolyline> > patterns;              // identified patterns from the sequence

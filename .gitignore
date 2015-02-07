@@ -102,3 +102,13 @@ Thumbs.db
 # Folder config file
 Desktop.ini
 
+
+openFrameworks-Info.plist
+
+Project.xcconfig
+
+zuzor.xcodeproj/project.pbxproj
+
+zuzor.xcodeproj/xcshareddata/xcschemes/zuzor Debug.xcscheme
+
+zuzor.xcodeproj/xcshareddata/xcschemes/zuzor Release.xcscheme
