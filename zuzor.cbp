@@ -18,6 +18,7 @@
 				<Option projectLinkerOptionsRelation="2" />
 				<Compiler>
 					<Add directory="apps/myApps/newZuzor/src" />
+					<Add directory="apps/myApps/zuzor/src" />
 				</Compiler>
 			</Target>
 			<Target title="Release">
@@ -30,6 +31,7 @@
 				<Option projectLinkerOptionsRelation="2" />
 				<Compiler>
 					<Add directory="apps/myApps/newZuzor/src" />
+					<Add directory="apps/myApps/zuzor/src" />
 				</Compiler>
 			</Target>
 		</Build>
@@ -804,6 +806,12 @@
 		<Unit filename="config.make">
 			<Option virtualFolder="build config" />
 		</Unit>
+		<Unit filename="src/Contour.cpp">
+			<Option virtualFolder="src/" />
+		</Unit>
+		<Unit filename="src/Contour.h">
+			<Option virtualFolder="src/" />
+		</Unit>
 		<Unit filename="src/Marker.cpp">
 			<Option virtualFolder="src/" />
 		</Unit>
@@ -822,10 +830,10 @@
 		<Unit filename="src/ParticleSystem.h">
 			<Option virtualFolder="src/" />
 		</Unit>
-		<Unit filename="src/hungarian.cpp">
+		<Unit filename="src/Sequence.cpp">
 			<Option virtualFolder="src/" />
 		</Unit>
-		<Unit filename="src/hungarian.h">
+		<Unit filename="src/Sequence.h">
 			<Option virtualFolder="src/" />
 		</Unit>
 		<Unit filename="src/main.cpp">
@@ -835,6 +843,12 @@
 			<Option virtualFolder="src/" />
 		</Unit>
 		<Unit filename="src/ofApp.h">
+			<Option virtualFolder="src/" />
+		</Unit>
+		<Unit filename="src/vmo.cpp">
+			<Option virtualFolder="src/" />
+		</Unit>
+		<Unit filename="src/vmo.h">
 			<Option virtualFolder="src/" />
 		</Unit>
 		<Extensions>

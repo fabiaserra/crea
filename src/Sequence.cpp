@@ -53,7 +53,6 @@ void Sequence::draw(float percent, vector<int> highlightedIndices){
                 bool highlight = false;
                 vector<int>::iterator it = find(highlightedIndices.begin(), highlightedIndices.end(), patternIndex+1);
                 if(it != highlightedIndices.end()) highlight = true;
-//                if(patternIndex == 1) highlight = true;
                 drawPattern(patternPosition, patternIndex, percent, highlight);
             }
         }
@@ -107,13 +106,13 @@ void Sequence::load(const string path){
         xml.popTag();
     }
 
-    // Debug: print vertices of the sequence
-    for(int i = 0; i < nMarkers; i++){
-        vector<ofPoint> vertices = markersPosition[i].getVertices();
-        for(int j = 0; j < vertices.size(); j++){
-//           cout << j << ": " << vertices[j].x << " " << vertices[j].y << endl;
-        }
-    }
+//    // Debug: print vertices of the sequence
+//    for(int i = 0; i < nMarkers; i++){
+//        vector<ofPoint> vertices = markersPosition[i].getVertices();
+//        for(int j = 0; j < vertices.size(); j++){
+////           cout << j << ": " << vertices[j].x << " " << vertices[j].y << endl;
+//        }
+//    }
 
     int nPatterns = 14;
 

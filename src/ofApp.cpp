@@ -125,15 +125,15 @@ void ofApp::setup(){
 //	gestureCat = -1;
 	//2. Processing
 	//2.1 Load file into VMO
-//	int minLen = 5; // Temporary setting
-//	float start = 0.0, step = 0.01, stop = 2.0;
-//	float t = vmo::findThreshold(obs, 4, start, step, stop); // Temporary threshold range and step
-//	seqVmo = vmo::buildOracle(obs, numMarkers*2 ,t);
+	int minLen = 5; // Temporary setting
+	float start = 0.0, step = 0.01, stop = 2.0;
+	float t = vmo::findThreshold(obs, 4, start, step, stop); // Temporary threshold range and step
+	seqVmo = vmo::buildOracle(obs, numMarkers*2 ,t);
 //	2.2 Output pattern list
-//	pttrList = vmo::findPttr(seqVmo, minLen);
+	pttrList = vmo::findPttr(seqVmo, minLen);
 //	patterns = vmo::processPttr(seqVmo, pttrList);
 
-//    sequence.patterns = vmo::processPttr(seqVmo, pttrList);
+    sequence.patterns = vmo::processPttr(seqVmo, pttrList);
 
 }
 
@@ -237,7 +237,6 @@ void ofApp::update(){
 //                }
 //            }
 //        }
-
 	}
 }
 
@@ -268,6 +267,7 @@ void ofApp::draw(){
 //    for (int i = 0; i < tempMarkers.size(); i++){
 //        tempMarkers[i].draw();
 //    }
+
 
 	ofPopMatrix();
 
@@ -577,6 +577,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 		if (button->getValue() == true){
             ofFileDialogResult result = ofSystemLoadDialog("Select sequence xml file.", false, "sequences/");
             if (result.bSuccess){
+                    cout << result.getPath() << endl;
                 sequence.load(result.getPath());
             }
 		}
