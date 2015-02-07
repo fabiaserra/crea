@@ -279,7 +279,11 @@ void ofApp::draw(){
 //    float percent = ofMap(idx, 1.0, len, 0.0, 1.0);
 
     float percent = testCounter;
-    sequence.draw(percent);
+    vector<int> highlightedIndices;
+    highlightedIndices.push_back(1);
+    highlightedIndices.push_back(3);
+    highlightedIndices.push_back(4);
+    sequence.draw(percent, highlightedIndices);
     if(sequence.sequenceLoaded && testCounter < 0.98) testCounter += 0.001;
 }
 

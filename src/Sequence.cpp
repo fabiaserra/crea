@@ -28,8 +28,8 @@ void Sequence::record(vector<irMarker>& markers){
     xml.popTag();
 }
 
-//void Sequence::draw(float percent, vector<int> highlightedIndexes){
-void Sequence::draw(float percent){
+void Sequence::draw(float percent, vector<int> highlightedIndices){
+//void Sequence::draw(float percent){
 
     if(sequenceLoaded){
 //        for(int markerIndex = 0; markerIndex < nMarkers; markerIndex++){
@@ -51,7 +51,9 @@ void Sequence::draw(float percent){
             for(int patternIndex = 0; patternIndex < patterns.size(); patternIndex++){
                 int patternPosition = patternIndex + 1;
                 bool highlight = false;
-                if(patternIndex == 1) highlight = true;
+                vector<int>::iterator it = find(highlightedIndices.begin(), highlightedIndices.end(), patternIndex+1);
+                if(it != highlightedIndices.end()) highlight = true;
+//                if(patternIndex == 1) highlight = true;
                 drawPattern(patternPosition, patternIndex, percent, highlight);
             }
         }
