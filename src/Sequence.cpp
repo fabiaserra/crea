@@ -161,9 +161,9 @@ void Sequence::drawPattern(int patternPosition, int patternIndex, float percent,
     // Drawing window parameters
     float width = 640.0;
     float height = 480.0;
-    float scale = 5.6;
+    float scale = 5.5;
     float margin = 40.0;
-    float guiHeight = 680;
+    float guiHeight = 700;
 
     ofPushMatrix();
 

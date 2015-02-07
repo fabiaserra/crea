@@ -106,6 +106,7 @@ void ofApp::setup(){
     int numMarkers = 2;
     sequence.setup(numMarkers);
 	sequence.load("sequences/sequence.xml");
+	cout << sequence.numFrames << endl;
 
     testCounter = 0.0;
 
@@ -133,8 +134,7 @@ void ofApp::setup(){
 	pttrList = vmo::findPttr(seqVmo, minLen);
 //	patterns = vmo::processPttr(seqVmo, pttrList);
 
-    sequence.patterns = vmo::processPttr(seqVmo, pttrList);
-
+//    sequence.patterns = vmo::processPttr(seqVmo, pttrList);
 }
 
 //--------------------------------------------------------------
@@ -251,15 +251,18 @@ void ofApp::draw(){
 //    ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 
 	ofSetColor(255);
+
+    // Kinect images
 //    irImage.draw(0, 0);
 //    depthImage.draw(0, 0);
 
+    // OpenCV contour detection
 //    contourFinder.draw();
 //    irMarkerFinder.draw();
 
+    // Graphics
 //    particles.draw();
     markersParticles.draw();
-
 //    contour.draw();
 
 //    vector<irMarker>& tempMarkers         = tracker.getFollowers();
@@ -278,24 +281,28 @@ void ofApp::draw(){
 //    float len = float(pttrList.sfxLen[gestureCat[0]-1]);
 //    float percent = ofMap(idx, 1.0, len, 0.0, 1.0);
 
+    // Draw gesture patterns
     float percent = testCounter;
     vector<int> highlightedIndices;
     highlightedIndices.push_back(1);
     highlightedIndices.push_back(3);
     highlightedIndices.push_back(4);
+    highlightedIndices.push_back(9);
+    highlightedIndices.push_back(14);
     sequence.draw(percent, highlightedIndices);
     if(sequence.sequenceLoaded && testCounter < 0.98) testCounter += 0.001;
 }
 
 //--------------------------------------------------------------
 void ofApp::setupGUI0(){
-	gui0 = new ofxUISuperCanvas("0: MAIN WINDOW", 0, 0, guiWidth, ofGetHeight());
+	if(gui0 == NULL) gui0 = new ofxUISuperCanvas("0: MAIN WINDOW", 0, 0, guiWidth, ofGetHeight());
+    else gui0->clearWidgets();
     gui0->setTheme(theme);
 
 	gui0->addSpacer();
 	gui0->addLabel("Press panel number 0 to 7 to", OFX_UI_FONT_SMALL);
 	gui0->addLabel("switch between panels and hide", OFX_UI_FONT_SMALL);
-	gui0->addLabel("the current one.", OFX_UI_FONT_SMALL);
+	gui0->addLabel("them.", OFX_UI_FONT_SMALL);
 	gui0->addSpacer();
 	gui0->addLabel("Press 'f' to fullscreen", OFX_UI_FONT_SMALL);
 
@@ -315,21 +322,31 @@ void ofApp::setupGUI0(){
 	gui0->addLabel("4: GESTURE TRACKER");
 	gui0->addSpacer();
 
+	gui0->addSpacer();
+	gui0->addLabel("5: CUE LIST");
+	gui0->addSpacer();
+
     gui0->addSpacer();
-	gui0->addLabel("5: FLUID SOLVER");
+	gui0->addLabel("6: FLUID SOLVER");
 	gui0->addSpacer();
 
 	gui0->addSpacer();
-	gui0->addLabel("6: PARTICLES");
+	gui0->addLabel("7: PARTICLES");
+	gui0->addSpacer();
+
+	gui0->addSpacer();
+	gui0->addLabel("8: DEPTH CONTOUR");
 	gui0->addSpacer();
 
 	gui0->autoSizeToFitWidgets();
 	ofAddListener(gui0->newGUIEvent, this, &ofApp::guiEvent);
+	guis.push_back(gui0);
 }
 
 //--------------------------------------------------------------
 void ofApp::setupGUI1(){
-	gui1 = new ofxUISuperCanvas("1: BASICS", 0, 0, guiWidth, ofGetHeight());
+	if(gui1 == NULL) gui1 = new ofxUISuperCanvas("1: BASICS", 0, 0, guiWidth, ofGetHeight());
+	else gui1->clearWidgets();
 	gui1->setTheme(theme);
     gui1->setTriggerWidgetsUponLoad(true);
 
@@ -350,7 +367,6 @@ void ofApp::setupGUI1(){
     gui1->addImageButton("Save Settings", "gui/icons/save.png", false, dim, dim);
     gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui1->addImageButton("Load Settings", "gui/icons/open.png", false, dim, dim);
-    gui1->addImageButton("Reset Settings", "gui/icons/reset.png", false, dim, dim);
     gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui1->addSpacer();
@@ -378,12 +394,13 @@ void ofApp::setupGUI1(){
 	gui1->autoSizeToFitWidgets();
 	gui1->setVisible(false);
 	ofAddListener(gui1->newGUIEvent, this, &ofApp::guiEvent);
-    gui1->loadSettings("gui/gui1Settings.xml");
+//    gui1->loadSettings("gui/gui1Settings.xml");
+    guis.push_back(gui1);
 }
 
 //--------------------------------------------------------------
 void ofApp::setupGUI2(){
-	gui2 = new ofxUISuperCanvas("2: KINECT", 0, 0, guiWidth, ofGetHeight());
+	if(gui2 == NULL) gui2 = new ofxUISuperCanvas("2: KINECT", 0, 0, guiWidth, ofGetHeight());
 	gui2->setTheme(theme);
 
 	gui2->addSpacer();
@@ -421,36 +438,40 @@ void ofApp::setupGUI2(){
 	gui2->autoSizeToFitWidgets();
 	gui2->setVisible(false);
 	ofAddListener(gui2->newGUIEvent, this, &ofApp::guiEvent);
-	gui2->loadSettings("gui/gui2Settings.xml");
+//	gui2->loadSettings("gui/gui2Settings.xml");
+    guis.push_back(gui2);
 }
 
 //--------------------------------------------------------------
 void ofApp::setupGUI3(){
-	gui3 = new ofxUISuperCanvas("3: GESTURE SEQUENCE", 0, 0, guiWidth, ofGetHeight());
+	if(gui3 == NULL) gui3 = new ofxUISuperCanvas("3: GESTURE SEQUENCE", 0, 0, guiWidth, ofGetHeight());
     gui3->setTheme(theme);
 
 	gui3->addSpacer();
 	gui3->addLabel("Press '3' to hide panel", OFX_UI_FONT_SMALL);
 
 	gui3->addSpacer();
-	recordingButton = gui3->addImageToggle("Record sequence", "gui/icons/record.png", false, dim, dim);
+	recordingButton = gui3->addImageToggle("Record Sequence", "gui/icons/record.png", false, dim, dim);
 	gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-	gui3->addImageButton("Save sequence", "gui/icons/save.png", false, dim, dim);
-	gui3->addImageButton("Load sequence", "gui/icons/open.png", false, dim, dim);
+	gui3->addImageButton("Save Sequence", "gui/icons/save.png", false, dim, dim);
+	gui3->addImageButton("Load Sequence", "gui/icons/open.png", false, dim, dim);
 	gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui3->addSpacer();
-    gui3->addToggle("Show patterns", &sequence.drawPatterns);
+    gui3->addToggle("Show gesture patterns", &sequence.drawPatterns);
+
+    gui3->addSpacer();
 
 	gui3->autoSizeToFitWidgets();
 	gui3->setVisible(false);
 	ofAddListener(gui3->newGUIEvent, this, &ofApp::guiEvent);
 //	gui3->loadSettings("gui/gui3Settings.xml");
+    guis.push_back(gui3);
 }
 
 //--------------------------------------------------------------
 void ofApp::setupGUI4(){
-	gui4 = new ofxUISuperCanvas("4: GESTURE TRACKER", 0, 0, guiWidth, ofGetHeight());
+	if(gui4 == NULL) gui4 = new ofxUISuperCanvas("4: GESTURE TRACKER", 0, 0, guiWidth, ofGetHeight());
 	gui4->setTheme(theme);
 
 	gui4->addSpacer();
@@ -463,16 +484,20 @@ void ofApp::setupGUI4(){
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui4->addSpacer();
+    gui4->addToggle("Show gesture patterns", &sequence.drawPatterns);
+
+    gui4->addSpacer();
 
 	gui4->autoSizeToFitWidgets();
 	gui4->setVisible(false);
 	ofAddListener(gui4->newGUIEvent, this, &ofApp::guiEvent);
 //	gui4->loadSettings("gui/gui4Settings.xml");
+    guis.push_back(gui4);
 }
 
 //--------------------------------------------------------------
 void ofApp::setupGUI5(){
-	gui5 = new ofxUISuperCanvas("5: FLUID SOLVER", 0, 0, guiWidth, ofGetHeight());
+    if(!gui5) gui5 = new ofxUISuperCanvas("5: FLUID SOLVER", 0, 0, guiWidth, ofGetHeight());
     gui5->setTheme(theme);
 
 	gui5->addSpacer();
@@ -488,11 +513,12 @@ void ofApp::setupGUI5(){
 	gui5->setVisible(false);
 	ofAddListener(gui5->newGUIEvent, this, &ofApp::guiEvent);
 	gui5->loadSettings("gui/gui5Settings.xml");
+	guis.push_back(gui5);
 }
 
 //--------------------------------------------------------------
 void ofApp::setupGUI6(int i){
-	gui6 = new ofxUISuperCanvas("6: PARTICLES", 0, 0, guiWidth, ofGetHeight());
+	if(!gui6) gui6 = new ofxUISuperCanvas("6: PARTICLES", 0, 0, guiWidth, ofGetHeight());
 	gui6->setTheme(theme);
 
 	gui6->addSpacer();
@@ -541,7 +567,8 @@ void ofApp::setupGUI6(int i){
 	gui6->autoSizeToFitWidgets();
 	gui6->setVisible(false);
 	ofAddListener(gui6->newGUIEvent, this, &ofApp::guiEvent);
-	gui6->loadSettings("gui/gui6Settings.xml");
+//	gui6->loadSettings("gui/gui6Settings.xml");
+    guis.push_back(gui6);
 }
 
 void ofApp::guiEvent(ofxUIEventArgs &e){
@@ -554,13 +581,35 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         }
 	}
 
-	if(e.getName() == "Record sequence"){
+    if(e.getName() == "Save Settings"){
+        ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
+		if (button->getValue() == true){
+            recordingButton->setValue(false);
+            ofFileDialogResult result = ofSystemSaveDialog("sequence.xml", "Save sequence file");
+            if (result.bSuccess){
+                saveGUISettings(result.getPath());
+            }
+		}
+	}
+
+    if(e.getName() == "Load Settings"){
+        ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
+		if (button->getValue() == true){
+            recordingButton->setValue(false);
+            ofFileDialogResult result = ofSystemLoadDialog("Select settings xml file.", false, "settings/");
+            if (result.bSuccess){
+                loadGUISettings(result.getPath());
+            }
+		}
+	}
+
+	if(e.getName() == "Record Sequence"){
 		if (recordingButton->getValue() == true){
             sequence.startRecording();
 		}
 	}
 
-	if(e.getName() == "Save sequence"){
+	if(e.getName() == "Save Sequence"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
 		if (button->getValue() == true){
             recordingButton->setValue(false);
@@ -568,16 +617,14 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             if (result.bSuccess){
                 sequence.save(result.getPath());
             }
-
 		}
 	}
 
-	if(e.getName() == "Load sequence"){
+	if(e.getName() == "Load Sequence"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
 		if (button->getValue() == true){
             ofFileDialogResult result = ofSystemLoadDialog("Select sequence xml file.", false, "sequences/");
             if (result.bSuccess){
-                    cout << result.getPath() << endl;
                 sequence.load(result.getPath());
             }
 		}
@@ -624,7 +671,6 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 	 if(e.getName() == "GUI Theme"){
 	 	ofxUIRadio *radio = (ofxUIRadio *) e.widget;
 
-
         string name = radio->getActiveName();
         if (name == "DEFAULT")      theme = OFX_UI_THEME_DEFAULT;
         if (name == "HIPSTER")      theme = OFX_UI_THEME_HIPSTER;
@@ -655,16 +701,78 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 }
 
 //--------------------------------------------------------------
+void ofApp::saveGUISettings(const string path){
+
+    ofxXmlSettings *XML = new ofxXmlSettings();
+    int guiIndex = 0;
+
+    for(vector<ofxUISuperCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it)
+    {
+        ofxUICanvas *g = *it;
+        int guiIndex = XML->addTag("GUI");
+        XML->pushTag("GUI", guiIndex);
+        vector<ofxUIWidget*> widgets = g->getWidgets();
+        for(int i = 0; i < widgets.size(); i++)
+        {
+            if(widgets[i]->hasState()){
+                int index = XML->addTag("Widget");
+                if(XML->pushTag("Widget", index))
+                {
+                    XML->setValue("Kind", widgets[i]->getKind(), 0);
+                    XML->setValue("Name", widgets[i]->getName(), 0);
+                    widgets[i]->saveState(XML);
+                }
+                XML->popTag();
+            }
+        }
+        XML->popTag();
+        guiIndex++;
+    }
+
+    XML->saveFile(path);
+    delete XML;
+}
+
+//--------------------------------------------------------------
+void ofApp::loadGUISettings(const string path){
+    ofxXmlSettings *XML = new ofxXmlSettings();
+    XML->loadFile(path);
+    int guiIndex = 0;
+
+    for(vector<ofxUISuperCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it)
+    {
+        ofxUICanvas *g = *it;
+        XML->pushTag("GUI", guiIndex);
+        int widgetTags = XML->getNumTags("Widget");
+        for(int i = 0; i < widgetTags; i++)
+        {
+            XML->pushTag("Widget", i);
+            string name = XML->getValue("Name", "NULL", 0);
+            ofxUIWidget *widget = g->getWidget(name);
+            if(widget != NULL && widget->hasState())
+            {
+                widget->loadState(XML);
+                g->triggerEvent(widget);
+            }
+            XML->popTag();
+        }
+        XML->popTag();
+        guiIndex++;
+    }
+    delete XML;
+}
+
+//--------------------------------------------------------------
 void ofApp::exit(){
 	kinect.close();
 
-	gui0->saveSettings("gui/gui0Settings.xml");
-	gui1->saveSettings("gui/gui1Settings.xml");
-	gui2->saveSettings("gui/gui2Settings.xml");
-	gui3->saveSettings("gui/gui3Settings.xml");
-	gui4->saveSettings("gui/gui4Settings.xml");
-	gui5->saveSettings("gui/gui5Settings.xml");
-	gui6->saveSettings("gui/gui6Settings.xml");
+//	gui0->saveSettings("gui/gui0Settings.xml");
+//	gui1->saveSettings("gui/gui1Settings.xml");
+//	gui2->saveSettings("gui/gui2Settings.xml");
+//	gui3->saveSettings("gui/gui3Settings.xml");
+//	gui4->saveSettings("gui/gui4Settings.xml");
+//	gui5->saveSettings("gui/gui5Settings.xml");
+//	gui6->saveSettings("gui/gui6Settings.xml");
 
 	delete gui0;
 	delete gui1;
@@ -750,6 +858,7 @@ void ofApp::keyPressed(int key){
 			gui4->setVisible(false);
 			gui5->toggleVisible();
 			gui6->setVisible(false);
+			sequence.drawPatterns = false;
 			break;
 
 		case '6':
