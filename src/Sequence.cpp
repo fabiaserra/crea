@@ -28,8 +28,7 @@ void Sequence::record(vector<irMarker>& markers){
     xml.popTag();
 }
 
-//void Sequence::draw(float percent, vector<int> highlightedIndexes){
-void Sequence::draw(float percent){
+void Sequence::draw(float percent, vector<int> highlightedIndexes){
 
     if(sequenceLoaded){
 //        for(int markerIndex = 0; markerIndex < nMarkers; markerIndex++){
@@ -51,7 +50,8 @@ void Sequence::draw(float percent){
             for(int patternIndex = 0; patternIndex < patterns.size(); patternIndex++){
                 int patternPosition = patternIndex + 1;
                 bool highlight = false;
-                if(patternIndex == 1) highlight = true;
+                vector<int>::iterator it = find(highlightedIndices.begin(), highlightedIndices.end(), patternIndex+1);
+                if(it != highlightedIndices.end()) highlight = true;
                 drawPattern(patternPosition, patternIndex, percent, highlight);
             }
         }
@@ -61,11 +61,7 @@ void Sequence::draw(float percent){
 
 void Sequence::load(const string path){
 
-	if(!ofFile::doesFileExist(path))
-    {
-        cout << "FILE DOES NOT EXIST"<< endl;
-        return;
-    }
+	if(!ofFile::doesFileExist(path)) return;
 
     if(!xml.load(path)) return;
 
@@ -109,13 +105,13 @@ void Sequence::load(const string path){
         xml.popTag();
     }
 
-    // Debug: print vertices of the sequence
-    for(int i = 0; i < nMarkers; i++){
-        vector<ofPoint> vertices = markersPosition[i].getVertices();
-        for(int j = 0; j < vertices.size(); j++){
-//           cout << j << ": " << vertices[j].x << " " << vertices[j].y << endl;
-        }
-    }
+//    // Debug: print vertices of the sequence
+//    for(int i = 0; i < nMarkers; i++){
+//        vector<ofPoint> vertices = markersPosition[i].getVertices();
+//        for(int j = 0; j < vertices.size(); j++){
+////           cout << j << ": " << vertices[j].x << " " << vertices[j].y << endl;
+//        }
+//    }
 
     int nPatterns = 14;
 
@@ -164,9 +160,9 @@ void Sequence::drawPattern(int patternPosition, int patternIndex, float percent,
     // Drawing window parameters
     float width = 640.0;
     float height = 480.0;
-    float scale = 5.6;
+    float scale = 5.5;
     float margin = 40.0;
-    float guiHeight = 680;
+    float guiHeight = 700;
 
     ofPushMatrix();
 
