@@ -654,16 +654,72 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 }
 
 //--------------------------------------------------------------
+void ofApp::saveGUISettings(const string path){
+
+    ofxXmlSettings *XML = new ofxXmlSettings();
+    int guiIndex = 0;
+
+    for(vector<ofxUISuperCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it)
+    {
+        ofxUICanvas *g = *it;
+        int guiIndex = XML->addTag("GUI");
+        XML->pushTag("GUI", guiIndex);
+        vector<ofxUIWidget*> widgets = g->getWidgets();
+        for(int i = 0; i < widgets.size(); i++)
+        {
+            if(widgets[i]->hasState()){
+                int index = XML->addTag("Widget");
+                if(XML->pushTag("Widget", index))
+                {
+                    XML->setValue("Kind", widgets[i]->getKind(), 0);
+                    XML->setValue("Name", widgets[i]->getName(), 0);
+                    widgets[i]->saveState(XML);
+                }
+                XML->popTag();
+            }
+        }
+        XML->popTag();
+        guiIndex++;
+    }
+
+    XML->saveFile(path);
+    delete XML;
+}
+
+//--------------------------------------------------------------
+void ofApp::loadGUISettings(const string path){
+    ofxXmlSettings *XML = new ofxXmlSettings();
+    XML->loadFile(path);
+    int guiIndex = 0;
+
+    for(vector<ofxUISuperCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it)
+    {
+        ofxUICanvas *g = *it;
+        XML->pushTag("GUI", guiIndex);
+        int widgetTags = XML->getNumTags("Widget");
+        for(int i = 0; i < widgetTags; i++)
+        {
+            XML->pushTag("Widget", i);
+            string name = XML->getValue("Name", "NULL", 0);
+            ofxUIWidget *widget = g->getWidget(name);
+            if(widget != NULL && widget->hasState())
+            {
+                widget->loadState(XML);
+                g->triggerEvent(widget);
+            }
+            XML->popTag();
+        }
+        XML->popTag();
+        guiIndex++;
+    }
+    delete XML;
+}
+
+//--------------------------------------------------------------
 void ofApp::exit(){
 	kinect.close();
 
-	gui0->saveSettings("gui/gui0Settings.xml");
-	gui1->saveSettings("gui/gui1Settings.xml");
-	gui2->saveSettings("gui/gui2Settings.xml");
-	gui3->saveSettings("gui/gui3Settings.xml");
-	gui4->saveSettings("gui/gui4Settings.xml");
-	gui5->saveSettings("gui/gui5Settings.xml");
-	gui6->saveSettings("gui/gui6Settings.xml");
+	saveGUISettings("settings/lastSettings.xml");
 
 	delete gui0;
 	delete gui1;
