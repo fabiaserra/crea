@@ -51,7 +51,7 @@ class vmo{
 public:
 	vmo();
 	// Main functions
-	void setup(int dim, float threshold);
+	void setup(int dim, int num, float threshold);
 	void reset();
 	void addState(vector<float>& newData);
 
@@ -82,13 +82,14 @@ public:
 	vector<vector<float> > obs;
 
 	int nStates;
-	int dim;
+	int dimFeature;
+	int numFeature;
 	float thresh;
 
 	// Static functions
 	// Construction funcitons
-	static float findThreshold(vector<vector<float> > &obs, int dim,float start, float step, float end);
-	static vmo buildOracle(vector<vector<float> > &obs, int dim, float threshold);
+	static float findThreshold(vector<vector<float> > &obs, int dim, int num, float start, float step, float end);
+	static vmo buildOracle(vector<vector<float> > &obs, int dim, int num, float threshold);
 
 	class pttr{
 	public:
@@ -108,10 +109,14 @@ public:
 	};
 
 	// Analysis functions
-	static vmo::pttr findPttr(vmo oracle, int minLen);
-	static vector< vector<ofPolyline> > processPttr(vmo oracle, vmo::pttr pttrList);
-	static vmo::belief tracking_init(vmo::pttr pttrList, vmo oracle, vector<float> firstObs);
-	static vmo::belief tracking(vmo::pttr pttrList, vmo oracle, vmo::belief prevState, vector<float>obs);
+	static vmo::pttr findPttr(const vmo& oracle, int minLen);
+	static vector< vector<ofPolyline> > processPttr(vmo& oracle, const vmo::pttr& pttrList);
+	static vmo::belief tracking_init(vmo& oracle,
+									 const vmo::pttr& pttrList,
+									 vector<float> &firstObs);
+	static vmo::belief tracking(vmo& oracle,
+								const vmo::pttr& pttrList,
+								vmo::belief& prevState, vector<float> &obs);
 
 	// Interface with openFrameworks
 //	static vector<vector<ofPoint> > pttr2Points(vmo::pttr pttrList);

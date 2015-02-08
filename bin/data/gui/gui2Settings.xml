@@ -31,18 +31,18 @@
 <Widget>
     <Kind>4</Kind>
     <Name>IR Threshold</Name>
-    <Value>80.000000000</Value>
+    <Value>236.314651489</Value>
 </Widget>
 <Widget>
     <Kind>6</Kind>
     <Name>Markers size</Name>
-    <HighValue>350.000000000</HighValue>
-    <LowValue>10.000000000</LowValue>
+    <HighValue>69.396591187</HighValue>
+    <LowValue>22.629325867</LowValue>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Tracker persistence</Name>
-    <Value>70.000000000</Value>
+    <Value>64.655166626</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>

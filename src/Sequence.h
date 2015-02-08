@@ -11,7 +11,7 @@ class Sequence{
 		void record(vector<irMarker>& markers);
 		void load(const string path);
 		void save(const string path);
-        void draw(float percent, vector<int> highlightedIndices);
+        void draw(float percent);
         void drawPattern(int patternPosition, int patternIndex, float percent, bool highlight);
 
         void startRecording();

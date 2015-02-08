@@ -31,26 +31,35 @@
 
 vmo::pttr::pttr(){
     size = 0;
-	sfxPts.clear();
-	sfxPts.reserve(INIT_VMO_SIZE);
-	sfxLen.clear();
-	sfxLen.reserve(INIT_VMO_SIZE);
+	
+	vector2D tmpPts(0);
+	sfxPts = tmpPts;
+//	sfxPts.reserve(INIT_VMO_SIZE);
+	
+	vector1D tmpLen(0);
+	sfxLen = tmpLen;
+//	sfxLen.reserve(INIT_VMO_SIZE);
 }
 
 vmo::belief::belief(){
 	K = 0;
 	currentIdx = -1;
-	path.clear();
-	cost.clear();
+	
+	vector1D tmpPath(0);
+	path = tmpPath;
+	
+	vector<float> tmpCost(0);
+	cost = tmpCost;
 }
 
 vmo::vmo(){
 }
 
-void vmo::setup(int dim = 1, float threshold = 0.0){
+void vmo::setup(int dim = 1, int num = 1, float threshold = 0.0){
 
 	nStates = 1;
-	this->dim = dim;
+	this->dimFeature = dim;
+	this->numFeature = num;
 	this->thresh = threshold;
 
 	// Suffix link vector
@@ -99,7 +108,7 @@ void vmo::setup(int dim = 1, float threshold = 0.0){
 	pttrInd.push_back(zeroStatePttrInd);
 
 	// Observation vector
-	vector<float> zeroStateObs(this->dim, 0.0);
+	vector<float> zeroStateObs(dimFeature*numFeature, 0.0);
 	obs.clear();
 	obs.reserve(INIT_VMO_SIZE);
 	obs.push_back(zeroStateObs);
@@ -217,8 +226,7 @@ void vmo::addState(vector<float>& newData){
 	while (k >= 0) {
 		vector1D trnList(0);
 		vector<float> trnVec(0);
-//        vector<vector<float> >& tmp = vmo::trnIndexing(k);
-		vector<vector<float> > tmp(trn[k].size(), vector<float>(dim, 0.0));
+		vector<vector<float> > tmp(trn[k].size(), vector<float>(dimFeature*numFeature, 0.0));
 		for (int i = 0; i < trn[k].size(); i++) {
 			tmp[i] = obs[trn[k][i]];
 		}
@@ -238,8 +246,6 @@ void vmo::addState(vector<float>& newData){
 			sfxCandidate = trn[k][trnList[argmin]];
 			break;
 		}
-//		tmp.clear();
-//		dvec.clear();
 	}
 
 	if (k == -1) {
@@ -313,11 +319,11 @@ void vmo::print(string attr){
 
 }
 
-float vmo::findThreshold(vector<vector<float> > &obs, int dim = 1,float start = 0.0, float step = 0.01, float end = 2.0){
+float vmo::findThreshold(vector<vector<float> > &obs, int dim = 1, int num = 1,float start = 0.0, float step = 0.01, float end = 2.0){
 	float t = start;
 	float ir = 0.0;
 	while (start <= end) {
-		vmo tmpVmo = buildOracle(obs, dim, start);
+		vmo tmpVmo = buildOracle(obs, dim, num, start);
 		float tmpIr = tmpVmo.getIR();
 		if (tmpIr >= ir) {
 			ir = tmpIr;
@@ -328,9 +334,9 @@ float vmo::findThreshold(vector<vector<float> > &obs, int dim = 1,float start = 
 	return t;
 }
 
-vmo vmo::buildOracle(vector<vector<float> > &obs, int dim = 1, float threshold = 0.0){
+vmo vmo::buildOracle(vector<vector<float> > &obs, int dim = 1, int num = 1, float threshold = 0.0){
 	vmo oracle = vmo();
-	oracle.setup(dim, threshold);
+	oracle.setup(dim, num, threshold);
 
 	for (int i = 0; i<obs.size(); i++) {
 		oracle.addState(obs[i]);
@@ -338,7 +344,7 @@ vmo vmo::buildOracle(vector<vector<float> > &obs, int dim = 1, float threshold =
 	return oracle;
 }
 
-vmo::pttr vmo::findPttr(vmo oracle, int minLen = 0){
+vmo::pttr vmo::findPttr(const vmo& oracle, int minLen = 0){
 	vmo::pttr pttrList = vmo::pttr();
 	int preSfx = -1;
 
@@ -347,11 +353,12 @@ vmo::pttr vmo::findPttr(vmo oracle, int minLen = 0){
 		vector1D r = oracle.rsfx[i];
 		bool pttrFound = false;
 
-		if (s != 0 &&
-			i - oracle.lrs[i]+1 > s &&
+		if (
+			(s != 0) &&
+			((i - oracle.lrs[i]+1) > s) &&
 			oracle.lrs[i] > minLen) {
 			for (int j = 0; j < pttrList.size; j++) {
-				vector1D tmp;
+				vector1D tmp(0);
 				for (int k = 0; k < pttrList.sfxPts[j].size(); k++) {
 					if ((pttrList.sfxPts[j][k]-pttrList.sfxLen[j]) < i &&
 						pttrList.sfxPts[j][k] > i) {
@@ -369,12 +376,13 @@ vmo::pttr vmo::findPttr(vmo oracle, int minLen = 0){
 					}
 				}
 			}
-			if (preSfx - s != 1 &&
-				!pttrFound) {
-				if (r.size() == 0) {
+			if (
+				((preSfx - s) != 1) &&
+				(!pttrFound)) {
+				if (r.size() != 0) {
 					r.push_back(i);
 					r.push_back(s);
-					vector1D lrsVec;
+					vector1D lrsVec(0);
 					for (int k = r.size()-1; k > -1; k--) {
 						lrsVec.push_back(oracle.lrs[r[k]]);
 					}
@@ -384,7 +392,7 @@ vmo::pttr vmo::findPttr(vmo oracle, int minLen = 0){
 						pttrList.sfxLen.push_back(len);
 					}
 				}else{
-					vector1D pts;
+					vector1D pts(0);
 					pts.push_back(i);
 					pts.push_back(s);
 					pttrList.sfxPts.push_back(pts);
@@ -401,33 +409,39 @@ vmo::pttr vmo::findPttr(vmo oracle, int minLen = 0){
 	return pttrList;
 }
 
-vector< vector<ofPolyline> > vmo::processPttr(vmo oracle, vmo::pttr pttrList){
+vector< vector<ofPolyline> > vmo::processPttr(vmo& oracle, const vmo::pttr& pttrList){
 
-	vector< vector<ofPolyline> > pattern;
-	vector1D pts;
+	vector< vector<ofPolyline> > pattern(0);
+	vector1D pts(0);
 	int len;
 	for (int i = 0; i < pttrList.size; i++) {
 		pts = pttrList.sfxPts[i];
 		len = pttrList.sfxLen[i];
 		int cat = i+1;
-		ofPolyline ges1;
-		ofPolyline ges2;
+//		ofPolyline ges1;
+//		ofPolyline ges2;
         vector<ofPolyline> ges;
-        ges1.resize(len);
-        ges2.resize(len);
-        ges.push_back(ges1);
-        ges.push_back(ges2);
+		
+		for (int g = 0; g < oracle.numFeature; g++) {
+			ofPolyline gesTmp;
+			gesTmp.resize(len);
+			ges.push_back(gesTmp);
+		}
+//        ges1.resize(len);
+//        ges2.resize(len);
+//        ges.push_back(ges1);
+//        ges.push_back(ges2);
 		for (int j = 0; j<pts.size(); j++) {
 			int ind = 1;
 			for (int k = pts[j]; k > pts[j]-len; k--) {
 				oracle.pttrCat[k].push_back(cat);
 				oracle.pttrInd[k].push_back(ind);
 
-				for (int d = 0; d < 2; d++) {
+				for (int d = 0; d < oracle.numFeature/oracle.dimFeature; d++) {
 					ges[d][k].x = (ges[d][k].x*float(ind-1)/float(ind))
-                                    + oracle.obs[k][d*2]/float(ind);
+                                    + oracle.obs[k][d*oracle.dimFeature]/float(ind);
 					ges[d][k].y = (ges[d][k].y*float(ind-1)/float(ind))
-                                    + oracle.obs[k][d*2+1]/float(ind);
+                                    + oracle.obs[k][d*oracle.dimFeature+1]/float(ind);
 				}
 				ind++;
 			}
@@ -439,7 +453,7 @@ vector< vector<ofPolyline> > vmo::processPttr(vmo oracle, vmo::pttr pttrList){
 }
 
 
-vmo::belief vmo::tracking_init(vmo::pttr pttrList, vmo oracle, vector<float> firstObs){
+vmo::belief vmo::tracking_init(vmo& oracle, const vmo::pttr& pttrList, vector<float> &firstObs){
 	vmo::belief bf = vmo::belief();
 	bf.K = oracle.getK();
 	bf.path.assign(bf.K, 0);
@@ -470,7 +484,9 @@ vmo::belief vmo::tracking_init(vmo::pttr pttrList, vmo oracle, vector<float> fir
 	return bf;
 }
 
-vmo::belief vmo::tracking(vmo::pttr pttrList, vmo oracle, vmo::belief prevBf, vector<float> obs){
+vmo::belief vmo::tracking(vmo& oracle,
+						  const vmo::pttr& pttrList,
+						  vmo::belief& prevBf, vector<float> &obs){
 	/*
 	 Real-time tracking function for VMO, not optimized yet.
 	 */
