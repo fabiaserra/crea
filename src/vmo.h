@@ -51,7 +51,7 @@ class vmo{
 public:
 	vmo();
 	// Main functions
-	void setup(int dim, float threshold);
+	void setup(int dim, int num, float threshold);
 	void reset();
 	void addState(vector<float>& newData);
 
@@ -82,13 +82,14 @@ public:
 	vector<vector<float> > obs;
 
 	int nStates;
-	int dim;
+	int dimFeature;
+	int numFeature;
 	float thresh;
 
 	// Static functions
 	// Construction funcitons
-	static float findThreshold(vector<vector<float> > &obs, int dim,float start, float step, float end);
-	static vmo buildOracle(vector<vector<float> > &obs, int dim, float threshold);
+	static float findThreshold(vector<vector<float> > &obs, int dim, int num, float start, float step, float end);
+	static vmo buildOracle(vector<vector<float> > &obs, int dim, int num, float threshold);
 
 	class pttr{
 	public:

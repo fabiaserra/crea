@@ -43,10 +43,6 @@ class ofApp : public ofBaseApp{
 		void setupGUI5();
 		void setupGUI6(int i);	// TODO: use the i to be able to create a vector of ParticleSystems
 
-		void saveGUISettings(const string path);
-		void loadGUISettings(const string path);
-		void resetGUISettings();
-
 		void guiEvent(ofxUIEventArgs &e);
 
         //--------------------------------------------------------------
@@ -76,7 +72,6 @@ class ofApp : public ofBaseApp{
 		Sequence sequence;      // Gestures sequence
 		float testCounter;
         //--------------------------------------------------------------
-        vector<ofxUISuperCanvas *> guis;
 		ofxUISuperCanvas *gui0;
 		ofxUISuperCanvas *gui1;
 		ofxUISuperCanvas *gui2;
