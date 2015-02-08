@@ -31,20 +31,22 @@ void Sequence::record(vector<irMarker>& markers){
 void Sequence::draw(float percent, vector<int> highlightedIndexes){
 
     if(sequenceLoaded){
-//        for(int markerIndex = 0; markerIndex < nMarkers; markerIndex++){
-//            if(markerIndex == 0) ofSetColor(255, 0, 0);
-//            if(markerIndex == 1) ofSetColor(0, 255, 0);
-//            markersPosition[markerIndex].draw();
+        // Draw entire sequence
+        // for(int markerIndex = 0; markerIndex < nMarkers; markerIndex++){
+        //     if(markerIndex == 0) ofSetColor(255, 0, 0);
+        //     if(markerIndex == 1) ofSetColor(0, 255, 0);
+        //     markersPosition[markerIndex].draw();
 
-//            ofPoint currentPoint = markersPosition[markerIndex].getPointAtPercent(percent);
-//            markersPastPoints[markerIndex].addVertex(currentPoint);
-//
-//            ofSetColor(0, 255, 0);
-//            markersPastPoints[markerIndex].draw();
-//
-//            ofCircle(currentPoint, 3);
-//        }
+        //     ofPoint currentPoint = markersPosition[markerIndex].getPointAtPercent(percent);
+        //     markersPastPoints[markerIndex].addVertex(currentPoint);
+ 
+        //     ofSetColor(0, 255, 0);
+        //     markersPastPoints[markerIndex].draw();
+ 
+        //     ofCircle(currentPoint, 3);
+        // }
 
+        // Draw gesture patterns
         // if patterns identified...
         if (drawPatterns){
             for(int patternIndex = 0; patternIndex < patterns.size(); patternIndex++){
@@ -61,7 +63,7 @@ void Sequence::draw(float percent, vector<int> highlightedIndexes){
 
 void Sequence::load(const string path){
 
-	if(!ofFile::doesFileExist(path)) return;
+    if(!ofFile::doesFileExist(path)) return;
 
     if(!xml.load(path)) return;
 
@@ -105,13 +107,13 @@ void Sequence::load(const string path){
         xml.popTag();
     }
 
-//    // Debug: print vertices of the sequence
-//    for(int i = 0; i < nMarkers; i++){
-//        vector<ofPoint> vertices = markersPosition[i].getVertices();
-//        for(int j = 0; j < vertices.size(); j++){
-////           cout << j << ": " << vertices[j].x << " " << vertices[j].y << endl;
-//        }
-//    }
+    // // Debug: print vertices of the sequence
+    // for(int i = 0; i < nMarkers; i++){
+    //     vector<ofPoint> vertices = markersPosition[i].getVertices();
+    //     for(int j = 0; j < vertices.size(); j++){
+    //        cout << j << ": " << vertices[j].x << " " << vertices[j].y << endl;
+    //     }
+    // }
 
     int nPatterns = 14;
 
@@ -224,6 +226,6 @@ void Sequence::save(const string path) {
 }
 
 void Sequence::startRecording(){
-	xml.clear();
+    xml.clear();
 }
 

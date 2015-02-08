@@ -9,7 +9,6 @@ Contour::Contour()
 }
 
 void Contour::setup(){
-
     smoothingSize = 0;
 
     drawBoundingRect = false;
@@ -20,7 +19,6 @@ void Contour::setup(){
 
 void Contour::update(ofxCv::ContourFinder & contourFinder){
     // TODO: compute optical flow
-
     boundingRects.clear();
     convexHulls.clear();
     contours.clear();
@@ -42,36 +40,35 @@ void Contour::update(ofxCv::ContourFinder & contourFinder){
 }
 
 void Contour::draw(){
+    if(drawBoundingRect){
+        ofFill();
+        ofSetColor(255);
+        for(int i = 0; i < boundingRects.size(); i++)
+            ofRect(boundingRects[i]);
+    }
 
-        if(drawBoundingRect){
-            ofFill();
-            ofSetColor(255);
-            for(int i = 0; i < boundingRects.size(); i++)
-                ofRect(boundingRects[i]);
-        }
-
-        if(drawConvexHull){
-            ofSetColor(255);
-            for(int i = 0; i < convexHulls.size(); i++){
-                ofBeginShape();
-                for(int j = 0; i < convexHulls[i].getVertices().size(); j++){
-                    ofVertex(convexHulls[i].getVertices().at(j).x, convexHulls[i].getVertices().at(j).y);
-                }
-                ofEndShape();
+    if(drawConvexHull){
+        ofSetColor(255);
+        for(int i = 0; i < convexHulls.size(); i++){
+            ofBeginShape();
+            for(int j = 0; i < convexHulls[i].getVertices().size(); j++){
+                ofVertex(convexHulls[i].getVertices().at(j).x, convexHulls[i].getVertices().at(j).y);
             }
+            ofEndShape();
         }
+    }
 
-        if(drawConvexHullLine){
-            ofSetColor(255, 0, 0);
-            ofSetLineWidth(3);
-            for(int i = 0; i < convexHulls.size(); i++)
-                convexHulls[i].draw(); //if we only want the contour
-        }
+    if(drawConvexHullLine){
+        ofSetColor(255, 0, 0);
+        ofSetLineWidth(3);
+        for(int i = 0; i < convexHulls.size(); i++)
+            convexHulls[i].draw(); //if we only want the contour
+    }
 
-        if(drawContourLine){
-            ofSetColor(0);
-            ofSetLineWidth(3);
-            for(int i = 0; i < contours.size(); i++)
-                contours[i].draw();
-        }
+    if(drawContourLine){
+        ofSetColor(0);
+        ofSetLineWidth(3);
+        for(int i = 0; i < contours.size(); i++)
+            contours[i].draw();
+    }
 }
