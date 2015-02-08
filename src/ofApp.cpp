@@ -187,7 +187,7 @@ void ofApp::update(){
 		contourFinder.findContours(depthImage);
 
 		// Track markers
-		vector<irMarker>& tempMarkers         = tracker.getFollowers();   // TODO: assign dead labels to new labels and have a MAX number of markers
+		vector<irMarker>& tempMarkers       = tracker.getFollowers();   // TODO: assign dead labels to new labels and have a MAX number of markers
 		vector<unsigned int> deadLabels     = tracker.getDeadLabels();
 		vector<unsigned int> currentLabels  = tracker.getCurrentLabels();
 		// vector<unsigned int> newLabels      = tracker.getNewLabels();
