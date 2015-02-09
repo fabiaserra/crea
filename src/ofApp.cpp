@@ -136,7 +136,7 @@ void ofApp::setup(){
     pttrList = vmo::findPttr(seqVmo, minLen);
     // patterns = vmo::processPttr(seqVmo, pttrList);
 
-    sequence.patterns = vmo::processPttr(seqVmo, pttrList);
+    //sequence.patterns = vmo::processPttr(seqVmo, pttrList);
 
 }
 
@@ -733,7 +733,7 @@ void ofApp::saveGUISettings(const string path){
 //--------------------------------------------------------------
 void ofApp::loadGUISettings(const string path){
     ofxXmlSettings *XML = new ofxXmlSettings();
-    XML->loadFile(path);
+    if(!XML->loadFile(path)) return;
     int guiIndex = 0;
 
     for(vector<ofxUISuperCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it)
