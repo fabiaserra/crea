@@ -28,7 +28,7 @@ void Sequence::record(vector<irMarker>& markers){
     xml.popTag();
 }
 
-void Sequence::draw(float percent, vector<int> highlightedIndexes){
+void Sequence::draw(float percent, vector<int> highlightedIndices){
 
     if(sequenceLoaded){
         // Draw entire sequence

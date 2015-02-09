@@ -287,7 +287,7 @@ void ofApp::draw(){
     // float percent = testCounter;
     
     // Draw gesture patterns
-    float percent = testCounter;
+    // percent = testCounter;
     vector<int> highlightedIndices;
     highlightedIndices.push_back(1);
     highlightedIndices.push_back(3);
