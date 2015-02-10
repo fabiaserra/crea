@@ -10,10 +10,11 @@ class Sequence{
         Sequence();
 
         void setup(int nMarkers);
+        void update();
         void record(vector<irMarker>& markers);
         void load(const string path);
         void save(const string path);
-        void draw(float percent);
+        void draw();
         void drawPatterns(map<int, float> currentPatterns);
 
 //        void setPatterns(vector< vector<ofPolyline> > patterns);
@@ -42,10 +43,13 @@ class Sequence{
         float duration;
         size_t numFrames;
         //--------------------------------------------------------------
-        int frame_counter;
+        float playhead; // 0 ~ 1
+        float elapsed_time;
         //--------------------------------------------------------------
         ofTrueTypeFont  verdana;
 
     protected:
         void drawPattern(int patternPosition, int patternIndex, float percent, bool highlight);
+        void updatePlayhead();
+        size_t calcCurrentFrameIndex();
 };

@@ -91,41 +91,42 @@ void ofApp::setup(){
 
     // SEQUENCE
     int numMarkers = 2;
-    int dim = 2;
+//    int dim = 2;
     sequence.setup(numMarkers);
-    sequence.load("sequences/sequence4.xml");
+    sequence.load("sequences/sequence.xml");
+//
+//    testCounter = 0.0;
+//
+//    //VMO Setup goes here//
+//    obs.assign(sequence.numFrames, vector<float>(numMarkers*dim));
+//    for (int markerIndex = 0; markerIndex < numMarkers; markerIndex++){
+//        for (int frameIndex = 0; frameIndex < sequence.numFrames; frameIndex++){
+//            obs[frameIndex][markerIndex*dim] = sequence.markersPosition[markerIndex][frameIndex].x;
+//            obs[frameIndex][markerIndex*dim+1] = sequence.markersPosition[markerIndex][frameIndex].y;
+//        }
+//    }
 
-    testCounter = 0.0;
-
-    //VMO Setup goes here//
-    obs.assign(sequence.numFrames, vector<float>(numMarkers*dim));
-    for (int markerIndex = 0; markerIndex < numMarkers; markerIndex++){
-        for (int frameIndex = 0; frameIndex < sequence.numFrames; frameIndex++){
-            obs[frameIndex][markerIndex*dim] = sequence.markersPosition[markerIndex][frameIndex].x;
-            obs[frameIndex][markerIndex*dim+1] = sequence.markersPosition[markerIndex][frameIndex].y;
-        }
-    }
-
-    initStatus = true;
-    stopTracking = true;
-//    // gestureInd = -1;
-//    // gestureCat = -1;
-    // 2. Processing
-    // 2.1 Load file into VMO
-    int minLen = 1; // Temporary setting
-    float start = 0.0, step = 0.05, stop = 5.0;
-    float t = vmo::findThreshold(obs, dim, numMarkers, start, step, stop); // Temporary threshold range and step
-    seqVmo = vmo::buildOracle(obs, dim, numMarkers, t);
-    // 2.2 Output pattern list
-    pttrList = vmo::findPttr(seqVmo, minLen);
-    sequence.patterns = vmo::processPttr(seqVmo, pttrList); // double free error in linux
-    cout << sequence.patterns.size() << endl;
+//    initStatus = true;
+//    stopTracking = true;
+////    // gestureInd = -1;
+////    // gestureCat = -1;
+//    // 2. Processing
+//    // 2.1 Load file into VMO
+//    int minLen = 1; // Temporary setting
+//    float start = 0.0, step = 0.05, stop = 5.0;
+//    float t = vmo::findThreshold(obs, dim, numMarkers, start, step, stop); // Temporary threshold range and step
+//    seqVmo = vmo::buildOracle(obs, dim, numMarkers, t);
+//    // 2.2 Output pattern list
+//    pttrList = vmo::findPttr(seqVmo, minLen);
+//    sequence.patterns = vmo::processPttr(seqVmo, pttrList); // double free error in linux
+//    cout << sequence.patterns.size() << endl;
     
     // SETUP GUIs
     dim = 32;
     guiWidth = 240;
     theme = OFX_UI_THEME_GRAYDAY;
     drawPatterns = false;
+    drawSequence = false;
 
     setupGUI0();
     setupGUI1();
@@ -217,6 +218,8 @@ void ofApp::update(){
 
         // Record sequence when recording button is true
         if(recordingSequence->getValue() == true) sequence.record(tempMarkers);
+        
+        if(drawSequence) sequence.update();
 
         //Gesture Tracking with VMO here?
 //
@@ -270,6 +273,8 @@ void ofApp::draw(){
     // for (int i = 0; i < tempMarkers.size(); i++){
     //     tempMarkers[i].draw();
     // }
+    
+    if(drawSequence) sequence.draw();
 
     ofPopMatrix();
 
@@ -281,25 +286,25 @@ void ofApp::draw(){
 //
 //    float percent = ofMap(idx, 1.0, len, 0.0, 1.0);
 
-	gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
+//	gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
 
 //     float percent = testCounter;
 
     // Draw gesture patterns
-    ofSetColor(255, 0, 0);
-    ofSetLineWidth(3);
-    for(int patternIndex = 0; patternIndex < sequence.patterns.size(); patternIndex++){
-        for(int markerIndex = 0; markerIndex < sequence.patterns[patternIndex].size(); markerIndex++){
-//            cout << sequence.patterns[patternIndex][markerIndex].size() << endl;
-            sequence.patterns[patternIndex][markerIndex].draw();
-        }
-    }
+//    ofSetColor(255, 0, 0);
+//    ofSetLineWidth(3);
+//    for(int patternIndex = 0; patternIndex < sequence.patterns.size(); patternIndex++){
+//        for(int markerIndex = 0; markerIndex < sequence.patterns[patternIndex].size(); markerIndex++){
+////            cout << sequence.patterns[patternIndex][markerIndex].size() << endl;
+//            sequence.patterns[patternIndex][markerIndex].draw();
+//        }
+//    }
     
     map<int, float> currentPatterns; // Use "gestureUpdate" above!!!!!!!!!!
     currentPatterns[1] = 0.35;
     currentPatterns[3] = 0.75;
     currentPatterns[4] = 0.95;
-    if(drawPatterns) sequence.drawPatterns(currentPatterns);
+//    if(drawPatterns) sequence.drawPatterns(currentPatterns);
 
 }
 
@@ -462,11 +467,12 @@ void ofApp::setupGUI3(){
     gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui3->addImageButton("Save Sequence", "gui/icons/save.png", false, dim, dim);
     gui3->addImageButton("Load Sequence", "gui/icons/open.png", false, dim, dim);
+    gui3->addImageToggle("Play Sequence", "gui/icons/play.png", false, dim, dim);
     gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-//
-//    sequenceFilename = gui3->addLabel("Filename: "+sequence.filename, OFX_UI_FONT_SMALL);
-//    sequenceDuration = gui3->addLabel("Duration: "+ofToString(sequence.duration, 2) + " s", OFX_UI_FONT_SMALL);
-//    sequenceNumFrames = gui3->addLabel("Number of frames: "+ofToString(sequence.numFrames), OFX_UI_FONT_SMALL);
+
+    sequenceFilename = gui3->addLabel("Filename: "+sequence.filename, OFX_UI_FONT_SMALL);
+    sequenceDuration = gui3->addLabel("Duration: "+ofToString(sequence.duration, 2) + " s", OFX_UI_FONT_SMALL);
+    sequenceNumFrames = gui3->addLabel("Number of frames: "+ofToString(sequence.numFrames), OFX_UI_FONT_SMALL);
 
 
     gui3->addSpacer();
@@ -641,6 +647,14 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             }
         }
     }
+    
+    if(e.getName() == "Play Sequence"){
+        ofxUIImageToggle *button = (ofxUIImageToggle *) e.widget;
+        if (button->getValue() == true){
+            recordingSequence->setValue(false);
+            drawSequence = true;
+        }
+    }
 
     if(e.getName() == "Start vmo"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
@@ -761,7 +775,6 @@ void ofApp::loadGUISettings(const string path){
             ofxUIWidget *widget = g->getWidget(name);
             if(widget != NULL && widget->hasState())
             {
-                if(widget->getName() == "Show gesture patterns") continue;
                 widget->loadState(XML);
                 g->triggerEvent(widget);
             }
@@ -807,7 +820,7 @@ void ofApp::keyPressed(int key){
             gui4->setVisible(false);
             gui5->setVisible(false);
             gui6->setVisible(false);
-            drawPatterns = false;
+//            drawPatterns = false;
             break;
 
         case '1':
@@ -818,7 +831,7 @@ void ofApp::keyPressed(int key){
             gui4->setVisible(false);
             gui5->setVisible(false);
             gui6->setVisible(false);
-            drawPatterns = false;
+//            drawPatterns = false;
             break;
 
         case '2':
@@ -829,7 +842,7 @@ void ofApp::keyPressed(int key){
             gui4->setVisible(false);
             gui5->setVisible(false);
             gui6->setVisible(false);
-            drawPatterns = false;
+//            drawPatterns = false;
             break;
 
         case '3':
@@ -840,8 +853,8 @@ void ofApp::keyPressed(int key){
             gui4->setVisible(false);
             gui5->setVisible(false);
             gui6->setVisible(false);
-            if(gui3->isVisible()) drawPatterns = true;
-            else drawPatterns = false;
+//            if(gui3->isVisible()) drawPatterns = true;
+//            else drawPatterns = false;
             break;
 
         case '4':
@@ -852,8 +865,8 @@ void ofApp::keyPressed(int key){
             gui4->toggleVisible();
             gui5->setVisible(false);
             gui6->setVisible(false);
-            if(gui4->isVisible()) drawPatterns = true;
-            else drawPatterns = false;
+//            if(gui4->isVisible()) drawPatterns = true;
+//            else drawPatterns = false;
             break;
 
         case '5':
@@ -864,7 +877,7 @@ void ofApp::keyPressed(int key){
             gui4->setVisible(false);
             gui5->toggleVisible();
             gui6->setVisible(false);
-            drawPatterns = false;
+//            drawPatterns = false;
             break;
 
         case '6':
@@ -875,7 +888,7 @@ void ofApp::keyPressed(int key){
             gui4->setVisible(false);
             gui5->setVisible(false);
             gui6->toggleVisible();
-            drawPatterns = false;
+//            drawPatterns = false;
             break;
 
         default:

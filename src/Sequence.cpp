@@ -4,7 +4,7 @@ Sequence::Sequence(){
     filename = "";
     duration = 0;
     numFrames = 0;
-    frame_counter = 0;
+    
 }
 
 void Sequence::setup(int nMarkers){
@@ -12,6 +12,10 @@ void Sequence::setup(int nMarkers){
 
     verdana.loadFont("fonts/verdana.ttf", 80, true, true);
 
+}
+
+void Sequence::update(){
+    updatePlayhead();
 }
 
 void Sequence::record(vector<irMarker>& markers){
@@ -29,15 +33,15 @@ void Sequence::record(vector<irMarker>& markers){
     xml.popTag();
 }
 
-void Sequence::draw(float percent){
+void Sequence::draw(){
 
     // Draw entire sequence
     for(int markerIndex = 0; markerIndex < nMarkers; markerIndex++){
         if(markerIndex == 0) ofSetColor(255, 0, 0);
         if(markerIndex == 1) ofSetColor(0, 255, 0);
-        markersPosition[markerIndex].draw();
-
-        ofPoint currentPoint = markersPosition[markerIndex].getPointAtPercent(percent);
+        //markersPosition[markerIndex].draw();
+        
+        ofPoint currentPoint = markersPosition[markerIndex].getPointAtIndexInterpolated(calcCurrentFrameIndex());
         markersPastPoints[markerIndex].addVertex(currentPoint);
 
         ofSetColor(0, 255, 0);
@@ -242,5 +246,33 @@ void Sequence::save(const string path) {
 
 void Sequence::startRecording(){
     xml.clear();
+}
+
+void Sequence::updatePlayhead()
+{
+    elapsed_time += ofGetLastFrameTime();
+    
+    bool wrapped = false;
+    
+    if (elapsed_time > duration)
+    {
+        elapsed_time = 0;
+    }
+    
+    if (elapsed_time < 0)
+    {
+        elapsed_time = duration;
+    }
+    
+    playhead = (elapsed_time / duration);
+}
+
+size_t Sequence::calcCurrentFrameIndex()
+{
+    size_t frameIndex = floor(numFrames * playhead);
+    
+    if (frameIndex >= numFrames) frameIndex = numFrames-1;
+    
+    return frameIndex;
 }
 
