@@ -566,3 +566,19 @@ int* vmo::getGestureInd(int ind){
     return temp;
 }
 
+map<int, float> vmo::getGestureUpdate(int ind, vmo::pttr& pttrList){
+	map<int, float> out;
+	if (pttrCat[ind].size() == 0) {
+		out[0] = -1.0;
+	}else{
+		float idx;
+		float len;
+		for (int i = 0; i < pttrCat[ind].size(); i++) {
+			idx = float(pttrInd[ind][i]);
+			len = float(pttrList.sfxLen[pttrCat[ind][i]-1]);
+			out[pttrCat[ind][i]] = ofMap(idx, 0.0, len, 0.0, 1.0);
+		}
+	}
+	return out;
+}
+

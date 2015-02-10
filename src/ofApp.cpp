@@ -108,7 +108,7 @@ void ofApp::setup(){
     int numMarkers = 2;
     int dim = 2;
     sequence.setup(numMarkers);
-    sequence.load("sequences/sequence.xml");
+    sequence.load("sequences/sequence4.xml");
 
     testCounter = 0.0;
 
@@ -136,7 +136,7 @@ void ofApp::setup(){
     pttrList = vmo::findPttr(seqVmo, minLen);
     // patterns = vmo::processPttr(seqVmo, pttrList);
 
-    //sequence.patterns = vmo::processPttr(seqVmo, pttrList);
+//    sequence.patterns = vmo::processPttr(seqVmo, pttrList);
 
 }
 
@@ -277,25 +277,28 @@ void ofApp::draw(){
 
     ofPopMatrix();
 
-    gestureInd = seqVmo.getGestureInd(currentBf.currentIdx);
-    gestureCat = seqVmo.getGestureCat(currentBf.currentIdx);
+//    gestureInd = seqVmo.getGestureInd(currentBf.currentIdx);
+//    gestureCat = seqVmo.getGestureCat(currentBf.currentIdx);
+	
+//	float idx = float(gestureInd[0]);
+//    float len = float(pttrList.sfxLen[gestureCat[0]-1]);
+//
+//    float percent = ofMap(idx, 1.0, len, 0.0, 1.0);
 
-    float idx = float(gestureInd[0]);
-    float len = float(pttrList.sfxLen[gestureCat[0]-1]);
-    float percent = ofMap(idx, 1.0, len, 0.0, 1.0);
-
+	gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
+	
     // float percent = testCounter;
     
     // Draw gesture patterns
     // percent = testCounter;
-    vector<int> highlightedIndices;
-    highlightedIndices.push_back(1);
-    highlightedIndices.push_back(3);
-    highlightedIndices.push_back(4);
-    highlightedIndices.push_back(9);
-    highlightedIndices.push_back(14);
-    sequence.draw(percent, highlightedIndices);
-    if(sequence.sequenceLoaded && testCounter < 0.98) testCounter += 0.001;
+//    vector<int> highlightedIndices;
+//    highlightedIndices.push_back(1);
+//    highlightedIndices.push_back(3);
+//    highlightedIndices.push_back(4);
+//    highlightedIndices.push_back(9);
+//    highlightedIndices.push_back(14);
+//    sequence.draw(percent, highlightedIndices);
+//    if(sequence.sequenceLoaded && testCounter < 0.98) testCounter += 0.001;
 }
 
 //--------------------------------------------------------------

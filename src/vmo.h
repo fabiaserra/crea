@@ -49,6 +49,24 @@ typedef vector<vector1D> vector2D;
 
 class vmo{
 public:
+	
+	class pttr{
+	public:
+		pttr();
+		int size = 0;
+		vector2D sfxPts;
+		vector1D sfxLen;
+	};
+	
+	class belief{
+	public:
+		belief();
+		int K;
+		int currentIdx;
+		vector1D path;
+		vector<float> cost;
+	};
+	
 	vmo();
 	// Main functions
 	void setup(int dim, int num, float threshold);
@@ -64,12 +82,12 @@ public:
 	void print(string attr);
 	int* getGestureCat(int ind);
 	int* getGestureInd(int ind);
+	map<int, float> getGestureUpdate(int ind, vmo::pttr& pttrList);
 
 	// Attributes
 	vector1D sfx;
 	vector1D lrs;
 	vector1D data;
-//		vector1D maxLrs;
 
 	vector2D trn;
 	vector2D rsfx;
@@ -91,23 +109,6 @@ public:
 	static float findThreshold(vector<vector<float> > &obs, int dim, int num, float start, float step, float end);
 	static vmo buildOracle(vector<vector<float> > &obs, int dim, int num, float threshold);
 
-	class pttr{
-	public:
-		pttr();
-		int size = 0;
-		vector2D sfxPts;
-		vector1D sfxLen;
-	};
-
-	class belief{
-	public:
-		belief();
-		int K;
-		int currentIdx;
-		vector1D path;
-		vector<float> cost;
-	};
-
 	// Analysis functions
 	static vmo::pttr findPttr(const vmo& oracle, int minLen);
 	static vector< vector<ofPolyline> > processPttr(vmo& oracle, const vmo::pttr& pttrList);
@@ -117,9 +118,6 @@ public:
 	static vmo::belief tracking(vmo& oracle,
 								const vmo::pttr& pttrList,
 								vmo::belief& prevState, vector<float> &obs);
-
-	// Interface with openFrameworks
-//	static vector<vector<ofPoint> > pttr2Points(vmo::pttr pttrList);
 
 private:
 	// Helper functions

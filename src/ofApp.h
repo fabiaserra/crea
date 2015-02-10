@@ -117,6 +117,6 @@ class ofApp : public ofBaseApp{
         vector<vector<float> > loadXML(); // dummy function
         bool initStatus;
         bool stopTracking;
-        int *gestureInd;
-        int *gestureCat;
+		map<int, float> gestureUpdate
+
 };
