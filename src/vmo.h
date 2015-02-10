@@ -110,7 +110,7 @@ public:
 
 	// Analysis functions
 	static vmo::pttr findPttr(const vmo& oracle, int minLen);
-	static vector< vector<ofPolyline> > processPttr(vmo& oracle, const vmo::pttr& pttrList);
+	static void processPttr(vmo& oracle, const vmo::pttr& pttrList, vector< vector<ofPolyline> > & patterns);
 	static vmo::belief tracking_init(vmo& oracle,
 									 const vmo::pttr& pttrList,
 									 vector<float> &firstObs);
