@@ -91,35 +91,33 @@ void ofApp::setup(){
 
     // SEQUENCE
     int numMarkers = 2;
-//    int dim = 2;
     sequence.setup(numMarkers);
     sequence.load("sequences/sequence.xml");
-//
-//    testCounter = 0.0;
-//
-//    //VMO Setup goes here//
-//    obs.assign(sequence.numFrames, vector<float>(numMarkers*dim));
-//    for (int markerIndex = 0; markerIndex < numMarkers; markerIndex++){
-//        for (int frameIndex = 0; frameIndex < sequence.numFrames; frameIndex++){
-//            obs[frameIndex][markerIndex*dim] = sequence.markersPosition[markerIndex][frameIndex].x;
-//            obs[frameIndex][markerIndex*dim+1] = sequence.markersPosition[markerIndex][frameIndex].y;
-//        }
-//    }
 
-//    initStatus = true;
-//    stopTracking = true;
-////    // gestureInd = -1;
-////    // gestureCat = -1;
-//    // 2. Processing
-//    // 2.1 Load file into VMO
-//    int minLen = 1; // Temporary setting
-//    float start = 0.0, step = 0.05, stop = 5.0;
-//    float t = vmo::findThreshold(obs, dim, numMarkers, start, step, stop); // Temporary threshold range and step
-//    seqVmo = vmo::buildOracle(obs, dim, numMarkers, t);
-//    // 2.2 Output pattern list
-//    pttrList = vmo::findPttr(seqVmo, minLen);
-//    sequence.patterns = vmo::processPttr(seqVmo, pttrList); // double free error in linux
-//    cout << sequence.patterns.size() << endl;
+//    //VMO Setup goes here//
+    int dimensions = 2;
+    obs.assign(sequence.numFrames, vector<float>(numMarkers*dimensions));
+    for (int markerIndex = 0; markerIndex < numMarkers; markerIndex++){
+        for (int frameIndex = 0; frameIndex < sequence.numFrames; frameIndex++){
+            obs[frameIndex][markerIndex*dimensions] = sequence.markersPosition[markerIndex][frameIndex].x;
+            obs[frameIndex][markerIndex*dimensions+1] = sequence.markersPosition[markerIndex][frameIndex].y;
+        }
+    }
+
+    initStatus = true;
+    stopTracking = true;
+//    // gestureInd = -1;
+//    // gestureCat = -1;
+    // 2. Processing
+    // 2.1 Load file into VMO
+    int minLen = 1; // Temporary setting
+    float start = 0.0, step = 0.05, stop = 5.0;
+    float t = vmo::findThreshold(obs, dimensions, numMarkers, start, step, stop); // Temporary threshold range and step
+    seqVmo = vmo::buildOracle(obs, dimensions, numMarkers, t);
+    // 2.2 Output pattern list
+    pttrList = vmo::findPttr(seqVmo, minLen);
+    sequence.patterns = vmo::processPttr(seqVmo, pttrList); // double free error in linux
+    cout << sequence.patterns.size() << endl;
     
     // SETUP GUIs
     dim = 32;

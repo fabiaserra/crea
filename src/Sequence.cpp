@@ -170,7 +170,7 @@ void Sequence::drawPattern(int patternPosition, int patternIndex, float percent,
     float height = 480.0;
     float scale = 5.5;
     float margin = 40.0;
-    float guiHeight = 700;
+    float guiHeight = 800;
 
     ofPushMatrix();
 
