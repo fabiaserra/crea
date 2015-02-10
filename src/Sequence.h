@@ -20,8 +20,7 @@ class Sequence{
 //        void setPatterns(vector< vector<ofPolyline> > patterns);
 
         void startRecording();
-        void stopRecording();
-        // void deleteRecording();
+        void clearPlayback();
 
         //--------------------------------------------------------------
         ofxXmlSettings xml;
@@ -44,7 +43,7 @@ class Sequence{
         size_t numFrames;
         //--------------------------------------------------------------
         float playhead; // 0 ~ 1
-        float elapsed_time;
+        float elapsedTime;
         //--------------------------------------------------------------
         ofTrueTypeFont  verdana;
 

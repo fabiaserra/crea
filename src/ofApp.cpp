@@ -118,7 +118,7 @@ void ofApp::setup(){
     pttrList = vmo::findPttr(seqVmo, minLen);
     sequence.patterns = vmo::processPttr(seqVmo, pttrList); // double free error in linux
     cout << sequence.patterns.size() << endl;
-    
+
     // SETUP GUIs
     dim = 32;
     guiWidth = 240;
@@ -216,7 +216,7 @@ void ofApp::update(){
 
         // Record sequence when recording button is true
         if(recordingSequence->getValue() == true) sequence.record(tempMarkers);
-        
+
         if(drawSequence) sequence.update();
 
         //Gesture Tracking with VMO here?
@@ -271,14 +271,14 @@ void ofApp::draw(){
     // for (int i = 0; i < tempMarkers.size(); i++){
     //     tempMarkers[i].draw();
     // }
-    
+
     if(drawSequence) sequence.draw();
 
     ofPopMatrix();
 
 //    gestureInd = seqVmo.getGestureInd(currentBf.currentIdx);
 //    gestureCat = seqVmo.getGestureCat(currentBf.currentIdx);
-	
+
 //    float idx = float(gestureInd[0]);
 //    float len = float(pttrList.sfxLen[gestureCat[0]-1]);
 //
@@ -297,7 +297,7 @@ void ofApp::draw(){
 //            sequence.patterns[patternIndex][markerIndex].draw();
 //        }
 //    }
-    
+
     map<int, float> currentPatterns; // Use "gestureUpdate" above!!!!!!!!!!
     currentPatterns[1] = 0.35;
     currentPatterns[3] = 0.75;
@@ -639,13 +639,13 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             ofFileDialogResult result = ofSystemLoadDialog("Select sequence xml file.", false, "sequences/");
             if (result.bSuccess){
                 sequence.load(result.getPath());
-                sequenceFilename->setName("Filename: "+sequence.filename);
-                sequenceDuration->setName("Duration: "+ofToString(sequence.duration, 2) + " s");
-                sequenceNumFrames->setName("Number of frames: "+ofToString(sequence.numFrames));
+                sequenceFilename->setLabel("Filename: "+sequence.filename);
+                sequenceDuration->setLabel("Duration: "+ofToString(sequence.duration, 2) + " s");
+                sequenceNumFrames->setLabel("Number of frames: "+ofToString(sequence.numFrames));
             }
         }
     }
-    
+
     if(e.getName() == "Play Sequence"){
         ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
         if (toggle->getValue() == true){
@@ -653,6 +653,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             drawSequence = true;
         }
         else{
+            sequence.clearPlayback();
             drawSequence = false;
         }
     }
@@ -740,7 +741,8 @@ void ofApp::saveGUISettings(const string path){
         vector<ofxUIWidget*> widgets = g->getWidgets();
         for(int i = 0; i < widgets.size(); i++)
         {
-            if(widgets[i]->hasState()){
+            // kind number 20 is ofxUIImageToggle, for which we don't want to save the state
+            if(widgets[i]->hasState() && widgets[i]->getKind() != 20){
                 int index = XML->addTag("Widget");
                 if(XML->pushTag("Widget", index))
                 {

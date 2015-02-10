@@ -5,14 +5,13 @@ Sequence::Sequence(){
     duration = 0;
     numFrames = 0;
     playhead = 0;
-    elapsed_time = 0;
+    elapsedTime = 0;
 }
 
 void Sequence::setup(int nMarkers){
     this->nMarkers = nMarkers;
 
     verdana.loadFont("fonts/verdana.ttf", 80, true, true);
-
 }
 
 void Sequence::update(){
@@ -38,14 +37,14 @@ void Sequence::draw(){
 
     // Draw entire sequence
     for(int markerIndex = 0; markerIndex < nMarkers; markerIndex++){
-        if(markerIndex == 0) ofSetColor(255, 0, 0);
-        if(markerIndex == 1) ofSetColor(0, 255, 0);
-        markersPosition[markerIndex].draw();
-        
+
+//        markersPosition[markerIndex].draw();
+
         ofPoint currentPoint = markersPosition[markerIndex].getPointAtIndexInterpolated(calcCurrentFrameIndex());
         markersPastPoints[markerIndex].addVertex(currentPoint);
 
-        ofSetColor(0, 255, 0);
+        if(markerIndex == 0) ofSetColor(255, 0, 0);
+        if(markerIndex == 1) ofSetColor(0, 0, 255);
         markersPastPoints[markerIndex].draw();
 
         ofCircle(currentPoint, 3);
@@ -249,30 +248,35 @@ void Sequence::startRecording(){
     xml.clear();
 }
 
+void Sequence::clearPlayback(){
+    // Clear and Initialize previous points polylines sequence
+    markersPastPoints.clear();
+    for(int i = 0; i < nMarkers; i++){
+        ofPolyline newPolyline;
+        markersPastPoints.push_back(newPolyline);
+    }
+    playhead = 0;
+    elapsedTime = 0;
+}
+
 void Sequence::updatePlayhead()
 {
-    elapsed_time += ofGetLastFrameTime();
-    
-    if (elapsed_time > duration)
+    elapsedTime += ofGetLastFrameTime();
+
+    if (elapsedTime > duration)
     {
-        elapsed_time = 0;
+        clearPlayback();
     }
-    
-    if (elapsed_time < 0)
-    {
-        elapsed_time = duration;
-    }
-    
-    playhead = (elapsed_time / duration);
-    elapsed_time = duration * playhead;
+
+    playhead = (elapsedTime / duration);
 }
 
 size_t Sequence::calcCurrentFrameIndex()
 {
     size_t frameIndex = floor(numFrames * playhead);
-    
+
     if (frameIndex >= numFrames) frameIndex = numFrames-1;
-    
+
     return frameIndex;
 }
 
