@@ -3,6 +3,8 @@
 #include "ofxXmlSettings.h"
 #include "irMarker.h"
 
+//typedef vector<ofPolyline> Trajectories;
+
 class Sequence{
     public:
         Sequence();
@@ -11,8 +13,10 @@ class Sequence{
         void record(vector<irMarker>& markers);
         void load(const string path);
         void save(const string path);
-        void draw(float percent, vector<int> highlightedIndices);
-        void drawPattern(int patternPosition, int patternIndex, float percent, bool highlight);
+        void draw(float percent);
+        void drawPatterns(map<int, float> currentPatterns);
+
+//        void setPatterns(vector< vector<ofPolyline> > patterns);
 
         void startRecording();
         void stopRecording();
@@ -20,9 +24,6 @@ class Sequence{
 
         //--------------------------------------------------------------
         ofxXmlSettings xml;
-        //--------------------------------------------------------------
-        bool sequenceLoaded;
-        bool drawPatterns;
         //--------------------------------------------------------------
         size_t nMarkers;
         //--------------------------------------------------------------
@@ -37,9 +38,14 @@ class Sequence{
         vector< vector<ofPolyline> > patterns;              // identified patterns from the sequence
         vector< vector<ofPolyline> > patternsPastPoints;    // Percentage completion fragments of the patterns
         //--------------------------------------------------------------
-        int frame_counter;
+        string filename;
         float duration;
         size_t numFrames;
         //--------------------------------------------------------------
+        int frame_counter;
+        //--------------------------------------------------------------
         ofTrueTypeFont  verdana;
+
+    protected:
+        void drawPattern(int patternPosition, int patternIndex, float percent, bool highlight);
 };

@@ -812,12 +812,6 @@
 		<Unit filename="src/Contour.h">
 			<Option virtualFolder="src/" />
 		</Unit>
-		<Unit filename="src/Marker.cpp">
-			<Option virtualFolder="src/" />
-		</Unit>
-		<Unit filename="src/Marker.h">
-			<Option virtualFolder="src/" />
-		</Unit>
 		<Unit filename="src/Particle.cpp">
 			<Option virtualFolder="src/" />
 		</Unit>
@@ -834,6 +828,12 @@
 			<Option virtualFolder="src/" />
 		</Unit>
 		<Unit filename="src/Sequence.h">
+			<Option virtualFolder="src/" />
+		</Unit>
+		<Unit filename="src/irMarker.cpp">
+			<Option virtualFolder="src/" />
+		</Unit>
+		<Unit filename="src/irMarker.h">
 			<Option virtualFolder="src/" />
 		</Unit>
 		<Unit filename="src/main.cpp">

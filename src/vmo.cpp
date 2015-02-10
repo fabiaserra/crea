@@ -31,11 +31,11 @@
 
 vmo::pttr::pttr(){
     size = 0;
-	
+
 	vector2D tmpPts(0);
 	sfxPts = tmpPts;
 //	sfxPts.reserve(INIT_VMO_SIZE);
-	
+
 	vector1D tmpLen(0);
 	sfxLen = tmpLen;
 //	sfxLen.reserve(INIT_VMO_SIZE);
@@ -44,10 +44,10 @@ vmo::pttr::pttr(){
 vmo::belief::belief(){
 	K = 0;
 	currentIdx = -1;
-	
+
 	vector1D tmpPath(0);
 	path = tmpPath;
-	
+
 	vector<float> tmpCost(0);
 	cost = tmpCost;
 }
@@ -409,10 +409,10 @@ vmo::pttr vmo::findPttr(const vmo& oracle, int minLen = 0){
 	return pttrList;
 }
 
-vector< vector<ofPolyline> > vmo::processPttr(vmo& oracle, const vmo::pttr& pttrList){
+void vmo::processPttr(vmo& oracle, const vmo::pttr& pttrList, vector< vector<ofPolyline> > & patterns){
 
-	vector< vector<ofPolyline> > pattern(0);
-	vector1D pts(0);
+    patterns.clear();
+	vector1D pts;
 	int len;
 	for (int i = 0; i < pttrList.size; i++) {
 		pts = pttrList.sfxPts[i];
@@ -421,7 +421,7 @@ vector< vector<ofPolyline> > vmo::processPttr(vmo& oracle, const vmo::pttr& pttr
 //		ofPolyline ges1;
 //		ofPolyline ges2;
         vector<ofPolyline> ges;
-		
+
 		for (int g = 0; g < oracle.numFeature; g++) {
 			ofPolyline gesTmp;
 			gesTmp.resize(len);
@@ -446,10 +446,8 @@ vector< vector<ofPolyline> > vmo::processPttr(vmo& oracle, const vmo::pttr& pttr
 				ind++;
 			}
 		}
-        pattern.push_back(ges);
+        patterns.push_back(ges);
 	}
-    
-	return pattern;
 }
 
 
