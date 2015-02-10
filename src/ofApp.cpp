@@ -649,10 +649,13 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     }
     
     if(e.getName() == "Play Sequence"){
-        ofxUIImageToggle *button = (ofxUIImageToggle *) e.widget;
-        if (button->getValue() == true){
+        ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
+        if (toggle->getValue() == true){
             recordingSequence->setValue(false);
             drawSequence = true;
+        }
+        else{
+            drawSequence = false;
         }
     }
 

@@ -4,7 +4,8 @@ Sequence::Sequence(){
     filename = "";
     duration = 0;
     numFrames = 0;
-    
+    playhead = 0;
+    elapsed_time = 0;
 }
 
 void Sequence::setup(int nMarkers){
@@ -39,7 +40,7 @@ void Sequence::draw(){
     for(int markerIndex = 0; markerIndex < nMarkers; markerIndex++){
         if(markerIndex == 0) ofSetColor(255, 0, 0);
         if(markerIndex == 1) ofSetColor(0, 255, 0);
-        //markersPosition[markerIndex].draw();
+        markersPosition[markerIndex].draw();
         
         ofPoint currentPoint = markersPosition[markerIndex].getPointAtIndexInterpolated(calcCurrentFrameIndex());
         markersPastPoints[markerIndex].addVertex(currentPoint);
@@ -252,8 +253,6 @@ void Sequence::updatePlayhead()
 {
     elapsed_time += ofGetLastFrameTime();
     
-    bool wrapped = false;
-    
     if (elapsed_time > duration)
     {
         elapsed_time = 0;
@@ -265,6 +264,7 @@ void Sequence::updatePlayhead()
     }
     
     playhead = (elapsed_time / duration);
+    elapsed_time = duration * playhead;
 }
 
 size_t Sequence::calcCurrentFrameIndex()
