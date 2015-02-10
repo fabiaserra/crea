@@ -409,17 +409,13 @@ vmo::pttr vmo::findPttr(const vmo& oracle, int minLen = 0){
 	return pttrList;
 }
 
-void vmo::processPttr(vmo& oracle, const vmo::pttr& pttrList, vector< vector<ofPolyline> > & patterns){
+vector< vector<ofPolyline> > vmo::processPttr(vmo& oracle, const vmo::pttr& pttrList){
 
-    patterns.clear();
-	vector1D pts;
-	int len;
-	for (int i = 0; i < pttrList.size; i++) {
-		pts = pttrList.sfxPts[i];
-		len = pttrList.sfxLen[i];
+    vector< vector<ofPolyline> > patterns;
+	for (int i = 0; i < pttrList.sfxPts.size(); i++) {
+		vector1D pts = pttrList.sfxPts[i];
+		int len = pttrList.sfxLen[i];
 		int cat = i+1;
-//		ofPolyline ges1;
-//		ofPolyline ges2;
         vector<ofPolyline> ges;
 
 		for (int g = 0; g < oracle.numFeature; g++) {
@@ -427,10 +423,7 @@ void vmo::processPttr(vmo& oracle, const vmo::pttr& pttrList, vector< vector<ofP
 			gesTmp.resize(len);
 			ges.push_back(gesTmp);
 		}
-//        ges1.resize(len);
-//        ges2.resize(len);
-//        ges.push_back(ges1);
-//        ges.push_back(ges2);
+
 		for (int j = 0; j<pts.size(); j++) {
 			int ind = 1;
 			for (int k = pts[j]; k > pts[j]-len; k--) {
@@ -438,16 +431,19 @@ void vmo::processPttr(vmo& oracle, const vmo::pttr& pttrList, vector< vector<ofP
 				oracle.pttrInd[k].push_back(ind);
 
 				for (int d = 0; d < oracle.numFeature/oracle.dimFeature; d++) {
-					ges[d][k].x = (ges[d][k].x*float(ind-1)/float(ind))
-                                    + oracle.obs[k][d*oracle.dimFeature]/float(ind);
-					ges[d][k].y = (ges[d][k].y*float(ind-1)/float(ind))
-                                    + oracle.obs[k][d*oracle.dimFeature+1]/float(ind);
+//					ges[d][k].x = (ges[d][k].x*float(ind-1)/float(ind))
+//                                    + oracle.obs[k][d*oracle.dimFeature]/float(ind);
+//					ges[d][k].y = (ges[d][k].y*float(ind-1)/float(ind))
+//                                    + oracle.obs[k][d*oracle.dimFeature+1]/float(ind);
+                    ges[d][k] = (ges[d][k]*float(ind-1)/float(ind))
+                                      + oracle.obs[k][d*oracle.dimFeature]/float(ind);
 				}
 				ind++;
 			}
 		}
         patterns.push_back(ges);
 	}
+    return patterns;
 }
 
 

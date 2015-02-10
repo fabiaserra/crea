@@ -118,11 +118,9 @@ void ofApp::setup(){
     seqVmo = vmo::buildOracle(obs, dim, numMarkers, t);
     // 2.2 Output pattern list
     pttrList = vmo::findPttr(seqVmo, minLen);
-//    vmo::processPttr(seqVmo, pttrList, sequence.patterns); // double free error
-
+    sequence.patterns = vmo::processPttr(seqVmo, pttrList); // double free error in linux
     cout << sequence.patterns.size() << endl;
-
-//    sequence.patterns = vmo::processPttr(seqVmo, pttrList);
+    
     // SETUP GUIs
     dim = 32;
     guiWidth = 240;
@@ -278,23 +276,15 @@ void ofApp::draw(){
 //    gestureInd = seqVmo.getGestureInd(currentBf.currentIdx);
 //    gestureCat = seqVmo.getGestureCat(currentBf.currentIdx);
 	
-//	float idx = float(gestureInd[0]);
+//    float idx = float(gestureInd[0]);
 //    float len = float(pttrList.sfxLen[gestureCat[0]-1]);
 //
 //    float percent = ofMap(idx, 1.0, len, 0.0, 1.0);
 
 	gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
-	
-    // float percent = testCounter;
-    
-
-//    float idx = float(gestureInd[0]);
-//    float len = float(pttrList.sfxLen[gestureCat[0]-1]);
-//    float percent = ofMap(idx, 1.0, len, 0.0, 1.0);
 
 //     float percent = testCounter;
 
-//>>>>>>> upstream/master
     // Draw gesture patterns
     ofSetColor(255, 0, 0);
     ofSetLineWidth(3);
@@ -304,23 +294,12 @@ void ofApp::draw(){
             sequence.patterns[patternIndex][markerIndex].draw();
         }
     }
-
-    // percent = testCounter;
-//    vector<int> highlightedIndices;
-//    highlightedIndices.push_back(1);
-//    highlightedIndices.push_back(3);
-//    highlightedIndices.push_back(4);
-//    highlightedIndices.push_back(9);
-//    highlightedIndices.push_back(14);
-//    sequence.draw(percent, highlightedIndices);
-//    if(sequence.sequenceLoaded && testCounter < 0.98) testCounter += 0.001;
-	
-	
+    
     map<int, float> currentPatterns; // Use "gestureUpdate" above!!!!!!!!!!
     currentPatterns[1] = 0.35;
     currentPatterns[3] = 0.75;
     currentPatterns[4] = 0.95;
-//    if(drawPatterns) sequence.drawPatterns(currentPatterns);
+    if(drawPatterns) sequence.drawPatterns(currentPatterns);
 
 }
 
