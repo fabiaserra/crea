@@ -128,10 +128,10 @@ void ofApp::setup(){
     int minLen = 1; // Temporary setting
     float start = 0.0, step = 0.05, stop = 5.0;
 	
-	//For sequence4.xml
-	//int minLen = 4;
-	//float start = 11.0 step = 0.01 stop = 14.0;
-	
+    // For sequence4.xml
+//    int minLen = 4;
+//    float start = 11.0 step = 0.01 stop = 14.0;
+    
     float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
     seqVmo = vmo::buildOracle(obs, dimensions, maxMarkers, t);
     // 2.2 Output pattern list
@@ -239,7 +239,6 @@ void ofApp::update(){
         if(drawSequence) sequence.update();
 
         //Gesture Tracking with VMO here?
-
         if (tempMarkers.size()>1){
             if (!stopTracking){
                 vector<float> obs; // Temporary code
@@ -294,11 +293,9 @@ void ofApp::draw(){
 
     if(drawSequence) sequence.draw();
 
-
     ofPopMatrix();
 
 //	gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
-
 
     // Draw gesture patterns
     ofSetColor(255, 0, 0);
@@ -317,7 +314,6 @@ void ofApp::draw(){
     currentPatterns[4] = 0.95;
 //    if(drawPatterns) sequence.drawPatterns(currentPatterns);
 
->>>>>>> upstream/master
 }
 
 //--------------------------------------------------------------
