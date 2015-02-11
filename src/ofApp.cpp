@@ -201,6 +201,9 @@ void ofApp::update(){
         for(unsigned int i = 0; i < tempMarkers.size(); i++){
             tempMarkers[i].updateLabels(deadLabels, currentLabels);
         }
+        
+        // Record sequence when recording button is true
+        if(recordingSequence->getValue() == true) sequence.record(tempMarkers);
 
         // Print currentLabels
         // cout << "Current:" << endl;
@@ -219,10 +222,11 @@ void ofApp::update(){
 
         // Update markers particles
         markersParticles.update(dt, tempMarkers);
-
-        // Record sequence when recording button is true
-        if(recordingSequence->getValue() == true) sequence.record(tempMarkers);
-
+        
+        // Update contour
+        contour.update(contourFinder);
+        
+        // Update sequence playhead to draw gesture
         if(drawSequence) sequence.update();
 
         //Gesture Tracking with VMO here?
