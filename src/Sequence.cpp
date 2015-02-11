@@ -8,9 +8,8 @@ Sequence::Sequence(){
     elapsedTime = 0;
 }
 
-void Sequence::setup(int maxMarkers){
+void Sequence::setup(const int maxMarkers){
     this->maxMarkers = maxMarkers;
-
     verdana.loadFont("fonts/verdana.ttf", 80, true, true);
 }
 
@@ -18,7 +17,7 @@ void Sequence::update(){
     updatePlayhead();
 }
 
-void Sequence::record(vector<irMarker>& markers){
+void Sequence::record(const vector<irMarker>& markers){
     int frameNum = xml.addTag("frame");
     xml.pushTag("frame", frameNum);
     xml.setValue("timestamp", ofGetElapsedTimef(), frameNum);
@@ -155,48 +154,48 @@ void Sequence::load(const string path){
     filename = ofFilePath::getFileName(path);
 
     // // Debug: print vertices of the sequence
-    // for(int i = 0; i < nMarkers; i++){
+    // for(int i = 0; i < maxMarkers; i++){
     //     vector<ofPoint> vertices = markersPosition[i].getVertices();
     //     for(int j = 0; j < vertices.size(); j++){
     //        cout << j << ": " << vertices[j].x << " " << vertices[j].y << endl;
     //     }
     // }
 
-//    int nPatterns = 14;
-//
-//    // Clear and initialize memory of polylines patterns
-//    patterns.clear();
-//    for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
-//        vector<ofPolyline> newPattern;
-//        for(int markerIndex = 0; markerIndex < nMarkers; markerIndex++){
-//            ofPolyline newPolyline;
-//            newPattern.push_back(newPolyline);
-//        }
-//        patterns.push_back(newPattern);
-//    }
-//
-//    // Clear and initialize memory of previous points polylines patterns
-//    patternsPastPoints.clear();
-//    for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
-//        vector<ofPolyline> newPattern;
-//        for(int markerIndex = 0; markerIndex < nMarkers; markerIndex++){
-//            ofPolyline newPolyline;
-//            newPattern.push_back(newPolyline);
-//        }
-//        patternsPastPoints.push_back(newPattern);
-//    }
+    int nPatterns = 12;
 
-//    // Break sequence in n patterns for debug
-//    for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
-//        for(int markerIndex = 0; markerIndex < nMarkers; markerIndex++){
-//            int startIndex = markersPosition[markerIndex].getIndexAtPercent(patternIndex * (1.01/nPatterns));
-//            int endIndex = markersPosition[markerIndex].getIndexAtPercent((patternIndex+1) * (1.01/nPatterns))+1;
-//            if (endIndex == 1) endIndex = markersPosition[markerIndex].size();
-//            for(int i = startIndex; i < endIndex; i++){
-//                patterns[patternIndex][markerIndex].addVertex(markersPosition[markerIndex][i]);
-//            }
-//        }
-//    }
+    // Clear and initialize memory of polylines patterns
+    patterns.clear();
+    for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
+        vector<ofPolyline> newPattern;
+        for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
+            ofPolyline newPolyline;
+            newPattern.push_back(newPolyline);
+        }
+        patterns.push_back(newPattern);
+    }
+
+    // Clear and initialize memory of previous points polylines patterns
+    patternsPastPoints.clear();
+    for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
+        vector<ofPolyline> newPattern;
+        for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
+            ofPolyline newPolyline;
+            newPattern.push_back(newPolyline);
+        }
+        patternsPastPoints.push_back(newPattern);
+    }
+
+    // Break sequence in n patterns for debug
+    for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
+        for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
+            int startIndex = markersPosition[markerIndex].getIndexAtPercent(patternIndex * (1.01/nPatterns));
+            int endIndex = markersPosition[markerIndex].getIndexAtPercent((patternIndex+1) * (1.01/nPatterns))+1;
+            if (endIndex == 1) endIndex = markersPosition[markerIndex].size();
+            for(int i = startIndex; i < endIndex; i++){
+                patterns[patternIndex][markerIndex].addVertex(markersPosition[markerIndex][i]);
+            }
+        }
+    }
 
     // Number of frames of the sequence
     numFrames = numFrames - emptyFrames;
@@ -220,14 +219,14 @@ void Sequence::drawPatterns(map<int, float> currentPatterns){
     }
 }
 
-void Sequence::drawPattern(int patternPosition, int patternIndex, float percent, bool highlight){
+void Sequence::drawPattern(const int patternPosition, const int patternIndex, const float percent, const bool highlight){
 
     // Drawing window parameters
     float width = 640.0;
     float height = 480.0;
     float scale = 5.5;
     float margin = 40.0;
-    float guiHeight = 800;
+    float guiHeight = 900;
 
     ofPushMatrix();
 
@@ -321,8 +320,7 @@ void Sequence::updatePlayhead()
 {
     elapsedTime += ofGetLastFrameTime();
 
-    if (elapsedTime > duration)
-    {
+    if(elapsedTime > duration){
         clearPlayback();
     }
 
@@ -333,7 +331,7 @@ size_t Sequence::calcCurrentFrameIndex()
 {
     size_t frameIndex = floor(numFrames * playhead);
 
-    if (frameIndex >= numFrames) frameIndex = numFrames-1;
+    if(frameIndex >= numFrames) frameIndex = numFrames-1;
 
     return frameIndex;
 }

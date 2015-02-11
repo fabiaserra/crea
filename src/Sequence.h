@@ -9,9 +9,9 @@ class Sequence{
     public:
         Sequence();
 
-        void setup(int nMarkers);
+        void setup(const int nMarkers);
         void update();
-        void record(vector<irMarker>& markers);
+        void record(const vector<irMarker>& markers);
         void load(const string path);
         void save(const string path);
         void draw();
@@ -49,7 +49,7 @@ class Sequence{
         ofTrueTypeFont  verdana;
 
     protected:
-        void drawPattern(int patternPosition, int patternIndex, float percent, bool highlight);
+        void drawPattern(const int patternPosition, const int patternIndex, const float percent, const bool highlight);
         void updatePlayhead();
         size_t calcCurrentFrameIndex();
 };
