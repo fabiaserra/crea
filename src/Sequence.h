@@ -25,11 +25,12 @@ class Sequence{
         //--------------------------------------------------------------
         ofxXmlSettings xml;
         //--------------------------------------------------------------
-        size_t nMarkers;
+        size_t maxMarkers;
         //--------------------------------------------------------------
         vector<ofPolyline> markersPosition;                 // Markers positions through all the sequence
         vector<ofPolyline> markersPastPoints;               // Percentage completion fragment of the sequence
 
+//        map<int, vector<ofPolyline> > markersPosition;      // Markers positions through all the sequence with label
         // Other ideas
         // vector< vector<ofPoint> > markersPosition;
         // vector< vector<Marker> > markersPosition;

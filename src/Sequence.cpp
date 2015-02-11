@@ -8,8 +8,8 @@ Sequence::Sequence(){
     elapsedTime = 0;
 }
 
-void Sequence::setup(int nMarkers){
-    this->nMarkers = nMarkers;
+void Sequence::setup(int maxMarkers){
+    this->maxMarkers = maxMarkers;
 
     verdana.loadFont("fonts/verdana.ttf", 80, true, true);
 }
@@ -22,22 +22,37 @@ void Sequence::record(vector<irMarker>& markers){
     int frameNum = xml.addTag("frame");
     xml.pushTag("frame", frameNum);
     xml.setValue("timestamp", ofGetElapsedTimef(), frameNum);
-    for(int i = 0; i < nMarkers; i++){
+    for(int markerIndex = 0; markerIndex < markers.size(); markerIndex++){
+        // don't record marker if we have already maxMarkers?
+//        if(xml.getNumTags("marker") > maxMarkers) break;
+
         int numMarker = xml.addTag("marker");
         xml.pushTag("marker", numMarker);
-//        xml.setValue("id", i, numMarker);
-        xml.setValue("x", markers[i].smoothPos.x, numMarker);
-        xml.setValue("y", markers[i].smoothPos.y, numMarker);
+        xml.setValue("id", ofToString(markers[markerIndex].getLabel()), numMarker);
+        xml.setValue("x",  markers[markerIndex].smoothPos.x, numMarker);
+        xml.setValue("y",  markers[markerIndex].smoothPos.y, numMarker);
+        xml.setValue("disappeared", markers[markerIndex].hasDisappeared, numMarker);
         xml.popTag();
     }
+//    // fill with dummy markers if not enough markers
+//    while(xml.getNumTags("marker") < maxMarkers){
+//        int numMarker = xml.addTag("marker");
+//        xml.pushTag("marker", numMarker);
+//        xml.setValue("id", -1, numMarker);
+//        xml.setValue("x",  -1, numMarker);
+//        xml.setValue("y",  -1, numMarker);
+//        xml.setValue("disappeared", 1, numMarker);
+//        xml.popTag();
+//    }
     xml.popTag();
 }
 
 void Sequence::draw(){
 
     // Draw entire sequence
-    for(int markerIndex = 0; markerIndex < nMarkers; markerIndex++){
+    for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
 
+//        ofSetColor(255, 40);
 //        markersPosition[markerIndex].draw();
 
         ofPoint currentPoint = markersPosition[markerIndex].getPointAtIndexInterpolated(calcCurrentFrameIndex());
@@ -45,8 +60,10 @@ void Sequence::draw(){
 
         if(markerIndex == 0) ofSetColor(255, 0, 0);
         if(markerIndex == 1) ofSetColor(0, 0, 255);
+        ofSetLineWidth(1.2);
         markersPastPoints[markerIndex].draw();
 
+        ofFill();
         ofCircle(currentPoint, 3);
     }
 }
@@ -59,14 +76,14 @@ void Sequence::load(const string path){
 
     // Initialize polylines sequence
     markersPosition.clear();
-    for(int i = 0; i < nMarkers; i++){
+    for(int i = 0; i < maxMarkers; i++){
         ofPolyline newPolyline;
         markersPosition.push_back(newPolyline);
     }
 
     // Initialize previous points polylines sequence
     markersPastPoints.clear();
-    for(int i = 0; i < nMarkers; i++){
+    for(int i = 0; i < maxMarkers; i++){
         ofPolyline newPolyline;
         markersPastPoints.push_back(newPolyline);
     }
@@ -75,25 +92,63 @@ void Sequence::load(const string path){
 
     // Number of frames of the sequence
     numFrames = xml.getNumTags("frame");
-    float timestampFirstFrame;
-    float timestampLastFrame;
+    float timestampFirstFrame = -1;
+    float timestampLastFrame = -1;
+    size_t emptyFrames = 0;
 
     for(size_t frameIndex = 0; frameIndex < numFrames; frameIndex++){
         xml.pushTag("frame", frameIndex);
 
-        // Frame timestamp
-        if(frameIndex == 0) timestampFirstFrame = xml.getValue("timestamp", -1.0);;
-        if(frameIndex == numFrames-1) timestampLastFrame = xml.getValue("timestamp", -1.0);;
-
-        // Frame markers positions
         const size_t nMarkers = xml.getNumTags("marker");
+
+        // Frame timestamp
+        if(timestampFirstFrame == -1 && nMarkers > 0) timestampFirstFrame = xml.getValue("timestamp", -1.0);;
+        if(nMarkers > 0) timestampLastFrame = xml.getValue("timestamp", -2.0);;
+
+        // If no recorded markers we don't consider that frame
+        if(nMarkers == 0){
+            emptyFrames++;
+            xml.popTag();
+            continue;
+        }
+
+        int addedMarkers = 0;
         for(size_t markerIndex = 0; markerIndex < nMarkers; markerIndex++){
             xml.pushTag("marker", markerIndex);
-            const float px = xml.getValue("x", -1.0);
-            const float py = xml.getValue("y", -1.0);
-            markersPosition[markerIndex].addVertex(ofPoint(px, py));
+            unsigned int id = xml.getValue("id", -2.0);
+            const float px = xml.getValue("x", -2.0);
+            const float py = xml.getValue("y", -2.0);
+            const bool disappeared = xml.getValue("disappeared", -1.0);
+
+            // Number of markers we still have to take the value from
+            int aheadMarkers = (nMarkers-1) - markerIndex;
+            // If marker is not disappeared in that frame we add it
+            if(!disappeared){
+                markersPosition[addedMarkers].addVertex(ofPoint(px, py));
+                addedMarkers++;
+            }
+            // If marker is disappeared but not enough markers to fill maxMarkers we add it too
+            else if(disappeared && aheadMarkers < (maxMarkers-addedMarkers)){
+                markersPosition[addedMarkers].addVertex(ofPoint(px, py));
+                addedMarkers++;
+            }
+            // If marker has disappeared but we have other markers in the list we don't add it
+            else{}
+
             xml.popTag();
+
+            // If we have already loaded more or equal maxMarkers we go to the next frame
+            if(addedMarkers >= maxMarkers ){
+                break;
+            }
         }
+
+        // If not enough markers in the frame to fill maxMarkers we add dummy vertices to the polyline
+        while(addedMarkers < maxMarkers){
+            markersPosition[addedMarkers].addVertex(ofPoint(-1, -1));
+            addedMarkers++;
+        }
+
         xml.popTag();
     }
 
@@ -106,7 +161,7 @@ void Sequence::load(const string path){
     //        cout << j << ": " << vertices[j].x << " " << vertices[j].y << endl;
     //     }
     // }
-//
+
 //    int nPatterns = 14;
 //
 //    // Clear and initialize memory of polylines patterns
@@ -142,6 +197,9 @@ void Sequence::load(const string path){
 //            }
 //        }
 //    }
+
+    // Number of frames of the sequence
+    numFrames = numFrames - emptyFrames;
 
     // Duration in seconds of the sequence
     duration = timestampLastFrame - timestampFirstFrame;
@@ -251,7 +309,7 @@ void Sequence::startRecording(){
 void Sequence::clearPlayback(){
     // Clear and Initialize previous points polylines sequence
     markersPastPoints.clear();
-    for(int i = 0; i < nMarkers; i++){
+    for(int i = 0; i < maxMarkers; i++){
         ofPolyline newPolyline;
         markersPastPoints.push_back(newPolyline);
     }

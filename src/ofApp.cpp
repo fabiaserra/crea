@@ -90,14 +90,14 @@ void ofApp::setup(){
     // contour.setup();
 
     // SEQUENCE
-    int numMarkers = 2;
-    sequence.setup(numMarkers);
+    int maxMarkers = 2;
+    sequence.setup(maxMarkers);
     sequence.load("sequences/sequence.xml");
 
 //    //VMO Setup goes here//
     int dimensions = 2;
-    obs.assign(sequence.numFrames, vector<float>(numMarkers*dimensions));
-    for (int markerIndex = 0; markerIndex < numMarkers; markerIndex++){
+    obs.assign(sequence.numFrames, vector<float>(maxMarkers*dimensions));
+    for (int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
         for (int frameIndex = 0; frameIndex < sequence.numFrames; frameIndex++){
             obs[frameIndex][markerIndex*dimensions] = sequence.markersPosition[markerIndex][frameIndex].x;
             obs[frameIndex][markerIndex*dimensions+1] = sequence.markersPosition[markerIndex][frameIndex].y;
@@ -112,11 +112,12 @@ void ofApp::setup(){
     // 2.1 Load file into VMO
     int minLen = 1; // Temporary setting
     float start = 0.0, step = 0.05, stop = 5.0;
-    float t = vmo::findThreshold(obs, dimensions, numMarkers, start, step, stop); // Temporary threshold range and step
-    seqVmo = vmo::buildOracle(obs, dimensions, numMarkers, t);
+    float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
+    seqVmo = vmo::buildOracle(obs, dimensions, maxMarkers, t);
     // 2.2 Output pattern list
     pttrList = vmo::findPttr(seqVmo, minLen);
     sequence.patterns = vmo::processPttr(seqVmo, pttrList); // double free error in linux
+
     cout << sequence.patterns.size() << endl;
 
     // SETUP GUIs
@@ -266,11 +267,11 @@ void ofApp::draw(){
     markersParticles.draw();
     // contour.draw();
 
-    // vector<irMarker>& tempMarkers         = tracker.getFollowers();
-    // // Draw identified IR markers
-    // for (int i = 0; i < tempMarkers.size(); i++){
-    //     tempMarkers[i].draw();
-    // }
+     vector<irMarker>& tempMarkers         = tracker.getFollowers();
+     // Draw identified IR markers
+     for (int i = 0; i < tempMarkers.size(); i++){
+         tempMarkers[i].draw();
+     }
 
     if(drawSequence) sequence.draw();
 
@@ -289,14 +290,15 @@ void ofApp::draw(){
 //     float percent = testCounter;
 
     // Draw gesture patterns
-//    ofSetColor(255, 0, 0);
-//    ofSetLineWidth(3);
-//    for(int patternIndex = 0; patternIndex < sequence.patterns.size(); patternIndex++){
-//        for(int markerIndex = 0; markerIndex < sequence.patterns[patternIndex].size(); markerIndex++){
-////            cout << sequence.patterns[patternIndex][markerIndex].size() << endl;
-//            sequence.patterns[patternIndex][markerIndex].draw();
-//        }
-//    }
+    ofSetColor(255, 0, 0);
+    ofSetLineWidth(3);
+    for(int patternIndex = 0; patternIndex < sequence.patterns.size(); patternIndex++){
+        for(int markerIndex = 0; markerIndex < sequence.patterns[patternIndex].size(); markerIndex++){
+//            cout << sequence.patterns[patternIndex][markerIndex].size() << endl;
+            sequence.patterns[patternIndex][markerIndex].draw();
+        }
+    }
+
 
     map<int, float> currentPatterns; // Use "gestureUpdate" above!!!!!!!!!!
     currentPatterns[1] = 0.35;
@@ -465,7 +467,7 @@ void ofApp::setupGUI3(){
     gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui3->addImageButton("Save Sequence", "gui/icons/save.png", false, dim, dim);
     gui3->addImageButton("Load Sequence", "gui/icons/open.png", false, dim, dim);
-    gui3->addImageToggle("Play Sequence", "gui/icons/play.png", false, dim, dim);
+    gui3->addImageToggle("Play Sequence", "gui/icons/play.png", &drawSequence, dim, dim);
     gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     sequenceFilename = gui3->addLabel("Filename: "+sequence.filename, OFX_UI_FONT_SMALL);
@@ -617,6 +619,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 
     if(e.getName() == "Record Sequence"){
         if (recordingSequence->getValue() == true){
+            drawSequence = false;
             sequence.startRecording();
         }
     }
@@ -625,6 +628,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if (button->getValue() == true){
             recordingSequence->setValue(false);
+            drawSequence = false;
             ofFileDialogResult result = ofSystemSaveDialog("sequence.xml", "Save sequence file");
             if (result.bSuccess){
                 sequence.save(result.getPath());
@@ -636,6 +640,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if (button->getValue() == true){
             recordingSequence->setValue(false);
+            drawSequence = false;
             ofFileDialogResult result = ofSystemLoadDialog("Select sequence xml file.", false, "sequences/");
             if (result.bSuccess){
                 sequence.load(result.getPath());
