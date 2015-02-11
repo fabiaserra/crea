@@ -112,6 +112,11 @@ void ofApp::setup(){
     // 2.1 Load file into VMO
     int minLen = 1; // Temporary setting
     float start = 0.0, step = 0.05, stop = 5.0;
+    
+    // For sequence4.xml
+//    int minLen = 4;
+//    float start = 11.0 step = 0.01 stop = 14.0;
+    
     float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
     seqVmo = vmo::buildOracle(obs, dimensions, maxMarkers, t);
     // 2.2 Output pattern list
@@ -221,24 +226,23 @@ void ofApp::update(){
         if(drawSequence) sequence.update();
 
         //Gesture Tracking with VMO here?
-//
-//        if (tempMarkers.size()>1){
-//            if (!stopTracking){
-//                vector<float> obs; // Temporary code
-//                for(unsigned int i = 0; i < 2; i++){
-//                    obs.push_back(tempMarkers[i].smoothPos.x);
-//                    obs.push_back(tempMarkers[i].smoothPos.y);
-//                }
-//                if(initStatus){
-//                    currentBf = vmo::tracking_init(seqVmo, pttrList, obs);
-//                    initStatus = false;
-//                }
-//                else{
-//                    prevBf = currentBf;
-//                    currentBf = vmo::tracking(seqVmo, pttrList, prevBf, obs);
-//                }
-//            }
-//        }
+        if (tempMarkers.size()>1){
+            if (!stopTracking){
+                vector<float> obs; // Temporary code
+                for(unsigned int i = 0; i < 2; i++){
+                    obs.push_back(tempMarkers[i].smoothPos.x);
+                    obs.push_back(tempMarkers[i].smoothPos.y);
+                }
+                if(initStatus){
+                    currentBf = vmo::tracking_init(seqVmo, pttrList, obs);
+                    initStatus = false;
+                }
+                else{
+                    prevBf = currentBf;
+                    currentBf = vmo::tracking(seqVmo, pttrList, prevBf, obs);
+                }
+            }
+        }
     }
 }
 
@@ -277,17 +281,7 @@ void ofApp::draw(){
 
     ofPopMatrix();
 
-//    gestureInd = seqVmo.getGestureInd(currentBf.currentIdx);
-//    gestureCat = seqVmo.getGestureCat(currentBf.currentIdx);
-
-//    float idx = float(gestureInd[0]);
-//    float len = float(pttrList.sfxLen[gestureCat[0]-1]);
-//
-//    float percent = ofMap(idx, 1.0, len, 0.0, 1.0);
-
 //	gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
-
-//     float percent = testCounter;
 
     // Draw gesture patterns
     ofSetColor(255, 0, 0);
