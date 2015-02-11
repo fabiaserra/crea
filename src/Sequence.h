@@ -3,8 +3,6 @@
 #include "ofxXmlSettings.h"
 #include "irMarker.h"
 
-//typedef vector<ofPolyline> Trajectories;
-
 class Sequence{
     public:
         Sequence();
@@ -39,7 +37,7 @@ class Sequence{
         vector< vector<ofPolyline> > patterns;              // identified patterns from the sequence
         vector< vector<ofPolyline> > patternsPastPoints;    // Percentage completion fragments of the patterns
         //--------------------------------------------------------------
-        string filename;
+        int frame_counter;
         float duration;
         size_t numFrames;
         //--------------------------------------------------------------

@@ -89,6 +89,21 @@ void ofApp::setup(){
     // smoothingSize = 0;
     // contour.setup();
 
+    // SETUP GUIs
+    dim = 32;
+    guiWidth = 240;
+    theme = OFX_UI_THEME_GRAYDAY;
+
+    setupGUI0();
+    setupGUI1();
+    setupGUI2();
+    setupGUI3();
+    setupGUI4();
+    setupGUI5();
+    setupGUI6(0);
+
+    loadGUISettings("settings/lastSettings.xml");
+
     // SEQUENCE
     int maxMarkers = 2;
     sequence.setup(maxMarkers);
@@ -106,19 +121,22 @@ void ofApp::setup(){
 
     initStatus = true;
     stopTracking = true;
-//    // gestureInd = -1;
-//    // gestureCat = -1;
+    // gestureInd = -1;
+    // gestureCat = -1;
     // 2. Processing
     // 2.1 Load file into VMO
     int minLen = 1; // Temporary setting
     float start = 0.0, step = 0.05, stop = 5.0;
+	
+	//For sequence4.xml
+	//int minLen = 4;
+	//float start = 11.0 step = 0.01 stop = 14.0;
+	
     float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
     seqVmo = vmo::buildOracle(obs, dimensions, maxMarkers, t);
     // 2.2 Output pattern list
     pttrList = vmo::findPttr(seqVmo, minLen);
-    sequence.patterns = vmo::processPttr(seqVmo, pttrList); // double free error in linux
-
-    cout << sequence.patterns.size() << endl;
+    sequence.patterns = vmo::processPttr(seqVmo, pttrList);
 
     // SETUP GUIs
     dim = 32;
@@ -216,29 +234,29 @@ void ofApp::update(){
         markersParticles.update(dt, tempMarkers);
 
         // Record sequence when recording button is true
-        if(recordingSequence->getValue() == true) sequence.record(tempMarkers);
+        if(recordingButton->getValue() == true) sequence.record(tempMarkers);
 
         if(drawSequence) sequence.update();
 
         //Gesture Tracking with VMO here?
-//
-//        if (tempMarkers.size()>1){
-//            if (!stopTracking){
-//                vector<float> obs; // Temporary code
-//                for(unsigned int i = 0; i < 2; i++){
-//                    obs.push_back(tempMarkers[i].smoothPos.x);
-//                    obs.push_back(tempMarkers[i].smoothPos.y);
-//                }
-//                if(initStatus){
-//                    currentBf = vmo::tracking_init(seqVmo, pttrList, obs);
-//                    initStatus = false;
-//                }
-//                else{
-//                    prevBf = currentBf;
-//                    currentBf = vmo::tracking(seqVmo, pttrList, prevBf, obs);
-//                }
-//            }
-//        }
+
+        if (tempMarkers.size()>1){
+            if (!stopTracking){
+                vector<float> obs; // Temporary code
+                for(unsigned int i = 0; i < 2; i++){
+                    obs.push_back(tempMarkers[i].smoothPos.x);
+                    obs.push_back(tempMarkers[i].smoothPos.y);
+                }
+                if(initStatus){
+                    currentBf = vmo::tracking_init(seqVmo, pttrList, obs);
+                    initStatus = false;
+                }
+                else{
+                    prevBf = currentBf;
+                    currentBf = vmo::tracking(seqVmo, pttrList, prevBf, obs);
+                }
+            }
+        }
     }
 }
 
@@ -265,6 +283,7 @@ void ofApp::draw(){
     // Graphics
     // particles.draw();
     markersParticles.draw();
+
     // contour.draw();
 
      vector<irMarker>& tempMarkers         = tracker.getFollowers();
@@ -275,19 +294,11 @@ void ofApp::draw(){
 
     if(drawSequence) sequence.draw();
 
+
     ofPopMatrix();
-
-//    gestureInd = seqVmo.getGestureInd(currentBf.currentIdx);
-//    gestureCat = seqVmo.getGestureCat(currentBf.currentIdx);
-
-//    float idx = float(gestureInd[0]);
-//    float len = float(pttrList.sfxLen[gestureCat[0]-1]);
-//
-//    float percent = ofMap(idx, 1.0, len, 0.0, 1.0);
 
 //	gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
 
-//     float percent = testCounter;
 
     // Draw gesture patterns
     ofSetColor(255, 0, 0);
@@ -306,6 +317,7 @@ void ofApp::draw(){
     currentPatterns[4] = 0.95;
 //    if(drawPatterns) sequence.drawPatterns(currentPatterns);
 
+>>>>>>> upstream/master
 }
 
 //--------------------------------------------------------------
@@ -399,7 +411,6 @@ void ofApp::setupGUI1(){
     themes.push_back("MIDNIGHT");
     themes.push_back("BERLIN");
 
-    ofxUIRadio *guiThemes;
     guiThemes = gui1->addRadio("GUI Theme", themes, OFX_UI_ORIENTATION_VERTICAL);
     guiThemes->activateToggle("GRAYDAY");
 
@@ -463,8 +474,7 @@ void ofApp::setupGUI3(){
     gui3->addLabel("Press '3' to hide panel", OFX_UI_FONT_SMALL);
 
     gui3->addSpacer();
-    recordingSequence = gui3->addImageToggle("Record Sequence", "gui/icons/record.png", false, dim, dim);
-    gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    recordingButton = gui3->addImageToggle("Record Sequence", "gui/icons/record.png", false, dim, dim);
     gui3->addImageButton("Save Sequence", "gui/icons/save.png", false, dim, dim);
     gui3->addImageButton("Load Sequence", "gui/icons/open.png", false, dim, dim);
     gui3->addImageToggle("Play Sequence", "gui/icons/play.png", &drawSequence, dim, dim);
@@ -474,9 +484,8 @@ void ofApp::setupGUI3(){
     sequenceDuration = gui3->addLabel("Duration: "+ofToString(sequence.duration, 2) + " s", OFX_UI_FONT_SMALL);
     sequenceNumFrames = gui3->addLabel("Number of frames: "+ofToString(sequence.numFrames), OFX_UI_FONT_SMALL);
 
-
-    gui3->addSpacer();
-    gui3->addToggle("Show gesture patterns", &drawPatterns);
+	gui3->addSpacer();
+    gui3->addToggle("Show gesture patterns", &sequence.drawPatterns);
 
     gui3->addSpacer();
 
@@ -501,7 +510,7 @@ void ofApp::setupGUI4(){
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui4->addSpacer();
-    gui4->addToggle("Show gesture patterns", &drawPatterns);
+    gui4->addToggle("Show gesture patterns", &sequence.drawPatterns);
 
     gui4->addSpacer();
 
@@ -589,10 +598,8 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     if(e.getName() == "Reset Kinect"){
         if(resetKinect){
             kinect.close();
-            kinect.clear();
         }
         else{
-            kinect.init(true); // shows infrared instead of RGB video Image
             kinect.open();
         }
     }
@@ -600,6 +607,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     if(e.getName() == "Save Settings"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if (button->getValue() == true){
+            recordingButton->setValue(false);
             ofFileDialogResult result = ofSystemSaveDialog("sequence.xml", "Save sequence file");
             if (result.bSuccess){
                 saveGUISettings(result.getPath());
@@ -610,6 +618,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     if(e.getName() == "Load Settings"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if (button->getValue() == true){
+            recordingButton->setValue(false);
             ofFileDialogResult result = ofSystemLoadDialog("Select settings xml file.", false, "settings/");
             if (result.bSuccess){
                 loadGUISettings(result.getPath());
@@ -737,6 +746,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 void ofApp::saveGUISettings(const string path){
 
     ofxXmlSettings *XML = new ofxXmlSettings();
+    int guiIndex = 0;
 
     for(vector<ofxUISuperCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it)
     {
@@ -759,6 +769,7 @@ void ofApp::saveGUISettings(const string path){
             }
         }
         XML->popTag();
+        guiIndex++;
     }
 
     XML->saveFile(path);
@@ -788,8 +799,8 @@ void ofApp::loadGUISettings(const string path){
             }
             XML->popTag();
         }
-        guiIndex++;
         XML->popTag();
+        guiIndex++;
     }
     delete XML;
 }
@@ -797,7 +808,6 @@ void ofApp::loadGUISettings(const string path){
 //--------------------------------------------------------------
 void ofApp::exit(){
     kinect.close();
-    kinect.clear();
 
     saveGUISettings("settings/lastSettings.xml");
 
@@ -814,8 +824,8 @@ void ofApp::exit(){
 void ofApp::keyPressed(int key){
     switch (key){
 
-            ofToggleFullscreen();
         case 'f':
+            ofToggleFullscreen();
             reScale = (float)ofGetWidth() / (float)kinect.width;
             break;
 
