@@ -433,6 +433,7 @@ vector<vector<ofPolyline> > vmo::processPttr(vmo& oracle, const vmo::pttr& pttrL
                                     + oracle.obs[offset+k][d*oracle.dimFeature]/float(j+1);
 					pattern[i][d][k].y = (pattern[i][d][k].y*float(j)/float(j+1))
                                     + oracle.obs[offset+k][d*oracle.dimFeature+1]/float(j+1);
+
 				}
 			}
 		}

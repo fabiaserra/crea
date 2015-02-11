@@ -49,22 +49,21 @@ typedef vector<vector1D> vector2D;
 
 class vmo{
 public:
-	
-	class pttr{
-	public:
-		pttr();
-		int size = 0;
-		vector2D sfxPts;
-		vector1D sfxLen;
+    class pttr{
+        public:
+            pttr();
+            int size = 0;
+            vector2D sfxPts;
+            vector1D sfxLen;
 	};
 	
 	class belief{
-	public:
-		belief();
-		int K;
-		int currentIdx;
-		vector1D path;
-		vector<float> cost;
+        public:
+            belief();
+            int K;
+            int currentIdx;
+            vector1D path;
+            vector<float> cost;
 	};
 	
 	vmo();

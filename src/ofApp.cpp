@@ -105,20 +105,17 @@ void ofApp::setup(){
     loadGUISettings("settings/lastSettings.xml");
 
     // SEQUENCE
-    int numMarkers = 2;
-    int dim = 2;
-    sequence.setup(numMarkers);
-    sequence.load("sequences/sequence4.xml");
+    int maxMarkers = 2;
+    sequence.setup(maxMarkers);
+    sequence.load("sequences/sequence.xml");
 
-    testCounter = 0.0;
-
-    //VMO Setup goes here//
-    //1. Load xml files...
-    obs.assign(sequence.numFrames, vector<float>(numMarkers*dim));
-    for (int i = 0; i < sequence.markersPosition.size(); i++) {
-        for (int j = 0; j < sequence.markersPosition[i].size(); j++) {
-            obs[j][i*dim] = sequence.markersPosition[i][j].x;
-            obs[j][i*dim+1] = sequence.markersPosition[i][j].y;
+//    //VMO Setup goes here//
+    int dimensions = 2;
+    obs.assign(sequence.numFrames, vector<float>(maxMarkers*dimensions));
+    for (int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
+        for (int frameIndex = 0; frameIndex < sequence.numFrames; frameIndex++){
+            obs[frameIndex][markerIndex*dimensions] = sequence.markersPosition[markerIndex][frameIndex].x;
+            obs[frameIndex][markerIndex*dimensions+1] = sequence.markersPosition[markerIndex][frameIndex].y;
         }
     }
 
@@ -128,16 +125,35 @@ void ofApp::setup(){
     // gestureCat = -1;
     // 2. Processing
     // 2.1 Load file into VMO
-    int minLen = 4; // Temporary setting
-    float start = 10.0, step = 0.05, stop = 15.0;
-    float t = vmo::findThreshold(obs, dim, numMarkers, start, step, stop); // Temporary threshold range and step
-    seqVmo = vmo::buildOracle(obs, dim, numMarkers, t);
+    int minLen = 1; // Temporary setting
+    float start = 0.0, step = 0.05, stop = 5.0;
+	
+	//For sequence4.xml
+	//int minLen = 4;
+	//float start = 11.0 step = 0.01 stop = 14.0;
+	
+    float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
+    seqVmo = vmo::buildOracle(obs, dimensions, maxMarkers, t);
     // 2.2 Output pattern list
     pttrList = vmo::findPttr(seqVmo, minLen);
-    // patterns = vmo::processPttr(seqVmo, pttrList);
-
     sequence.patterns = vmo::processPttr(seqVmo, pttrList);
 
+    // SETUP GUIs
+    dim = 32;
+    guiWidth = 240;
+    theme = OFX_UI_THEME_GRAYDAY;
+    drawPatterns = false;
+    drawSequence = false;
+
+    setupGUI0();
+    setupGUI1();
+    setupGUI2();
+    setupGUI3();
+    setupGUI4();
+    setupGUI5();
+    setupGUI6(0);
+
+    loadGUISettings("settings/lastSettings.xml");
 }
 
 //--------------------------------------------------------------
@@ -220,6 +236,8 @@ void ofApp::update(){
         // Record sequence when recording button is true
         if(recordingButton->getValue() == true) sequence.record(tempMarkers);
 
+        if(drawSequence) sequence.update();
+
         //Gesture Tracking with VMO here?
 
         if (tempMarkers.size()>1){
@@ -268,37 +286,38 @@ void ofApp::draw(){
 
     // contour.draw();
 
-    // vector<irMarker>& tempMarkers         = tracker.getFollowers();
-    // // Draw identified IR markers
-    // for (int i = 0; i < tempMarkers.size(); i++){
-    //     tempMarkers[i].draw();
-    // }
+     vector<irMarker>& tempMarkers         = tracker.getFollowers();
+     // Draw identified IR markers
+     for (int i = 0; i < tempMarkers.size(); i++){
+         tempMarkers[i].draw();
+     }
+
+    if(drawSequence) sequence.draw();
 
 
     ofPopMatrix();
 
-//    gestureInd = seqVmo.getGestureInd(currentBf.currentIdx);
-//    gestureCat = seqVmo.getGestureCat(currentBf.currentIdx);
-	
-//	float idx = float(gestureInd[0]);
-//    float len = float(pttrList.sfxLen[gestureCat[0]-1]);
-//
-//    float percent = ofMap(idx, 1.0, len, 0.0, 1.0);
+//	gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
 
-	gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
-	
-    // float percent = testCounter;
-    
+
     // Draw gesture patterns
-    // percent = testCounter;
-//    vector<int> highlightedIndices;
-//    highlightedIndices.push_back(1);
-//    highlightedIndices.push_back(3);
-//    highlightedIndices.push_back(4);
-//    highlightedIndices.push_back(9);
-//    highlightedIndices.push_back(14);
-//    sequence.draw(percent, highlightedIndices);
-//    if(sequence.sequenceLoaded && testCounter < 0.98) testCounter += 0.001;
+    ofSetColor(255, 0, 0);
+    ofSetLineWidth(3);
+    for(int patternIndex = 0; patternIndex < sequence.patterns.size(); patternIndex++){
+        for(int markerIndex = 0; markerIndex < sequence.patterns[patternIndex].size(); markerIndex++){
+//            cout << sequence.patterns[patternIndex][markerIndex].size() << endl;
+            sequence.patterns[patternIndex][markerIndex].draw();
+        }
+    }
+
+
+    map<int, float> currentPatterns; // Use "gestureUpdate" above!!!!!!!!!!
+    currentPatterns[1] = 0.35;
+    currentPatterns[3] = 0.75;
+    currentPatterns[4] = 0.95;
+//    if(drawPatterns) sequence.drawPatterns(currentPatterns);
+
+>>>>>>> upstream/master
 }
 
 //--------------------------------------------------------------
@@ -456,12 +475,16 @@ void ofApp::setupGUI3(){
 
     gui3->addSpacer();
     recordingButton = gui3->addImageToggle("Record Sequence", "gui/icons/record.png", false, dim, dim);
-    gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui3->addImageButton("Save Sequence", "gui/icons/save.png", false, dim, dim);
     gui3->addImageButton("Load Sequence", "gui/icons/open.png", false, dim, dim);
+    gui3->addImageToggle("Play Sequence", "gui/icons/play.png", &drawSequence, dim, dim);
     gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
-    gui3->addSpacer();
+    sequenceFilename = gui3->addLabel("Filename: "+sequence.filename, OFX_UI_FONT_SMALL);
+    sequenceDuration = gui3->addLabel("Duration: "+ofToString(sequence.duration, 2) + " s", OFX_UI_FONT_SMALL);
+    sequenceNumFrames = gui3->addLabel("Number of frames: "+ofToString(sequence.numFrames), OFX_UI_FONT_SMALL);
+
+	gui3->addSpacer();
     gui3->addToggle("Show gesture patterns", &sequence.drawPatterns);
 
     gui3->addSpacer();
@@ -604,7 +627,8 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     }
 
     if(e.getName() == "Record Sequence"){
-        if (recordingButton->getValue() == true){
+        if (recordingSequence->getValue() == true){
+            drawSequence = false;
             sequence.startRecording();
         }
     }
@@ -612,7 +636,8 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     if(e.getName() == "Save Sequence"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if (button->getValue() == true){
-            recordingButton->setValue(false);
+            recordingSequence->setValue(false);
+            drawSequence = false;
             ofFileDialogResult result = ofSystemSaveDialog("sequence.xml", "Save sequence file");
             if (result.bSuccess){
                 sequence.save(result.getPath());
@@ -623,10 +648,27 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     if(e.getName() == "Load Sequence"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if (button->getValue() == true){
+            recordingSequence->setValue(false);
+            drawSequence = false;
             ofFileDialogResult result = ofSystemLoadDialog("Select sequence xml file.", false, "sequences/");
             if (result.bSuccess){
                 sequence.load(result.getPath());
+                sequenceFilename->setLabel("Filename: "+sequence.filename);
+                sequenceDuration->setLabel("Duration: "+ofToString(sequence.duration, 2) + " s");
+                sequenceNumFrames->setLabel("Number of frames: "+ofToString(sequence.numFrames));
             }
+        }
+    }
+
+    if(e.getName() == "Play Sequence"){
+        ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
+        if (toggle->getValue() == true){
+            recordingSequence->setValue(false);
+            drawSequence = true;
+        }
+        else{
+            sequence.clearPlayback();
+            drawSequence = false;
         }
     }
 
@@ -714,7 +756,8 @@ void ofApp::saveGUISettings(const string path){
         vector<ofxUIWidget*> widgets = g->getWidgets();
         for(int i = 0; i < widgets.size(); i++)
         {
-            if(widgets[i]->hasState()){
+            // kind number 20 is ofxUIImageToggle, for which we don't want to save the state
+            if(widgets[i]->hasState() && widgets[i]->getKind() != 20){
                 int index = XML->addTag("Widget");
                 if(XML->pushTag("Widget", index))
                 {
@@ -795,7 +838,7 @@ void ofApp::keyPressed(int key){
             gui4->setVisible(false);
             gui5->setVisible(false);
             gui6->setVisible(false);
-            sequence.drawPatterns = false;
+//            drawPatterns = false;
             break;
 
         case '1':
@@ -806,7 +849,7 @@ void ofApp::keyPressed(int key){
             gui4->setVisible(false);
             gui5->setVisible(false);
             gui6->setVisible(false);
-            sequence.drawPatterns = false;
+//            drawPatterns = false;
             break;
 
         case '2':
@@ -817,7 +860,7 @@ void ofApp::keyPressed(int key){
             gui4->setVisible(false);
             gui5->setVisible(false);
             gui6->setVisible(false);
-            sequence.drawPatterns = false;
+//            drawPatterns = false;
             break;
 
         case '3':
@@ -828,8 +871,8 @@ void ofApp::keyPressed(int key){
             gui4->setVisible(false);
             gui5->setVisible(false);
             gui6->setVisible(false);
-            if(gui3->isVisible()) sequence.drawPatterns = true;
-            else sequence.drawPatterns = false;
+//            if(gui3->isVisible()) drawPatterns = true;
+//            else drawPatterns = false;
             break;
 
         case '4':
@@ -840,8 +883,8 @@ void ofApp::keyPressed(int key){
             gui4->toggleVisible();
             gui5->setVisible(false);
             gui6->setVisible(false);
-            if(gui4->isVisible()) sequence.drawPatterns = true;
-            else sequence.drawPatterns = false;
+//            if(gui4->isVisible()) drawPatterns = true;
+//            else drawPatterns = false;
             break;
 
         case '5':
@@ -852,7 +895,7 @@ void ofApp::keyPressed(int key){
             gui4->setVisible(false);
             gui5->toggleVisible();
             gui6->setVisible(false);
-            sequence.drawPatterns = false;
+//            drawPatterns = false;
             break;
 
         case '6':
@@ -863,7 +906,7 @@ void ofApp::keyPressed(int key){
             gui4->setVisible(false);
             gui5->setVisible(false);
             gui6->toggleVisible();
-            sequence.drawPatterns = false;
+//            drawPatterns = false;
             break;
 
         default:

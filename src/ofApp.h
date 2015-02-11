@@ -74,6 +74,8 @@ class ofApp : public ofBaseApp{
         //--------------------------------------------------------------
         Sequence sequence;      // Gestures sequence
         float testCounter;
+        bool drawPatterns;
+        bool drawSequence;
         //--------------------------------------------------------------
         vector<ofxUISuperCanvas *> guis;
         ofxUISuperCanvas *gui0;

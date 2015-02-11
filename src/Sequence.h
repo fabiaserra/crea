@@ -8,27 +8,27 @@ class Sequence{
         Sequence();
 
         void setup(int nMarkers);
+        void update();
         void record(vector<irMarker>& markers);
         void load(const string path);
         void save(const string path);
-        void draw(float percent, vector<int> highlightedIndices);
-        void drawPattern(int patternPosition, int patternIndex, float percent, bool highlight);
+        void draw();
+        void drawPatterns(map<int, float> currentPatterns);
+
+//        void setPatterns(vector< vector<ofPolyline> > patterns);
 
         void startRecording();
-        void stopRecording();
-        // void deleteRecording();
+        void clearPlayback();
 
         //--------------------------------------------------------------
         ofxXmlSettings xml;
         //--------------------------------------------------------------
-        bool sequenceLoaded;
-        bool drawPatterns;
-        //--------------------------------------------------------------
-        size_t nMarkers;
+        size_t maxMarkers;
         //--------------------------------------------------------------
         vector<ofPolyline> markersPosition;                 // Markers positions through all the sequence
         vector<ofPolyline> markersPastPoints;               // Percentage completion fragment of the sequence
 
+//        map<int, vector<ofPolyline> > markersPosition;      // Markers positions through all the sequence with label
         // Other ideas
         // vector< vector<ofPoint> > markersPosition;
         // vector< vector<Marker> > markersPosition;
@@ -41,5 +41,13 @@ class Sequence{
         float duration;
         size_t numFrames;
         //--------------------------------------------------------------
+        float playhead; // 0 ~ 1
+        float elapsedTime;
+        //--------------------------------------------------------------
         ofTrueTypeFont  verdana;
+
+    protected:
+        void drawPattern(int patternPosition, int patternIndex, float percent, bool highlight);
+        void updatePlayhead();
+        size_t calcCurrentFrameIndex();
 };
