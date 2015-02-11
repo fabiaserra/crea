@@ -1,9 +1,8 @@
 #include "Sequence.h"
 
 Sequence::Sequence(){
-    filename = "";
-    duration = 0;
-    numFrames = 0;
+    sequenceLoaded = false;
+    drawPatterns = false;
     frame_counter = 0;
 }
 
@@ -29,21 +28,36 @@ void Sequence::record(vector<irMarker>& markers){
     xml.popTag();
 }
 
-void Sequence::draw(float percent){
+void Sequence::draw(float percent, vector<int> highlightedIndices){
 
-    // Draw entire sequence
-    for(int markerIndex = 0; markerIndex < nMarkers; markerIndex++){
-        if(markerIndex == 0) ofSetColor(255, 0, 0);
-        if(markerIndex == 1) ofSetColor(0, 255, 0);
-        markersPosition[markerIndex].draw();
+    if(sequenceLoaded){
+        // Draw entire sequence
+        // for(int markerIndex = 0; markerIndex < nMarkers; markerIndex++){
+        //     if(markerIndex == 0) ofSetColor(255, 0, 0);
+        //     if(markerIndex == 1) ofSetColor(0, 255, 0);
+        //     markersPosition[markerIndex].draw();
 
-        ofPoint currentPoint = markersPosition[markerIndex].getPointAtPercent(percent);
-        markersPastPoints[markerIndex].addVertex(currentPoint);
+        //     ofPoint currentPoint = markersPosition[markerIndex].getPointAtPercent(percent);
+        //     markersPastPoints[markerIndex].addVertex(currentPoint);
+ 
+        //     ofSetColor(0, 255, 0);
+        //     markersPastPoints[markerIndex].draw();
+ 
+        //     ofCircle(currentPoint, 3);
+        // }
 
-        ofSetColor(0, 255, 0);
-        markersPastPoints[markerIndex].draw();
+        // Draw gesture patterns
+        // if patterns identified...
+        if (drawPatterns){
+            for(int patternIndex = 0; patternIndex < patterns.size(); patternIndex++){
+                int patternPosition = patternIndex + 1;
+                bool highlight = false;
+                vector<int>::iterator it = find(highlightedIndices.begin(), highlightedIndices.end(), patternIndex+1);
+                if(it != highlightedIndices.end()) highlight = true;
+                drawPattern(patternPosition, patternIndex, percent, highlight);
+            }
+        }
 
-        ofCircle(currentPoint, 3);
     }
 }
 
@@ -93,8 +107,6 @@ void Sequence::load(const string path){
         xml.popTag();
     }
 
-    filename = ofFilePath::getFileName(path);
-
     // // Debug: print vertices of the sequence
     // for(int i = 0; i < nMarkers; i++){
     //     vector<ofPoint> vertices = markersPosition[i].getVertices();
@@ -102,60 +114,47 @@ void Sequence::load(const string path){
     //        cout << j << ": " << vertices[j].x << " " << vertices[j].y << endl;
     //     }
     // }
-//
-//    int nPatterns = 14;
-//
-//    // Clear and initialize memory of polylines patterns
-//    patterns.clear();
-//    for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
-//        vector<ofPolyline> newPattern;
-//        for(int markerIndex = 0; markerIndex < nMarkers; markerIndex++){
-//            ofPolyline newPolyline;
-//            newPattern.push_back(newPolyline);
-//        }
-//        patterns.push_back(newPattern);
-//    }
-//
-//    // Clear and initialize memory of previous points polylines patterns
-//    patternsPastPoints.clear();
-//    for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
-//        vector<ofPolyline> newPattern;
-//        for(int markerIndex = 0; markerIndex < nMarkers; markerIndex++){
-//            ofPolyline newPolyline;
-//            newPattern.push_back(newPolyline);
-//        }
-//        patternsPastPoints.push_back(newPattern);
-//    }
 
-//    // Break sequence in n patterns for debug
-//    for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
-//        for(int markerIndex = 0; markerIndex < nMarkers; markerIndex++){
-//            int startIndex = markersPosition[markerIndex].getIndexAtPercent(patternIndex * (1.01/nPatterns));
-//            int endIndex = markersPosition[markerIndex].getIndexAtPercent((patternIndex+1) * (1.01/nPatterns))+1;
-//            if (endIndex == 1) endIndex = markersPosition[markerIndex].size();
-//            for(int i = startIndex; i < endIndex; i++){
-//                patterns[patternIndex][markerIndex].addVertex(markersPosition[markerIndex][i]);
-//            }
-//        }
-//    }
+    int nPatterns = 14;
+
+    // Clear and initialize memory of polylines patterns
+    patterns.clear();
+    for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
+        vector<ofPolyline> newPattern;
+        for(int markerIndex = 0; markerIndex < nMarkers; markerIndex++){
+            ofPolyline newPolyline;
+            newPattern.push_back(newPolyline);
+        }
+        patterns.push_back(newPattern);
+    }
+
+    // Clear and initialize memory of previous points polylines patterns
+    patternsPastPoints.clear();
+    for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
+        vector<ofPolyline> newPattern;
+        for(int markerIndex = 0; markerIndex < nMarkers; markerIndex++){
+            ofPolyline newPolyline;
+            newPattern.push_back(newPolyline);
+        }
+        patternsPastPoints.push_back(newPattern);
+    }
+
+    // Break sequence in n patterns for debug
+    for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
+        for(int markerIndex = 0; markerIndex < nMarkers; markerIndex++){
+            int startIndex = markersPosition[markerIndex].getIndexAtPercent(patternIndex * (1.01/nPatterns));
+            int endIndex = markersPosition[markerIndex].getIndexAtPercent((patternIndex+1) * (1.01/nPatterns))+1;
+            if (endIndex == 1) endIndex = markersPosition[markerIndex].size();
+            for(int i = startIndex; i < endIndex; i++){
+                patterns[patternIndex][markerIndex].addVertex(markersPosition[markerIndex][i]);
+            }
+        }
+    }
 
     // Duration in seconds of the sequence
     duration = timestampLastFrame - timestampFirstFrame;
-}
 
-void Sequence::drawPatterns(map<int, float> currentPatterns){
-    // Draw gesture patterns
-    for(int patternIndex = 0; patternIndex < patterns.size(); patternIndex++){
-        int patternPosition = patternIndex + 1;
-        bool highlight = false;
-        float percent = 0;
-        // if the pattern is is inside the map
-        if(currentPatterns.find(patternIndex) != currentPatterns.end()) {
-            highlight = true;
-            percent = currentPatterns[patternIndex];
-        }
-        drawPattern(patternPosition, patternIndex, percent, highlight);
-    }
+    sequenceLoaded = true;
 }
 
 void Sequence::drawPattern(int patternPosition, int patternIndex, float percent, bool highlight){
@@ -221,20 +220,6 @@ void Sequence::drawPattern(int patternPosition, int patternIndex, float percent,
     ofPopMatrix();
 }
 
-//void Sequence::setPatterns(vector< vector<ofPolyline> > patterns){
-//    this->patterns = patterns;
-//
-//    // Clear and initialize memory of previous points polylines patterns
-//    patternsPastPoints.clear();
-//    for(int patternIndex = 0; patternIndex < patterns.size(); patternIndex++){
-//        vector<ofPolyline> newPattern;
-//        for(int markerIndex = 0; markerIndex < nMarkers; markerIndex++){
-//            ofPolyline newPolyline;
-//            newPattern.push_back(newPolyline);
-//        }
-//        patternsPastPoints.push_back(newPattern);
-//    }
-//}
 
 void Sequence::save(const string path) {
     xml.saveFile(path);

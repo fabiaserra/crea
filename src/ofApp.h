@@ -74,8 +74,6 @@ class ofApp : public ofBaseApp{
         //--------------------------------------------------------------
         Sequence sequence;      // Gestures sequence
         float testCounter;
-        bool drawPatterns;
-        bool playSequence;
         //--------------------------------------------------------------
         vector<ofxUISuperCanvas *> guis;
         ofxUISuperCanvas *gui0;
@@ -86,10 +84,8 @@ class ofApp : public ofBaseApp{
         ofxUISuperCanvas *gui5;
         ofxUISuperCanvas *gui6;
         //--------------------------------------------------------------
-        ofxUIImageToggle *recordingSequence;  // Button to record gestures sequence
-        ofxUILabel *sequenceFilename;  // Button to record gestures sequence
-        ofxUILabel *sequenceDuration;  // Button to record gestures sequence
-        ofxUILabel *sequenceNumFrames;  // Button to record gestures sequence
+        ofxUIImageToggle *recordingButton;  // Button to record gestures sequence
+        ofxUIRadio *guiThemes;  // Button to record gestures sequence
         int theme;
         //--------------------------------------------------------------
         float dim;              // Size of GUI elements
@@ -121,6 +117,6 @@ class ofApp : public ofBaseApp{
         vector<vector<float> > loadXML(); // dummy function
         bool initStatus;
         bool stopTracking;
-		map<int, float> gestureUpdate
+        map<int, float> gestureUpdate;
 
 };
