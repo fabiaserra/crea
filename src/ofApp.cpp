@@ -128,9 +128,8 @@ void ofApp::setup(){
 //    sequence.patterns = vmo::processPttr(seqVmo, pttrList);
 //    cout << sequence.patterns.size() << endl;
 
-    // SETUP CUES
-//    cues.push_back("cues/.xml");
-//    currentCueIndex = -1;
+    // SETUP CUE LIST
+    loadCuesVector("settings/lastSettings.xml");  // initialize cues vector with cues from the last settings used
 
     // SETUP GUIs
     dim = 32;
@@ -149,6 +148,14 @@ void ofApp::setup(){
     setupGUI7(0);
 
     loadGUISettings("settings/lastSettings.xml", true);
+
+    // CREATE DIRECTORIES IN DATA IF THEY DONT EXIST
+    string directory[3] = {"sequences", "settings", "cues"};
+    for (int i = 0; i < 3; i++) {
+        if(!ofDirectory::doesDirectoryExist(directory[i])){
+            ofDirectory::createDirectory(directory[i]);
+        }
+    }
 }
 
 //--------------------------------------------------------------
@@ -524,17 +531,18 @@ void ofApp::setupGUI5(){
     gui5->addSpacer();
 
     gui5->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN, OFX_UI_ALIGN_CENTER);
-    loadCuesVector("settings/lastSettings.xml");
     string cueFilename = "";
     string currentCueIndexString = "";
+    currentCueIndex = -1;
     if(cues.size() > 0){
-        currentCueIndexString = ofToString(0)+".";
-        cueFilename = ofFilePath::getBaseName(cues[0]);
+        currentCueIndex = 0;
+        currentCueIndexString = ofToString(currentCueIndex)+".";
+        cueFilename = ofFilePath::getBaseName(cues[currentCueIndex]);
     }
     currentCueIndexLabel = gui5->addLabel(currentCueIndexString, OFX_UI_FONT_MEDIUM);
     gui5->setWidgetFontSize(OFX_UI_FONT_MEDIUM);
     currentCueName = gui5->addTextInput("Current Cue", cueFilename);
-
+    if(cues.size() == 0) currentCueName->setVisible(false);
 
     gui5->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui5->addSpacer();
@@ -656,7 +664,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     if(e.getName() == "Load Settings"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if(button->getValue() == true){
-            ofFileDialogResult result = ofSystemLoadDialog("Select settings xml file.", false, "settings/");
+            ofFileDialogResult result = ofSystemLoadDialog("Select settings xml file.", false, ofToDataPath("settings/"));
             if(result.bSuccess){
                 loadGUISettings(result.getPath(), true);
             }
@@ -736,25 +744,21 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if(button->getValue() == true){
             currentCueIndex++;
-            string cuePath = "cues/newCue"+ofToString(currentCueIndex)+".xml";
+            string cueFileName = "newCue"+ofToString(currentCueIndex);
+            string cuePath = "cues/"+cueFileName+".xml";
             vector<string>::iterator it = cues.begin();
             cues.insert(it+currentCueIndex, cuePath);
-            string cueFilename = ofFilePath::getBaseName(cuePath);
             currentCueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
-            currentCueName->setTextString(cueFilename);
+            currentCueName->setTextString(cueFileName);
             currentCueName->setVisible(true);
         }
     }
 
-    if(e.getName() == "Next Cue"){
+    if(e.getName() == "Save Cue"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if(button->getValue() == true){
-            if(cues.size() == 0) return;
-            else if(currentCueIndex+1 < cues.size()) currentCueIndex++;
-            else if(currentCueIndex+1 == cues.size()) currentCueIndex = 0;
-            string cueFilename = ofFilePath::getBaseName(cues[currentCueIndex]);
-            currentCueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
-            currentCueName->setTextString(cueFilename);
+            string cuePath = "cues/"+currentCueName->getTextString()+".xml";
+            saveGUISettings(cuePath);
         }
     }
 
@@ -764,9 +768,39 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             if(cues.size() == 0) return;
             else if(currentCueIndex-1 >= 0) currentCueIndex--;
             else if(currentCueIndex-1 < 0) currentCueIndex = cues.size()-1;
-            string cueFilename = ofFilePath::getBaseName(cues[currentCueIndex]);
+            string cueFileName = ofFilePath::getBaseName(cues[currentCueIndex]);
             currentCueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
-            currentCueName->setTextString(cueFilename);
+            currentCueName->setTextString(cueFileName);
+        }
+    }
+
+    if(e.getName() == "Next Cue"){
+        ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
+        if(button->getValue() == true){
+            if(cues.size() == 0) return;
+            else if(currentCueIndex+1 < cues.size()) currentCueIndex++;
+            else if(currentCueIndex+1 == cues.size()) currentCueIndex = 0;
+            string cueFileName = ofFilePath::getBaseName(cues[currentCueIndex]);
+            currentCueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
+            currentCueName->setTextString(cueFileName);
+        }
+    }
+
+    if(e.getName() == "Load Cue"){
+        ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
+        if(button->getValue() == true){
+            ofFileDialogResult result = ofSystemLoadDialog("Select cue file.", false, ofToDataPath("cues/"));
+            if(result.bSuccess){
+                currentCueIndex++;
+                string cuePath = "cues/"+ofFilePath::getFileName(result.getPath());
+                // TODO: SAVE LOADED CUE
+                vector<string>::iterator it = cues.begin();
+                cues.insert(it+currentCueIndex, cuePath);
+                string cueFileName = ofFilePath::getBaseName(cuePath);
+                currentCueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
+                currentCueName->setTextString(cueFileName);
+                currentCueName->setVisible(true);
+            }
         }
     }
 
@@ -785,10 +819,18 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
                 currentCueName->setVisible(false);
             }
             else{
-                string cueFilename = ofFilePath::getBaseName(cues[currentCueIndex]);
+                string cueFileName = ofFilePath::getBaseName(cues[currentCueIndex]);
                 currentCueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
-                currentCueName->setTextString(cueFilename);
+                currentCueName->setTextString(cueFileName);
             }
+        }
+    }
+
+    if(e.getName() == "GO"){
+        ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
+        if(button->getValue() == true){
+            // TODO: Load and trigger all the widgets
+            loadGUISettings(cues[currentCueIndex], true);
         }
     }
 
@@ -850,8 +892,8 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 //--------------------------------------------------------------
 void ofApp::saveGUISettings(const string path){
 
+    // Create directory if this doesnt exist
     ofFile file(path);
-    ofDirectory dir;
     if(!ofDirectory::doesDirectoryExist(file.getEnclosingDirectory())){
         ofDirectory::createDirectory(file.getEnclosingDirectory());
     }
@@ -865,7 +907,8 @@ void ofApp::saveGUISettings(const string path){
         vector<ofxUIWidget*> widgets = g->getWidgets();
         for(int i = 0; i < widgets.size(); i++){
             // kind number 20 is ofxUIImageToggle, for which we don't want to save the state
-            if(widgets[i]->hasState() && widgets[i]->getKind() != 20){
+            // kind number 12 is ofxUITextInput, for which we don't want to save the state
+            if(widgets[i]->hasState() && widgets[i]->getKind() != 20 && widgets[i]->getKind() != 12){
                 int index = XML->addTag("Widget");
                 if(XML->pushTag("Widget", index)){
                     XML->setValue("Kind", widgets[i]->getKind(), 0);
@@ -892,7 +935,10 @@ void ofApp::saveGUISettings(const string path){
 //--------------------------------------------------------------
 void ofApp::loadGUISettings(const string path, bool triggerEvents){
     ofxXmlSettings *XML = new ofxXmlSettings();
-    if(!XML->loadFile(path)) return;
+    if(!XML->loadFile(path)){
+        ofLogWarning("File " + ofFilePath::getFileName(path) + " not found.");
+        return;
+    }
     int guiIndex = 0;
 
     for(vector<ofxUISuperCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
@@ -926,7 +972,13 @@ void ofApp::loadCuesVector(const string path){
     cues.clear();
     for(int i = 0; i < numCues; i++){
         string name = XML->getValue("Cue", "NULL", i);
-        cues.push_back(name);
+        // Check if name corresponds to a cue file in data folder /cues, if not, we dont add it
+        if(ofFile::doesFileExist(name)){
+            cues.push_back(name);
+        }
+        else{
+            ofLogWarning("File " + ofFilePath::getFileName(name) + " not found in /cues folder.");
+        }
     }
     XML->popTag();
     delete XML;
