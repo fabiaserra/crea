@@ -95,7 +95,7 @@ void ofApp::setup(){
     // SEQUENCE
     int maxMarkers = 2;
     sequence.setup(maxMarkers);
-    sequence.load("sequences/sequence.xml");
+    sequence.load("sequences/sequence2.xml");
 
     // MARKERS
     markers.resize(maxMarkers);

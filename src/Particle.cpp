@@ -146,8 +146,7 @@ void Particle::draw(){
             color.setHue(hue);
         }
 
-        // ofSetColor(color, opacity);
-        ofSetColor(255);
+        ofSetColor(color, opacity);
 
         if(isEmpty){
             ofNoFill();
