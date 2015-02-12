@@ -109,11 +109,14 @@ void ofApp::setup(){
     sequence.setup(maxMarkers);
     sequence.load("sequences/sequence.xml");
 
+    // SEQUENCE
+    markers.resize(maxMarkers);
+
 //    //VMO Setup goes here//
     int dimensions = 2;
     obs.assign(sequence.numFrames, vector<float>(maxMarkers*dimensions));
-    for (int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
-        for (int frameIndex = 0; frameIndex < sequence.numFrames; frameIndex++){
+    for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
+        for(int frameIndex = 0; frameIndex < sequence.numFrames; frameIndex++){
             obs[frameIndex][markerIndex*dimensions] = sequence.markersPosition[markerIndex][frameIndex].x;
             obs[frameIndex][markerIndex*dimensions+1] = sequence.markersPosition[markerIndex][frameIndex].y;
         }
@@ -127,11 +130,10 @@ void ofApp::setup(){
     // 2.1 Load file into VMO
     int minLen = 1; // Temporary setting
     float start = 0.0, step = 0.05, stop = 5.0;
-	
     // For sequence4.xml
 //    int minLen = 4;
-//    float start = 11.0 step = 0.01 stop = 14.0;
-    
+//    float start = 11.0, step = 0.01, stop = 14.0;
+
     float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
     seqVmo = vmo::buildOracle(obs, dimensions, maxMarkers, t);
     // 2.2 Output pattern list
@@ -151,7 +153,8 @@ void ofApp::setup(){
     setupGUI3();
     setupGUI4();
     setupGUI5();
-    setupGUI6(0);
+    setupGUI6();
+    setupGUI7(0);
 
     loadGUISettings("settings/lastSettings.xml");
 }
@@ -214,7 +217,7 @@ void ofApp::update(){
         for(unsigned int i = 0; i < tempMarkers.size(); i++){
             tempMarkers[i].updateLabels(deadLabels, currentLabels);
         }
-        
+
         // Record sequence when recording button is true
         if(recordingSequence->getValue() == true) sequence.record(tempMarkers);
 
@@ -235,10 +238,10 @@ void ofApp::update(){
 
         // Update markers particles
         markersParticles.update(dt, tempMarkers);
-		
+
         // Update contour
         contour.update(contourFinder);
-        
+
         // Update sequence playhead to draw gesture
         if(drawSequence) sequence.update();
 
@@ -297,26 +300,24 @@ void ofApp::draw(){
 
     if(drawSequence) sequence.draw();
 
+    // Draw gesture patterns
+//    ofSetColor(255, 0, 0);
+//    ofSetLineWidth(3);
+//    for(int patternIndex = 0; patternIndex < sequence.patterns.size(); patternIndex++){
+//        for(int markerIndex = 0; markerIndex < sequence.patterns[patternIndex].size(); markerIndex++){
+//            sequence.patterns[patternIndex][markerIndex].draw();
+//        }
+//    }
+
     ofPopMatrix();
 
 //	gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
-
-    // Draw gesture patterns
-    ofSetColor(255, 0, 0);
-    ofSetLineWidth(3);
-    for(int patternIndex = 0; patternIndex < sequence.patterns.size(); patternIndex++){
-        for(int markerIndex = 0; markerIndex < sequence.patterns[patternIndex].size(); markerIndex++){
-//            cout << sequence.patterns[patternIndex][markerIndex].size() << endl;
-            sequence.patterns[patternIndex][markerIndex].draw();
-        }
-    }
-
 
     map<int, float> currentPatterns; // Use "gestureUpdate" above!!!!!!!!!!
     currentPatterns[1] = 0.35;
     currentPatterns[3] = 0.75;
     currentPatterns[4] = 0.95;
-//    if(drawPatterns) sequence.drawPatterns(currentPatterns);
+    if(drawPatterns) sequence.drawPatterns(currentPatterns);
 
 }
 
@@ -478,14 +479,13 @@ void ofApp::setupGUI3(){
     gui3->addImageButton("Save Sequence", "gui/icons/save.png", false, dim, dim);
     gui3->addImageButton("Load Sequence", "gui/icons/open.png", false, dim, dim);
     gui3->addImageToggle("Play Sequence", "gui/icons/play.png", &drawSequence, dim, dim);
+    gui3->addImageToggle("Show gesture patterns", "gui/icons/show.png", &drawPatterns, dim, dim);
     gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
+    gui3->addSpacer();
     sequenceFilename = gui3->addLabel("Filename: "+sequence.filename, OFX_UI_FONT_SMALL);
     sequenceDuration = gui3->addLabel("Duration: "+ofToString(sequence.duration, 2) + " s", OFX_UI_FONT_SMALL);
     sequenceNumFrames = gui3->addLabel("Number of frames: "+ofToString(sequence.numFrames), OFX_UI_FONT_SMALL);
-
-	gui3->addSpacer();
-    gui3->addToggle("Show gesture patterns", &sequence.drawPatterns);
 
     gui3->addSpacer();
 
@@ -507,10 +507,8 @@ void ofApp::setupGUI4(){
     gui4->addImageButton("Start vmo", "gui/icons/play.png", false, dim, dim);
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui4->addImageButton("Stop vmo", "gui/icons/delete.png", false, dim, dim);
+    gui4->addImageToggle("Show gesture patterns", "gui/icons/show.png", &drawPatterns, dim, dim);
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-
-    gui4->addSpacer();
-    gui4->addToggle("Show gesture patterns", &sequence.drawPatterns);
 
     gui4->addSpacer();
 
@@ -522,15 +520,15 @@ void ofApp::setupGUI4(){
 
 //--------------------------------------------------------------
 void ofApp::setupGUI5(){
-    gui5 = new ofxUISuperCanvas("5: FLUID SOLVER", 0, 0, guiWidth, ofGetHeight());
+    gui5 = new ofxUISuperCanvas("5: CUE LIST", 0, 0, guiWidth, ofGetHeight());
     gui5->setTheme(theme);
 
     gui5->addSpacer();
     gui5->addLabel("Press '5' to hide panel", OFX_UI_FONT_SMALL);
 
     gui5->addSpacer();
-    gui5->addLabel("Physics");
-    gui5->addSlider("Friction", 0, 100, &markersParticles.friction);
+    gui5->addLabel("CUES");
+    gui5->addImageButton("Load Cue", "gui/icons/open.png", false, dim, dim);
 
     gui5->addSpacer();
 
@@ -541,50 +539,16 @@ void ofApp::setupGUI5(){
 }
 
 //--------------------------------------------------------------
-void ofApp::setupGUI6(int i){
-    gui6 = new ofxUISuperCanvas("6: PARTICLES", 0, 0, guiWidth, ofGetHeight());
+void ofApp::setupGUI6(){
+    gui6 = new ofxUISuperCanvas("6: FLUID SOLVER", 0, 0, guiWidth, ofGetHeight());
     gui6->setTheme(theme);
 
     gui6->addSpacer();
-    gui6->addLabel("Press '6' to hide panel", OFX_UI_FONT_SMALL);
-
-    gui6->addSpacer();
-    gui6->addLabel("Emitter");
-    gui6->addSlider("Particles/sec", 0.0, 20.0, &markersParticles.bornRate);
-
-    // vector<string> types;
-    // types.push_back("Point");
-    // types.push_back("Grid");
-    // types.push_back("Contour");
-    // gui6->addLabel("Emitter type:", OFX_UI_FONT_SMALL);
-    // gui6->addRadio("Emitter type", types, OFX_UI_ORIENTATION_VERTICAL);
-
-    gui6->addSlider("Velocity", 0.0, 100.0, &markersParticles.velocity);
-    gui6->addSlider("Velocity Random[%]", 0.0, 100.0, &markersParticles.velocityRnd);
-    gui6->addSlider("Velocity from Motion[%]", 0.0, 100.0, &markersParticles.velocityMotion);
-
-    gui6->addSlider("Emitter size", 0.0, 60.0, &markersParticles.emitterSize);
-
-    gui6->addSpacer();
-    gui6->addLabel("Particle");
-    gui6->addToggle("Immortal", &markersParticles.immortal);
-    gui6->addSlider("Lifetime", 0.0, 20.0, &markersParticles.lifetime);
-    gui6->addSlider("Life Random[%]", 0.0, 100.0, &markersParticles.lifetimeRnd);
-    gui6->addSlider("Radius", 1.0, 15.0, &markersParticles.radius);
-    gui6->addSlider("Radius Random[%]", 0.0, 100.0, &markersParticles.radiusRnd);
-
-    gui6->addSpacer();
-    gui6->addLabel("Time behaviour");
-    gui6->addToggle("Size", &markersParticles.sizeAge);
-    gui6->addToggle("Opacity", &markersParticles.opacityAge);
-    gui6->addToggle("Flickers", &markersParticles.flickersAge);
-    gui6->addToggle("Color", &markersParticles.colorAge);
-    gui6->addToggle("Bounce", &markersParticles.bounce);
+    gui6->addLabel("Press '5' to hide panel", OFX_UI_FONT_SMALL);
 
     gui6->addSpacer();
     gui6->addLabel("Physics");
     gui6->addSlider("Friction", 0, 100, &markersParticles.friction);
-    gui6->addSlider("Gravity", 0.0, 20.0, &markersParticles.gravity);
 
     gui6->addSpacer();
 
@@ -592,6 +556,60 @@ void ofApp::setupGUI6(int i){
     gui6->setVisible(false);
     ofAddListener(gui6->newGUIEvent, this, &ofApp::guiEvent);
     guis.push_back(gui6);
+}
+
+//--------------------------------------------------------------
+void ofApp::setupGUI7(int i){
+    gui7 = new ofxUISuperCanvas("7: PARTICLES", 0, 0, guiWidth, ofGetHeight());
+    gui7->setTheme(theme);
+
+    gui7->addSpacer();
+    gui7->addLabel("Press '6' to hide panel", OFX_UI_FONT_SMALL);
+
+    gui7->addSpacer();
+    gui7->addLabel("Emitter");
+    gui7->addSlider("Particles/sec", 0.0, 20.0, &markersParticles.bornRate);
+
+    // vector<string> types;
+    // types.push_back("Point");
+    // types.push_back("Grid");
+    // types.push_back("Contour");
+    // gui7->addLabel("Emitter type:", OFX_UI_FONT_SMALL);
+    // gui7->addRadio("Emitter type", types, OFX_UI_ORIENTATION_VERTICAL);
+
+    gui7->addSlider("Velocity", 0.0, 100.0, &markersParticles.velocity);
+    gui7->addSlider("Velocity Random[%]", 0.0, 100.0, &markersParticles.velocityRnd);
+    gui7->addSlider("Velocity from Motion[%]", 0.0, 100.0, &markersParticles.velocityMotion);
+
+    gui7->addSlider("Emitter size", 0.0, 60.0, &markersParticles.emitterSize);
+
+    gui7->addSpacer();
+    gui7->addLabel("Particle");
+    gui7->addToggle("Immortal", &markersParticles.immortal);
+    gui7->addSlider("Lifetime", 0.0, 20.0, &markersParticles.lifetime);
+    gui7->addSlider("Life Random[%]", 0.0, 100.0, &markersParticles.lifetimeRnd);
+    gui7->addSlider("Radius", 1.0, 15.0, &markersParticles.radius);
+    gui7->addSlider("Radius Random[%]", 0.0, 100.0, &markersParticles.radiusRnd);
+
+    gui7->addSpacer();
+    gui7->addLabel("Time behaviour");
+    gui7->addToggle("Size", &markersParticles.sizeAge);
+    gui7->addToggle("Opacity", &markersParticles.opacityAge);
+    gui7->addToggle("Flickers", &markersParticles.flickersAge);
+    gui7->addToggle("Color", &markersParticles.colorAge);
+    gui7->addToggle("Bounce", &markersParticles.bounce);
+
+    gui7->addSpacer();
+    gui7->addLabel("Physics");
+    gui7->addSlider("Friction", 0, 100, &markersParticles.friction);
+    gui7->addSlider("Gravity", 0.0, 20.0, &markersParticles.gravity);
+
+    gui7->addSpacer();
+
+    gui7->autoSizeToFitWidgets();
+    gui7->setVisible(false);
+    ofAddListener(gui7->newGUIEvent, this, &ofApp::guiEvent);
+    guis.push_back(gui7);
 }
 
 void ofApp::guiEvent(ofxUIEventArgs &e){
@@ -606,10 +624,9 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 
     if(e.getName() == "Save Settings"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
-        if (button->getValue() == true){
-            recordingButton->setValue(false);
+        if(button->getValue() == true){
             ofFileDialogResult result = ofSystemSaveDialog("sequence.xml", "Save sequence file");
-            if (result.bSuccess){
+            if(result.bSuccess){
                 saveGUISettings(result.getPath());
             }
         }
@@ -617,17 +634,16 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 
     if(e.getName() == "Load Settings"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
-        if (button->getValue() == true){
-            recordingButton->setValue(false);
+        if(button->getValue() == true){
             ofFileDialogResult result = ofSystemLoadDialog("Select settings xml file.", false, "settings/");
-            if (result.bSuccess){
+            if(result.bSuccess){
                 loadGUISettings(result.getPath());
             }
         }
     }
 
     if(e.getName() == "Record Sequence"){
-        if (recordingSequence->getValue() == true){
+        if(recordingSequence->getValue() == true){
             drawSequence = false;
             sequence.startRecording();
         }
@@ -635,11 +651,11 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 
     if(e.getName() == "Save Sequence"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
-        if (button->getValue() == true){
+        if(button->getValue() == true){
             recordingSequence->setValue(false);
             drawSequence = false;
             ofFileDialogResult result = ofSystemSaveDialog("sequence.xml", "Save sequence file");
-            if (result.bSuccess){
+            if(result.bSuccess){
                 sequence.save(result.getPath());
             }
         }
@@ -647,11 +663,11 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 
     if(e.getName() == "Load Sequence"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
-        if (button->getValue() == true){
+        if(button->getValue() == true){
             recordingSequence->setValue(false);
             drawSequence = false;
             ofFileDialogResult result = ofSystemLoadDialog("Select sequence xml file.", false, "sequences/");
-            if (result.bSuccess){
+            if(result.bSuccess){
                 sequence.load(result.getPath());
                 sequenceFilename->setLabel("Filename: "+sequence.filename);
                 sequenceDuration->setLabel("Duration: "+ofToString(sequence.duration, 2) + " s");
@@ -662,7 +678,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 
     if(e.getName() == "Play Sequence"){
         ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
-        if (toggle->getValue() == true){
+        if(toggle->getValue() == true){
             recordingSequence->setValue(false);
             drawSequence = true;
         }
@@ -674,7 +690,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 
     if(e.getName() == "Start vmo"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
-        if (button->getValue() == true){
+        if(button->getValue() == true){
             initStatus = true;
             stopTracking = false;
         }
@@ -682,7 +698,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 
     if(e.getName() == "Stop vmo"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
-        if (button->getValue() == true){
+        if(button->getValue() == true){
             stopTracking = true;
         }
     }
@@ -714,18 +730,18 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         ofxUIRadio *radio = (ofxUIRadio *) e.widget;
 
         string name = radio->getActiveName();
-        if (name == "DEFAULT")      theme = OFX_UI_THEME_DEFAULT;
-        if (name == "HIPSTER")      theme = OFX_UI_THEME_HIPSTER;
-        if (name == "GRAYDAY")      theme = OFX_UI_THEME_GRAYDAY;
-        if (name == "RUSTIC")       theme = OFX_UI_THEME_RUSTIC;
-        if (name == "LIMESTONE")    theme = OFX_UI_THEME_LIMESTONE;
-        if (name == "VEGAN")        theme = OFX_UI_THEME_VEGAN;
-        if (name == "BLUEBLUE")     theme = OFX_UI_THEME_BLUEBLUE;
-        if (name == "COOLCLAY")     theme = OFX_UI_THEME_COOLCLAY;
-        if (name == "SPEARMINT")    theme = OFX_UI_THEME_SPEARMINT;
-        if (name == "PEPTOBISMOL")  theme = OFX_UI_THEME_PEPTOBISMOL;
-        if (name == "MIDNIGHT")     theme = OFX_UI_THEME_MIDNIGHT;
-        if (name == "BERLIN")       theme = OFX_UI_THEME_BERLIN;
+        if(name == "DEFAULT")      theme = OFX_UI_THEME_DEFAULT;
+        if(name == "HIPSTER")      theme = OFX_UI_THEME_HIPSTER;
+        if(name == "GRAYDAY")      theme = OFX_UI_THEME_GRAYDAY;
+        if(name == "RUSTIC")       theme = OFX_UI_THEME_RUSTIC;
+        if(name == "LIMESTONE")    theme = OFX_UI_THEME_LIMESTONE;
+        if(name == "VEGAN")        theme = OFX_UI_THEME_VEGAN;
+        if(name == "BLUEBLUE")     theme = OFX_UI_THEME_BLUEBLUE;
+        if(name == "COOLCLAY")     theme = OFX_UI_THEME_COOLCLAY;
+        if(name == "SPEARMINT")    theme = OFX_UI_THEME_SPEARMINT;
+        if(name == "PEPTOBISMOL")  theme = OFX_UI_THEME_PEPTOBISMOL;
+        if(name == "MIDNIGHT")     theme = OFX_UI_THEME_MIDNIGHT;
+        if(name == "BERLIN")       theme = OFX_UI_THEME_BERLIN;
 
         gui0->setTheme(theme);
         gui1->setTheme(theme);
@@ -738,7 +754,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 
     if(e.getName() == "Immortal"){
         ofxUIToggle *toggle = (ofxUIToggle *) e.widget;
-        if (toggle->getValue() == false) markersParticles.killParticles();
+        if(toggle->getValue() == false) markersParticles.killParticles();
     }
 }
 
@@ -748,19 +764,16 @@ void ofApp::saveGUISettings(const string path){
     ofxXmlSettings *XML = new ofxXmlSettings();
     int guiIndex = 0;
 
-    for(vector<ofxUISuperCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it)
-    {
+    for(vector<ofxUISuperCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
         ofxUICanvas *g = *it;
         int guiIndex = XML->addTag("GUI");
         XML->pushTag("GUI", guiIndex);
         vector<ofxUIWidget*> widgets = g->getWidgets();
-        for(int i = 0; i < widgets.size(); i++)
-        {
+        for(int i = 0; i < widgets.size(); i++){
             // kind number 20 is ofxUIImageToggle, for which we don't want to save the state
             if(widgets[i]->hasState() && widgets[i]->getKind() != 20){
                 int index = XML->addTag("Widget");
-                if(XML->pushTag("Widget", index))
-                {
+                if(XML->pushTag("Widget", index)){
                     XML->setValue("Kind", widgets[i]->getKind(), 0);
                     XML->setValue("Name", widgets[i]->getName(), 0);
                     widgets[i]->saveState(XML);
@@ -782,18 +795,15 @@ void ofApp::loadGUISettings(const string path){
     if(!XML->loadFile(path)) return;
     int guiIndex = 0;
 
-    for(vector<ofxUISuperCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it)
-    {
+    for(vector<ofxUISuperCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
         ofxUICanvas *g = *it;
         XML->pushTag("GUI", guiIndex);
         int widgetTags = XML->getNumTags("Widget");
-        for(int i = 0; i < widgetTags; i++)
-        {
+        for(int i = 0; i < widgetTags; i++){
             XML->pushTag("Widget", i);
             string name = XML->getValue("Name", "NULL", 0);
             ofxUIWidget *widget = g->getWidget(name);
-            if(widget != NULL && widget->hasState())
-            {
+            if(widget != NULL && widget->hasState()){
                 widget->loadState(XML);
                 g->triggerEvent(widget);
             }
@@ -818,12 +828,12 @@ void ofApp::exit(){
     delete gui4;
     delete gui5;
     delete gui6;
+    delete gui7;
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
     switch (key){
-
         case 'f':
             ofToggleFullscreen();
             reScale = (float)ofGetWidth() / (float)kinect.width;
@@ -838,7 +848,8 @@ void ofApp::keyPressed(int key){
             gui4->setVisible(false);
             gui5->setVisible(false);
             gui6->setVisible(false);
-//            drawPatterns = false;
+            gui7->setVisible(false);
+            drawPatterns = false;
             break;
 
         case '1':
@@ -849,7 +860,8 @@ void ofApp::keyPressed(int key){
             gui4->setVisible(false);
             gui5->setVisible(false);
             gui6->setVisible(false);
-//            drawPatterns = false;
+            gui7->setVisible(false);
+            drawPatterns = false;
             break;
 
         case '2':
@@ -860,7 +872,8 @@ void ofApp::keyPressed(int key){
             gui4->setVisible(false);
             gui5->setVisible(false);
             gui6->setVisible(false);
-//            drawPatterns = false;
+            gui7->setVisible(false);
+            drawPatterns = false;
             break;
 
         case '3':
@@ -871,8 +884,9 @@ void ofApp::keyPressed(int key){
             gui4->setVisible(false);
             gui5->setVisible(false);
             gui6->setVisible(false);
-//            if(gui3->isVisible()) drawPatterns = true;
-//            else drawPatterns = false;
+            gui7->setVisible(false);
+            if(gui3->isVisible()) drawPatterns = true;
+            else drawPatterns = false;
             break;
 
         case '4':
@@ -883,8 +897,9 @@ void ofApp::keyPressed(int key){
             gui4->toggleVisible();
             gui5->setVisible(false);
             gui6->setVisible(false);
-//            if(gui4->isVisible()) drawPatterns = true;
-//            else drawPatterns = false;
+            gui7->setVisible(false);
+            if(gui4->isVisible()) drawPatterns = true;
+            else drawPatterns = false;
             break;
 
         case '5':
@@ -895,7 +910,8 @@ void ofApp::keyPressed(int key){
             gui4->setVisible(false);
             gui5->toggleVisible();
             gui6->setVisible(false);
-//            drawPatterns = false;
+            gui7->setVisible(false);
+            drawPatterns = false;
             break;
 
         case '6':
@@ -906,7 +922,20 @@ void ofApp::keyPressed(int key){
             gui4->setVisible(false);
             gui5->setVisible(false);
             gui6->toggleVisible();
-//            drawPatterns = false;
+            gui7->setVisible(false);
+            drawPatterns = false;
+            break;
+
+        case '7':
+            gui0->setVisible(false);
+            gui1->setVisible(false);
+            gui2->setVisible(false);
+            gui3->setVisible(false);
+            gui4->setVisible(false);
+            gui5->setVisible(false);
+            gui6->setVisible(false);
+            gui7->toggleVisible();
+            drawPatterns = false;
             break;
 
         default:

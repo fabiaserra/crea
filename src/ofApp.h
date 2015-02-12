@@ -40,7 +40,8 @@ class ofApp : public ofBaseApp{
         void setupGUI3();
         void setupGUI4();
         void setupGUI5();
-        void setupGUI6(int i);  // TODO: use the i to be able to create a vector of ParticleSystems
+        void setupGUI6();
+        void setupGUI7(int i);  // TODO: use the i to be able to create a vector of ParticleSystems
 
         void saveGUISettings(const string path);
         void loadGUISettings(const string path);
@@ -66,6 +67,8 @@ class ofApp : public ofBaseApp{
         ofxCv::ContourFinder irMarkerFinder;
         ofxCv::RectTrackerFollower<irMarker> tracker;
         //--------------------------------------------------------------
+        vector<irMarker> markers;
+        //--------------------------------------------------------------
         // TODO: vector<ParticleSystem> particles
         ParticleSystem particles;
         ParticleSystem markersParticles;
@@ -85,6 +88,7 @@ class ofApp : public ofBaseApp{
         ofxUISuperCanvas *gui4;
         ofxUISuperCanvas *gui5;
         ofxUISuperCanvas *gui6;
+        ofxUISuperCanvas *gui7;
         //--------------------------------------------------------------
         ofxUIImageToggle *recordingButton;  // Button to record gestures sequence
         ofxUIRadio *guiThemes;  // Button to record gestures sequence
