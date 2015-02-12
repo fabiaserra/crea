@@ -94,7 +94,7 @@ void ofApp::setup(){
     sequence.setup(maxMarkers);
     sequence.load("sequences/sequence.xml");
 
-    // SEQUENCE
+    // MARKERS
     markers.resize(maxMarkers);
 
     // VMO SETUP
@@ -388,9 +388,9 @@ void ofApp::setupGUI1(){
 
     gui1->addSpacer();
     gui1->addLabel("SETTINGS");
-    gui1->addImageButton("Save Settings", "gui/icons/save.png", false, dim, dim);
+    gui1->addImageButton("Save Settings", "icons/save.png", false, dim, dim);
     gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui1->addImageButton("Load Settings", "gui/icons/open.png", false, dim, dim);
+    gui1->addImageButton("Load Settings", "icons/open.png", false, dim, dim);
     gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui1->addSpacer();
@@ -473,11 +473,11 @@ void ofApp::setupGUI3(){
     gui3->addLabel("Press '3' to hide panel", OFX_UI_FONT_SMALL);
 
     gui3->addSpacer();
-    recordingSequence = gui3->addImageToggle("Record Sequence", "gui/icons/record.png", false, dim, dim);
+    recordingSequence = gui3->addImageToggle("Record Sequence", "icons/record.png", false, dim, dim);
     gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui3->addImageButton("Save Sequence", "gui/icons/save.png", false, dim, dim);
-    gui3->addImageButton("Load Sequence", "gui/icons/open.png", false, dim, dim);
-    gui3->addImageToggle("Play Sequence", "gui/icons/play.png", &drawSequence, dim, dim);
+    gui3->addImageButton("Save Sequence", "icons/save.png", false, dim, dim);
+    gui3->addImageButton("Load Sequence", "icons/open.png", false, dim, dim);
+    gui3->addImageToggle("Play Sequence", "icons/play.png", &drawSequence, dim, dim);
     gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui3->addSpacer();
@@ -502,10 +502,10 @@ void ofApp::setupGUI4(){
     gui4->addLabel("Press '4' to hide panel", OFX_UI_FONT_SMALL);
 
     gui4->addSpacer();
-    gui4->addImageButton("Start vmo", "gui/icons/play.png", false, dim, dim);
+    gui4->addImageButton("Start vmo", "icons/play.png", false, dim, dim);
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui4->addImageButton("Stop vmo", "gui/icons/delete.png", false, dim, dim);
-    gui4->addImageToggle("Show gesture patterns", "gui/icons/show.png", &drawPatterns, dim, dim);
+    gui4->addImageButton("Stop vmo", "icons/delete.png", false, dim, dim);
+    gui4->addImageToggle("Show gesture patterns", "icons/show.png", &drawPatterns, dim, dim);
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui4->addSpacer();
@@ -546,13 +546,13 @@ void ofApp::setupGUI5(){
 
     gui5->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui5->addSpacer();
-    gui5->addImageButton("New Cue", "gui/icons/add.png", false, dim, dim);
+    gui5->addImageButton("New Cue", "icons/add.png", false, dim, dim);
     gui5->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui5->addImageButton("Save Cue", "gui/icons/save.png", false, dim, dim);
-    gui5->addImageButton("Previous Cue", "gui/icons/previous.png", false, dim, dim);
-    gui5->addImageButton("Next Cue", "gui/icons/play.png", false, dim, dim);
-    gui5->addImageButton("Load Cue", "gui/icons/open.png", false, dim, dim);
-    gui5->addImageButton("Delete Cue", "gui/icons/delete.png", false, dim, dim);
+    gui5->addImageButton("Save Cue", "icons/save.png", false, dim, dim);
+    gui5->addImageButton("Previous Cue", "icons/previous.png", false, dim, dim);
+    gui5->addImageButton("Next Cue", "icons/play.png", false, dim, dim);
+    gui5->addImageButton("Load Cue", "icons/open.png", false, dim, dim);
+    gui5->addImageButton("Delete Cue", "icons/delete.png", false, dim, dim);
     gui5->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN, OFX_UI_ALIGN_CENTER);
     gui5->addSpacer();
     gui5->addLabelButton("GO", false, 230, 40);
