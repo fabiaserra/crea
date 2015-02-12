@@ -125,7 +125,7 @@ void ofApp::setup(){
     // 2.2 Output pattern list
     pttrList = vmo::findPttr(seqVmo, minLen);
     cout << pttrList.size << endl;
-//    sequence.patterns = vmo::processPttr(seqVmo, pttrList);
+    sequence.patterns = vmo::processPttr(seqVmo, pttrList);
 //    cout << sequence.patterns.size() << endl;
 
     // SETUP CUE LIST

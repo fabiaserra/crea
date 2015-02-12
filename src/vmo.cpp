@@ -415,12 +415,12 @@ vector<vector<ofPolyline> > vmo::processPttr(vmo& oracle, const vmo::pttr& pttrL
 										vector<ofPolyline>(oracle.numFeature,
 														   vector<ofPoint>(0)));
 	vector1D pts(0);
-	int len;
+	int len = 0;
 	for (int i = 0; i < pttrList.size; i++) {
-		vector<ofPolyline> ges(oracle.numFeature, vector<ofPoint>(len, ofPoint(0.0,0.0)));
-		pattern[i] = ges;
 		pts = pttrList.sfxPts[i];
 		len = pttrList.sfxLen[i];
+		vector<ofPolyline> ges(oracle.numFeature, vector<ofPoint>(len, ofPoint(0.0,0.0)));
+		pattern[i] = ges;
 		int cat = i+1;
 		for (int j = 0; j<pts.size(); j++) {
 			int offset = pts[j]-len+1;
