@@ -204,22 +204,19 @@ void Sequence::load(const string path){
     duration = timestampLastFrame - timestampFirstFrame;
 }
 
-    // Break sequence in n patterns for debug
-    for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
-        for(int markerIndex = 0; markerIndex < nMarkers; markerIndex++){
-            int startIndex = markersPosition[markerIndex].getIndexAtPercent(patternIndex * (1.01/nPatterns));
-            int endIndex = markersPosition[markerIndex].getIndexAtPercent((patternIndex+1) * (1.01/nPatterns))+1;
-            if (endIndex == 1) endIndex = markersPosition[markerIndex].size();
-            for(int i = startIndex; i < endIndex; i++){
-                patterns[patternIndex][markerIndex].addVertex(markersPosition[markerIndex][i]);
-            }
+void Sequence::drawPatterns(map<int, float> currentPatterns){
+    // Draw gesture patterns
+    for(int patternIndex = 0; patternIndex < patterns.size(); patternIndex++){
+        int patternPosition = patternIndex + 1;
+        bool highlight = false;
+        float percent = 0;
+        // if the pattern is is inside the map
+        if(currentPatterns.find(patternIndex) != currentPatterns.end()) {
+            highlight = true;
+            percent = currentPatterns[patternIndex];
         }
+        drawPattern(patternPosition, patternIndex, percent, highlight);
     }
-
-    // Duration in seconds of the sequence
-    duration = timestampLastFrame - timestampFirstFrame;
-
-    sequenceLoaded = true;
 }
 
 void Sequence::drawPattern(const int patternPosition, const int patternIndex, const float percent, const bool highlight){
@@ -285,6 +282,20 @@ void Sequence::drawPattern(const int patternPosition, const int patternIndex, co
     ofPopMatrix();
 }
 
+//void Sequence::setPatterns(vector< vector<ofPolyline> > patterns){
+//    this->patterns = patterns;
+//
+//    // Clear and initialize memory of previous points polylines patterns
+//    patternsPastPoints.clear();
+//    for(int patternIndex = 0; patternIndex < patterns.size(); patternIndex++){
+//        vector<ofPolyline> newPattern;
+//        for(int markerIndex = 0; markerIndex < nMarkers; markerIndex++){
+//            ofPolyline newPolyline;
+//            newPattern.push_back(newPolyline);
+//        }
+//        patternsPastPoints.push_back(newPattern);
+//    }
+//}
 
 void Sequence::save(const string path) {
     xml.saveFile(path);

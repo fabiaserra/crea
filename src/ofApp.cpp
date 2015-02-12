@@ -89,21 +89,6 @@ void ofApp::setup(){
     // smoothingSize = 0;
     // contour.setup();
 
-    // SETUP GUIs
-    dim = 32;
-    guiWidth = 240;
-    theme = OFX_UI_THEME_GRAYDAY;
-
-    setupGUI0();
-    setupGUI1();
-    setupGUI2();
-    setupGUI3();
-    setupGUI4();
-    setupGUI5();
-    setupGUI6(0);
-
-    loadGUISettings("settings/lastSettings.xml");
-
     // SEQUENCE
     int maxMarkers = 2;
     sequence.setup(maxMarkers);
@@ -124,8 +109,8 @@ void ofApp::setup(){
 
     initStatus = true;
     stopTracking = true;
-    // gestureInd = -1;
-    // gestureCat = -1;
+//    // gestureInd = -1;
+//    // gestureCat = -1;
     // 2. Processing
     // 2.1 Load file into VMO
     int minLen = 1; // Temporary setting
@@ -140,7 +125,7 @@ void ofApp::setup(){
     // 2.2 Output pattern list
     pttrList = vmo::findPttr(seqVmo, minLen);
     cout << pttrList.size << endl;
-//    sequence.patterns = vmo::processPttr(seqVmo, pttrList);
+    sequence.patterns = vmo::processPttr(seqVmo, pttrList);
 //    cout << sequence.patterns.size() << endl;
 
     // SETUP CUE LIST
@@ -306,7 +291,6 @@ void ofApp::draw(){
     // Graphics
     // particles.draw();
     markersParticles.draw();
-
     // contour.draw();
 
      vector<irMarker>& tempMarkers         = tracker.getFollowers();
@@ -431,6 +415,7 @@ void ofApp::setupGUI1(){
     themes.push_back("MIDNIGHT");
     themes.push_back("BERLIN");
 
+    ofxUIRadio *guiThemes;
     guiThemes = gui1->addRadio("GUI Theme", themes, OFX_UI_ORIENTATION_VERTICAL);
     guiThemes->activateToggle("GRAYDAY");
 
@@ -663,8 +648,10 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     if(e.getName() == "Reset Kinect"){
         if(resetKinect){
             kinect.close();
+            kinect.clear();
         }
         else{
+            kinect.init(true); // shows infrared instead of RGB video Image
             kinect.open();
         }
     }
@@ -929,7 +916,6 @@ void ofApp::saveGUISettings(const string path){
     }
 
     ofxXmlSettings *XML = new ofxXmlSettings();
-    int guiIndex = 0;
 
     for(vector<ofxUISuperCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
         ofxUICanvas *g = *it;
@@ -950,7 +936,6 @@ void ofApp::saveGUISettings(const string path){
             }
         }
         XML->popTag();
-        guiIndex++;
     }
 
 //    XML->addTag("CUES");
@@ -1003,8 +988,8 @@ void ofApp::loadGUISettings(const string path, bool interpolate){
             }
             XML->popTag();
         }
-        XML->popTag();
         guiIndex++;
+        XML->popTag();
     }
     delete XML;
 }
@@ -1111,6 +1096,7 @@ void ofApp::interpolateWidgetValues(){
 //--------------------------------------------------------------
 void ofApp::exit(){
     kinect.close();
+    kinect.clear();
 
     saveGUISettings("settings/lastSettings.xml");
 
