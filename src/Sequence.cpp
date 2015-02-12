@@ -151,6 +151,8 @@ void Sequence::load(const string path){
         xml.popTag();
     }
 
+    filename = ofFilePath::getBaseName(path);
+
     // // Debug: print vertices of the sequence
     // for(int i = 0; i < maxMarkers; i++){
     //     vector<ofPoint> vertices = markersPosition[i].getVertices();
@@ -159,41 +161,41 @@ void Sequence::load(const string path){
     //     }
     // }
 
-    int nPatterns = 12;
-
-    // Clear and initialize memory of polylines patterns
-    patterns.clear();
-    for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
-        vector<ofPolyline> newPattern;
-        for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
-            ofPolyline newPolyline;
-            newPattern.push_back(newPolyline);
-        }
-        patterns.push_back(newPattern);
-    }
-
-    // Clear and initialize memory of previous points polylines patterns
-    patternsPastPoints.clear();
-    for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
-        vector<ofPolyline> newPattern;
-        for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
-            ofPolyline newPolyline;
-            newPattern.push_back(newPolyline);
-        }
-        patternsPastPoints.push_back(newPattern);
-    }
-
-    // Break sequence in n patterns for debug
-    for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
-        for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
-            int startIndex = markersPosition[markerIndex].getIndexAtPercent(patternIndex * (1.01/nPatterns));
-            int endIndex = markersPosition[markerIndex].getIndexAtPercent((patternIndex+1) * (1.01/nPatterns))+1;
-            if (endIndex == 1) endIndex = markersPosition[markerIndex].size();
-            for(int i = startIndex; i < endIndex; i++){
-                patterns[patternIndex][markerIndex].addVertex(markersPosition[markerIndex][i]);
-            }
-        }
-    }
+//    int nPatterns = 12;
+//
+//    // Clear and initialize memory of polylines patterns
+//    patterns.clear();
+//    for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
+//        vector<ofPolyline> newPattern;
+//        for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
+//            ofPolyline newPolyline;
+//            newPattern.push_back(newPolyline);
+//        }
+//        patterns.push_back(newPattern);
+//    }
+//
+//    // Clear and initialize memory of previous points polylines patterns
+//    patternsPastPoints.clear();
+//    for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
+//        vector<ofPolyline> newPattern;
+//        for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
+//            ofPolyline newPolyline;
+//            newPattern.push_back(newPolyline);
+//        }
+//        patternsPastPoints.push_back(newPattern);
+//    }
+//
+//    // Break sequence in n patterns for debug
+//    for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
+//        for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
+//            int startIndex = markersPosition[markerIndex].getIndexAtPercent(patternIndex * (1.01/nPatterns));
+//            int endIndex = markersPosition[markerIndex].getIndexAtPercent((patternIndex+1) * (1.01/nPatterns))+1;
+//            if (endIndex == 1) endIndex = markersPosition[markerIndex].size();
+//            for(int i = startIndex; i < endIndex; i++){
+//                patterns[patternIndex][markerIndex].addVertex(markersPosition[markerIndex][i]);
+//            }
+//        }
+//    }
 
     // Number of frames of the sequence
     numFrames = numFrames - emptyFrames;

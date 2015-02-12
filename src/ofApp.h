@@ -44,8 +44,10 @@ class ofApp : public ofBaseApp{
         void setupGUI7(int i);  // TODO: use the i to be able to create a vector of ParticleSystems
 
         void saveGUISettings(const string path);
-        void loadGUISettings(const string path);
-        void resetGUISettings();
+        void loadGUISettings(const string path, bool triggerEvents);
+
+        void loadCuesVector();
+        void interpolateWidgetValues();
 
         void guiEvent(ofxUIEventArgs &e);
 
@@ -76,9 +78,12 @@ class ofApp : public ofBaseApp{
         Contour contour;        // User silhouette contour
         //--------------------------------------------------------------
         Sequence sequence;      // Gestures sequence
-        float testCounter;
         bool drawPatterns;
         bool drawSequence;
+        //--------------------------------------------------------------
+        vector<string> cues;
+        int currentCueIndex;
+        map<ofxUIWidget *, vector<float> > widgetsToUpdate;
         //--------------------------------------------------------------
         vector<ofxUISuperCanvas *> guis;
         ofxUISuperCanvas *gui0;
@@ -90,8 +95,12 @@ class ofApp : public ofBaseApp{
         ofxUISuperCanvas *gui6;
         ofxUISuperCanvas *gui7;
         //--------------------------------------------------------------
-        ofxUIImageToggle *recordingButton;  // Button to record gestures sequence
-        ofxUIRadio *guiThemes;  // Button to record gestures sequence
+        ofxUIImageToggle *recordingSequence;  // Button to record gestures sequence
+        ofxUILabel *sequenceFilename;  // Button to record gestures sequence
+        ofxUILabel *sequenceDuration;  // Button to record gestures sequence
+        ofxUILabel *sequenceNumFrames;  // Button to record gestures sequence
+        ofxUILabel *currentCueIndexLabel;  // Button to record gestures sequence
+        ofxUITextInput *currentCueName;  // Button to record gestures sequence
         int theme;
         //--------------------------------------------------------------
         float dim;              // Size of GUI elements
