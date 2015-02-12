@@ -46,7 +46,8 @@ class ofApp : public ofBaseApp{
         void saveGUISettings(const string path);
         void loadGUISettings(const string path, bool triggerEvents);
 
-        void loadCuesVector(const string path);
+        void loadCuesVector();
+        void interpolateWidgetValues();
 
         void guiEvent(ofxUIEventArgs &e);
 
@@ -82,6 +83,7 @@ class ofApp : public ofBaseApp{
         //--------------------------------------------------------------
         vector<string> cues;
         int currentCueIndex;
+        map<ofxUIWidget *, vector<float> > widgetsToUpdate;
         //--------------------------------------------------------------
         vector<ofxUISuperCanvas *> guis;
         ofxUISuperCanvas *gui0;
