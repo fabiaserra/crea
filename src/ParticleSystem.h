@@ -11,12 +11,12 @@ class ParticleSystem
 	public:
 		ParticleSystem();
 
-		void setup(bool immortal, ofColor color, float gravity, bool sizeAge, bool opacityAge, bool flickersAge, 
-				   bool colorAge, bool bounce);
-		void setup(float bornRate, float velocity, float velocityRnd, float velocityMotion, float emitterSize, 
-				   bool immortal, float lifetime, float lifetimeRnd, ofColor color, float radius, float radiusRnd, 
-				   float friction, float gravity, bool sizeAge, bool opacityAge,  bool flickersAge, bool colorAge, 
-				   bool bounce);
+		void setup(bool immortal, ofColor color, float gravity, bool sizeAge, bool opacityAge, bool flickersAge,
+				   bool colorAge, bool isEmpty, bool bounce);
+		void setup(float bornRate, float velocity, float velocityRnd, float velocityMotion, float emitterSize,
+				   bool immortal, float lifetime, float lifetimeRnd, ofColor color, float radius, float radiusRnd,
+				   float friction, float gravity, bool sizeAge, bool opacityAge,  bool flickersAge, bool colorAge,
+				   bool isEmpty, bool bounce);
 
 		void update(float dt, vector<irMarker>& markers);
 		void draw();
@@ -56,6 +56,7 @@ class ParticleSystem
 		bool flickersAge;       // Particles flicker opacity when about to die?
 		bool colorAge;          // Particles change color with age?
 		bool bounce;            // Particles bounce with the window margins?
+		bool isEmpty;           // Particles are empty inside, only draw the contour?
 		//--------------------------------------------------------------
 		float friction;        	// Multiply this value by the velocity every frame
 		float gravity;          // Makes particles fall down in a natural way

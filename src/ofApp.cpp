@@ -67,6 +67,7 @@ void ofApp::setup(){
     bool  opacityAge     = true;     // Decrease opacity when particles get older?
     bool  flickersAge    = true;     // Particle flickers opacity when about to die?
     bool  colorAge       = true;     // Change color when particles get older?
+    bool  isEmpty        = true;     // Draw only contours of the particles?
     bool  bounce         = true;     // Bounce particles with the walls of the window?
 
     float friction       = 0;        // Multiply this value by the velocity every frame
@@ -75,15 +76,17 @@ void ofApp::setup(){
     ofColor color(255);
 
     markersParticles.setup(bornRate, velocity, velocityRnd, velocityMotion, emitterSize, immortal, lifetime, lifetimeRnd,
-                           color, radius, radiusRnd, 1-friction/1000, gravity, sizeAge, opacityAge, flickersAge, colorAge, bounce);
+                           color, radius, radiusRnd, 1-friction/1000, gravity, sizeAge, opacityAge, flickersAge, colorAge, isEmpty,
+                           bounce);
 
     // GRID PARTICLES
     bool sizeAge2     = false;
     bool opacityAge2  = false;
     bool flickersAge2 = false;
     bool colorAge2    = false;
+    bool isEmpty2     = false;
 
-    particles.setup(true, color, gravity, sizeAge2, opacityAge2, flickersAge2, colorAge2, bounce);
+    particles.setup(true, color, gravity, sizeAge2, opacityAge2, flickersAge2, colorAge2, isEmpty2, bounce);
 
     // DEPTH CONTOUR
     // smoothingSize = 0;
@@ -314,8 +317,9 @@ void ofApp::draw(){
 //	gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
 
     map<int, float> currentPatterns; // Use "gestureUpdate" above!!!!!!!!!!
-    currentPatterns[1] = 0.35;
-//    currentPatterns[3] = 0.75;
+    currentPatterns[0] = 1;
+    currentPatterns[1] = 1;
+    currentPatterns[3] = 1;
 //    currentPatterns[4] = 0.95;
     if(drawPatterns) sequence.drawPatterns(currentPatterns);
 
@@ -611,6 +615,10 @@ void ofApp::setupGUI7(int i){
     gui7->addSpacer();
     gui7->addLabel("Particle");
     gui7->addToggle("Immortal", &markersParticles.immortal);
+    gui7->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui7->addToggle("Empty", &markersParticles.isEmpty);
+    gui7->addToggle("Bounces", &markersParticles.bounce);
+    gui7->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui7->addSlider("Lifetime", 0.0, 20.0, &markersParticles.lifetime);
     gui7->addSlider("Life Random[%]", 0.0, 100.0, &markersParticles.lifetimeRnd);
     gui7->addSlider("Radius", 1.0, 15.0, &markersParticles.radius);
@@ -619,10 +627,11 @@ void ofApp::setupGUI7(int i){
     gui7->addSpacer();
     gui7->addLabel("Time behaviour");
     gui7->addToggle("Size", &markersParticles.sizeAge);
+    gui7->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui7->addToggle("Opacity", &markersParticles.opacityAge);
     gui7->addToggle("Flickers", &markersParticles.flickersAge);
+    gui7->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui7->addToggle("Color", &markersParticles.colorAge);
-    gui7->addToggle("Bounce", &markersParticles.bounce);
 
     gui7->addSpacer();
     gui7->addLabel("Physics");

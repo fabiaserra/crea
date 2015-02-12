@@ -8,7 +8,7 @@ Particle::Particle(){
     opacityAge  = true;
     colorAge    = true;
     flickersAge = true;
-    drawContour = true;
+    isEmpty     = true;
     drawShapes  = false;
     age         = 0;
 }
@@ -62,7 +62,7 @@ void Particle::update(float dt){
     if(isAlive){
         // Perlin noise
         // noise = ofNoise(pos.x*0.005f, pos.y*0.005f, dt*0.1f);
- 
+
         // Update position
         // float angle = noise*30.0f;
         // acc = ofPoint(cos(angle), sin(angle)) * age * 0.1;
@@ -149,19 +149,14 @@ void Particle::draw(){
         // ofSetColor(color, opacity);
         ofSetColor(255);
 
-        // Draw circles
-        if(drawContour){
+        if(isEmpty){
             ofNoFill();
             ofSetLineWidth(1);
         }
         else ofFill();
 
-        if (sizeAge){
-            ofCircle(pos, radius);
-        }
-        else{
-            ofCircle(pos, initialRadius);
-        }
+        if (sizeAge) ofCircle(pos, radius);
+        else ofCircle(pos, initialRadius);
 
         // // Draw arrows
         // if (markerDist == 0){
