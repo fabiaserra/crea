@@ -43,10 +43,10 @@ class ofApp : public ofBaseApp{
         void setupGUI6();
         void setupGUI7(int i);  // TODO: use the i to be able to create a vector of ParticleSystems
 
-        void saveGUISettings(const string path);
-        void loadGUISettings(const string path, bool triggerEvents);
+        void saveGUISettings(const string path, const bool saveCues);
+        void loadGUISettings(const string path, const bool interpolate, const bool loadCues);
 
-        void loadCuesVector();
+        void loadCuesVector(const string path);
         void interpolateWidgetValues();
 
         void guiEvent(ofxUIEventArgs &e);
