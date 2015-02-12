@@ -97,7 +97,7 @@ void ofApp::setup(){
     // SEQUENCE
     markers.resize(maxMarkers);
 
-//    //VMO Setup goes here//
+    // VMO SETUP
     int dimensions = 2;
     obs.assign(sequence.numFrames, vector<float>(maxMarkers*dimensions));
     for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
@@ -114,7 +114,7 @@ void ofApp::setup(){
     // 2. Processing
     // 2.1 Load file into VMO
     int minLen = 1; // Temporary setting
-    float start = 0.0, step = 0.05, stop = 5.0;
+    float start = 0.0, step = 0.05, stop = 10.0;
 
     // For sequence4.xml
 //    int minLen = 4;
@@ -124,9 +124,13 @@ void ofApp::setup(){
     seqVmo = vmo::buildOracle(obs, dimensions, maxMarkers, t);
     // 2.2 Output pattern list
     pttrList = vmo::findPttr(seqVmo, minLen);
-    sequence.patterns = vmo::processPttr(seqVmo, pttrList); // double free error in linux
-
+    cout << pttrList.size << endl;
+//    sequence.patterns = vmo::processPttr(seqVmo, pttrList);
 //    cout << sequence.patterns.size() << endl;
+
+    // SETUP CUES
+//    cues.push_back("cues/.xml");
+//    currentCueIndex = -1;
 
     // SETUP GUIs
     dim = 32;
@@ -144,7 +148,7 @@ void ofApp::setup(){
     setupGUI6();
     setupGUI7(0);
 
-    loadGUISettings("settings/lastSettings.xml");
+    loadGUISettings("settings/lastSettings.xml", true);
 }
 
 //--------------------------------------------------------------
@@ -434,7 +438,6 @@ void ofApp::setupGUI2(){
     gui2->addImage("Depth filtered", &depthImage, kinect.width/6, kinect.height/6, true);
     gui2->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
-
     gui2->addSpacer();
     gui2->addLabel("INFRARED IMAGE");
     gui2->addSlider("IR Threshold", 0.0, 255.0, &irThreshold);
@@ -468,7 +471,6 @@ void ofApp::setupGUI3(){
     gui3->addImageButton("Save Sequence", "gui/icons/save.png", false, dim, dim);
     gui3->addImageButton("Load Sequence", "gui/icons/open.png", false, dim, dim);
     gui3->addImageToggle("Play Sequence", "gui/icons/play.png", &drawSequence, dim, dim);
-    gui3->addImageToggle("Show gesture patterns", "gui/icons/show.png", &drawPatterns, dim, dim);
     gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui3->addSpacer();
@@ -514,10 +516,38 @@ void ofApp::setupGUI5(){
 
     gui5->addSpacer();
     gui5->addLabel("Press '5' to hide panel", OFX_UI_FONT_SMALL);
+    gui5->addSpacer();
+    gui5->addLabel("Press arrow keys to navigate", OFX_UI_FONT_SMALL);
+    gui5->addLabel("through cues and space key", OFX_UI_FONT_SMALL);
+    gui5->addLabel("to trigger next cue in the list.", OFX_UI_FONT_SMALL);
 
     gui5->addSpacer();
-    gui5->addLabel("CUES");
+
+    gui5->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN, OFX_UI_ALIGN_CENTER);
+    loadCuesVector("settings/lastSettings.xml");
+    string cueFilename = "";
+    string currentCueIndexString = "";
+    if(cues.size() > 0){
+        currentCueIndexString = ofToString(0)+".";
+        cueFilename = ofFilePath::getBaseName(cues[0]);
+    }
+    currentCueIndexLabel = gui5->addLabel(currentCueIndexString, OFX_UI_FONT_MEDIUM);
+    gui5->setWidgetFontSize(OFX_UI_FONT_MEDIUM);
+    currentCueName = gui5->addTextInput("Current Cue", cueFilename);
+
+
+    gui5->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui5->addSpacer();
+    gui5->addImageButton("New Cue", "gui/icons/add.png", false, dim, dim);
+    gui5->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui5->addImageButton("Save Cue", "gui/icons/save.png", false, dim, dim);
+    gui5->addImageButton("Previous Cue", "gui/icons/previous.png", false, dim, dim);
+    gui5->addImageButton("Next Cue", "gui/icons/play.png", false, dim, dim);
     gui5->addImageButton("Load Cue", "gui/icons/open.png", false, dim, dim);
+    gui5->addImageButton("Delete Cue", "gui/icons/delete.png", false, dim, dim);
+    gui5->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN, OFX_UI_ALIGN_CENTER);
+    gui5->addSpacer();
+    gui5->addLabelButton("GO", false, 230, 40);
 
     gui5->addSpacer();
 
@@ -628,7 +658,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         if(button->getValue() == true){
             ofFileDialogResult result = ofSystemLoadDialog("Select settings xml file.", false, "settings/");
             if(result.bSuccess){
-                loadGUISettings(result.getPath());
+                loadGUISettings(result.getPath(), true);
             }
         }
     }
@@ -657,7 +687,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         if(button->getValue() == true){
             recordingSequence->setValue(false);
             drawSequence = false;
-            ofFileDialogResult result = ofSystemLoadDialog("Select sequence xml file.", false, "sequences/");
+            ofFileDialogResult result = ofSystemLoadDialog("Select sequence xml file.", false, ofToDataPath("sequences/"));
             if(result.bSuccess){
                 sequence.load(result.getPath());
                 sequenceFilename->setLabel("Filename: "+sequence.filename);
@@ -691,6 +721,74 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if(button->getValue() == true){
             stopTracking = true;
+        }
+    }
+
+    if(e.getName() == "Current Cue"){
+        ofxUITextInput *ti = (ofxUITextInput *) e.widget;
+        if(ti->getInputTriggerType() == OFX_UI_TEXTINPUT_ON_UNFOCUS){
+            string cuePath = "cues/"+currentCueName->getTextString()+".xml";
+            cues[currentCueIndex] = cuePath;
+        }
+    }
+
+    if(e.getName() == "New Cue"){
+        ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
+        if(button->getValue() == true){
+            currentCueIndex++;
+            string cuePath = "cues/newCue"+ofToString(currentCueIndex)+".xml";
+            vector<string>::iterator it = cues.begin();
+            cues.insert(it+currentCueIndex, cuePath);
+            string cueFilename = ofFilePath::getBaseName(cuePath);
+            currentCueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
+            currentCueName->setTextString(cueFilename);
+            currentCueName->setVisible(true);
+        }
+    }
+
+    if(e.getName() == "Next Cue"){
+        ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
+        if(button->getValue() == true){
+            if(cues.size() == 0) return;
+            else if(currentCueIndex+1 < cues.size()) currentCueIndex++;
+            else if(currentCueIndex+1 == cues.size()) currentCueIndex = 0;
+            string cueFilename = ofFilePath::getBaseName(cues[currentCueIndex]);
+            currentCueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
+            currentCueName->setTextString(cueFilename);
+        }
+    }
+
+    if(e.getName() == "Previous Cue"){
+        ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
+        if(button->getValue() == true){
+            if(cues.size() == 0) return;
+            else if(currentCueIndex-1 >= 0) currentCueIndex--;
+            else if(currentCueIndex-1 < 0) currentCueIndex = cues.size()-1;
+            string cueFilename = ofFilePath::getBaseName(cues[currentCueIndex]);
+            currentCueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
+            currentCueName->setTextString(cueFilename);
+        }
+    }
+
+    if(e.getName() == "Delete Cue"){
+        ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
+        if(button->getValue() == true){
+            if(cues.size() == 0) return;
+            vector<string>::iterator it = cues.begin();
+            cues.erase(it+currentCueIndex);
+            if(currentCueIndex-1 >= 0) currentCueIndex--;
+            else if(currentCueIndex-1 < 0) currentCueIndex = cues.size()-1;
+            if(cues.size() == 0){
+                currentCueIndex = -1; // if it enters here it already has this value
+                currentCueIndexLabel->setLabel("");
+                currentCueName->setTextString("");
+                currentCueName->setVisible(false);
+            }
+            else{
+                string cueFilename = ofFilePath::getBaseName(cues[currentCueIndex]);
+                currentCueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
+                currentCueName->setTextString(cueFilename);
+            }
         }
     }
 
@@ -752,6 +850,12 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 //--------------------------------------------------------------
 void ofApp::saveGUISettings(const string path){
 
+    ofFile file(path);
+    ofDirectory dir;
+    if(!ofDirectory::doesDirectoryExist(file.getEnclosingDirectory())){
+        ofDirectory::createDirectory(file.getEnclosingDirectory());
+    }
+
     ofxXmlSettings *XML = new ofxXmlSettings();
 
     for(vector<ofxUISuperCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
@@ -774,12 +878,19 @@ void ofApp::saveGUISettings(const string path){
         XML->popTag();
     }
 
+    XML->addTag("CUES");
+    XML->pushTag("CUES");
+    for(int i = 0; i < cues.size(); i++){
+        XML->setValue("Cue", cues[i], i);
+    }
+    XML->popTag();
+
     XML->saveFile(path);
     delete XML;
 }
 
 //--------------------------------------------------------------
-void ofApp::loadGUISettings(const string path){
+void ofApp::loadGUISettings(const string path, bool triggerEvents){
     ofxXmlSettings *XML = new ofxXmlSettings();
     if(!XML->loadFile(path)) return;
     int guiIndex = 0;
@@ -794,13 +905,30 @@ void ofApp::loadGUISettings(const string path){
             ofxUIWidget *widget = g->getWidget(name);
             if(widget != NULL && widget->hasState()){
                 widget->loadState(XML);
-                g->triggerEvent(widget);
+                if(triggerEvents) g->triggerEvent(widget);
             }
             XML->popTag();
         }
         guiIndex++;
         XML->popTag();
     }
+    delete XML;
+}
+
+//--------------------------------------------------------------
+void ofApp::loadCuesVector(const string path){
+    ofxXmlSettings *XML = new ofxXmlSettings();
+    if(!XML->loadFile(path)) return;
+
+    XML->pushTag("CUES");
+    int numCues = XML->getNumTags("Cue");
+
+    cues.clear();
+    for(int i = 0; i < numCues; i++){
+        string name = XML->getValue("Cue", "NULL", i);
+        cues.push_back(name);
+    }
+    XML->popTag();
     delete XML;
 }
 
@@ -823,113 +951,105 @@ void ofApp::exit(){
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-    switch (key){
-        case 'f':
-            ofToggleFullscreen();
-            reScale = (float)ofGetWidth() / (float)kinect.width;
-            break;
+    if(!currentCueName->isFocused()){
+        switch (key){
+            case 'f':
+                ofToggleFullscreen();
+                reScale = (float)ofGetWidth() / (float)kinect.width;
+                break;
 
-        case '0':
-        case '`':
-            gui0->toggleVisible();
-            gui1->setVisible(false);
-            gui2->setVisible(false);
-            gui3->setVisible(false);
-            gui4->setVisible(false);
-            gui5->setVisible(false);
-            gui6->setVisible(false);
-            gui7->setVisible(false);
-            drawPatterns = false;
-            break;
+            case '0':
+            case '`':
+                gui0->toggleVisible();
+                gui1->setVisible(false);
+                gui2->setVisible(false);
+                gui3->setVisible(false);
+                gui4->setVisible(false);
+                gui5->setVisible(false);
+                gui6->setVisible(false);
+                gui7->setVisible(false);
+                break;
 
-        case '1':
-            gui0->setVisible(false);
-            gui1->toggleVisible();
-            gui2->setVisible(false);
-            gui3->setVisible(false);
-            gui4->setVisible(false);
-            gui5->setVisible(false);
-            gui6->setVisible(false);
-            gui7->setVisible(false);
-            drawPatterns = false;
-            break;
+            case '1':
+                gui0->setVisible(false);
+                gui1->toggleVisible();
+                gui2->setVisible(false);
+                gui3->setVisible(false);
+                gui4->setVisible(false);
+                gui5->setVisible(false);
+                gui6->setVisible(false);
+                gui7->setVisible(false);
+                break;
 
-        case '2':
-            gui0->setVisible(false);
-            gui1->setVisible(false);
-            gui2->toggleVisible();
-            gui3->setVisible(false);
-            gui4->setVisible(false);
-            gui5->setVisible(false);
-            gui6->setVisible(false);
-            gui7->setVisible(false);
-            drawPatterns = false;
-            break;
+            case '2':
+                gui0->setVisible(false);
+                gui1->setVisible(false);
+                gui2->toggleVisible();
+                gui3->setVisible(false);
+                gui4->setVisible(false);
+                gui5->setVisible(false);
+                gui6->setVisible(false);
+                gui7->setVisible(false);
+                break;
 
-        case '3':
-            gui0->setVisible(false);
-            gui1->setVisible(false);
-            gui2->setVisible(false);
-            gui3->toggleVisible();
-            gui4->setVisible(false);
-            gui5->setVisible(false);
-            gui6->setVisible(false);
-            gui7->setVisible(false);
-            if(gui3->isVisible()) drawPatterns = true;
-            else drawPatterns = false;
-            break;
+            case '3':
+                gui0->setVisible(false);
+                gui1->setVisible(false);
+                gui2->setVisible(false);
+                gui3->toggleVisible();
+                gui4->setVisible(false);
+                gui5->setVisible(false);
+                gui6->setVisible(false);
+                gui7->setVisible(false);
+                break;
 
-        case '4':
-            gui0->setVisible(false);
-            gui1->setVisible(false);
-            gui2->setVisible(false);
-            gui3->setVisible(false);
-            gui4->toggleVisible();
-            gui5->setVisible(false);
-            gui6->setVisible(false);
-            gui7->setVisible(false);
-            if(gui4->isVisible()) drawPatterns = true;
-            else drawPatterns = false;
-            break;
+            case '4':
+                gui0->setVisible(false);
+                gui1->setVisible(false);
+                gui2->setVisible(false);
+                gui3->setVisible(false);
+                gui4->toggleVisible();
+                gui5->setVisible(false);
+                gui6->setVisible(false);
+                gui7->setVisible(false);
+                break;
 
-        case '5':
-            gui0->setVisible(false);
-            gui1->setVisible(false);
-            gui2->setVisible(false);
-            gui3->setVisible(false);
-            gui4->setVisible(false);
-            gui5->toggleVisible();
-            gui6->setVisible(false);
-            gui7->setVisible(false);
-            drawPatterns = false;
-            break;
+            case '5':
+                gui0->setVisible(false);
+                gui1->setVisible(false);
+                gui2->setVisible(false);
+                gui3->setVisible(false);
+                gui4->setVisible(false);
+                gui5->toggleVisible();
+                gui6->setVisible(false);
+                gui7->setVisible(false);
+                break;
 
-        case '6':
-            gui0->setVisible(false);
-            gui1->setVisible(false);
-            gui2->setVisible(false);
-            gui3->setVisible(false);
-            gui4->setVisible(false);
-            gui5->setVisible(false);
-            gui6->toggleVisible();
-            gui7->setVisible(false);
-            drawPatterns = false;
-            break;
+            case '6':
+                gui0->setVisible(false);
+                gui1->setVisible(false);
+                gui2->setVisible(false);
+                gui3->setVisible(false);
+                gui4->setVisible(false);
+                gui5->setVisible(false);
+                gui6->toggleVisible();
+                gui7->setVisible(false);
+                break;
 
-        case '7':
-            gui0->setVisible(false);
-            gui1->setVisible(false);
-            gui2->setVisible(false);
-            gui3->setVisible(false);
-            gui4->setVisible(false);
-            gui5->setVisible(false);
-            gui6->setVisible(false);
-            gui7->toggleVisible();
-            drawPatterns = false;
-            break;
+            case '7':
+                gui0->setVisible(false);
+                gui1->setVisible(false);
+                gui2->setVisible(false);
+                gui3->setVisible(false);
+                gui4->setVisible(false);
+                gui5->setVisible(false);
+                gui6->setVisible(false);
+                gui7->toggleVisible();
+                break;
 
-        default:
-            break;
+            default:
+                break;
+        }
     }
 }
 
