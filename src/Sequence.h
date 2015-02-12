@@ -17,7 +17,7 @@ class Sequence{
         void draw();
         void drawPatterns(map<int, float> currentPatterns);
 
-//        void setPatterns(vector< vector<ofPolyline> > patterns);
+        void loadPatterns(vector< vector<ofPolyline> > patterns);
 
         void startRecording();
         void clearPlayback();

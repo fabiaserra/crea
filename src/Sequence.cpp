@@ -282,20 +282,20 @@ void Sequence::drawPattern(const int patternPosition, const int patternIndex, co
     ofPopMatrix();
 }
 
-//void Sequence::setPatterns(vector< vector<ofPolyline> > patterns){
-//    this->patterns = patterns;
-//
-//    // Clear and initialize memory of previous points polylines patterns
-//    patternsPastPoints.clear();
-//    for(int patternIndex = 0; patternIndex < patterns.size(); patternIndex++){
-//        vector<ofPolyline> newPattern;
-//        for(int markerIndex = 0; markerIndex < nMarkers; markerIndex++){
-//            ofPolyline newPolyline;
-//            newPattern.push_back(newPolyline);
-//        }
-//        patternsPastPoints.push_back(newPattern);
-//    }
-//}
+void Sequence::loadPatterns(vector< vector<ofPolyline> > patterns){
+    this->patterns = patterns;
+
+    // Clear and initialize memory of previous points polylines patterns
+    patternsPastPoints.clear();
+    for(int patternIndex = 0; patternIndex < patterns.size(); patternIndex++){
+        vector<ofPolyline> newPattern;
+        for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
+            ofPolyline newPolyline;
+            newPattern.push_back(newPolyline);
+        }
+        patternsPastPoints.push_back(newPattern);
+    }
+}
 
 void Sequence::save(const string path) {
     xml.saveFile(path);

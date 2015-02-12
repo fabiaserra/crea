@@ -83,6 +83,7 @@ class ofApp : public ofBaseApp{
         //--------------------------------------------------------------
         vector<string> cues;
         int currentCueIndex;
+        bool interpolatingWidgets;
         map<ofxUIWidget *, vector<float> > widgetsToUpdate;
         //--------------------------------------------------------------
         vector<ofxUISuperCanvas *> guis;
@@ -96,11 +97,11 @@ class ofApp : public ofBaseApp{
         ofxUISuperCanvas *gui7;
         //--------------------------------------------------------------
         ofxUIImageToggle *recordingSequence;  // Button to record gestures sequence
-        ofxUILabel *sequenceFilename;  // Button to record gestures sequence
-        ofxUILabel *sequenceDuration;  // Button to record gestures sequence
-        ofxUILabel *sequenceNumFrames;  // Button to record gestures sequence
-        ofxUILabel *currentCueIndexLabel;  // Button to record gestures sequence
-        ofxUITextInput *currentCueName;  // Button to record gestures sequence
+        ofxUILabel *sequenceFilename;         // Name of the sequence
+        ofxUILabel *sequenceDuration;         // Duration of the sequence in seconds
+        ofxUILabel *sequenceNumFrames;        // Number of frames of the sequence
+        ofxUILabel *cueIndexLabel;            // Current cue index
+        ofxUITextInput *cueName;              // Name of the cue
         int theme;
         //--------------------------------------------------------------
         float dim;              // Size of GUI elements
