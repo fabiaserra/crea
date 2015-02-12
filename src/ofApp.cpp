@@ -1047,8 +1047,11 @@ void ofApp::interpolateWidgetValues(){
             float currentLowValue = XML->getValue("LowValue", targetLowValue, 0);
             float highDifference = currentHighValue-targetHighValue;
             float lowDifference = currentLowValue-targetLowValue;
-            if(highDifference == 0 && lowDifference == 0){
+            if(abs(highDifference) < 0.1 && abs(lowDifference) < 0.1){
                 canDelete = true;
+                XML->setValue("HighValue", targetHighValue, 0);
+                XML->setValue("LowValue", targetLowValue, 0);
+                w->loadState(XML);
             }
             else{
                 float highIncrement = highDifference/100.0;
@@ -1063,8 +1066,10 @@ void ofApp::interpolateWidgetValues(){
             float targetValue = values.front();
             float currentValue = XML->getValue("Value", targetValue, 0);
             float difference = currentValue-targetValue;
-            if(difference == 0){
+            if(abs(difference) < 0.1){
                 canDelete = true;
+                XML->setValue("Value", targetValue, 0);
+                w->loadState(XML);
             }
             else{
                 float increment = difference/100.0;
