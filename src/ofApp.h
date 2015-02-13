@@ -96,7 +96,7 @@ class ofApp : public ofBaseApp{
         ofxUISuperCanvas *gui6;
         ofxUISuperCanvas *gui7;
         //--------------------------------------------------------------
-        ofxUIImageToggle *recordingSequence;  // Button to record gestures sequence
+        ofxUIImageToggle *recordingSequence;  // Toggle to record gestures sequence
         ofxUILabel *sequenceFilename;         // Name of the sequence
         ofxUILabel *sequenceDuration;         // Duration of the sequence in seconds
         ofxUILabel *sequenceNumFrames;        // Number of frames of the sequence

@@ -321,7 +321,8 @@ void ofApp::draw(){
     currentPatterns[1] = 1;
     currentPatterns[3] = 1;
 //    currentPatterns[4] = 0.95;
-    if(drawPatterns) sequence.drawPatterns(currentPatterns);
+//    if(drawPatterns) sequence.drawPatterns(currentPatterns);
+    if(drawPatterns) sequence.drawPatterns(gestureUpdate);
 
 }
 
@@ -551,13 +552,13 @@ void ofApp::setupGUI5(){
     gui5->addImageButton("New Cue", "icons/add.png", false, dim, dim);
     gui5->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui5->addImageButton("Save Cue", "icons/save.png", false, dim, dim);
-    gui5->addImageButton("Previous Cue", "icons/previous.png", false, dim, dim);
-    gui5->addImageButton("Next Cue", "icons/play.png", false, dim, dim);
+    gui5->addImageButton("Previous Cue", "icons/previous.png", false, dim, dim)->bindToKey(OF_KEY_LEFT);
+    gui5->addImageButton("Next Cue", "icons/play.png", false, dim, dim)->bindToKey(OF_KEY_RIGHT);
     gui5->addImageButton("Load Cue", "icons/open.png", false, dim, dim);
     gui5->addImageButton("Delete Cue", "icons/delete.png", false, dim, dim);
     gui5->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN, OFX_UI_ALIGN_CENTER);
     gui5->addSpacer();
-    gui5->addLabelButton("GO", false, 230, 40);
+    gui5->addLabelButton("GO", false, 230, 40)->bindToKey(' ');
 
     gui5->addSpacer();
 
@@ -762,6 +763,7 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
             string cueFileName = ofFilePath::getBaseName(cues[currentCueIndex]);
             cueName->setTextString(cueFileName);
             cueName->setVisible(true);
+            loadGUISettings(cues[currentCueIndex], false, false);
         }
     }
 
@@ -793,16 +795,17 @@ void ofApp::interpolateWidgetValues(){
         vector<float> values = it->second;
         ofxXmlSettings *XML = new ofxXmlSettings();
         bool canDelete = false;
-
+        // if widget is a range slider we have two values to interpolate to
         if(w->getKind() == 6){ // kind 6 is a range slider widget
             w->saveState(XML);
             float targetHighValue = values.at(0);
             float targetLowValue = values.at(1);
             float currentHighValue = XML->getValue("HighValue", targetHighValue, 0);
             float currentLowValue = XML->getValue("LowValue", targetLowValue, 0);
-            float highDifference = currentHighValue-targetHighValue;
-            float lowDifference = currentLowValue-targetLowValue;
-            if(abs(highDifference) < 0.1 && abs(lowDifference) < 0.1){
+            float highDifference = targetHighValue-currentHighValue;
+            float lowDifference = targetLowValue-currentLowValue;
+            // if the difference is small we assign the target value
+            if(abs(highDifference) < 1 && abs(lowDifference) < 1){
                 canDelete = true;
                 XML->setValue("HighValue", targetHighValue, 0);
                 XML->setValue("LowValue", targetLowValue, 0);
@@ -820,8 +823,8 @@ void ofApp::interpolateWidgetValues(){
             w->saveState(XML);
             float targetValue = values.front();
             float currentValue = XML->getValue("Value", targetValue, 0);
-            float difference = currentValue-targetValue;
-            if(abs(difference) < 0.1){
+            float difference = targetValue-currentValue;
+            if(abs(difference) < 1 || w->getKind() == 2){ // kind 2 is a toggle
                 canDelete = true;
                 XML->setValue("Value", targetValue, 0);
                 w->loadState(XML);
@@ -833,7 +836,7 @@ void ofApp::interpolateWidgetValues(){
             }
         }
 
-        // If values already interpolated
+        // If values already interpolated we delete widget from the map
         if (canDelete){
             map<ofxUIWidget *, vector<float> >::iterator toErase = it;
             ++it;
@@ -842,10 +845,11 @@ void ofApp::interpolateWidgetValues(){
         else{
             ++it;
         }
-
         // Delete XML where we load and save values
         delete XML;
     }
+
+    if(widgetsToUpdate.empty()) interpolatingWidgets = false;
 }
 
 //--------------------------------------------------------------
@@ -976,7 +980,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if(button->getValue() == true){
             if(cues.size() == 0) return;
-            saveGUISettings(cues[currentCueIndex], false);
+            if(!interpolatingWidgets) saveGUISettings(cues[currentCueIndex], false);
             if(currentCueIndex-1 >= 0) currentCueIndex--;
             else if(currentCueIndex-1 < 0) currentCueIndex = cues.size()-1;
             loadGUISettings(cues[currentCueIndex], false, false);
@@ -990,7 +994,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if(button->getValue() == true){
             if(cues.size() == 0) return;
-            saveGUISettings(cues[currentCueIndex], false);
+            if(!interpolatingWidgets) saveGUISettings(cues[currentCueIndex], false);
             if(currentCueIndex+1 < cues.size()) currentCueIndex++;
             else if(currentCueIndex+1 == cues.size()) currentCueIndex = 0;
             loadGUISettings(cues[currentCueIndex], false, false);
@@ -1043,7 +1047,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     }
 
     if(e.getName() == "GO"){
-        ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
+        ofxUILabelButton *button = (ofxUILabelButton *) e.widget;
         if(button->getValue() == true){
             if(cues.size() == 0) return;
             if(currentCueIndex+1 < cues.size()) currentCueIndex++;
@@ -1235,6 +1239,25 @@ void ofApp::keyPressed(int key){
                 gui6->setVisible(false);
                 gui7->toggleVisible();
                 break;
+
+//            case OF_KEY_LEFT:
+//                previousCue->triggerSelf();
+//                previousCue->bindToKey(OF_KEY_LEFT);
+//                {
+//                cout << "DINTRE" << endl;
+//                vector<ofxUISuperCanvas *>::iterator it = guis.begin()+5;
+//                ofxUIWidget *widget = (*it)->getWidget("Previous Cue");
+//                cout << widget->getKind() << endl;
+////                (*it)->triggerEvent(widget);
+//                ofxUIButton *button = (ofxUIButton *)widget;
+//                button->toggleValue();
+////                ofxXmlSettings *XML = new ofxXmlSettings();
+////                XML->setValue("Value", 1, 0);
+////                widget->loadState(XML);
+////                delete XML;
+//                }
+                break;
+
 
             default:
                 break;
