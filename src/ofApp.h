@@ -22,17 +22,6 @@ class ofApp : public ofBaseApp{
         void setup();
         void update();
         void draw();
-        void exit();
-
-        void keyPressed(int key);
-        void keyReleased(int key);
-        void mouseMoved(int x, int y );
-        void mouseDragged(int x, int y, int button);
-        void mousePressed(int x, int y, int button);
-        void mouseReleased(int x, int y, int button);
-        void windowResized(int w, int h);
-        void dragEvent(ofDragInfo dragInfo);
-        void gotMessage(ofMessage msg);
 
         void setupGUI0();
         void setupGUI1();
@@ -45,11 +34,21 @@ class ofApp : public ofBaseApp{
 
         void saveGUISettings(const string path, const bool saveCues);
         void loadGUISettings(const string path, const bool interpolate, const bool loadCues);
-
-        void loadCuesVector(const string path);
         void interpolateWidgetValues();
 
         void guiEvent(ofxUIEventArgs &e);
+
+        void exit();
+
+        void keyPressed(int key);
+        void keyReleased(int key);
+        void mouseMoved(int x, int y );
+        void mouseDragged(int x, int y, int button);
+        void mousePressed(int x, int y, int button);
+        void mouseReleased(int x, int y, int button);
+        void windowResized(int w, int h);
+        void dragEvent(ofDragInfo dragInfo);
+        void gotMessage(ofMessage msg);
 
         //--------------------------------------------------------------
         float time0;            // Time value for computing dt

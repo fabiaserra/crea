@@ -740,19 +740,19 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
         XML->popTag();
     }
 
-    // Load cues
+    // Load cue list
     if(loadCues){
         XML->pushTag("CUES");
         int numCues = XML->getNumTags("Cue");
         cues.clear();
         for(int i = 0; i < numCues; i++){
             string name = XML->getValue("Cue", "NULL", i);
-            // Check if name corresponds to a cue file in data folder /cues, if not, we dont add it
+            // Check if path corresponds to a cue file, if not, we dont add it
             if(ofFile::doesFileExist(name)){
                 cues.push_back(name);
             }
             else{
-                ofLogWarning("File " + ofFilePath::getFileName(name) + " not found in /cues folder.");
+                ofLogWarning("File " + ofFilePath::getFileName(name) + " not found.");
             }
         }
         XML->popTag();
@@ -1239,25 +1239,6 @@ void ofApp::keyPressed(int key){
                 gui6->setVisible(false);
                 gui7->toggleVisible();
                 break;
-
-//            case OF_KEY_LEFT:
-//                previousCue->triggerSelf();
-//                previousCue->bindToKey(OF_KEY_LEFT);
-//                {
-//                cout << "DINTRE" << endl;
-//                vector<ofxUISuperCanvas *>::iterator it = guis.begin()+5;
-//                ofxUIWidget *widget = (*it)->getWidget("Previous Cue");
-//                cout << widget->getKind() << endl;
-////                (*it)->triggerEvent(widget);
-//                ofxUIButton *button = (ofxUIButton *)widget;
-//                button->toggleValue();
-////                ofxXmlSettings *XML = new ofxXmlSettings();
-////                XML->setValue("Value", 1, 0);
-////                widget->loadState(XML);
-////                delete XML;
-//                }
-                break;
-
 
             default:
                 break;
