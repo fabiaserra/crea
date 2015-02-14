@@ -79,6 +79,7 @@ class ofApp : public ofBaseApp{
         Sequence sequence;      // Gestures sequence
         bool drawPatterns;
         bool drawSequence;
+        float testCounter;      // delete this when VMO tracking done
         //--------------------------------------------------------------
         vector<string> cues;
         int currentCueIndex;

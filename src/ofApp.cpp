@@ -127,7 +127,8 @@ void ofApp::setup(){
     seqVmo = vmo::buildOracle(obs, dimensions, maxMarkers, t);
     // 2.2 Output pattern list
     pttrList = vmo::findPttr(seqVmo, minLen);
-//    sequence.loadPatterns(vmo::processPttr(seqVmo, pttrList));
+    sequence.loadPatterns(vmo::processPttr(seqVmo, pttrList));
+    cout << sequence.patterns.size() << endl;
 
     // SETUP GUIs
     dim = 32;
@@ -135,6 +136,7 @@ void ofApp::setup(){
     theme = OFX_UI_THEME_GRAYDAY;
     drawPatterns = false;
     drawSequence = false;
+    testCounter = 0;
 
     setupGUI0();
     setupGUI1();
@@ -285,12 +287,12 @@ void ofApp::draw(){
 
     // OpenCV contour detection
     // contourFinder.draw();
-//    irMarkerFinder.draw();
+    irMarkerFinder.draw();
 
     // Graphics
 //     particles.draw();
-//    markersParticles.draw();
-     contour.draw();
+    markersParticles.draw();
+//     contour.draw();
 
 //     vector<irMarker>& tempMarkers         = tracker.getFollowers();
 //     // Draw identified IR markers
@@ -300,27 +302,17 @@ void ofApp::draw(){
 
     if(drawSequence) sequence.draw();
 
-    // Draw gesture patterns
-//    ofSetColor(255, 0, 0);
-//    ofSetLineWidth(3);
-//    for(int patternIndex = 0; patternIndex < sequence.patterns.size(); patternIndex++){
-//        for(int markerIndex = 0; markerIndex < sequence.patterns[patternIndex].size(); markerIndex++){
-//            sequence.patterns[patternIndex][markerIndex].draw();
-//        }
-//    }
-
     ofPopMatrix();
 
-//	gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
+//    gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
+//    if(drawPatterns) sequence.drawPatterns(gestureUpdate);
 
-    map<int, float> currentPatterns; // Use "gestureUpdate" above!!!!!!!!!!
-    currentPatterns[0] = 1;
-    currentPatterns[1] = 1;
-    currentPatterns[3] = 1;
-//    currentPatterns[4] = 0.95;
-//    if(drawPatterns) sequence.drawPatterns(currentPatterns);
+    map<int, float> currentPatterns;
+    if(drawPatterns && testCounter < 0.6) testCounter += 0.05;
+    currentPatterns[5] = testCounter;
+    currentPatterns[3] = testCounter;
+    currentPatterns[4] = testCounter;
     if(drawPatterns) sequence.drawPatterns(currentPatterns);
-
 }
 
 //--------------------------------------------------------------
