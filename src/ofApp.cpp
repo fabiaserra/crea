@@ -45,8 +45,8 @@ void ofApp::setup(){
     irMarkerFinder.setMinAreaRadius(minMarkerSize);
     irMarkerFinder.setMaxAreaRadius(maxMarkerSize);
 
-    trackerPersistence = 70;
-    trackerMaxDistance = 64;
+    trackerPersistence = 100;
+    trackerMaxDistance = 200;
     tracker.setPersistence(trackerPersistence);     // wait for 'trackerPersistence' frames before forgetting something
     tracker.setMaximumDistance(trackerMaxDistance); // an object can move up to 'trackerMaxDistance' pixels per frame
 
@@ -90,12 +90,12 @@ void ofApp::setup(){
 
     // DEPTH CONTOUR
     // smoothingSize = 0;
-    // contour.setup();
+    contour.setup();
 
     // SEQUENCE
     int maxMarkers = 2;
     sequence.setup(maxMarkers);
-    sequence.load("sequences/sequence2.xml");
+    sequence.load("sequences/sequence.xml");
 
     // MARKERS
     markers.resize(maxMarkers);
@@ -127,10 +127,7 @@ void ofApp::setup(){
     seqVmo = vmo::buildOracle(obs, dimensions, maxMarkers, t);
     // 2.2 Output pattern list
     pttrList = vmo::findPttr(seqVmo, minLen);
-    sequence.loadPatterns(vmo::processPttr(seqVmo, pttrList));
-
-    // SETUP CUE LIST
-//    loadCuesVector("settings/lastSettings.xml");  // initialize cues vector with cues from the last settings used
+//    sequence.loadPatterns(vmo::processPttr(seqVmo, pttrList));
 
     // SETUP GUIs
     dim = 32;
@@ -249,7 +246,7 @@ void ofApp::update(){
         // Update sequence playhead to draw gesture
         if(drawSequence) sequence.update();
 
-        //Gesture Tracking with VMO here?
+        // Gesture Tracking with VMO here?
         if (tempMarkers.size()>1){
             if (!stopTracking){
                 vector<float> obs; // Temporary code
@@ -288,18 +285,18 @@ void ofApp::draw(){
 
     // OpenCV contour detection
     // contourFinder.draw();
-    irMarkerFinder.draw();
+//    irMarkerFinder.draw();
 
     // Graphics
-    // particles.draw();
-    markersParticles.draw();
-    // contour.draw();
+//     particles.draw();
+//    markersParticles.draw();
+     contour.draw();
 
-     vector<irMarker>& tempMarkers         = tracker.getFollowers();
-     // Draw identified IR markers
-     for (int i = 0; i < tempMarkers.size(); i++){
-         tempMarkers[i].draw();
-     }
+//     vector<irMarker>& tempMarkers         = tracker.getFollowers();
+//     // Draw identified IR markers
+//     for (int i = 0; i < tempMarkers.size(); i++){
+//         tempMarkers[i].draw();
+//     }
 
     if(drawSequence) sequence.draw();
 
@@ -322,7 +319,7 @@ void ofApp::draw(){
     currentPatterns[3] = 1;
 //    currentPatterns[4] = 0.95;
 //    if(drawPatterns) sequence.drawPatterns(currentPatterns);
-    if(drawPatterns) sequence.drawPatterns(gestureUpdate);
+    if(drawPatterns) sequence.drawPatterns(currentPatterns);
 
 }
 
@@ -339,6 +336,7 @@ void ofApp::setupGUI0(){
     gui0->addLabel("Press 'h' to hide GUIs.", OFX_UI_FONT_SMALL);
     gui0->addSpacer();
     gui0->addLabel("Press 'f' to fullscreen.", OFX_UI_FONT_SMALL);
+    gui0->addSpacer();
 
     gui0->addSpacer();
     gui0->addLabel("1: BASICS");
@@ -868,7 +866,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     if(e.getName() == "Save Settings"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if(button->getValue() == true){
-            ofFileDialogResult result = ofSystemSaveDialog("sequence.xml", "Save sequence file");
+            ofFileDialogResult result = ofSystemSaveDialog("sequence.xml", "Save current settings");
             if(result.bSuccess){
                 saveGUISettings(result.getPath(), true);
             }
@@ -1106,6 +1104,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         gui4->setTheme(theme);
         gui5->setTheme(theme);
         gui6->setTheme(theme);
+        gui7->setTheme(theme);
      }
 
     if(e.getName() == "Immortal"){

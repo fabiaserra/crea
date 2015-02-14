@@ -12,9 +12,9 @@ void Contour::setup(){
     smoothingSize = 0;
 
     drawBoundingRect = false;
-    drawConvexHull = false;
+    drawConvexHull = true;
     drawConvexHullLine = false;
-    drawContourLine = true;
+    drawContourLine = false;
 }
 
 void Contour::update(ofxCv::ContourFinder & contourFinder){
