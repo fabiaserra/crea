@@ -145,7 +145,8 @@ void ofApp::setup(){
     setupGUI4();
     setupGUI5();
     setupGUI6();
-    setupGUI7(0);
+    setupGUI7();
+    setupGUI8(0);
 
     interpolatingWidgets = false;
     loadGUISettings("settings/lastSettings.xml", false, true);
@@ -355,11 +356,11 @@ void ofApp::setupGUI0(){
     gui0->addSpacer();
 
     gui0->addSpacer();
-    gui0->addLabel("7: PARTICLES");
+    gui0->addLabel("7: DEPTH CONTOUR");
     gui0->addSpacer();
 
     gui0->addSpacer();
-    gui0->addLabel("8: DEPTH CONTOUR");
+    gui0->addLabel("8: PARTICLES");
     gui0->addSpacer();
 
     gui0->autoSizeToFitWidgets();
@@ -564,7 +565,7 @@ void ofApp::setupGUI6(){
     gui6->setTheme(theme);
 
     gui6->addSpacer();
-    gui6->addLabel("Press '5' to hide panel", OFX_UI_FONT_SMALL);
+    gui6->addLabel("Press '6' to hide panel", OFX_UI_FONT_SMALL);
 
     gui6->addSpacer();
     gui6->addLabel("Physics");
@@ -579,55 +580,12 @@ void ofApp::setupGUI6(){
 }
 
 //--------------------------------------------------------------
-void ofApp::setupGUI7(int i){
-    gui7 = new ofxUISuperCanvas("7: PARTICLES", 0, 0, guiWidth, ofGetHeight());
+void ofApp::setupGUI7(){
+    gui7 = new ofxUISuperCanvas("7: DEPTH CONTOUR", 0, 0, guiWidth, ofGetHeight());
     gui7->setTheme(theme);
 
     gui7->addSpacer();
-    gui7->addLabel("Press '6' to hide panel", OFX_UI_FONT_SMALL);
-
-    gui7->addSpacer();
-    gui7->addLabel("Emitter");
-    gui7->addSlider("Particles/sec", 0.0, 20.0, &markersParticles.bornRate);
-
-    // vector<string> types;
-    // types.push_back("Point");
-    // types.push_back("Grid");
-    // types.push_back("Contour");
-    // gui7->addLabel("Emitter type:", OFX_UI_FONT_SMALL);
-    // gui7->addRadio("Emitter type", types, OFX_UI_ORIENTATION_VERTICAL);
-
-    gui7->addSlider("Velocity", 0.0, 100.0, &markersParticles.velocity);
-    gui7->addSlider("Velocity Random[%]", 0.0, 100.0, &markersParticles.velocityRnd);
-    gui7->addSlider("Velocity from Motion[%]", 0.0, 100.0, &markersParticles.velocityMotion);
-
-    gui7->addSlider("Emitter size", 0.0, 60.0, &markersParticles.emitterSize);
-
-    gui7->addSpacer();
-    gui7->addLabel("Particle");
-    gui7->addToggle("Immortal", &markersParticles.immortal);
-    gui7->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui7->addToggle("Empty", &markersParticles.isEmpty);
-    gui7->addToggle("Bounces", &markersParticles.bounce);
-    gui7->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui7->addSlider("Lifetime", 0.0, 20.0, &markersParticles.lifetime);
-    gui7->addSlider("Life Random[%]", 0.0, 100.0, &markersParticles.lifetimeRnd);
-    gui7->addSlider("Radius", 1.0, 15.0, &markersParticles.radius);
-    gui7->addSlider("Radius Random[%]", 0.0, 100.0, &markersParticles.radiusRnd);
-
-    gui7->addSpacer();
-    gui7->addLabel("Time behaviour");
-    gui7->addToggle("Size", &markersParticles.sizeAge);
-    gui7->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui7->addToggle("Opacity", &markersParticles.opacityAge);
-    gui7->addToggle("Flickers", &markersParticles.flickersAge);
-    gui7->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui7->addToggle("Color", &markersParticles.colorAge);
-
-    gui7->addSpacer();
-    gui7->addLabel("Physics");
-    gui7->addSlider("Friction", 0, 100, &markersParticles.friction);
-    gui7->addSlider("Gravity", 0.0, 20.0, &markersParticles.gravity);
+    gui7->addLabel("Press '7' to hide panel", OFX_UI_FONT_SMALL);
 
     gui7->addSpacer();
 
@@ -635,6 +593,65 @@ void ofApp::setupGUI7(int i){
     gui7->setVisible(false);
     ofAddListener(gui7->newGUIEvent, this, &ofApp::guiEvent);
     guis.push_back(gui7);
+}
+
+//--------------------------------------------------------------
+void ofApp::setupGUI8(int i){
+    gui8 = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
+    gui8->setTheme(theme);
+
+    gui8->addSpacer();
+    gui8->addLabel("Press '8' to hide panel", OFX_UI_FONT_SMALL);
+
+    gui8->addSpacer();
+    gui8->addLabel("Emitter");
+    gui8->addSlider("Particles/sec", 0.0, 20.0, &markersParticles.bornRate);
+
+    // vector<string> types;
+    // types.push_back("Point");
+    // types.push_back("Grid");
+    // types.push_back("Contour");
+    // gui8->addLabel("Emitter type:", OFX_UI_FONT_SMALL);
+    // gui8->addRadio("Emitter type", types, OFX_UI_ORIENTATION_VERTICAL);
+
+    gui8->addSlider("Velocity", 0.0, 100.0, &markersParticles.velocity);
+    gui8->addSlider("Velocity Random[%]", 0.0, 100.0, &markersParticles.velocityRnd);
+    gui8->addSlider("Velocity from Motion[%]", 0.0, 100.0, &markersParticles.velocityMotion);
+
+    gui8->addSlider("Emitter size", 0.0, 60.0, &markersParticles.emitterSize);
+
+    gui8->addSpacer();
+    gui8->addLabel("Particle");
+    gui8->addToggle("Immortal", &markersParticles.immortal);
+    gui8->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8->addToggle("Empty", &markersParticles.isEmpty);
+    gui8->addToggle("Bounces", &markersParticles.bounce);
+    gui8->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8->addSlider("Lifetime", 0.0, 20.0, &markersParticles.lifetime);
+    gui8->addSlider("Life Random[%]", 0.0, 100.0, &markersParticles.lifetimeRnd);
+    gui8->addSlider("Radius", 1.0, 15.0, &markersParticles.radius);
+    gui8->addSlider("Radius Random[%]", 0.0, 100.0, &markersParticles.radiusRnd);
+
+    gui8->addSpacer();
+    gui8->addLabel("Time behaviour");
+    gui8->addToggle("Size", &markersParticles.sizeAge);
+    gui8->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8->addToggle("Opacity", &markersParticles.opacityAge);
+    gui8->addToggle("Flickers", &markersParticles.flickersAge);
+    gui8->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8->addToggle("Color", &markersParticles.colorAge);
+
+    gui8->addSpacer();
+    gui8->addLabel("Physics");
+    gui8->addSlider("Friction", 0, 100, &markersParticles.friction);
+    gui8->addSlider("Gravity", 0.0, 20.0, &markersParticles.gravity);
+
+    gui8->addSpacer();
+
+    gui8->autoSizeToFitWidgets();
+    gui8->setVisible(false);
+    ofAddListener(gui8->newGUIEvent, this, &ofApp::guiEvent);
+    guis.push_back(gui8);
 }
 
 //--------------------------------------------------------------
@@ -1097,6 +1114,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         gui5->setTheme(theme);
         gui6->setTheme(theme);
         gui7->setTheme(theme);
+        gui8->setTheme(theme);
      }
 
     if(e.getName() == "Immortal"){
@@ -1120,6 +1138,7 @@ void ofApp::exit(){
     delete gui5;
     delete gui6;
     delete gui7;
+    delete gui8;
 }
 
 //--------------------------------------------------------------
@@ -1140,6 +1159,7 @@ void ofApp::keyPressed(int key){
                 gui5->setVisible(false);
                 gui6->setVisible(false);
                 gui7->setVisible(false);
+                gui8->setVisible(false);
                 break;
 
             case '0':
@@ -1152,6 +1172,7 @@ void ofApp::keyPressed(int key){
                 gui5->setVisible(false);
                 gui6->setVisible(false);
                 gui7->setVisible(false);
+                gui8->setVisible(false);
                 break;
 
             case '1':
@@ -1163,6 +1184,7 @@ void ofApp::keyPressed(int key){
                 gui5->setVisible(false);
                 gui6->setVisible(false);
                 gui7->setVisible(false);
+                gui8->setVisible(false);
                 break;
 
             case '2':
@@ -1174,6 +1196,7 @@ void ofApp::keyPressed(int key){
                 gui5->setVisible(false);
                 gui6->setVisible(false);
                 gui7->setVisible(false);
+                gui8->setVisible(false);
                 break;
 
             case '3':
@@ -1185,6 +1208,7 @@ void ofApp::keyPressed(int key){
                 gui5->setVisible(false);
                 gui6->setVisible(false);
                 gui7->setVisible(false);
+                gui8->setVisible(false);
                 break;
 
             case '4':
@@ -1196,6 +1220,7 @@ void ofApp::keyPressed(int key){
                 gui5->setVisible(false);
                 gui6->setVisible(false);
                 gui7->setVisible(false);
+                gui8->setVisible(false);
                 break;
 
             case '5':
@@ -1207,6 +1232,7 @@ void ofApp::keyPressed(int key){
                 gui5->toggleVisible();
                 gui6->setVisible(false);
                 gui7->setVisible(false);
+                gui8->setVisible(false);
                 break;
 
             case '6':
@@ -1218,6 +1244,7 @@ void ofApp::keyPressed(int key){
                 gui5->setVisible(false);
                 gui6->toggleVisible();
                 gui7->setVisible(false);
+                gui8->setVisible(false);
                 break;
 
             case '7':
@@ -1229,6 +1256,19 @@ void ofApp::keyPressed(int key){
                 gui5->setVisible(false);
                 gui6->setVisible(false);
                 gui7->toggleVisible();
+                gui8->setVisible(false);
+                break;            
+
+            case '8':
+                gui0->setVisible(false);
+                gui1->setVisible(false);
+                gui2->setVisible(false);
+                gui3->setVisible(false);
+                gui4->setVisible(false);
+                gui5->setVisible(false);
+                gui6->setVisible(false);
+                gui7->setVisible(false);
+                gui8->toggleVisible();
                 break;
 
             default:

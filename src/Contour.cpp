@@ -51,7 +51,7 @@ void Contour::draw(){
         ofSetColor(255);
         for(int i = 0; i < convexHulls.size(); i++){
             ofBeginShape();
-            for(int j = 0; i < convexHulls[i].getVertices().size(); j++){
+            for(int j = 0; j < convexHulls[i].getVertices().size(); j++){
                 ofVertex(convexHulls[i].getVertices().at(j).x, convexHulls[i].getVertices().at(j).y);
             }
             ofEndShape();
