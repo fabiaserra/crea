@@ -116,12 +116,12 @@ void ofApp::setup(){
 //    // gestureCat = -1;
     // 2. Processing
     // 2.1 Load file into VMO
-    int minLen = 1; // Temporary setting
-    float start = 0.0, step = 0.05, stop = 10.0;
+//    int minLen = 1; // Temporary setting
+//    float start = 0.0, step = 0.05, stop = 10.0;
 
     // For sequence4.xml
-//    int minLen = 4;
-//    float start = 11.0, step = 0.01, stop = 14.0;
+    int minLen = 4;
+    float start = 11.0, step = 0.01, stop = 14.0;
 
     float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
     seqVmo = vmo::buildOracle(obs, dimensions, maxMarkers, t);
@@ -305,15 +305,15 @@ void ofApp::draw(){
 
     ofPopMatrix();
 
-//    gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
+    gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
 //    if(drawPatterns) sequence.drawPatterns(gestureUpdate);
 
-    map<int, float> currentPatterns;
-    if(drawPatterns && testCounter < 0.6) testCounter += 0.05;
-    currentPatterns[5] = testCounter;
-    currentPatterns[3] = testCounter;
-    currentPatterns[4] = testCounter;
-    if(drawPatterns) sequence.drawPatterns(currentPatterns);
+//    map<int, float> currentPatterns;
+//    if(drawPatterns && testCounter < 0.6) testCounter += 0.05;
+//    currentPatterns[5] = testCounter;
+//    currentPatterns[3] = testCounter;
+//    currentPatterns[4] = testCounter;
+    if(drawPatterns) sequence.drawPatterns(gestureUpdate);
 }
 
 //--------------------------------------------------------------
