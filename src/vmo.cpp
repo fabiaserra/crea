@@ -90,10 +90,10 @@ void vmo::setup(int dim = 1, int num = 1, float threshold = 0.0){
 	rsfx.push_back(zeroStateRsfx);
 
 	// State cluster vector
-	vector1D zeroStateLatent;
+//	vector1D zeroStateLatent;
 	latent.clear();
 	latent.reserve(INIT_VMO_K);
-	latent.push_back(zeroStateLatent);
+//	latent.push_back(zeroStateLatent);
 
 	// Pattern label vector
 	vector1D zeroStatePttrCat;
@@ -166,14 +166,6 @@ vector<float> vmo::getDistArray(vector<float> &x, vector< vector<float> > &y){
 	}
 	return dvec;
 }
-
-//vector<vector<float> >& vmo::trnIndexing(int n){
-//	vector<vector<float> > temp(trn[n].size(), vector<float>(dim, 0.0));
-//	for (int i = 0; i < trn[n].size(); i++) {
-//		temp[i] = obs[trn[n][i]];
-//	}
-//	return temp;
-//}
 
 vector2D vmo::encode(){
 	vector2D code;
@@ -261,11 +253,6 @@ void vmo::addState(vector<float>& newData){
 	}
 
 	rsfx[sfx[ind]].push_back(ind);
-}
-
-int vmo::getK(){
-	int K = latent.size();
-	return K;
 }
 
 vector<float> vmo::cumsum(vector<float> cw){
@@ -444,7 +431,7 @@ vector<vector<ofPolyline> > vmo::processPttr(vmo& oracle, const vmo::pttr& pttrL
 
 vmo::belief vmo::tracking_init(vmo& oracle, const vmo::pttr& pttrList, vector<float> &firstObs){
 	vmo::belief bf = vmo::belief();
-	bf.K = oracle.getK();
+	bf.K = oracle.latent.size();
 	bf.path.assign(bf.K, 0);
 	bf.cost.assign(bf.K, 0.0);
 
@@ -459,14 +446,14 @@ vmo::belief vmo::tracking_init(vmo& oracle, const vmo::pttr& pttrList, vector<fl
             d = getDistance(firstObs, oracle.obs[sym]);
 			if (d < minD) {
 				minD = d;
-				ind = i;
+				ind = sym;
 			}
-			bf.path[k] = minD;
-			bf.cost[k] = ind;
+			bf.path[k] = sym;
+			bf.cost[k] = minD;
 		}
 		if (minD < firstCost) {
-			firstCost = minD;
 			firstIdx = ind;
+			firstCost = minD;
 		}
 	}
 	bf.currentIdx = firstIdx;
@@ -497,9 +484,9 @@ vmo::belief vmo::tracking(vmo& oracle,
 			float d = getDistance(obs, oracle.obs[oracle.latent[selfTrn][i]]);
 			if (d < minD) {
 				minD = d;
-				ind = i;
-				prevBf.path[k] = minD;
-				prevBf.cost[k] = ind;
+				ind = selfTrn;
+				prevBf.path[k] = ind;
+				prevBf.cost[k] = minD;
 			}
 		}
 
@@ -508,13 +495,13 @@ vmo::belief vmo::tracking(vmo& oracle,
 		for (int j = 0; j < oracle.trn[prevBf.path[k]].size(); j++) {
 			sym = oracle.data[oracle.trn[prevBf.path[k]][j]];
 			float d = 0.0;
-			for (int i = 0; i < oracle.latent[selfTrn].size(); i++) {
+			for (int i = 0; i < oracle.latent[sym].size(); i++) {
 				d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
 				if (d < minD) {
 					minD = d;
-					ind = i;
-					prevBf.path[k] = minD;
-					prevBf.cost[k] = ind;
+					ind = sym;
+					prevBf.path[k] = ind;
+					prevBf.cost[k] = minD;
 				}
 			}
 		}
@@ -527,38 +514,10 @@ vmo::belief vmo::tracking(vmo& oracle,
 	return prevBf;
 }
 
-int* vmo::getGestureCat(int ind){
-    int* temp;
-    if (pttrCat[ind].size() == 0 ){
-        temp = new int[1];
-        temp[0] = -1;
-    }else{
-        temp = new int[pttrCat[ind].size()];
-        for (int i = 0; i < pttrCat[ind].size(); i++) {
-            temp[i] = pttrCat[ind][i];
-        }
-    }
-    return temp;
-}
-
-int* vmo::getGestureInd(int ind){
-    int* temp;
-    if (pttrInd[ind].size()==0){
-        temp = new int[1];
-        temp[0] = -1;
-    }else{
-        temp = new int[pttrInd[ind].size()];
-        for (int i = 0; i < pttrInd[ind].size(); i++) {
-            temp[i] = pttrInd[ind][i];
-        }
-    }
-    return temp;
-}
-
 map<int, float> vmo::getGestureUpdate(int ind, vmo::pttr& pttrList){
 	map<int, float> out;
-	if (pttrCat[ind].size() == 0) {
-		out[0] = -1.0;
+	if (pttrCat[ind].size() == 0 || ind == -1) {
+		out[0] = 0.0;
 	}else{
 		float idx;
 		float len;
