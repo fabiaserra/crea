@@ -258,6 +258,7 @@ void ofApp::update(){
                     obs.push_back(tempMarkers[i].smoothPos.y);
                 }
                 if(initStatus){
+                        cout << "HEI" << endl;
                     currentBf = vmo::tracking_init(seqVmo, pttrList, obs);
                     initStatus = false;
                 }
@@ -306,6 +307,10 @@ void ofApp::draw(){
     ofPopMatrix();
 
     gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
+    // print percent of completion
+    for(int patternIndex = 0; patternIndex < gestureUpdate.size(); patternIndex++){
+        cout << gestureUpdate[patternIndex] << endl;
+    }
 //    if(drawPatterns) sequence.drawPatterns(gestureUpdate);
 
 //    map<int, float> currentPatterns;
@@ -950,6 +955,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if(button->getValue() == true){
             stopTracking = true;
+            cout << "STOP VMO" << endl;
         }
     }
 
@@ -1257,7 +1263,7 @@ void ofApp::keyPressed(int key){
                 gui6->setVisible(false);
                 gui7->toggleVisible();
                 gui8->setVisible(false);
-                break;            
+                break;
 
             case '8':
                 gui0->setVisible(false);
