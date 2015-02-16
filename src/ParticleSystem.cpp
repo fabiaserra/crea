@@ -1,7 +1,7 @@
 #include "ParticleSystem.h"
 
 ParticleSystem::ParticleSystem(){
-
+    isActive = true;
 }
 
 void ParticleSystem::setup(bool immortal, ofColor color, float gravity, bool sizeAge, bool opacityAge,
@@ -31,7 +31,7 @@ void ParticleSystem::setup(bool immortal, ofColor color, float gravity, bool siz
 	this->opacityAge        = opacityAge;
 	this->flickersAge       = flickersAge;
 	this->colorAge          = colorAge;
-	this->isEmpty         = isEmpty;
+	this->isEmpty           = isEmpty;
 	this->bounce            = bounce;
 
 	createParticleGrid(ofGetWidth(), ofGetHeight(), 10);
@@ -93,14 +93,16 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers){
 		}
 
 		// Born new particles
-		for(unsigned int i = 0; i < markers.size(); i++){
-			if (markers[i].hasDisappeared){
-				markers[i].bornRate -= 0.5;
-			}
-			else{
-				markers[i].bornRate = bornRate;
-			}
-			addParticles(markers[i].bornRate, markers[i].smoothPos, markers[i].velocity, markers[i].color);
+		if(isActive){
+            for(unsigned int i = 0; i < markers.size(); i++){
+                if (markers[i].hasDisappeared){
+                    markers[i].bornRate -= 0.5;
+                }
+                else{
+                    markers[i].bornRate = bornRate;
+                }
+                addParticles(markers[i].bornRate, markers[i].smoothPos, markers[i].velocity, markers[i].color);
+            }
 		}
 
 		// Update the particles
