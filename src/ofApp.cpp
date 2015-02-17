@@ -120,7 +120,7 @@ void ofApp::setup(){
 //    float start = 0.0, step = 0.05, stop = 10.0;
 
     // For sequence4.xml
-    int minLen = 4;
+    int minLen = 3;
     float start = 11.0, step = 0.01, stop = 14.0;
 
     float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
@@ -128,8 +128,15 @@ void ofApp::setup(){
     // 2.2 Output pattern list
     pttrList = vmo::findPttr(seqVmo, minLen);
     sequence.loadPatterns(vmo::processPttr(seqVmo, pttrList));
-    cout << sequence.patterns.size() << endl;
-
+    cout << "pattern size: "<<sequence.patterns.size() << endl;
+	for (int i = 0; i < pttrList.size; i++) {
+		cout << "pattern "<< i+1 << endl;
+		for (int j = 0; j<pttrList.sfxPts[i].size(); j++){
+			cout << "	begin: "<< pttrList.sfxPts[i][j] - pttrList.sfxLen[i]<< endl;
+			cout << "	end  :"<< pttrList.sfxPts[i][j] << endl;
+		}
+	}
+	
     // SETUP GUIs
     dim = 32;
     guiWidth = 240;
@@ -264,7 +271,15 @@ void ofApp::update(){
                 else{
                     prevBf = currentBf;
                     currentBf = vmo::tracking(seqVmo, pttrList, prevBf, obs);
+					cout << "current index: "<<currentBf.currentIdx << endl;
                 }
+				gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
+				for (int i = 0; i < sequence.patterns.size(); i++) {
+					if(gestureUpdate.find(i) != gestureUpdate.end()) {
+						cout << "key: "<< i << endl;
+						cout << "percent:"<< gestureUpdate[i] << endl;
+					}
+				}
             }
         }
     }
@@ -305,7 +320,6 @@ void ofApp::draw(){
 
     ofPopMatrix();
 
-    gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
 //    if(drawPatterns) sequence.drawPatterns(gestureUpdate);
 
 //    map<int, float> currentPatterns;
