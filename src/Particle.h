@@ -7,8 +7,8 @@ class Particle
     public:
         Particle();
 
-        void setup(float id, ofPoint pos, ofPoint vel, ofColor color, float initialRadius, bool immortal, float lifetime, float friction);
-        void setup(float id, ofPolyline contour, ofPoint vel, ofColor color, float initialRadius, bool immortal, float lifetime, float friction);
+        void setup(float id, ofPoint pos, ofPoint vel, ofColor color, float initialRadius, float lifetime);
+//        void setup(float id, ofPolyline contour, ofPoint vel, ofColor color, float initialRadius, bool immortal, float lifetime, float friction);
         void update(float dt);
         void update(float dt, vector<irMarker>& markers);
         void draw();

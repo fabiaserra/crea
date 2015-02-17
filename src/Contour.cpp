@@ -5,7 +5,7 @@ using namespace cv;
 
 Contour::Contour()
 {
-    isActive = true;
+    isActive = false;
 }
 
 void Contour::setup(){

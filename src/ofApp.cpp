@@ -51,42 +51,10 @@ void ofApp::setup(){
     tracker.setMaximumDistance(trackerMaxDistance); // an object can move up to 'trackerMaxDistance' pixels per frame
 
     // MARKER PARTICLES
-    float bornRate       = 5;        // Number of particles born per frame
-    float velocity       = 50;       // Initial velocity magnitude of newborn particles
-    float velocityRnd    = 20;       // Magnitude randomness % of the initial velocity
-    float velocityMotion = 50;       // Marker motion contribution to the initial velocity
-    float emitterSize    = 8.0f;     // Size of the emitter area
-    EmitterType type     = POINT;    // Type of emitter
-    float lifetime       = 3;        // Lifetime of particles
-    float lifetimeRnd    = 60;       // Randomness of lifetime
-    float radius         = 5;        // Radius of the particles
-    float radiusRnd      = 20;       // Randomness of radius
-
-    bool  immortal       = false;    // Can particles die?
-    bool  sizeAge        = true;     // Decrease size when particles get older?
-    bool  opacityAge     = true;     // Decrease opacity when particles get older?
-    bool  flickersAge    = true;     // Particle flickers opacity when about to die?
-    bool  colorAge       = true;     // Change color when particles get older?
-    bool  isEmpty        = true;     // Draw only contours of the particles?
-    bool  bounce         = true;     // Bounce particles with the walls of the window?
-
-    float friction       = 0;        // Multiply this value by the velocity every frame
-    float gravity        = 5.0f;     // Makes particles fall down in a natural way
-
-    ofColor color(255);
-
-    markersParticles.setup(bornRate, velocity, velocityRnd, velocityMotion, emitterSize, immortal, lifetime, lifetimeRnd,
-                           color, radius, radiusRnd, 1-friction/1000, gravity, sizeAge, opacityAge, flickersAge, colorAge, isEmpty,
-                           bounce);
+    markersParticles.setup(BORN_PARTICLES);
 
     // GRID PARTICLES
-    bool sizeAge2     = false;
-    bool opacityAge2  = false;
-    bool flickersAge2 = false;
-    bool colorAge2    = false;
-    bool isEmpty2     = false;
-
-    particles.setup(true, color, gravity, sizeAge2, opacityAge2, flickersAge2, colorAge2, isEmpty2, bounce);
+    particles.setup(GRID_PARTICLES);
 
     // DEPTH CONTOUR
     // smoothingSize = 0;
@@ -656,7 +624,7 @@ void ofApp::setupGUI8(int i){
     gui8->addSpacer();
     gui8->addLabel("Physics");
     gui8->addSlider("Friction", 0, 100, &markersParticles.friction);
-    gui8->addSlider("Gravity", 0.0, 20.0, &markersParticles.gravity);
+    gui8->addSlider("Gravity", 0.0, 15.0, &markersParticles.gravity);
 
     gui8->addSpacer();
 

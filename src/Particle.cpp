@@ -14,48 +14,16 @@ Particle::Particle(){
     windowHeight    = ofGetHeight();
 }
 
-void Particle::setup(float id, ofPoint pos, ofPoint vel, ofColor color, float initialRadius, bool immortal,
-                     float lifetime, float friction){
+void Particle::setup(float id, ofPoint pos, ofPoint vel, ofColor color, float initialRadius, float lifetime){
     this->id = id;
     this->pos = pos;
     this->vel = vel;
     this->color = color;
     this->initialRadius = initialRadius;
     this->lifetime = lifetime;
-    this->friction = friction;
-    this->immortal = immortal;
 
     this->mass = initialRadius * initialRadius * 0.005f;
-
-    // Alter color for each particle
-    originalHue = color.getHue();
-    float hue = originalHue - ofRandom(-20, 20);
-    color.setHue(hue);
-}
-
-void Particle::setup(float id, ofPolyline contour, ofPoint vel, ofColor color, float initialRadius, bool immortal,
-                     float lifetime, float friction){
-    this->id = id;
-    this->contour = contour;
-    this->vel = vel;
-    this->color = color;
-    this->initialRadius = initialRadius;
-    this->lifetime = lifetime;
-    this->friction = friction;
-    this->immortal = immortal;
-
-    this->mass = initialRadius * initialRadius * 0.005f;
-
-    // Create particles only inside contour polyline
-    ofRectangle box = contour.getBoundingBox();
-    ofPoint center = box.getCenter();
-    pos.x = center.x + (ofRandom(1.0f) - 0.5f) * box.getWidth();
-    pos.y = center.y + (ofRandom(1.0f) - 0.5f) * box.getHeight();
-
-    while(!contour.inside(pos)){
-        pos.x = center.x + (ofRandom(1.0f) - 0.5f) * box.getWidth();
-        pos.y = center.y + (ofRandom(1.0f) - 0.5f) * box.getHeight();
-    }
+    this->originalHue = color.getHue();
 }
 
 void Particle::update(float dt){
@@ -89,7 +57,7 @@ void Particle::update(float dt){
         if (flickersAge && (age/lifetime) > 0.94f && ofRandomf() > 0.3){
             opacity *= 0.2;
         }
-        
+
         // Change particle color with age
         if (colorAge){
             float saturation = ofMap(age, 0, lifetime, 255, 128);
@@ -148,7 +116,7 @@ void Particle::update(float dt, vector<irMarker>& markers){
 void Particle::draw(){
     if(isAlive){
         ofPushStyle();
-        
+
         ofSetColor(color, opacity);
 
         if(isEmpty){
@@ -158,7 +126,7 @@ void Particle::draw(){
         else{
             ofFill();
         }
-        
+
         ofCircle(pos, radius);
 
         // // Draw arrows
@@ -171,7 +139,7 @@ void Particle::draw(){
         //     ofPoint p2(pos + dir*length);
         //     ofLine(p1, p2);
         // }
-        
+
         ofPopStyle();
     }
 }
