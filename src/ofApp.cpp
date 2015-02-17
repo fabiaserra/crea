@@ -592,6 +592,12 @@ void ofApp::setupGUI7(){
     gui7->addSpacer();
     gui7->addImageToggle("Show Contour", "icons/show.png", &contour.isActive, dim, dim);
 
+    gui7->addSpacer();
+    gui7->addToggle("Bounding Rectangle", &contour.drawBoundingRect);
+    gui7->addToggle("Convex Hull", &contour.drawConvexHull);
+    gui7->addToggle("Convex Hull Line", &contour.drawConvexHullLine);
+    gui7->addToggle("Contour Line", &contour.drawContourLine);
+
     gui7->autoSizeToFitWidgets();
     gui7->setVisible(false);
     ofAddListener(gui7->newGUIEvent, this, &ofApp::guiEvent);
