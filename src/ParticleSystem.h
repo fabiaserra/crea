@@ -3,7 +3,7 @@
 #include "Particle.h"
 #include "irMarker.h"
 
-enum ParticleMode {GRID_PARTICLES, BORN_PARTICLES, CONTOUR_PARTICLES};
+enum ParticleMode {GRID_PARTICLES, MARKER_PARTICLES, CONTOUR_PARTICLES};
 enum EmitterType {POINT, SPHERE, GRID, CONTOUR};
 
 class ParticleSystem

@@ -46,7 +46,7 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers){
 		}
 	}
 
-	else if(particleMode == BORN_PARTICLES){
+	else if(particleMode == MARKER_PARTICLES){
 		// Delete inactive particles
 		int i = 0;
 		while (i < particles.size()){
@@ -121,12 +121,12 @@ void ParticleSystem::addParticles(int n){
 
 void ParticleSystem::addParticles(int n, const irMarker &marker){
 	for(int i = 0; i < n; i++){
-		ofPoint pos = marker.smoothPos + randomVector()*ofRandom(0, emitterSize);
-		ofPoint vel = randomVector()*(velocity+randomRange(velocityRnd, velocity));
-		vel += marker.velocity*(velocityMotion/100)*6;
+        ofPoint pos = marker.smoothPos + randomVector()*ofRandom(0, emitterSize);
+        ofPoint vel = randomVector()*(velocity+randomRange(velocityRnd, velocity));
+        vel += marker.velocity*(velocityMotion/100)*6;
 
-		float initialRadius = radius + randomRange(radiusRnd, radius);
-		float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
+        float initialRadius = radius + randomRange(radiusRnd, radius);
+        float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
 
         ofColor color;
         float hue = marker.color.getHue() - ofRandom(-20, 20);
@@ -150,11 +150,11 @@ void ParticleSystem::addParticles(int n, const irMarker &marker){
 //            pos.y = center.y + (ofRandom(1.0f) - 0.5f) * box.getHeight();
 //        }
 //
-//		ofPoint vel = randomVector()*(velocity+randomRange(velocityRnd, velocity));
-//		vel += marker.velocity*(velocityMotion/100)*6;
+//        ofPoint vel = randomVector()*(velocity+randomRange(velocityRnd, velocity));
+//        vel += marker.velocity*(velocityMotion/100)*6;
 //
-//		float initialRadius = radius + randomRange(radiusRnd, radius);
-//		float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
+//        float initialRadius = radius + randomRange(radiusRnd, radius);
+//        float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
 //
 //        ofColor color;
 //        float hue = marker.color.getHue() - ofRandom(-20, 20);

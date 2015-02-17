@@ -51,7 +51,7 @@ void ofApp::setup(){
     tracker.setMaximumDistance(trackerMaxDistance); // an object can move up to 'trackerMaxDistance' pixels per frame
 
     // MARKER PARTICLES
-    markersParticles.setup(BORN_PARTICLES);
+    markersParticles.setup(MARKER_PARTICLES);
 
     // GRID PARTICLES
     particles.setup(GRID_PARTICLES);
