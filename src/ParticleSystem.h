@@ -11,20 +11,20 @@ class ParticleSystem
 	public:
 		ParticleSystem();
 
-		void setup(bool immortal, ofColor color, float gravity, bool sizeAge, bool opacityAge, bool flickersAge,
-				   bool colorAge, bool isEmpty, bool bounce);
+		void setup(bool immortal, ofColor color, float radius, bool sizeAge, bool opacityAge, bool flickersAge,
+                   bool colorAge, bool isEmpty, bool bounce);
 		void setup(float bornRate, float velocity, float velocityRnd, float velocityMotion, float emitterSize,
 				   bool immortal, float lifetime, float lifetimeRnd, ofColor color, float radius, float radiusRnd,
-				   float friction, float gravity, bool sizeAge, bool opacityAge,  bool flickersAge, bool colorAge,
-				   bool isEmpty, bool bounce);
+				   float friction, bool sizeAge, bool opacityAge,  bool flickersAge, bool colorAge, bool isEmpty,
+                   bool bounce);
 
 		void update(float dt, vector<irMarker>& markers);
 		void draw();
 
-		void createParticleGrid(int width, int height, int res);
-		void addParticles(int n);
+		void createParticleGrid(int width, int height, float radius, int res);
 		void addParticles(int n, const ofPoint &markerPos, const ofPoint &markerVel, const ofColor &markerColor);
 		void addParticle(int x, int y, float initialRadius);
+        void addParticles(int n);
 		void removeParticles(int n);
 
 		void killParticles();
@@ -61,7 +61,8 @@ class ParticleSystem
 		bool isEmpty;           // Particles are empty inside, only draw the contour?
 		//--------------------------------------------------------------
 		float friction;        	// Multiply this value by the velocity every frame
-		float gravity;          // Makes particles fall down in a natural way
+		
+        float gravity;          // Makes particles fall down in a natural way
 
 	protected:
 		// helper functions

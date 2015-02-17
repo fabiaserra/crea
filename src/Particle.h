@@ -12,6 +12,7 @@ class Particle
         void update(float dt);
         void update(float dt, vector<irMarker>& markers);
         void draw();
+        void applyForce(ofPoint force);
         void kill();
 //--------------------------------------------------------------
         ofPoint pos;            // Position
@@ -41,9 +42,11 @@ class Particle
         bool  flickersAge;      // Particle flickers opacity when about to die?
         bool  colorAge;         // Particle changes color with age?
         bool  isEmpty;          // Draw only contour of the particle
-        bool  drawShapes;       // Draw other shapes as particles
 // --------------------------------------------------------------
-        float markerDist;
-        ofPoint dir;
+        float markerDist;       // Distance between particle and closest marker
+        ofPoint dir;            // Direction from particle to closest marker
+// --------------------------------------------------------------
+        int windowWidth;        // Window dimensions particle boundaries
+        int windowHeight;
 };
 
