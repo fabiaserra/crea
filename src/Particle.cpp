@@ -1,75 +1,43 @@
 #include "Particle.h"
 
 Particle::Particle(){
-    immortal    = false;
-    isAlive     = true;
-    bounces     = true;
-    sizeAge     = true;
-    opacityAge  = true;
-    colorAge    = true;
-    flickersAge = true;
-    isEmpty     = true;
-    drawShapes  = false;
-    age         = 0;
+    immortal        = false;
+    isAlive         = true;
+    bounces         = true;
+    sizeAge         = true;
+    opacityAge      = true;
+    colorAge        = true;
+    flickersAge     = true;
+    isEmpty         = false;
+    age             = 0;
+    windowWidth     = ofGetWidth();
+    windowHeight    = ofGetHeight();
 }
 
-void Particle::setup(float id, ofPoint pos, ofPoint vel, ofColor color, float initialRadius, bool immortal,
-                     float lifetime, float friction){
+void Particle::setup(float id, ofPoint pos, ofPoint vel, ofColor color, float initialRadius, float lifetime){
     this->id = id;
     this->pos = pos;
     this->vel = vel;
     this->color = color;
     this->initialRadius = initialRadius;
     this->lifetime = lifetime;
-    this->friction = friction;
-    this->immortal = immortal;
 
     this->mass = initialRadius * initialRadius * 0.005f;
-
-    // Alter color for each particle
-    // color.setHsb((ofGetFrameNum() % 255), 255, 255);
-    originalHue = color.getHue();
-    float hue = originalHue - ofRandom(-20, 20);
-    color.setHue(hue);
-}
-
-void Particle::setup(float id, ofPolyline contour, ofPoint vel, ofColor color, float initialRadius, bool immortal,
-                     float lifetime, float friction){
-    this->id = id;
-    this->contour = contour;
-    this->vel = vel;
-    this->color = color;
-    this->initialRadius = initialRadius;
-    this->lifetime = lifetime;
-    this->friction = friction;
-    this->immortal = immortal;
-
-    this->mass = initialRadius * initialRadius * 0.005f;
-
-    // Create particles only inside contour polyline
-    ofRectangle box = contour.getBoundingBox();
-    ofPoint center = box.getCenter();
-    pos.x = center.x + (ofRandom(1.0f) - 0.5f) * box.getWidth();
-    pos.y = center.y + (ofRandom(1.0f) - 0.5f) * box.getHeight();
-
-    while(!contour.inside(pos)){
-        pos.x = center.x + (ofRandom(1.0f) - 0.5f) * box.getWidth();
-        pos.y = center.y + (ofRandom(1.0f) - 0.5f) * box.getHeight();
-    }
+    this->originalHue = color.getHue();
 }
 
 void Particle::update(float dt){
     if(isAlive){
         // Perlin noise
         // noise = ofNoise(pos.x*0.005f, pos.y*0.005f, dt*0.1f);
-
-        // Update position
         // float angle = noise*30.0f;
         // acc = ofPoint(cos(angle), sin(angle)) * age * 0.1;
-        // vel += acc;
-        // acc.set(0, 0);
+
+        // Update position
+        vel += acc;
         pos += vel*dt;
         vel *= friction;
+        acc.set(0, 0);
 
         // Update age and check if particle has to die
         age += dt;
@@ -79,9 +47,9 @@ void Particle::update(float dt){
         }
 
         // Decrease particle radius with age
-        radius = initialRadius * (1.0f - (age/lifetime));
+        if (sizeAge) radius = initialRadius * (1.0f - (age/lifetime));
 
-        // Change particle opacity with age
+        // Decrease particle opacity with age
         opacity = 255;
         if (opacityAge){
             opacity *= 1.0f - (age/lifetime);
@@ -90,18 +58,26 @@ void Particle::update(float dt){
             opacity *= 0.2;
         }
 
+        // Change particle color with age
+        if (colorAge){
+            float saturation = ofMap(age, 0, lifetime, 255, 128);
+            float hue = ofMap(age, 0, lifetime, originalHue, originalHue-100);
+            color.setSaturation(saturation);
+            color.setHue(hue);
+        }
+
         // Bounce particle with the window margins
         if(bounces){
-            if(pos.x > ofGetWidth()-radius){
-                pos.x = ofGetWidth()-radius;
+            if(pos.x > windowWidth-radius){
+                pos.x = windowWidth-radius;
                 vel.x *= -1.0;
             }
             if(pos.x < radius){
                 pos.x = radius;
                 vel.x *= -1.0;
             }
-            if(pos.y > ofGetHeight()-radius){
-                pos.y = ofGetHeight()-radius;
+            if(pos.y > windowHeight-radius){
+                pos.y = windowHeight-radius;
                 vel.y *= -1.0;
             }
             if(pos.y < radius){
@@ -139,12 +115,7 @@ void Particle::update(float dt, vector<irMarker>& markers){
 
 void Particle::draw(){
     if(isAlive){
-        if (colorAge){
-            float saturation = ofMap(age, 0, lifetime, 255, 128);
-            float hue = ofMap(age, 0, lifetime, originalHue, originalHue-100);
-            color.setSaturation(saturation);
-            color.setHue(hue);
-        }
+        ofPushStyle();
 
         ofSetColor(color, opacity);
 
@@ -152,10 +123,11 @@ void Particle::draw(){
             ofNoFill();
             ofSetLineWidth(1);
         }
-        else ofFill();
+        else{
+            ofFill();
+        }
 
-        if (sizeAge) ofCircle(pos, radius);
-        else ofCircle(pos, initialRadius);
+        ofCircle(pos, radius);
 
         // // Draw arrows
         // if (markerDist == 0){
@@ -167,7 +139,14 @@ void Particle::draw(){
         //     ofPoint p2(pos + dir*length);
         //     ofLine(p1, p2);
         // }
+
+        ofPopStyle();
     }
+}
+
+void Particle::applyForce(ofPoint force){
+    force /= mass;
+    acc += force;
 }
 
 void Particle::kill(){

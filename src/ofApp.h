@@ -30,7 +30,7 @@ class ofApp : public ofBaseApp{
         void setupGUI4();
         void setupGUI5();
         void setupGUI6();
-        void setupGUI7(); 
+        void setupGUI7();
         void setupGUI8(int i);  // TODO: use the i to be able to create a vector of ParticleSystems
 
         void saveGUISettings(const string path, const bool saveCues);
@@ -78,9 +78,10 @@ class ofApp : public ofBaseApp{
         Contour contour;        // User silhouette contour
         //--------------------------------------------------------------
         Sequence sequence;      // Gestures sequence
+        //--------------------------------------------------------------
         bool drawPatterns;
         bool drawSequence;
-        float testCounter;      // delete this when VMO tracking done
+        bool drawMarkers;
         //--------------------------------------------------------------
         vector<string> cues;
         int currentCueIndex;
@@ -136,5 +137,4 @@ class ofApp : public ofBaseApp{
         bool initStatus;
         bool stopTracking;
         map<int, float> gestureUpdate;
-
 };

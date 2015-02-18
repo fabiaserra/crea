@@ -32,8 +32,8 @@ void ofApp::setup(){
     nearClipping    = 500;
     farClipping     = 4000;
 
-    nearThreshold   = 230;
-    farThreshold    = 70;
+    nearThreshold   = 255;
+    farThreshold    = 165;
     minContourSize  = 20.0;
     maxContourSize  = 4000.0;
     contourFinder.setMinAreaRadius(minContourSize);
@@ -45,48 +45,16 @@ void ofApp::setup(){
     irMarkerFinder.setMinAreaRadius(minMarkerSize);
     irMarkerFinder.setMaxAreaRadius(maxMarkerSize);
 
-    trackerPersistence = 100;
-    trackerMaxDistance = 200;
+    trackerPersistence = 150;
+    trackerMaxDistance = 300;
     tracker.setPersistence(trackerPersistence);     // wait for 'trackerPersistence' frames before forgetting something
     tracker.setMaximumDistance(trackerMaxDistance); // an object can move up to 'trackerMaxDistance' pixels per frame
 
     // MARKER PARTICLES
-    float bornRate       = 5;        // Number of particles born per frame
-    float velocity       = 50;       // Initial velocity magnitude of newborn particles
-    float velocityRnd    = 20;       // Magnitude randomness % of the initial velocity
-    float velocityMotion = 50;       // Marker motion contribution to the initial velocity
-    float emitterSize    = 8.0f;     // Size of the emitter area
-    EmitterType type     = POINT;    // Type of emitter
-    float lifetime       = 3;        // Lifetime of particles
-    float lifetimeRnd    = 60;       // Randomness of lifetime
-    float radius         = 5;        // Radius of the particles
-    float radiusRnd      = 20;       // Randomness of radius
-
-    bool  immortal       = false;    // Can particles die?
-    bool  sizeAge        = true;     // Decrease size when particles get older?
-    bool  opacityAge     = true;     // Decrease opacity when particles get older?
-    bool  flickersAge    = true;     // Particle flickers opacity when about to die?
-    bool  colorAge       = true;     // Change color when particles get older?
-    bool  isEmpty        = true;     // Draw only contours of the particles?
-    bool  bounce         = true;     // Bounce particles with the walls of the window?
-
-    float friction       = 0;        // Multiply this value by the velocity every frame
-    float gravity        = 5.0f;     // Makes particles fall down in a natural way
-
-    ofColor color(255);
-
-    markersParticles.setup(bornRate, velocity, velocityRnd, velocityMotion, emitterSize, immortal, lifetime, lifetimeRnd,
-                           color, radius, radiusRnd, 1-friction/1000, gravity, sizeAge, opacityAge, flickersAge, colorAge, isEmpty,
-                           bounce);
+    markersParticles.setup(MARKER_PARTICLES);
 
     // GRID PARTICLES
-    bool sizeAge2     = false;
-    bool opacityAge2  = false;
-    bool flickersAge2 = false;
-    bool colorAge2    = false;
-    bool isEmpty2     = false;
-
-    particles.setup(true, color, gravity, sizeAge2, opacityAge2, flickersAge2, colorAge2, isEmpty2, bounce);
+    particles.setup(GRID_PARTICLES);
 
     // DEPTH CONTOUR
     // smoothingSize = 0;
@@ -95,10 +63,12 @@ void ofApp::setup(){
     // SEQUENCE
     int maxMarkers = 2;
     sequence.setup(maxMarkers);
-    sequence.load("sequences/sequence.xml");
+    sequence.load("sequences/sequence2.xml");
+    drawSequence = false;
 
     // MARKERS
     markers.resize(maxMarkers);
+    drawMarkers = true;
 
     // VMO SETUP
     int dimensions = 2;
@@ -128,22 +98,23 @@ void ofApp::setup(){
     // 2.2 Output pattern list
     pttrList = vmo::findPttr(seqVmo, minLen);
     sequence.loadPatterns(vmo::processPttr(seqVmo, pttrList));
-    cout << "pattern size: "<<sequence.patterns.size() << endl;
-	for (int i = 0; i < pttrList.size; i++) {
-		cout << "pattern "<< i+1 << endl;
-		for (int j = 0; j<pttrList.sfxPts[i].size(); j++){
-			cout << "	begin: "<< pttrList.sfxPts[i][j] - pttrList.sfxLen[i]<< endl;
-			cout << "	end  :"<< pttrList.sfxPts[i][j] << endl;
-		}
-	}
 	
+//    cout << "pattern size: "<<sequence.patterns.size() << endl;
+//	for (int i = 0; i < pttrList.size; i++) {
+//		cout << "pattern "<< i+1 << endl;
+//		for (int j = 0; j<pttrList.sfxPts[i].size(); j++){
+//			cout << "	begin: "<< pttrList.sfxPts[i][j] - pttrList.sfxLen[i]<< endl;
+//			cout << "	end  :"<< pttrList.sfxPts[i][j] << endl;
+//		}
+//	}
+	
+    drawPatterns = false;
+    cout << sequence.patterns.size() << endl;
+
     // SETUP GUIs
     dim = 32;
     guiWidth = 240;
     theme = OFX_UI_THEME_GRAYDAY;
-    drawPatterns = false;
-    drawSequence = false;
-    testCounter = 0;
 
     setupGUI0();
     setupGUI1();
@@ -160,7 +131,7 @@ void ofApp::setup(){
 
     // CREATE DIRECTORIES IN /DATA IF THEY DONT EXIST
     string directory[3] = {"sequences", "settings", "cues"};
-    for (int i = 0; i < 3; i++) {
+    for(int i = 0; i < 3; i++){
         if(!ofDirectory::doesDirectoryExist(directory[i])){ // relative to /data folder
             ofDirectory::createDirectory(directory[i]);
         }
@@ -303,31 +274,39 @@ void ofApp::draw(){
 
     // OpenCV contour detection
     // contourFinder.draw();
-    irMarkerFinder.draw();
+    if(drawMarkers) irMarkerFinder.draw();
 
     // Graphics
-//     particles.draw();
+    //     particles.draw();
     markersParticles.draw();
-//     contour.draw();
+    contour.draw();
 
-//     vector<irMarker>& tempMarkers         = tracker.getFollowers();
-//     // Draw identified IR markers
-//     for (int i = 0; i < tempMarkers.size(); i++){
-//         tempMarkers[i].draw();
-//     }
+    if(drawMarkers){
+        vector<irMarker>& tempMarkers = tracker.getFollowers();
+        // Draw identified IR markers
+        for (int i = 0; i < tempMarkers.size(); i++){
+            tempMarkers[i].draw();
+        }
+    }
 
     if(drawSequence) sequence.draw();
 
     ofPopMatrix();
 
 //    if(drawPatterns) sequence.drawPatterns(gestureUpdate);
+    gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
+    // print percent of completion
+    for(int patternIndex = 0; patternIndex < gestureUpdate.size(); patternIndex++){
+        cout << patternIndex << ": " << gestureUpdate[patternIndex] << endl;
+    }
+    if(drawPatterns) sequence.drawPatterns(gestureUpdate);
 
 //    map<int, float> currentPatterns;
 //    if(drawPatterns && testCounter < 0.6) testCounter += 0.05;
 //    currentPatterns[5] = testCounter;
 //    currentPatterns[3] = testCounter;
 //    currentPatterns[4] = testCounter;
-    if(drawPatterns) sequence.drawPatterns(gestureUpdate);
+//    if(drawPatterns) sequence.drawPatterns(currentPatterns);
 }
 
 //--------------------------------------------------------------
@@ -471,6 +450,9 @@ void ofApp::setupGUI2(){
     gui2->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui2->addSpacer();
+    gui2->addToggle("Show Markers", &drawMarkers);
+
+    gui2->addSpacer();
 
     gui2->autoSizeToFitWidgets();
     gui2->setVisible(false);
@@ -583,7 +565,6 @@ void ofApp::setupGUI6(){
 
     gui6->addSpacer();
     gui6->addLabel("Physics");
-    gui6->addSlider("Friction", 0, 100, &markersParticles.friction);
 
     gui6->addSpacer();
 
@@ -602,6 +583,13 @@ void ofApp::setupGUI7(){
     gui7->addLabel("Press '7' to hide panel", OFX_UI_FONT_SMALL);
 
     gui7->addSpacer();
+    gui7->addImageToggle("Show Contour", "icons/show.png", &contour.isActive, dim, dim);
+
+    gui7->addSpacer();
+    gui7->addToggle("Bounding Rectangle", &contour.drawBoundingRect);
+    gui7->addToggle("Convex Hull", &contour.drawConvexHull);
+    gui7->addToggle("Convex Hull Line", &contour.drawConvexHullLine);
+    gui7->addToggle("Contour Line", &contour.drawContourLine);
 
     gui7->autoSizeToFitWidgets();
     gui7->setVisible(false);
@@ -611,15 +599,24 @@ void ofApp::setupGUI7(){
 
 //--------------------------------------------------------------
 void ofApp::setupGUI8(int i){
-    gui8 = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
+    gui8 = new ofxUISuperCanvas("8: PARTICLE SYSTEMS", 0, 0, guiWidth, ofGetHeight());
     gui8->setTheme(theme);
 
     gui8->addSpacer();
     gui8->addLabel("Press '8' to hide panel", OFX_UI_FONT_SMALL);
 
     gui8->addSpacer();
+    gui8->addImageToggle("Particles Active", "icons/show.png", &markersParticles.isActive, dim, dim);
+    gui8->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8->addImageButton("New Particle System", "icons/add.png", false, dim, dim);
+    gui8->addImageButton("Previous Particle System", "icons/previous.png", false, dim, dim);
+    gui8->addImageButton("Next Particle System", "icons/play.png", false, dim, dim);
+    gui8->addImageButton("Delete Particle System", "icons/delete.png", false, dim, dim);
+    gui8->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+
+    gui8->addSpacer();
     gui8->addLabel("Emitter");
-    gui8->addSlider("Particles/sec", 0.0, 20.0, &markersParticles.bornRate);
+    gui8->addSlider("Particles/sec", 0.0, 15.0, &markersParticles.bornRate);
 
     // vector<string> types;
     // types.push_back("Point");
@@ -643,7 +640,7 @@ void ofApp::setupGUI8(int i){
     gui8->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui8->addSlider("Lifetime", 0.0, 20.0, &markersParticles.lifetime);
     gui8->addSlider("Life Random[%]", 0.0, 100.0, &markersParticles.lifetimeRnd);
-    gui8->addSlider("Radius", 1.0, 15.0, &markersParticles.radius);
+    gui8->addSlider("Radius", 1.0, 25.0, &markersParticles.radius);
     gui8->addSlider("Radius Random[%]", 0.0, 100.0, &markersParticles.radiusRnd);
 
     gui8->addSpacer();
@@ -658,7 +655,7 @@ void ofApp::setupGUI8(int i){
     gui8->addSpacer();
     gui8->addLabel("Physics");
     gui8->addSlider("Friction", 0, 100, &markersParticles.friction);
-    gui8->addSlider("Gravity", 0.0, 20.0, &markersParticles.gravity);
+    gui8->addSlider("Gravity", 0.0, 15.0, &markersParticles.gravity);
 
     gui8->addSpacer();
 
@@ -683,12 +680,14 @@ void ofApp::saveGUISettings(const string path, const bool saveCues){
     for(vector<ofxUISuperCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
         ofxUICanvas *g = *it;
         int guiIndex = XML->addTag("GUI");
+        if(!saveCues && guiIndex == 2) continue; // guiIndex 2 are the kinect settings and we dont save them if it is for a cue file
         XML->pushTag("GUI", guiIndex);
         vector<ofxUIWidget*> widgets = g->getWidgets();
         for(int i = 0; i < widgets.size(); i++){
             // kind number 20 is ofxUIImageToggle, for which we don't want to save the state
             // kind number 12 is ofxUITextInput, for which we don't want to save the state
-            if(widgets[i]->hasState() && widgets[i]->getKind() != 20 && widgets[i]->getKind() != 12){
+//            if(widgets[i]->hasState() && widgets[i]->getKind() != 20 && widgets[i]->getKind() != 12){
+            if(widgets[i]->hasState() && widgets[i]->getKind() != 12){
                 int index = XML->addTag("Widget");
                 if(XML->pushTag("Widget", index)){
                     XML->setValue("Kind", widgets[i]->getKind(), 0);
@@ -705,6 +704,7 @@ void ofApp::saveGUISettings(const string path, const bool saveCues){
     if(saveCues){
         XML->addTag("CUES");
         XML->pushTag("CUES");
+        XML->setValue("Active", currentCueIndex, 0);
         for(int i = 0; i < cues.size(); i++){
             XML->setValue("Cue", cues[i], i);
         }
@@ -728,6 +728,10 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
     int guiIndex = 0;
     for(vector<ofxUISuperCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
         ofxUICanvas *g = *it;
+        if(!loadCues && guiIndex == 2){ // guiIndex 2 are the kinect settings and dont load them as a cue file
+           guiIndex++;
+           continue;
+        }
         XML->pushTag("GUI", guiIndex);
         int widgetTags = XML->getNumTags("Widget");
         for(int i = 0; i < widgetTags; i++){
@@ -766,6 +770,7 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
         XML->pushTag("CUES");
         int numCues = XML->getNumTags("Cue");
         cues.clear();
+        currentCueIndex = XML->getValue("Active", -1, 0);
         for(int i = 0; i < numCues; i++){
             string name = XML->getValue("Cue", "NULL", i);
             // Check if path corresponds to a cue file, if not, we dont add it
@@ -779,7 +784,7 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
         XML->popTag();
 
         if(cues.size() > 0){
-            currentCueIndex = 0;
+            if(cues.size() <= currentCueIndex) currentCueIndex = 0;
             cueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
             string cueFileName = ofFilePath::getBaseName(cues[currentCueIndex]);
             cueName->setTextString(cueFileName);
@@ -964,6 +969,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if(button->getValue() == true){
             stopTracking = true;
+            cout << "STOP VMO" << endl;
         }
     }
 
@@ -978,6 +984,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     if(e.getName() == "New Cue"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if(button->getValue() == true){
+            if(currentCueIndex >= 0) saveGUISettings(cues[currentCueIndex], false);
             currentCueIndex++;
             string cueFileName = "newCue"+ofToString(currentCueIndex);
             string cuePath = "cues/"+cueFileName+".xml";
@@ -1131,6 +1138,11 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         gui8->setTheme(theme);
      }
 
+    if(e.getName() == "Particles Active"){
+        ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
+        if(toggle->getValue() == false) markersParticles.killParticles();
+    }
+
     if(e.getName() == "Immortal"){
         ofxUIToggle *toggle = (ofxUIToggle *) e.widget;
         if(toggle->getValue() == false) markersParticles.killParticles();
@@ -1142,6 +1154,7 @@ void ofApp::exit(){
     kinect.close();
     kinect.clear();
 
+    if(!interpolatingWidgets && cues.size()) saveGUISettings(cues[currentCueIndex], false);
     saveGUISettings("settings/lastSettings.xml", true);
 
     delete gui0;
@@ -1271,7 +1284,7 @@ void ofApp::keyPressed(int key){
                 gui6->setVisible(false);
                 gui7->toggleVisible();
                 gui8->setVisible(false);
-                break;            
+                break;
 
             case '8':
                 gui0->setVisible(false);

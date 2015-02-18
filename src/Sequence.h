@@ -18,6 +18,7 @@ class Sequence{
         void drawPatterns(map<int, float> currentPatterns);
 
         void loadPatterns(vector< vector<ofPolyline> > patterns);
+        void createPatterns(int nPatterns);
 
         void startRecording();
         void clearPlayback();
@@ -26,6 +27,8 @@ class Sequence{
         ofxXmlSettings xml;
         //--------------------------------------------------------------
         size_t maxMarkers;
+        //--------------------------------------------------------------
+        int maxPatternsWindow;
         //--------------------------------------------------------------
         vector<ofPolyline> markersPosition;                 // Markers positions through all the sequence
         vector<ofPolyline> markersPastPoints;               // Percentage completion fragment of the sequence

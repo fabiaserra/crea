@@ -18,6 +18,8 @@ class Contour
 
         float smoothingSize;
 
+        bool isActive;
+
         bool drawBoundingRect;
         bool drawConvexHull;
         bool drawConvexHullLine;

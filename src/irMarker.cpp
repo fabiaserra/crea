@@ -27,18 +27,10 @@ void irMarker::update(const cv::Rect& track){
 
 void irMarker::updateLabels(vector<unsigned int> deadLabels, vector<unsigned int> currentLabels){
     // Labels that have disappeared but can appear again
-    for(unsigned int i = 0; i < deadLabels.size(); i++){
-        if(deadLabels[i] == label){
-            hasDisappeared = true;
-        }
-    }
+    if(find(deadLabels.begin(), deadLabels.end(), label) != deadLabels.end()) hasDisappeared = true;
 
     // Labels that are currently being tracked
-    for(unsigned int i = 0; i < currentLabels.size(); i++){
-        if(currentLabels[i] == label){
-            hasDisappeared = false;
-        }
-    }
+    if(find(currentLabels.begin(), currentLabels.end(), label) != currentLabels.end()) hasDisappeared = false;
 }
 
 void irMarker::draw(){
