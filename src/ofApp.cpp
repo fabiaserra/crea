@@ -51,12 +51,11 @@ void ofApp::setup(){
     tracker.setMaximumDistance(trackerMaxDistance); // an object can move up to 'trackerMaxDistance' pixels per frame
 
     // MARKER PARTICLES
-    markersParticles.setup(MARKER_PARTICLES);
-    markersParticles.width = kinect.width;
-    markersParticles.height = kinect.height;
+//    markersParticles.setup(MARKER_PARTICLES);
+    markersParticles.setup(CONTOUR_PARTICLES, kinect.width, kinect.height);
 
     // GRID PARTICLES
-    particles.setup(GRID_PARTICLES);
+    particles.setup(GRID_PARTICLES, kinect.width, kinect.height);
 
     // DEPTH CONTOUR
     // smoothingSize = 0;
@@ -213,14 +212,17 @@ void ofApp::update(){
         //    cout << tempMarkers[i].getLabel() << endl;
         // }
 
+        // Update contour
+        contour.update(contourFinder);
+
         // Update grid particles
         particles.update(dt, tempMarkers);
 
         // Update markers particles
-        markersParticles.update(dt, tempMarkers);
+//        markersParticles.update(dt, tempMarkers);
+        markersParticles.update(dt, contour);
 
-        // Update contour
-        contour.update(contourFinder);
+
 
         // Gesture Tracking with VMO here?
         if (tempMarkers.size()>1){
@@ -1065,6 +1067,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         ofxUILabelButton *button = (ofxUILabelButton *) e.widget;
         if(button->getValue() == true){
             if(cues.size() == 0) return;
+            if(!interpolatingWidgets) saveGUISettings(cues[currentCueIndex], false);
             if(currentCueIndex+1 < cues.size()) currentCueIndex++;
             else if(currentCueIndex+1 == cues.size()) currentCueIndex = 0;
             loadGUISettings(cues[currentCueIndex], true, false);

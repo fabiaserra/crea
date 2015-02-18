@@ -1,10 +1,7 @@
 #include "ParticleSystem.h"
 
 ParticleSystem::ParticleSystem(){
-    isActive        = false;        // Particle system is activated
-
-    width           = ofGetWidth(); // Particle system boundaries
-    height          = ofGetHeight();
+    isActive        = false;        // Particle system is active?
 
     bornRate        = 5;            // Number of particles born per frame
     velocity        = 50;           // Initial velocity magnitude of newborn particles
@@ -29,17 +26,19 @@ ParticleSystem::ParticleSystem(){
     gravity         = 1.0f;         // Makes particles fall down in a natural way
 }
 
-void ParticleSystem::setup(ParticleMode mode){
+void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
 
-	particleMode = mode;
+	this->particleMode = particleMode;
+	this->width = width;
+	this->height = height;
 
-    if(mode == GRID_PARTICLES){
+    if(particleMode == GRID_PARTICLES){
         immortal = true;
-        createParticleGrid(ofGetWidth(), ofGetHeight(), 10);
+        createParticleGrid(width, height, 10);
     }
 }
 
-void ParticleSystem::update(float dt, vector<irMarker>& markers){
+void ParticleSystem::update(float dt, vector<irMarker> &markers){
 
 	if(particleMode == GRID_PARTICLES){
 		// Update the particles
@@ -64,12 +63,8 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers){
 		// Born new particles
 		if(isActive){
             for(unsigned int i = 0; i < markers.size(); i++){
-                if (markers[i].hasDisappeared){
-                    markers[i].bornRate -= 0.5;
-                }
-                else{
-                    markers[i].bornRate = bornRate;
-                }
+                if (markers[i].hasDisappeared) markers[i].bornRate -= 0.5;
+                else markers[i].bornRate = bornRate;
                 addParticles(markers[i].bornRate, markers[i]);
             }
 		}
@@ -81,7 +76,37 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers){
 			particles[i].update(dt);
 		}
 	}
+}
 
+
+void ParticleSystem::update(float dt, Contour& contour){
+    if(particleMode == CONTOUR_PARTICLES){
+        // Delete inactive particles
+		int i = 0;
+		while (i < particles.size()){
+			if (!particles[i].isAlive){
+				particles.erase(particles.begin() + i);
+				numParticles--;
+			}
+			else{
+				i++;
+			}
+		}
+
+		// Born new particles
+		if(isActive){
+            for(unsigned int i = 0; i < contour.contours.size(); i++){
+                addParticles(bornRate, contour.contours[i]);
+            }
+		}
+
+		// Update the particles
+		for(int i = 0; i < particles.size(); i++){
+            ofPoint windForce(0.2, 0.5);
+            particles[i].applyForce(windForce);
+			particles[i].update(dt);
+		}
+    }
 }
 
 void ParticleSystem::draw(){
@@ -134,41 +159,33 @@ void ParticleSystem::addParticles(int n, const irMarker &marker){
         float initialRadius = radius + randomRange(radiusRnd, radius);
         float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
 
-        ofColor color;
-        float hue = marker.color.getHue() - ofRandom(-20, 20);
-        color.setHue(hue);
+		addParticle(pos, vel, marker.color, initialRadius, lifetime);
+	}
+}
+
+void ParticleSystem::addParticles(int n, const ofPolyline &contour){
+	for(int i = 0; i < n; i++){
+        // Create particles only inside contour polyline
+        ofRectangle box = contour.getBoundingBox();
+        ofPoint center = box.getCenter();
+        ofPoint pos;
+        pos.x = center.x + (ofRandom(1.0f) - 0.5f) * box.getWidth();
+        pos.y = center.y + (ofRandom(1.0f) - 0.5f) * box.getHeight();
+
+        while(!contour.inside(pos)){
+            pos.x = center.x + (ofRandom(1.0f) - 0.5f) * box.getWidth();
+            pos.y = center.y + (ofRandom(1.0f) - 0.5f) * box.getHeight();
+        }
+
+        ofPoint vel = randomVector()*(velocity+randomRange(velocityRnd, velocity));
+//        vel += contour.velocity*(velocityMotion/100)*6;
+
+        float initialRadius = radius + randomRange(radiusRnd, radius);
+        float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
 
 		addParticle(pos, vel, color, initialRadius, lifetime);
 	}
 }
-
-//void ParticleSystem::addParticles(int n, const ofPolyline &contour){
-//	for(int i = 0; i < n; i++){
-//        // Create particles only inside contour polyline
-//        ofRectangle box = contour.getBoundingBox();
-//        ofPoint center = box.getCenter();
-//        ofPoint pos;
-//        pos.x = center.x + (ofRandom(1.0f) - 0.5f) * box.getWidth();
-//        pos.y = center.y + (ofRandom(1.0f) - 0.5f) * box.getHeight();
-//
-//        while(!contour.inside(pos)){
-//            pos.x = center.x + (ofRandom(1.0f) - 0.5f) * box.getWidth();
-//            pos.y = center.y + (ofRandom(1.0f) - 0.5f) * box.getHeight();
-//        }
-//
-//        ofPoint vel = randomVector()*(velocity+randomRange(velocityRnd, velocity));
-//        vel += marker.velocity*(velocityMotion/100)*6;
-//
-//        float initialRadius = radius + randomRange(radiusRnd, radius);
-//        float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
-//
-//        ofColor color;
-//        float hue = marker.color.getHue() - ofRandom(-20, 20);
-//        color.setHue(hue);
-//
-//		addParticle(pos, vel, color, initialRadius, lifetime);
-//	}
-//}
 
 void ParticleSystem::createParticleGrid(int width, int height, int res){
 	for(int y = 0; y < height/res; y++){
