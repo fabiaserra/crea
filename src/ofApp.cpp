@@ -51,12 +51,12 @@ void ofApp::setup(){
     tracker.setMaximumDistance(trackerMaxDistance); // an object can move up to 'trackerMaxDistance' pixels per frame
 
     // MARKER PARTICLES
-    markersParticles.setup(MARKER_PARTICLES);
+//    markersParticles.setup(MARKER_PARTICLES);
 //    markersParticles.width = kinect.width;
 //    markersParticles.height = kinect.height;
 
     // GRID PARTICLES
-    particles.setup(GRID_PARTICLES);
+//    particles.setup(GRID_PARTICLES);
 
     // DEPTH CONTOUR
     // smoothingSize = 0;
@@ -70,38 +70,38 @@ void ofApp::setup(){
 
     // MARKERS
     markers.resize(maxMarkers);
-    drawMarkers = true;
+//    drawMarkers = true;
 
     // VMO SETUP
-    int dimensions = 2;
-    obs.assign(sequence.numFrames, vector<float>(maxMarkers*dimensions));
-    for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
-        for(int frameIndex = 0; frameIndex < sequence.numFrames; frameIndex++){
-            obs[frameIndex][markerIndex*dimensions] = sequence.markersPosition[markerIndex][frameIndex].x;
-            obs[frameIndex][markerIndex*dimensions+1] = sequence.markersPosition[markerIndex][frameIndex].y;
-        }
-    }
-
-    initStatus = true;
-    stopTracking = true;
-//    // gestureInd = -1;
-//    // gestureCat = -1;
-    // 2. Processing
-    // 2.1 Load file into VMO
-//    int minLen = 1; // Temporary setting
-//    float start = 0.0, step = 0.05, stop = 10.0;
-
-    // For sequence4.xml
-    int minLen = 4;
-    float start = 11.0, step = 0.01, stop = 14.0;
-
-    float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
-    seqVmo = vmo::buildOracle(obs, dimensions, maxMarkers, t);
-    // 2.2 Output pattern list
-    pttrList = vmo::findPttr(seqVmo, minLen);
-    sequence.loadPatterns(vmo::processPttr(seqVmo, pttrList));
-    drawPatterns = false;
-    cout << sequence.patterns.size() << endl;
+//    int dimensions = 2;
+//    obs.assign(sequence.numFrames, vector<float>(maxMarkers*dimensions));
+//    for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
+//        for(int frameIndex = 0; frameIndex < sequence.numFrames; frameIndex++){
+//            obs[frameIndex][markerIndex*dimensions] = sequence.markersPosition[markerIndex][frameIndex].x;
+//            obs[frameIndex][markerIndex*dimensions+1] = sequence.markersPosition[markerIndex][frameIndex].y;
+//        }
+//    }
+//
+//    initStatus = true;
+//    stopTracking = true;
+////    // gestureInd = -1;
+////    // gestureCat = -1;
+//    // 2. Processing
+//    // 2.1 Load file into VMO
+////    int minLen = 1; // Temporary setting
+////    float start = 0.0, step = 0.05, stop = 10.0;
+//
+//    // For sequence4.xml
+//    int minLen = 4;
+//    float start = 11.0, step = 0.01, stop = 14.0;
+//
+//    float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
+//    seqVmo = vmo::buildOracle(obs, dimensions, maxMarkers, t);
+//    // 2.2 Output pattern list
+//    pttrList = vmo::findPttr(seqVmo, minLen);
+//    sequence.loadPatterns(vmo::processPttr(seqVmo, pttrList));
+//    drawPatterns = false;
+//    cout << sequence.patterns.size() << endl;
 
     // SETUP GUIs
     dim = 32;
@@ -142,7 +142,7 @@ void ofApp::update(){
     if(interpolatingWidgets) interpolateWidgetValues();
 
     // Update sequence playhead to draw gesture
-    if(drawSequence) sequence.update();
+//    if(drawSequence) sequence.update();
 
     kinect.update();
     if(kinect.isFrameNew()){
@@ -192,7 +192,7 @@ void ofApp::update(){
 
         // Update markers if we loose track of them
         for(unsigned int i = 0; i < tempMarkers.size(); i++){
-            tempMarkers[i].updateLabels(deadLabels, currentLabels);
+//            tempMarkers[i].updateLabels(deadLabels, currentLabels);
         }
 
         // Record sequence when recording button is true
@@ -211,32 +211,32 @@ void ofApp::update(){
         // }
 
         // Update grid particles
-        particles.update(dt, tempMarkers);
+//        particles.update(dt, tempMarkers);
 
         // Update markers particles
-        markersParticles.update(dt, tempMarkers);
+//        markersParticles.update(dt, tempMarkers);
 
         // Update contour
-        contour.update(contourFinder);
+//        contour.update(contourFinder);
 
         // Gesture Tracking with VMO here?
-        if (tempMarkers.size()>1){
-            if (!stopTracking){
-                vector<float> obs; // Temporary code
-                for(unsigned int i = 0; i < 2; i++){
-                    obs.push_back(tempMarkers[i].smoothPos.x);
-                    obs.push_back(tempMarkers[i].smoothPos.y);
-                }
-                if(initStatus){
-                    currentBf = vmo::tracking_init(seqVmo, pttrList, obs);
-                    initStatus = false;
-                }
-                else{
-                    prevBf = currentBf;
-                    currentBf = vmo::tracking(seqVmo, pttrList, prevBf, obs);
-                }
-            }
-        }
+//        if (tempMarkers.size()>1){
+//            if (!stopTracking){
+//                vector<float> obs; // Temporary code
+//                for(unsigned int i = 0; i < 2; i++){
+//                    obs.push_back(tempMarkers[i].smoothPos.x);
+//                    obs.push_back(tempMarkers[i].smoothPos.y);
+//                }
+//                if(initStatus){
+//                    currentBf = vmo::tracking_init(seqVmo, pttrList, obs);
+//                    initStatus = false;
+//                }
+//                else{
+//                    prevBf = currentBf;
+//                    currentBf = vmo::tracking(seqVmo, pttrList, prevBf, obs);
+//                }
+//            }
+//        }
     }
 }
 
@@ -244,16 +244,16 @@ void ofApp::update(){
 void ofApp::draw(){
 
     ofPushMatrix();
-//    ofTranslate(guiWidth+10, 0);
-    ofScale(reScale, reScale);
-//    ofScale(1.2, 1.2);
+    ofTranslate(guiWidth+10, 0);
+//    ofScale(reScale, reScale);
+    ofScale(1.2, 1.2);
     ofBackground(red, green, blue, 255);
     // ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 
     ofSetColor(255);
 
     // Kinect images
-    irImage.draw(0, 0);
+    // irImage.draw(0, 0);
     // depthImage.draw(0, 0);
 
     // OpenCV contour detection
@@ -262,8 +262,8 @@ void ofApp::draw(){
 
     // Graphics
     //     particles.draw();
-    markersParticles.draw();
-    contour.draw();
+//    markersParticles.draw();
+//    contour.draw();
 
     if(drawMarkers){
         vector<irMarker>& tempMarkers = tracker.getFollowers();
@@ -277,12 +277,12 @@ void ofApp::draw(){
 
     ofPopMatrix();
 
-    gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
+//    gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
     // print percent of completion
-    for(int patternIndex = 0; patternIndex < gestureUpdate.size(); patternIndex++){
-        cout << patternIndex << ": " << gestureUpdate[patternIndex] << endl;
-    }
-    if(drawPatterns) sequence.drawPatterns(gestureUpdate);
+//    for(int patternIndex = 0; patternIndex < gestureUpdate.size(); patternIndex++){
+//        cout << patternIndex << ": " << gestureUpdate[patternIndex] << endl;
+//    }
+//    if(drawPatterns) sequence.drawPatterns(gestureUpdate);
 
 //    map<int, float> currentPatterns;
 //    if(drawPatterns && testCounter < 0.6) testCounter += 0.05;
