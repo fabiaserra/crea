@@ -6,6 +6,7 @@ Sequence::Sequence(){
     numFrames = 0;
     playhead = 0;
     elapsedTime = 0;
+    maxPatternsWindow = 12;
 }
 
 void Sequence::setup(const int maxMarkers){
@@ -84,25 +85,24 @@ void Sequence::load(const string path){
         markersPastPoints.push_back(newPolyline);
     }
 
-    // Load XML sequence in memory
-
     // Number of frames of the sequence
     numFrames = xml.getNumTags("frame");
     float timestampFirstFrame = -1;
     float timestampLastFrame = -1;
     size_t emptyFrames = 0;
 
+    // Load XML sequence in memory
     for(size_t frameIndex = 0; frameIndex < numFrames; frameIndex++){
         xml.pushTag("frame", frameIndex);
 
         const size_t nMarkers = xml.getNumTags("marker");
 
         // Frame timestamp
-        if(timestampFirstFrame == -1 && nMarkers >= maxMarkers) timestampFirstFrame = xml.getValue("timestamp", -1.0);;
-        if(nMarkers >= maxMarkers) timestampLastFrame = xml.getValue("timestamp", -2.0);;
+        if(timestampFirstFrame == -1 && nMarkers >= maxMarkers) timestampFirstFrame = xml.getValue("timestamp", -2.0);
+        if(nMarkers >= maxMarkers) timestampLastFrame = xml.getValue("timestamp", -2.0);
 
         // If no recorded markers or less than maxMarkers we don't consider that frame
-        if(nMarkers <= maxMarkers){
+        if(nMarkers < maxMarkers){
             emptyFrames++;
             xml.popTag();
             continue;
@@ -162,12 +162,17 @@ void Sequence::load(const string path){
 }
 
 void Sequence::drawPatterns(map<int, float> currentPatterns){
+    // If there are more patterns than maximum able to show in the window
+    int nPatterns = MIN(maxPatternsWindow, patterns.size());
+
+    // TODO: show most important patterns if there are more than maxPatternsToShow
+
     // Draw gesture patterns
-    for(int patternIndex = 0; patternIndex < patterns.size(); patternIndex++){
+    for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
         int patternPosition = patternIndex + 1;
         bool highlight = false;
         float percent = 0;
-        // if the pattern is is inside the map
+        // If the pattern is is inside the map
         if(currentPatterns.find(patternIndex) != currentPatterns.end()) {
             highlight = true;
             percent = currentPatterns[patternIndex];
@@ -183,7 +188,7 @@ void Sequence::drawPattern(const int patternPosition, const int patternIndex, co
     float height = 480.0;
     float scale = 5.5;
     float margin = 40.0;
-    float guiHeight = 900;
+    float guiHeight = 800;
 
     ofPushMatrix();
 

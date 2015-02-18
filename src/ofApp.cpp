@@ -32,8 +32,8 @@ void ofApp::setup(){
     nearClipping    = 500;
     farClipping     = 4000;
 
-    nearThreshold   = 230;
-    farThreshold    = 70;
+    nearThreshold   = 255;
+    farThreshold    = 165;
     minContourSize  = 20.0;
     maxContourSize  = 4000.0;
     contourFinder.setMinAreaRadius(minContourSize);
@@ -45,8 +45,8 @@ void ofApp::setup(){
     irMarkerFinder.setMinAreaRadius(minMarkerSize);
     irMarkerFinder.setMaxAreaRadius(maxMarkerSize);
 
-    trackerPersistence = 100;
-    trackerMaxDistance = 200;
+    trackerPersistence = 150;
+    trackerMaxDistance = 300;
     tracker.setPersistence(trackerPersistence);     // wait for 'trackerPersistence' frames before forgetting something
     tracker.setMaximumDistance(trackerMaxDistance); // an object can move up to 'trackerMaxDistance' pixels per frame
 
@@ -68,6 +68,7 @@ void ofApp::setup(){
 
     // MARKERS
     markers.resize(maxMarkers);
+    drawMarkers = true;
 
     // VMO SETUP
     int dimensions = 2;
@@ -255,18 +256,20 @@ void ofApp::draw(){
 
     // OpenCV contour detection
     // contourFinder.draw();
-    irMarkerFinder.draw();
+    if(drawMarkers) irMarkerFinder.draw();
 
     // Graphics
-//     particles.draw();
+    //     particles.draw();
     markersParticles.draw();
     contour.draw();
 
-//     vector<irMarker>& tempMarkers         = tracker.getFollowers();
-//     // Draw identified IR markers
-//     for (int i = 0; i < tempMarkers.size(); i++){
-//         tempMarkers[i].draw();
-//     }
+    if(drawMarkers){
+        vector<irMarker>& tempMarkers = tracker.getFollowers();
+        // Draw identified IR markers
+        for (int i = 0; i < tempMarkers.size(); i++){
+            tempMarkers[i].draw();
+        }
+    }
 
     if(drawSequence) sequence.draw();
 
@@ -274,9 +277,9 @@ void ofApp::draw(){
 
     gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
     // print percent of completion
-//    for(int patternIndex = 0; patternIndex < gestureUpdate.size(); patternIndex++){
-//        cout << gestureUpdate[patternIndex] << endl;
-//    }
+    for(int patternIndex = 0; patternIndex < gestureUpdate.size(); patternIndex++){
+        cout << patternIndex << ": " << gestureUpdate[patternIndex] << endl;
+    }
     if(drawPatterns) sequence.drawPatterns(gestureUpdate);
 
 //    map<int, float> currentPatterns;
@@ -428,6 +431,9 @@ void ofApp::setupGUI2(){
     gui2->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui2->addSpacer();
+    gui2->addToggle("Show Markers", &drawMarkers);
+
+    gui2->addSpacer();
 
     gui2->autoSizeToFitWidgets();
     gui2->setVisible(false);
@@ -574,7 +580,7 @@ void ofApp::setupGUI7(){
 
 //--------------------------------------------------------------
 void ofApp::setupGUI8(int i){
-    gui8 = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
+    gui8 = new ofxUISuperCanvas("8: PARTICLE SYSTEMS", 0, 0, guiWidth, ofGetHeight());
     gui8->setTheme(theme);
 
     gui8->addSpacer();
@@ -582,6 +588,12 @@ void ofApp::setupGUI8(int i){
 
     gui8->addSpacer();
     gui8->addImageToggle("Particles Active", "icons/show.png", &markersParticles.isActive, dim, dim);
+    gui8->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8->addImageButton("New Particle System", "icons/add.png", false, dim, dim);
+    gui8->addImageButton("Previous Particle System", "icons/previous.png", false, dim, dim);
+    gui8->addImageButton("Next Particle System", "icons/play.png", false, dim, dim);
+    gui8->addImageButton("Delete Particle System", "icons/delete.png", false, dim, dim);
+    gui8->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui8->addSpacer();
     gui8->addLabel("Emitter");
@@ -1109,16 +1121,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 
     if(e.getName() == "Particles Active"){
         ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
-        if(toggle->getValue() == false){
-            markersParticles.isActive = false;
-            particles.isActive = false;
-            markersParticles.killParticles();
-            particles.killParticles();
-        }
-        else{
-            markersParticles.isActive = true;
-            particles.isActive = true;
-        }
+        if(toggle->getValue() == false) markersParticles.killParticles();
     }
 
     if(e.getName() == "Immortal"){

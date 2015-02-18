@@ -78,8 +78,10 @@ class ofApp : public ofBaseApp{
         Contour contour;        // User silhouette contour
         //--------------------------------------------------------------
         Sequence sequence;      // Gestures sequence
+        //--------------------------------------------------------------
         bool drawPatterns;
         bool drawSequence;
+        bool drawMarkers;
         //--------------------------------------------------------------
         vector<string> cues;
         int currentCueIndex;

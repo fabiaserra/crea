@@ -28,6 +28,8 @@ class Sequence{
         //--------------------------------------------------------------
         size_t maxMarkers;
         //--------------------------------------------------------------
+        int maxPatternsWindow;
+        //--------------------------------------------------------------
         vector<ofPolyline> markersPosition;                 // Markers positions through all the sequence
         vector<ofPolyline> markersPastPoints;               // Percentage completion fragment of the sequence
 
