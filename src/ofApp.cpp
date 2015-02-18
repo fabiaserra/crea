@@ -12,7 +12,7 @@ void ofApp::setup(){
     kinect.init(true); // shows infrared instead of RGB video Image
     kinect.open();
 
-    reScale = (float)ofGetWidth() / (float)kinect.width;
+    reScale = (float)ofGetHeight() / (float)kinect.height;
     time0 = ofGetElapsedTimef();
 
     // ALLOCATE IMAGES
@@ -138,6 +138,9 @@ void ofApp::update(){
     float dt = ofClamp(time - time0, 0, 0.1);
     time0 = time;
 
+    // Compute rescale value to scale kinect image
+    reScale = (float)ofGetHeight() / (float)kinect.height;
+
     // Interpolate GUI widget values
     if(interpolatingWidgets) interpolateWidgetValues();
 
@@ -252,16 +255,16 @@ void ofApp::draw(){
 
     ofSetColor(255);
 
-    // Kinect images
-    // irImage.draw(0, 0);
-    // depthImage.draw(0, 0);
+//    // Kinect images
+//    irImage.draw(0, 0);
+//    depthImage.draw(0, 0);
 
     // OpenCV contour detection
-    // contourFinder.draw();
+//    contourFinder.draw();
     if(drawMarkers) irMarkerFinder.draw();
 
     // Graphics
-    //     particles.draw();
+//    particles.draw();
     markersParticles.draw();
     contour.draw();
 
@@ -278,11 +281,12 @@ void ofApp::draw(){
     ofPopMatrix();
 
     gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
-    // print percent of completion
+    if(drawPatterns) sequence.drawPatterns(gestureUpdate);
+
+//    // print percent of completion
 //    for(int patternIndex = 0; patternIndex < gestureUpdate.size(); patternIndex++){
 //        cout << patternIndex << ": " << gestureUpdate[patternIndex] << endl;
 //    }
-    if(drawPatterns) sequence.drawPatterns(gestureUpdate);
 
 //    map<int, float> currentPatterns;
 //    if(drawPatterns && testCounter < 0.6) testCounter += 0.05;
@@ -1157,7 +1161,6 @@ void ofApp::keyPressed(int key){
         switch (key){
             case 'f':
                 ofToggleFullscreen();
-                reScale = (float)ofGetWidth() / (float)kinect.width;
                 break;
 
             case 'h':
