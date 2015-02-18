@@ -222,8 +222,6 @@ void ofApp::update(){
 //        markersParticles.update(dt, tempMarkers);
         markersParticles.update(dt, contour);
 
-
-
         // Gesture Tracking with VMO here?
         if (tempMarkers.size()>1){
             if (!stopTracking){
@@ -253,7 +251,8 @@ void ofApp::draw(){
 //    ofScale(1.2, 1.2);
     ofScale(reScale, reScale);
     ofBackground(red, green, blue, 255);
-    // ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+//    ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+//    ofEnableBlendMode(OF_BLENDMODE_ADD);
 
     ofSetColor(255);
 

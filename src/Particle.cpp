@@ -125,7 +125,7 @@ void Particle::draw(){
             ofFill();
         }
 
-//        ofCircle(pos, radius);
+        ofCircle(pos, radius);
 
         ofLine(pos, prevPos);
         prevPos = pos;
