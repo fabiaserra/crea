@@ -52,6 +52,8 @@ void ofApp::setup(){
 
     // MARKER PARTICLES
     markersParticles.setup(MARKER_PARTICLES);
+//    markersParticles.width = kinect.width;
+//    markersParticles.height = kinect.height;
 
     // GRID PARTICLES
     particles.setup(GRID_PARTICLES);
@@ -63,7 +65,7 @@ void ofApp::setup(){
     // SEQUENCE
     int maxMarkers = 2;
     sequence.setup(maxMarkers);
-    sequence.load("sequences/sequence2.xml");
+//    sequence.load("sequences/sequence.xml");
     drawSequence = false;
 
     // MARKERS
@@ -138,6 +140,9 @@ void ofApp::update(){
 
     // Interpolate GUI widget values
     if(interpolatingWidgets) interpolateWidgetValues();
+
+    // Update sequence playhead to draw gesture
+    if(drawSequence) sequence.update();
 
     kinect.update();
     if(kinect.isFrameNew()){
@@ -214,9 +219,6 @@ void ofApp::update(){
         // Update contour
         contour.update(contourFinder);
 
-        // Update sequence playhead to draw gesture
-        if(drawSequence) sequence.update();
-
         // Gesture Tracking with VMO here?
         if (tempMarkers.size()>1){
             if (!stopTracking){
@@ -242,21 +244,21 @@ void ofApp::update(){
 void ofApp::draw(){
 
     ofPushMatrix();
-    ofTranslate(guiWidth+10, 0);
-    // ofScale(reScale, reScale);
-    ofScale(1.2, 1.2);
+//    ofTranslate(guiWidth+10, 0);
+    ofScale(reScale, reScale);
+//    ofScale(1.2, 1.2);
     ofBackground(red, green, blue, 255);
     // ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 
     ofSetColor(255);
 
     // Kinect images
-    // irImage.draw(0, 0);
+    irImage.draw(0, 0);
     // depthImage.draw(0, 0);
 
     // OpenCV contour detection
     // contourFinder.draw();
-    if(drawMarkers) irMarkerFinder.draw();
+//    if(drawMarkers) irMarkerFinder.draw();
 
     // Graphics
     //     particles.draw();

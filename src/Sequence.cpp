@@ -139,7 +139,6 @@ void Sequence::load(const string path){
             }
         }
 
-        // now we are forcing to have maxMarkers in each frame
 //        // If not enough markers in the frame to fill maxMarkers we add dummy vertices to the polyline
 //        while(addedMarkers < maxMarkers){
 //            markersPosition[addedMarkers].addVertex(ofPoint(-1, -1));
@@ -195,7 +194,7 @@ void Sequence::drawPattern(const int patternPosition, const int patternIndex, co
         ofScale(1.0/scale, 1.0/scale);
         ofTranslate(0, guiHeight);
 
-        // Position window pattern
+        // Position window pattern in the screen
         if(patternPosition%2 == 0){
             ofTranslate(width+margin, (patternPosition/2 - 1) * (height+margin));
         }

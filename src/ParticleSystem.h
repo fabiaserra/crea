@@ -4,7 +4,6 @@
 #include "irMarker.h"
 
 enum ParticleMode {GRID_PARTICLES, MARKER_PARTICLES, CONTOUR_PARTICLES};
-enum EmitterType {POINT, SPHERE, GRID, CONTOUR};
 
 class ParticleSystem
 {
@@ -28,7 +27,10 @@ class ParticleSystem
 		void repulseParticles();
 
 		//--------------------------------------------------------------
-		bool isActive;
+		bool isActive;          // Particle system active
+		//--------------------------------------------------------------
+        int width;              // Particle system boundaries
+        int height;
 		//--------------------------------------------------------------
 		vector<Particle> particles;
 		//--------------------------------------------------------------
@@ -37,7 +39,6 @@ class ParticleSystem
 		//--------------------------------------------------------------
 		ofColor color;
 		ParticleMode particleMode;
-		EmitterType emitterType;
 		//--------------------------------------------------------------
 		float bornRate;         // Number of particles born per frame
 		float velocity;         // Initial velocity magnitude of newborn particles

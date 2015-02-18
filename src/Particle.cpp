@@ -10,8 +10,8 @@ Particle::Particle(){
     flickersAge     = true;
     isEmpty         = false;
     age             = 0;
-    windowWidth     = ofGetWidth();
-    windowHeight    = ofGetHeight();
+    width           = ofGetWidth();
+    height          = ofGetHeight();
 }
 
 void Particle::setup(float id, ofPoint pos, ofPoint vel, ofColor color, float initialRadius, float lifetime){
@@ -68,16 +68,16 @@ void Particle::update(float dt){
 
         // Bounce particle with the window margins
         if(bounces){
-            if(pos.x > windowWidth-radius){
-                pos.x = windowWidth-radius;
+            if(pos.x > width-radius){
+                pos.x = width-radius;
                 vel.x *= -1.0;
             }
             if(pos.x < radius){
                 pos.x = radius;
                 vel.x *= -1.0;
             }
-            if(pos.y > windowHeight-radius){
-                pos.y = windowHeight-radius;
+            if(pos.y > height-radius){
+                pos.y = height-radius;
                 vel.y *= -1.0;
             }
             if(pos.y < radius){

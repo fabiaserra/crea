@@ -107,7 +107,7 @@ class ofApp : public ofBaseApp{
         ofxUITextInput *cueName;              // Name of the cue
         int theme;
         //--------------------------------------------------------------
-        float dim;              // Size of GUI elements
+        float dim;                            // Size of GUI elements
         float guiWidth;
         //--------------------------------------------------------------
         float red, green, blue;
@@ -133,7 +133,6 @@ class ofApp : public ofBaseApp{
         // vector<ofPoint>& loadedFrames;
         vector<vector<float> > obs;
         // vector<vector<ofPolyline> > patterns;
-        vector<vector<float> > loadXML(); // dummy function
         bool initStatus;
         bool stopTracking;
         map<int, float> gestureUpdate;

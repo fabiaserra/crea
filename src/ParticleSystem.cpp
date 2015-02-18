@@ -2,6 +2,10 @@
 
 ParticleSystem::ParticleSystem(){
     isActive        = false;        // Particle system is activated
+
+    width           = ofGetWidth(); // Particle system boundaries
+    height          = ofGetHeight();
+
     bornRate        = 5;            // Number of particles born per frame
     velocity        = 50;           // Initial velocity magnitude of newborn particles
     velocityRnd     = 20;           // Magnitude randomness % of the initial velocity
@@ -23,14 +27,12 @@ ParticleSystem::ParticleSystem(){
 
     friction        = 0;            // Multiply this value by the velocity every frame
     gravity         = 1.0f;         // Makes particles fall down in a natural way
-
-//    EmitterType type     = POINT;    // Type of emitter
-
 }
 
 void ParticleSystem::setup(ParticleMode mode){
 
 	particleMode = mode;
+
     if(mode == GRID_PARTICLES){
         immortal = true;
         createParticleGrid(ofGetWidth(), ofGetHeight(), 10);
@@ -101,6 +103,10 @@ void ParticleSystem::addParticle(ofPoint pos, ofPoint vel, ofColor color, float 
 	newParticle.isEmpty = isEmpty;
 	newParticle.bounces = bounce;
 	newParticle.friction = 1-friction/1000;
+
+	newParticle.width = width;
+	newParticle.height = height;
+
 	particles.push_back(newParticle);
 
 	numParticles++;
