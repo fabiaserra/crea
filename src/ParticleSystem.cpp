@@ -3,8 +3,8 @@
 ParticleSystem::ParticleSystem(){
     isActive        = false;        // Particle system is activated
 
-//    width           = ofGetWidth(); // Particle system boundaries
-//    height          = ofGetHeight();
+    width           = ofGetWidth(); // Particle system boundaries
+    height          = ofGetHeight();
 
     bornRate        = 5;            // Number of particles born per frame
     velocity        = 50;           // Initial velocity magnitude of newborn particles

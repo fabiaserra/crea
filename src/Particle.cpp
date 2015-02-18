@@ -10,8 +10,8 @@ Particle::Particle(){
     flickersAge     = true;
     isEmpty         = false;
     age             = 0;
-//    width           = ofGetWidth();
-//    height          = ofGetHeight();
+    width           = ofGetWidth();
+    height          = ofGetHeight();
 }
 
 void Particle::setup(float id, ofPoint pos, ofPoint vel, ofColor color, float initialRadius, float lifetime){
