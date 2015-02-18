@@ -102,7 +102,7 @@ void ParticleSystem::update(float dt, Contour& contour){
 
 		// Update the particles
 		for(int i = 0; i < particles.size(); i++){
-            ofPoint windForce(0.2, 0.5);
+            ofPoint windForce(0.2, -0.1);
             particles[i].applyForce(windForce);
 			particles[i].update(dt);
 		}

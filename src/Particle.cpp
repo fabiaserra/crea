@@ -24,6 +24,7 @@ void Particle::setup(float id, ofPoint pos, ofPoint vel, ofColor color, float in
 
     this->mass = initialRadius * initialRadius * 0.005f;
     this->originalHue = color.getHue();
+    this->prevPos = pos;
 }
 
 void Particle::update(float dt){
@@ -48,15 +49,12 @@ void Particle::update(float dt){
 
         // Decrease particle radius with age
         if (sizeAge) radius = initialRadius * (1.0f - (age/lifetime));
+        else radius = initialRadius;
 
         // Decrease particle opacity with age
         opacity = 255;
-        if (opacityAge){
-            opacity *= 1.0f - (age/lifetime);
-        }
-        if (flickersAge && (age/lifetime) > 0.94f && ofRandomf() > 0.3){
-            opacity *= 0.2;
-        }
+        if (opacityAge) opacity *= (1.0f - (age/lifetime));
+        if (flickersAge && (age/lifetime) > 0.94f && ofRandomf() > 0.3) opacity *= 0.2;
 
         // Change particle color with age
         if (colorAge){
@@ -127,7 +125,10 @@ void Particle::draw(){
             ofFill();
         }
 
-        ofCircle(pos, radius);
+//        ofCircle(pos, radius);
+
+        ofLine(pos, prevPos);
+        prevPos = pos;
 
         // // Draw arrows
         // if (markerDist == 0){

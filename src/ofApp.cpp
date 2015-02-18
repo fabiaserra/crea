@@ -605,7 +605,7 @@ void ofApp::setupGUI8(int i){
 
     gui8->addSpacer();
     gui8->addLabel("Emitter");
-    gui8->addSlider("Particles/sec", 0.0, 15.0, &markersParticles.bornRate);
+    gui8->addSlider("Particles/sec", 0.0, 20.0, &markersParticles.bornRate);
 
     // vector<string> types;
     // types.push_back("Point");
@@ -629,7 +629,7 @@ void ofApp::setupGUI8(int i){
     gui8->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui8->addSlider("Lifetime", 0.0, 20.0, &markersParticles.lifetime);
     gui8->addSlider("Life Random[%]", 0.0, 100.0, &markersParticles.lifetimeRnd);
-    gui8->addSlider("Radius", 1.0, 25.0, &markersParticles.radius);
+    gui8->addSlider("Radius", 0.1, 25.0, &markersParticles.radius);
     gui8->addSlider("Radius Random[%]", 0.0, 100.0, &markersParticles.radiusRnd);
 
     gui8->addSpacer();
