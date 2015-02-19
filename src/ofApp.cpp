@@ -1164,11 +1164,17 @@ void ofApp::exit(){
     if(!interpolatingWidgets && cues.size()) saveGUISettings(cues[currentCueIndex], false);
     saveGUISettings("settings/lastSettings.xml", true);
 
-//    while(!particleSystems.empty()) delete particleSystems.back(), particleSystems.pop_back();
+
     delete contourParticles;
     delete markerParticles;
     delete gridParticles;
     particleSystems.clear();
+    
+//    for (int i=0; i<particleSystems.size(); i++) {
+//        delete particleSystems.at(i);
+//        particleSystems.at(i) = NULL;
+//    }
+//    particleSystems.clear();
 
     delete gui0;
     delete gui1;
