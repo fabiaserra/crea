@@ -31,7 +31,9 @@ class ofApp : public ofBaseApp{
         void setupGUI5();
         void setupGUI6();
         void setupGUI7();
-        void setupGUI8(int i);  // TODO: use the i to be able to create a vector of ParticleSystems
+        void setupGUI8Marker();
+        void setupGUI8Contour();
+        void setupGUI8Grid();
 
         void saveGUISettings(const string path, const bool saveCues);
         void loadGUISettings(const string path, const bool interpolate, const bool loadCues);
@@ -90,7 +92,6 @@ class ofApp : public ofBaseApp{
         bool interpolatingWidgets;
         map<ofxUIWidget *, vector<float> > widgetsToUpdate;
         //--------------------------------------------------------------
-        vector<ofxUISuperCanvas *> guis;
         ofxUISuperCanvas *gui0;
         ofxUISuperCanvas *gui1;
         ofxUISuperCanvas *gui2;
@@ -99,7 +100,10 @@ class ofApp : public ofBaseApp{
         ofxUISuperCanvas *gui5;
         ofxUISuperCanvas *gui6;
         ofxUISuperCanvas *gui7;
-        ofxUISuperCanvas *gui8;
+        ofxUISuperCanvas *gui8Marker;
+        ofxUISuperCanvas *gui8Contour;
+        ofxUISuperCanvas *gui8Grid;
+        vector<ofxUISuperCanvas *> guis;
         //--------------------------------------------------------------
         ofxUIImageToggle *recordingSequence;  // Toggle to record gestures sequence
         ofxUILabel *sequenceFilename;         // Name of the sequence

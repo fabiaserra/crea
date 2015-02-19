@@ -4,7 +4,7 @@
 #include "irMarker.h"
 #include "Contour.h"
 
-enum ParticleMode {GRID_PARTICLES, MARKER_PARTICLES, CONTOUR_PARTICLES};
+enum ParticleMode {MARKER_PARTICLES, CONTOUR_PARTICLES, GRID_PARTICLES};
 
 class ParticleSystem
 {
@@ -21,7 +21,7 @@ class ParticleSystem
 		void addParticles(int n, const irMarker &marker);
 		void addParticles(int n, const ofPolyline &contour);
 
-        void createParticleGrid(int width, int height, int res);
+        void createParticleGrid(int width, int height);
 
 		void removeParticles(int n);
 

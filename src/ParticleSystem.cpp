@@ -3,7 +3,7 @@
 ParticleSystem::ParticleSystem(){
     isActive        = false;        // Particle system is active?
 
-    bornRate        = 5;            // Number of particles born per frame
+    bornRate        = 3;            // Number of particles born per frame
     velocity        = 50;           // Initial velocity magnitude of newborn particles
     velocityRnd     = 20;           // Magnitude randomness % of the initial velocity
     velocityMotion  = 50;           // Marker motion contribution to the initial velocity
@@ -15,12 +15,12 @@ ParticleSystem::ParticleSystem(){
     radiusRnd       = 20;           // Randomness of radius
 
     immortal        = false;        // Can particles die?
-    sizeAge         = true;         // Decrease size when particles get older?
-    opacityAge      = true;         // Decrease opacity when particles get older?
-    flickersAge     = true;         // Particle flickers opacity when about to die?
-    colorAge        = true;         // Change color when particles get older?
-    isEmpty         = true;         // Draw only contours of the particles?
-    bounce          = true;         // Bounce particles with the walls of the window?
+    sizeAge         = false;         // Decrease size when particles get older?
+    opacityAge      = false;         // Decrease opacity when particles get older?
+    flickersAge     = false;         // Particle flickers opacity when about to die?
+    colorAge        = false;         // Change color when particles get older?
+    isEmpty         = false;         // Draw only contours of the particles?
+    bounce          = false;         // Bounce particles with the walls of the window?
 
     friction        = 0;            // Multiply this value by the velocity every frame
     gravity         = 1.0f;         // Makes particles fall down in a natural way
@@ -34,7 +34,7 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
 
     if(particleMode == GRID_PARTICLES){
         immortal = true;
-        createParticleGrid(width, height, 10);
+        createParticleGrid(width, height);
     }
 }
 
@@ -68,6 +68,9 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers){
                 addParticles(markers[i].bornRate, markers[i]);
             }
 		}
+		else{
+            killParticles();
+		}
 
 		// Update the particles
 		for(int i = 0; i < particles.size(); i++){
@@ -98,6 +101,9 @@ void ParticleSystem::update(float dt, Contour& contour){
             for(unsigned int i = 0; i < contour.contours.size(); i++){
                 addParticles(bornRate, contour.contours[i]);
             }
+		}
+        else{
+            killParticles();
 		}
 
 		// Update the particles
@@ -187,7 +193,9 @@ void ParticleSystem::addParticles(int n, const ofPolyline &contour){
 	}
 }
 
-void ParticleSystem::createParticleGrid(int width, int height, int res){
+void ParticleSystem::createParticleGrid(int width, int height){
+	int res = 10;
+    float radius = 3;
 	for(int y = 0; y < height/res; y++){
 		for(int x = 0; x < width/res; x++){
 			int xi = (x + 0.5f) * res;
