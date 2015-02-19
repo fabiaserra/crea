@@ -43,6 +43,7 @@ void Contour::update(ofxCv::ContourFinder & contourFinder){
 
 void Contour::draw(){
     if(isActive){
+        ofPushStyle();
         if(drawBoundingRect){
             ofFill();
             ofSetColor(255);
@@ -75,5 +76,6 @@ void Contour::draw(){
             for(int i = 0; i < contours.size(); i++)
                 contours[i].draw();
         }
+        ofPopStyle();
     }
 }

@@ -2,25 +2,26 @@
 #include "ofMain.h"
 #include "Particle.h"
 #include "irMarker.h"
+#include "Contour.h"
 
-enum ParticleMode {GRID_PARTICLES, MARKER_PARTICLES, CONTOUR_PARTICLES};
-enum EmitterType {POINT, SPHERE, GRID, CONTOUR};
+enum ParticleMode {MARKER_PARTICLES, CONTOUR_PARTICLES, GRID_PARTICLES};
 
 class ParticleSystem
 {
 	public:
 		ParticleSystem();
 
-		void setup(ParticleMode mode);
-		void update(float dt, vector<irMarker>& markers);
+		void setup(ParticleMode particleMode, int width , int height);
+		void update(float dt, vector<irMarker> &markers);
+		void update(float dt, Contour &contour);
 		void draw();
 
         void addParticle(ofPoint pos, ofPoint vel, ofColor color, float radius, float lifetime);
 		void addParticles(int n);
 		void addParticles(int n, const irMarker &marker);
-//		void addParticles(int n, const ofPolyline &contour);
+		void addParticles(int n, const ofPolyline &contour);
 
-        void createParticleGrid(int width, int height, int res);
+        void createParticleGrid(int width, int height);
 
 		void removeParticles(int n);
 
@@ -28,7 +29,10 @@ class ParticleSystem
 		void repulseParticles();
 
 		//--------------------------------------------------------------
-		bool isActive;
+		bool isActive;          // Particle system active
+		//--------------------------------------------------------------
+        int width;              // Particle system boundaries
+        int height;
 		//--------------------------------------------------------------
 		vector<Particle> particles;
 		//--------------------------------------------------------------
@@ -37,7 +41,6 @@ class ParticleSystem
 		//--------------------------------------------------------------
 		ofColor color;
 		ParticleMode particleMode;
-		EmitterType emitterType;
 		//--------------------------------------------------------------
 		float bornRate;         // Number of particles born per frame
 		float velocity;         // Initial velocity magnitude of newborn particles

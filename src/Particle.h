@@ -8,7 +8,6 @@ class Particle
         Particle();
 
         void setup(float id, ofPoint pos, ofPoint vel, ofColor color, float initialRadius, float lifetime);
-//        void setup(float id, ofPolyline contour, ofPoint vel, ofColor color, float initialRadius, bool immortal, float lifetime, float friction);
         void update(float dt);
         void update(float dt, vector<irMarker>& markers);
         void draw();
@@ -46,7 +45,7 @@ class Particle
         float markerDist;       // Distance between particle and closest marker
         ofPoint dir;            // Direction from particle to closest marker
 // --------------------------------------------------------------
-        int windowWidth;        // Window dimensions particle boundaries
-        int windowHeight;
+        int width;              // Particle boundaries
+        int height;
 };
 

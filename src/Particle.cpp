@@ -10,8 +10,8 @@ Particle::Particle(){
     flickersAge     = true;
     isEmpty         = false;
     age             = 0;
-    windowWidth     = ofGetWidth();
-    windowHeight    = ofGetHeight();
+    width           = ofGetWidth();
+    height          = ofGetHeight();
 }
 
 void Particle::setup(float id, ofPoint pos, ofPoint vel, ofColor color, float initialRadius, float lifetime){
@@ -24,6 +24,7 @@ void Particle::setup(float id, ofPoint pos, ofPoint vel, ofColor color, float in
 
     this->mass = initialRadius * initialRadius * 0.005f;
     this->originalHue = color.getHue();
+    this->prevPos = pos;
 }
 
 void Particle::update(float dt){
@@ -48,15 +49,12 @@ void Particle::update(float dt){
 
         // Decrease particle radius with age
         if (sizeAge) radius = initialRadius * (1.0f - (age/lifetime));
+        else radius = initialRadius;
 
         // Decrease particle opacity with age
         opacity = 255;
-        if (opacityAge){
-            opacity *= 1.0f - (age/lifetime);
-        }
-        if (flickersAge && (age/lifetime) > 0.94f && ofRandomf() > 0.3){
-            opacity *= 0.2;
-        }
+        if (opacityAge) opacity *= (1.0f - (age/lifetime));
+        if (flickersAge && (age/lifetime) > 0.94f && ofRandomf() > 0.3) opacity *= 0.2;
 
         // Change particle color with age
         if (colorAge){
@@ -68,16 +66,16 @@ void Particle::update(float dt){
 
         // Bounce particle with the window margins
         if(bounces){
-            if(pos.x > windowWidth-radius){
-                pos.x = windowWidth-radius;
+            if(pos.x > width-radius){
+                pos.x = width-radius;
                 vel.x *= -1.0;
             }
             if(pos.x < radius){
                 pos.x = radius;
                 vel.x *= -1.0;
             }
-            if(pos.y > windowHeight-radius){
-                pos.y = windowHeight-radius;
+            if(pos.y > height-radius){
+                pos.y = height-radius;
                 vel.y *= -1.0;
             }
             if(pos.y < radius){
@@ -128,6 +126,9 @@ void Particle::draw(){
         }
 
         ofCircle(pos, radius);
+
+        ofLine(pos, prevPos);
+        prevPos = pos;
 
         // // Draw arrows
         // if (markerDist == 0){

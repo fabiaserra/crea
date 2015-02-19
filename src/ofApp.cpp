@@ -12,7 +12,7 @@ void ofApp::setup(){
     kinect.init(true); // shows infrared instead of RGB video Image
     kinect.open();
 
-    reScale = (float)ofGetWidth() / (float)kinect.width;
+    reScale = (float)ofGetHeight() / (float)kinect.height;
     time0 = ofGetElapsedTimef();
 
     // ALLOCATE IMAGES
@@ -51,10 +51,22 @@ void ofApp::setup(){
     tracker.setMaximumDistance(trackerMaxDistance); // an object can move up to 'trackerMaxDistance' pixels per frame
 
     // MARKER PARTICLES
-    markersParticles.setup(MARKER_PARTICLES);
+    markerParticles = new ParticleSystem();
+    markerParticles->setup(MARKER_PARTICLES, kinect.width, kinect.height);
+
+    // CONTOUR PARTICLES
+    contourParticles = new ParticleSystem();
+    contourParticles->setup(CONTOUR_PARTICLES, kinect.width, kinect.height);
 
     // GRID PARTICLES
-    particles.setup(GRID_PARTICLES);
+    gridParticles = new ParticleSystem();
+    gridParticles->setup(GRID_PARTICLES, kinect.width, kinect.height);
+
+    // VECTOR OF PARTICLE SYSTEMS
+    particleSystems.push_back(markerParticles);
+    particleSystems.push_back(contourParticles);
+    particleSystems.push_back(gridParticles);
+    currentParticleSystem = 2;
 
     // DEPTH CONTOUR
     // smoothingSize = 0;
@@ -63,12 +75,12 @@ void ofApp::setup(){
     // SEQUENCE
     int maxMarkers = 2;
     sequence.setup(maxMarkers);
-    sequence.load("sequences/sequence2.xml");
+    sequence.load("sequences/sequence.xml");
     drawSequence = false;
 
     // MARKERS
     markers.resize(maxMarkers);
-    drawMarkers = true;
+    drawMarkers = false;
 
     // VMO SETUP
     int dimensions = 2;
@@ -124,7 +136,9 @@ void ofApp::setup(){
     setupGUI5();
     setupGUI6();
     setupGUI7();
-    setupGUI8(0);
+    setupGUI8Marker();
+    setupGUI8Grid();
+//    setupgui8Marker(MARKER_PARTICLES);
 
     interpolatingWidgets = false;
     loadGUISettings("settings/lastSettings.xml", false, true);
@@ -146,8 +160,14 @@ void ofApp::update(){
     float dt = ofClamp(time - time0, 0, 0.1);
     time0 = time;
 
+    // Compute rescale value to scale kinect image
+    reScale = (float)ofGetHeight() / (float)kinect.height;
+
     // Interpolate GUI widget values
     if(interpolatingWidgets) interpolateWidgetValues();
+
+    // Update sequence playhead to draw gesture
+    if(drawSequence) sequence.update();
 
     kinect.update();
     if(kinect.isFrameNew()){
@@ -215,17 +235,17 @@ void ofApp::update(){
         //    cout << tempMarkers[i].getLabel() << endl;
         // }
 
-        // Update grid particles
-        particles.update(dt, tempMarkers);
-
-        // Update markers particles
-        markersParticles.update(dt, tempMarkers);
-
         // Update contour
         contour.update(contourFinder);
 
-        // Update sequence playhead to draw gesture
-        if(drawSequence) sequence.update();
+        // Update grid particles
+        gridParticles->update(dt, tempMarkers);
+
+        // Update markers particles
+//        markerParticles->update(dt, tempMarkers);
+
+        // Update contour particles
+//        contourParticles->update(dt, contour);
 
         // Gesture Tracking with VMO here?
         if (tempMarkers.size()>1){
@@ -260,26 +280,28 @@ void ofApp::update(){
 void ofApp::draw(){
 
     ofPushMatrix();
-    ofTranslate(guiWidth+10, 0);
-    // ofScale(reScale, reScale);
-    ofScale(1.2, 1.2);
+//    ofTranslate(guiWidth+10, 0);
+//    ofScale(1.2, 1.2);
+    ofScale(reScale, reScale);
     ofBackground(red, green, blue, 255);
-    // ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+//    ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+//    ofEnableBlendMode(OF_BLENDMODE_ADD);
 
     ofSetColor(255);
 
-    // Kinect images
-    // irImage.draw(0, 0);
-    // depthImage.draw(0, 0);
+//    // Kinect images
+//    irImage.draw(0, 0);
+//    depthImage.draw(0, 0);
 
     // OpenCV contour detection
-    // contourFinder.draw();
+//    contourFinder.draw();
     if(drawMarkers) irMarkerFinder.draw();
 
     // Graphics
-    //     particles.draw();
-    markersParticles.draw();
-    contour.draw();
+//    contour.draw();
+    gridParticles->draw();
+//    markerParticles->draw();
+//    contourParticles->draw();
 
     if(drawMarkers){
         vector<irMarker>& tempMarkers = tracker.getFollowers();
@@ -295,11 +317,12 @@ void ofApp::draw(){
 
 //    if(drawPatterns) sequence.drawPatterns(gestureUpdate);
     gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
-    // print percent of completion
-    for(int patternIndex = 0; patternIndex < gestureUpdate.size(); patternIndex++){
-        cout << patternIndex << ": " << gestureUpdate[patternIndex] << endl;
-    }
     if(drawPatterns) sequence.drawPatterns(gestureUpdate);
+
+//    // print percent of completion
+//    for(int patternIndex = 0; patternIndex < gestureUpdate.size(); patternIndex++){
+//        cout << patternIndex << ": " << gestureUpdate[patternIndex] << endl;
+//    }
 
 //    map<int, float> currentPatterns;
 //    if(drawPatterns && testCounter < 0.6) testCounter += 0.05;
@@ -598,71 +621,115 @@ void ofApp::setupGUI7(){
 }
 
 //--------------------------------------------------------------
-void ofApp::setupGUI8(int i){
-    gui8 = new ofxUISuperCanvas("8: PARTICLE SYSTEMS", 0, 0, guiWidth, ofGetHeight());
-    gui8->setTheme(theme);
+void ofApp::setupGUI8Marker(){
+    gui8Marker = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
+    gui8Marker->setTheme(theme);
 
-    gui8->addSpacer();
-    gui8->addLabel("Press '8' to hide panel", OFX_UI_FONT_SMALL);
+    gui8Marker->addSpacer();
+    gui8Marker->addLabel("Press '8' to hide panel", OFX_UI_FONT_SMALL);
 
-    gui8->addSpacer();
-    gui8->addImageToggle("Particles Active", "icons/show.png", &markersParticles.isActive, dim, dim);
-    gui8->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui8->addImageButton("New Particle System", "icons/add.png", false, dim, dim);
-    gui8->addImageButton("Previous Particle System", "icons/previous.png", false, dim, dim);
-    gui8->addImageButton("Next Particle System", "icons/play.png", false, dim, dim);
-    gui8->addImageButton("Delete Particle System", "icons/delete.png", false, dim, dim);
-    gui8->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8Marker->addSpacer();
+    gui8Marker->addImageToggle("Particles Active", "icons/show.png", &markerParticles->isActive, dim, dim);
+    gui8Marker->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8Marker->addImageButton("Previous Particle System", "icons/previous.png", false, dim, dim)->bindToKey(OF_KEY_LEFT);
+    gui8Marker->addImageButton("Next Particle System", "icons/play.png", false, dim, dim)->bindToKey(OF_KEY_RIGHT);
+    gui8Marker->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
-    gui8->addSpacer();
-    gui8->addLabel("Emitter");
-    gui8->addSlider("Particles/sec", 0.0, 15.0, &markersParticles.bornRate);
+    gui8Marker->addLabel("MARKER PARTICLES", OFX_UI_FONT_LARGE);
+    gui8Marker->addSpacer();
+    gui8Marker->addLabel("Emitter");
+    gui8Marker->addSlider("Particles/sec", 0.0, 20.0, &markerParticles->bornRate);
 
-    // vector<string> types;
-    // types.push_back("Point");
-    // types.push_back("Grid");
-    // types.push_back("Contour");
-    // gui8->addLabel("Emitter type:", OFX_UI_FONT_SMALL);
-    // gui8->addRadio("Emitter type", types, OFX_UI_ORIENTATION_VERTICAL);
+    gui8Marker->addSlider("Velocity", 0.0, 100.0, &markerParticles->velocity);
+    gui8Marker->addSlider("Velocity Random[%]", 0.0, 100.0, &markerParticles->velocityRnd);
+    gui8Marker->addSlider("Velocity from Motion[%]", 0.0, 100.0, &markerParticles->velocityMotion);
 
-    gui8->addSlider("Velocity", 0.0, 100.0, &markersParticles.velocity);
-    gui8->addSlider("Velocity Random[%]", 0.0, 100.0, &markersParticles.velocityRnd);
-    gui8->addSlider("Velocity from Motion[%]", 0.0, 100.0, &markersParticles.velocityMotion);
+    gui8Marker->addSlider("Emitter size", 0.0, 60.0, &markerParticles->emitterSize);
 
-    gui8->addSlider("Emitter size", 0.0, 60.0, &markersParticles.emitterSize);
+    gui8Marker->addSpacer();
+    gui8Marker->addLabel("Particle");
+    gui8Marker->addToggle("Immortal", &markerParticles->immortal);
+    gui8Marker->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8Marker->addToggle("Empty", &markerParticles->isEmpty);
+    gui8Marker->addToggle("Bounces", &markerParticles->bounce);
+    gui8Marker->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8Marker->addSlider("Lifetime", 0.0, 20.0, &markerParticles->lifetime);
+    gui8Marker->addSlider("Life Random[%]", 0.0, 100.0, &markerParticles->lifetimeRnd);
+    gui8Marker->addSlider("Radius", 0.1, 25.0, &markerParticles->radius);
+    gui8Marker->addSlider("Radius Random[%]", 0.0, 100.0, &markerParticles->radiusRnd);
 
-    gui8->addSpacer();
-    gui8->addLabel("Particle");
-    gui8->addToggle("Immortal", &markersParticles.immortal);
-    gui8->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui8->addToggle("Empty", &markersParticles.isEmpty);
-    gui8->addToggle("Bounces", &markersParticles.bounce);
-    gui8->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui8->addSlider("Lifetime", 0.0, 20.0, &markersParticles.lifetime);
-    gui8->addSlider("Life Random[%]", 0.0, 100.0, &markersParticles.lifetimeRnd);
-    gui8->addSlider("Radius", 1.0, 25.0, &markersParticles.radius);
-    gui8->addSlider("Radius Random[%]", 0.0, 100.0, &markersParticles.radiusRnd);
+    gui8Marker->addSpacer();
+    gui8Marker->addLabel("Time behaviour");
+    gui8Marker->addToggle("Size", &markerParticles->sizeAge);
+    gui8Marker->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8Marker->addToggle("Opacity", &markerParticles->opacityAge);
+    gui8Marker->addToggle("Flickers", &markerParticles->flickersAge);
+    gui8Marker->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8Marker->addToggle("Color", &markerParticles->colorAge);
 
-    gui8->addSpacer();
-    gui8->addLabel("Time behaviour");
-    gui8->addToggle("Size", &markersParticles.sizeAge);
-    gui8->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui8->addToggle("Opacity", &markersParticles.opacityAge);
-    gui8->addToggle("Flickers", &markersParticles.flickersAge);
-    gui8->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui8->addToggle("Color", &markersParticles.colorAge);
+    gui8Marker->addSpacer();
+    gui8Marker->addLabel("Physics");
+    gui8Marker->addSlider("Friction", 0, 100, &markerParticles->friction);
+    gui8Marker->addSlider("Gravity", 0.0, 15.0, &markerParticles->gravity);
 
-    gui8->addSpacer();
-    gui8->addLabel("Physics");
-    gui8->addSlider("Friction", 0, 100, &markersParticles.friction);
-    gui8->addSlider("Gravity", 0.0, 15.0, &markersParticles.gravity);
+    gui8Marker->addSpacer();
 
-    gui8->addSpacer();
+    gui8Marker->autoSizeToFitWidgets();
+    gui8Marker->setVisible(false);
+    ofAddListener(gui8Marker->newGUIEvent, this, &ofApp::guiEvent);
+    guis.push_back(gui8Marker);
+}
 
-    gui8->autoSizeToFitWidgets();
-    gui8->setVisible(false);
-    ofAddListener(gui8->newGUIEvent, this, &ofApp::guiEvent);
-    guis.push_back(gui8);
+//--------------------------------------------------------------
+void ofApp::setupGUI8Grid(){
+    gui8Contour = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
+    gui8Contour->setTheme(theme);
+
+    gui8Contour->addSpacer();
+    gui8Contour->addLabel("Press '8' to hide panel", OFX_UI_FONT_SMALL);
+
+    gui8Contour->addSpacer();
+    gui8Contour->addImageToggle("Particles Active", "icons/show.png", &contourParticles->isActive, dim, dim);
+    gui8Contour->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8Contour->addImageButton("Previous Particle System", "icons/previous.png", false, dim, dim)->bindToKey(OF_KEY_LEFT);
+    gui8Contour->addImageButton("Next Particle System", "icons/play.png", false, dim, dim)->bindToKey(OF_KEY_RIGHT);
+    gui8Contour->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+
+    gui8Contour->addLabel("CONTOUR PARTICLES", OFX_UI_FONT_LARGE);
+    gui8Contour->addSpacer();
+
+    gui8Contour->addSpacer();
+
+    gui8Contour->autoSizeToFitWidgets();
+    gui8Contour->setVisible(false);
+    ofAddListener(gui8Contour->newGUIEvent, this, &ofApp::guiEvent);
+    guis.push_back(gui8Contour);
+}
+
+//--------------------------------------------------------------
+void ofApp::setupGUI8Grid(){
+    gui8Grid = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
+    gui8Grid->setTheme(theme);
+
+    gui8Grid->addSpacer();
+    gui8Grid->addLabel("Press '8' to hide panel", OFX_UI_FONT_SMALL);
+
+    gui8Grid->addSpacer();
+    gui8Grid->addImageToggle("Particles Active", "icons/show.png", &gridParticles->isActive, dim, dim);
+    gui8Grid->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8Grid->addImageButton("Previous Particle System", "icons/previous.png", false, dim, dim)->bindToKey(OF_KEY_LEFT);
+    gui8Grid->addImageButton("Next Particle System", "icons/play.png", false, dim, dim)->bindToKey(OF_KEY_RIGHT);
+    gui8Grid->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+
+    gui8Grid->addLabel("GRID PARTICLES", OFX_UI_FONT_LARGE);
+    gui8Grid->addSpacer();
+
+    gui8Grid->addSpacer();
+
+    gui8Grid->autoSizeToFitWidgets();
+    gui8Grid->setVisible(false);
+    ofAddListener(gui8Grid->newGUIEvent, this, &ofApp::guiEvent);
+    guis.push_back(gui8Grid);
 }
 
 //--------------------------------------------------------------
@@ -850,7 +917,7 @@ void ofApp::interpolateWidgetValues(){
             float targetValue = values.front();
             float currentValue = XML->getValue("Value", targetValue, 0);
             float difference = targetValue-currentValue;
-            if(abs(difference) < 1 || w->getKind() == 2){ // kind 2 is a toggle
+            if(abs(difference) < 1 || w->getKind() == 2 || w->getKind() == 20){ // kind 2 is a toggle and 20 is ofxUIImageToggle
                 canDelete = true;
                 XML->setValue("Value", targetValue, 0);
                 w->loadState(XML);
@@ -988,6 +1055,10 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             currentCueIndex++;
             string cueFileName = "newCue"+ofToString(currentCueIndex);
             string cuePath = "cues/"+cueFileName+".xml";
+            if(find(cues.begin(), cues.end(), cuePath) != cues.end()){
+                cueFileName += ".1";
+                cuePath = "cues/"+cueFileName+".xml";
+            }
             vector<string>::iterator it = cues.begin();
             cues.insert(it+currentCueIndex, cuePath);
             cueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
@@ -1078,6 +1149,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         ofxUILabelButton *button = (ofxUILabelButton *) e.widget;
         if(button->getValue() == true){
             if(cues.size() == 0) return;
+            if(!interpolatingWidgets) saveGUISettings(cues[currentCueIndex], false);
             if(currentCueIndex+1 < cues.size()) currentCueIndex++;
             else if(currentCueIndex+1 == cues.size()) currentCueIndex = 0;
             loadGUISettings(cues[currentCueIndex], true, false);
@@ -1110,7 +1182,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     //  cout << radio->getName() << " value: " << radio->getValue() << " active name: " << radio->getActiveName() << endl;
     // }
 
-     if(e.getName() == "GUI Theme"){
+    if(e.getName() == "GUI Theme"){
         ofxUIRadio *radio = (ofxUIRadio *) e.widget;
 
         string name = radio->getActiveName();
@@ -1135,17 +1207,35 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         gui5->setTheme(theme);
         gui6->setTheme(theme);
         gui7->setTheme(theme);
-        gui8->setTheme(theme);
-     }
+        gui8Marker->setTheme(theme);
+        gui8Contour->setTheme(theme);
+        gui8Grid->setTheme(theme);
+    }
+
+    if(e.getName() == "Previous Particle System"){
+        ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
+        if(button->getValue() == true){
+            if(currentCueIndex > 0) currentCueIndex--;
+            else currentCueIndex = particleSystems.size()-1;
+        }
+    }
+
+    if(e.getName() == "Next Particle System"){
+        ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
+        if(button->getValue() == true){
+            if(currentCueIndex < particleSystems.size()-1) currentCueIndex++;
+            else currentCueIndex = 0;
+        }
+    }
 
     if(e.getName() == "Particles Active"){
         ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
-        if(toggle->getValue() == false) markersParticles.killParticles();
+        if(toggle->getValue() == false) particleSystems[currentParticleSystem]->killParticles();
     }
 
     if(e.getName() == "Immortal"){
         ofxUIToggle *toggle = (ofxUIToggle *) e.widget;
-        if(toggle->getValue() == false) markersParticles.killParticles();
+        if(toggle->getValue() == false) particleSystems[currentParticleSystem]->killParticles();
     }
 }
 
@@ -1157,6 +1247,18 @@ void ofApp::exit(){
     if(!interpolatingWidgets && cues.size()) saveGUISettings(cues[currentCueIndex], false);
     saveGUISettings("settings/lastSettings.xml", true);
 
+
+    delete contourParticles;
+    delete markerParticles;
+    delete gridParticles;
+    particleSystems.clear();
+
+//    for (int i=0; i<particleSystems.size(); i++) {
+//        delete particleSystems.at(i);
+//        particleSystems.at(i) = NULL;
+//    }
+//    particleSystems.clear();
+
     delete gui0;
     delete gui1;
     delete gui2;
@@ -1165,7 +1267,8 @@ void ofApp::exit(){
     delete gui5;
     delete gui6;
     delete gui7;
-    delete gui8;
+    delete gui8Marker;
+    guis.clear();
 }
 
 //--------------------------------------------------------------
@@ -1174,7 +1277,6 @@ void ofApp::keyPressed(int key){
         switch (key){
             case 'f':
                 ofToggleFullscreen();
-                reScale = (float)ofGetWidth() / (float)kinect.width;
                 break;
 
             case 'h':
@@ -1186,7 +1288,9 @@ void ofApp::keyPressed(int key){
                 gui5->setVisible(false);
                 gui6->setVisible(false);
                 gui7->setVisible(false);
-                gui8->setVisible(false);
+                gui8Marker->setVisible(false);
+                gui8Contour->setVisible(false);
+                gui8Grid->setVisible(false);
                 break;
 
             case '0':
@@ -1199,7 +1303,9 @@ void ofApp::keyPressed(int key){
                 gui5->setVisible(false);
                 gui6->setVisible(false);
                 gui7->setVisible(false);
-                gui8->setVisible(false);
+                gui8Marker->setVisible(false);
+                gui8Contour->setVisible(false);
+                gui8Grid->setVisible(false);
                 break;
 
             case '1':
@@ -1211,7 +1317,9 @@ void ofApp::keyPressed(int key){
                 gui5->setVisible(false);
                 gui6->setVisible(false);
                 gui7->setVisible(false);
-                gui8->setVisible(false);
+                gui8Marker->setVisible(false);
+                gui8Contour->setVisible(false);
+                gui8Grid->setVisible(false);
                 break;
 
             case '2':
@@ -1223,7 +1331,9 @@ void ofApp::keyPressed(int key){
                 gui5->setVisible(false);
                 gui6->setVisible(false);
                 gui7->setVisible(false);
-                gui8->setVisible(false);
+                gui8Marker->setVisible(false);
+                gui8Contour->setVisible(false);
+                gui8Grid->setVisible(false);
                 break;
 
             case '3':
@@ -1235,7 +1345,9 @@ void ofApp::keyPressed(int key){
                 gui5->setVisible(false);
                 gui6->setVisible(false);
                 gui7->setVisible(false);
-                gui8->setVisible(false);
+                gui8Marker->setVisible(false);
+                gui8Contour->setVisible(false);
+                gui8Grid->setVisible(false);
                 break;
 
             case '4':
@@ -1247,7 +1359,9 @@ void ofApp::keyPressed(int key){
                 gui5->setVisible(false);
                 gui6->setVisible(false);
                 gui7->setVisible(false);
-                gui8->setVisible(false);
+                gui8Marker->setVisible(false);
+                gui8Contour->setVisible(false);
+                gui8Grid->setVisible(false);
                 break;
 
             case '5':
@@ -1259,7 +1373,9 @@ void ofApp::keyPressed(int key){
                 gui5->toggleVisible();
                 gui6->setVisible(false);
                 gui7->setVisible(false);
-                gui8->setVisible(false);
+                gui8Marker->setVisible(false);
+                gui8Contour->setVisible(false);
+                gui8Grid->setVisible(false);
                 break;
 
             case '6':
@@ -1271,7 +1387,9 @@ void ofApp::keyPressed(int key){
                 gui5->setVisible(false);
                 gui6->toggleVisible();
                 gui7->setVisible(false);
-                gui8->setVisible(false);
+                gui8Marker->setVisible(false);
+                gui8Contour->setVisible(false);
+                gui8Grid->setVisible(false);
                 break;
 
             case '7':
@@ -1283,7 +1401,9 @@ void ofApp::keyPressed(int key){
                 gui5->setVisible(false);
                 gui6->setVisible(false);
                 gui7->toggleVisible();
-                gui8->setVisible(false);
+                gui8Marker->setVisible(false);
+                gui8Contour->setVisible(false);
+                gui8Grid->setVisible(false);
                 break;
 
             case '8':
@@ -1295,7 +1415,17 @@ void ofApp::keyPressed(int key){
                 gui5->setVisible(false);
                 gui6->setVisible(false);
                 gui7->setVisible(false);
-                gui8->toggleVisible();
+                switch(currentParticleSystem){
+                    case 0:
+                        gui8Marker->toggleVisible();
+                        break;
+                    case 1:
+                        gui8Contour->toggleVisible();
+                        break;
+                    case 2:
+                        gui8Grid->toggleVisible();
+                        break;
+                }
                 break;
 
             default:
