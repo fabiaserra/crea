@@ -51,11 +51,22 @@ void ofApp::setup(){
     tracker.setMaximumDistance(trackerMaxDistance); // an object can move up to 'trackerMaxDistance' pixels per frame
 
     // MARKER PARTICLES
-//    markersParticles.setup(MARKER_PARTICLES);
-    markersParticles.setup(CONTOUR_PARTICLES, kinect.width, kinect.height);
+    markerParticles = new ParticleSystem();
+    markerParticles->setup(MARKER_PARTICLES, kinect.width, kinect.height);
+
+    // CONTOUR PARTICLES
+    contourParticles = new ParticleSystem();
+    contourParticles->setup(CONTOUR_PARTICLES, kinect.width, kinect.height);
 
     // GRID PARTICLES
-    particles.setup(GRID_PARTICLES, kinect.width, kinect.height);
+    gridParticles = new ParticleSystem();
+    gridParticles->setup(GRID_PARTICLES, kinect.width, kinect.height);
+
+    // VECTOR OF PARTICLE SYSTEMS
+    particleSystems.push_back(markerParticles);
+    particleSystems.push_back(contourParticles);
+    particleSystems.push_back(gridParticles);
+    currentParticleSystem = 0;
 
     // DEPTH CONTOUR
     // smoothingSize = 0;
@@ -115,7 +126,7 @@ void ofApp::setup(){
     setupGUI5();
     setupGUI6();
     setupGUI7();
-    setupGUI8(0);
+    setupGUI8(currentParticleSystem);
 
     interpolatingWidgets = false;
     loadGUISettings("settings/lastSettings.xml", false, true);
@@ -216,11 +227,13 @@ void ofApp::update(){
         contour.update(contourFinder);
 
         // Update grid particles
-        particles.update(dt, tempMarkers);
+        gridParticles->update(dt, tempMarkers);
 
         // Update markers particles
-//        markersParticles.update(dt, tempMarkers);
-        markersParticles.update(dt, contour);
+        markerParticles->update(dt, tempMarkers);
+
+        // Update contour particles
+        contourParticles->update(dt, contour);
 
         // Gesture Tracking with VMO here?
         if (tempMarkers.size()>1){
@@ -265,9 +278,10 @@ void ofApp::draw(){
     if(drawMarkers) irMarkerFinder.draw();
 
     // Graphics
-//    particles.draw();
-    markersParticles.draw();
     contour.draw();
+    gridParticles->draw();
+    markerParticles->draw();
+    contourParticles->draw();
 
     if(drawMarkers){
         vector<irMarker>& tempMarkers = tracker.getFollowers();
@@ -594,7 +608,7 @@ void ofApp::setupGUI8(int i){
     gui8->addLabel("Press '8' to hide panel", OFX_UI_FONT_SMALL);
 
     gui8->addSpacer();
-    gui8->addImageToggle("Particles Active", "icons/show.png", &markersParticles.isActive, dim, dim);
+    gui8->addImageToggle("Particles Active", "icons/show.png", &particleSystems[currentParticleSystem]->isActive, dim, dim);
     gui8->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui8->addImageButton("New Particle System", "icons/add.png", false, dim, dim);
     gui8->addImageButton("Previous Particle System", "icons/previous.png", false, dim, dim);
@@ -604,7 +618,7 @@ void ofApp::setupGUI8(int i){
 
     gui8->addSpacer();
     gui8->addLabel("Emitter");
-    gui8->addSlider("Particles/sec", 0.0, 20.0, &markersParticles.bornRate);
+    gui8->addSlider("Particles/sec", 0.0, 20.0, &particleSystems[currentParticleSystem]->bornRate);
 
     // vector<string> types;
     // types.push_back("Point");
@@ -613,37 +627,37 @@ void ofApp::setupGUI8(int i){
     // gui8->addLabel("Emitter type:", OFX_UI_FONT_SMALL);
     // gui8->addRadio("Emitter type", types, OFX_UI_ORIENTATION_VERTICAL);
 
-    gui8->addSlider("Velocity", 0.0, 100.0, &markersParticles.velocity);
-    gui8->addSlider("Velocity Random[%]", 0.0, 100.0, &markersParticles.velocityRnd);
-    gui8->addSlider("Velocity from Motion[%]", 0.0, 100.0, &markersParticles.velocityMotion);
+    gui8->addSlider("Velocity", 0.0, 100.0, &particleSystems[currentParticleSystem]->velocity);
+    gui8->addSlider("Velocity Random[%]", 0.0, 100.0, &particleSystems[currentParticleSystem]->velocityRnd);
+    gui8->addSlider("Velocity from Motion[%]", 0.0, 100.0, &particleSystems[currentParticleSystem]->velocityMotion);
 
-    gui8->addSlider("Emitter size", 0.0, 60.0, &markersParticles.emitterSize);
+    gui8->addSlider("Emitter size", 0.0, 60.0, &particleSystems[currentParticleSystem]->emitterSize);
 
     gui8->addSpacer();
     gui8->addLabel("Particle");
-    gui8->addToggle("Immortal", &markersParticles.immortal);
+    gui8->addToggle("Immortal", &particleSystems[currentParticleSystem]->immortal);
     gui8->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui8->addToggle("Empty", &markersParticles.isEmpty);
-    gui8->addToggle("Bounces", &markersParticles.bounce);
+    gui8->addToggle("Empty", &particleSystems[currentParticleSystem]->isEmpty);
+    gui8->addToggle("Bounces", &particleSystems[currentParticleSystem]->bounce);
     gui8->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui8->addSlider("Lifetime", 0.0, 20.0, &markersParticles.lifetime);
-    gui8->addSlider("Life Random[%]", 0.0, 100.0, &markersParticles.lifetimeRnd);
-    gui8->addSlider("Radius", 0.1, 25.0, &markersParticles.radius);
-    gui8->addSlider("Radius Random[%]", 0.0, 100.0, &markersParticles.radiusRnd);
+    gui8->addSlider("Lifetime", 0.0, 20.0, &particleSystems[currentParticleSystem]->lifetime);
+    gui8->addSlider("Life Random[%]", 0.0, 100.0, &particleSystems[currentParticleSystem]->lifetimeRnd);
+    gui8->addSlider("Radius", 0.1, 25.0, &particleSystems[currentParticleSystem]->radius);
+    gui8->addSlider("Radius Random[%]", 0.0, 100.0, &particleSystems[currentParticleSystem]->radiusRnd);
 
     gui8->addSpacer();
     gui8->addLabel("Time behaviour");
-    gui8->addToggle("Size", &markersParticles.sizeAge);
+    gui8->addToggle("Size", &particleSystems[currentParticleSystem]->sizeAge);
     gui8->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui8->addToggle("Opacity", &markersParticles.opacityAge);
-    gui8->addToggle("Flickers", &markersParticles.flickersAge);
+    gui8->addToggle("Opacity", &particleSystems[currentParticleSystem]->opacityAge);
+    gui8->addToggle("Flickers", &particleSystems[currentParticleSystem]->flickersAge);
     gui8->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui8->addToggle("Color", &markersParticles.colorAge);
+    gui8->addToggle("Color", &particleSystems[currentParticleSystem]->colorAge);
 
     gui8->addSpacer();
     gui8->addLabel("Physics");
-    gui8->addSlider("Friction", 0, 100, &markersParticles.friction);
-    gui8->addSlider("Gravity", 0.0, 15.0, &markersParticles.gravity);
+    gui8->addSlider("Friction", 0, 100, &particleSystems[currentParticleSystem]->friction);
+    gui8->addSlider("Gravity", 0.0, 15.0, &particleSystems[currentParticleSystem]->gravity);
 
     gui8->addSpacer();
 
@@ -838,7 +852,7 @@ void ofApp::interpolateWidgetValues(){
             float targetValue = values.front();
             float currentValue = XML->getValue("Value", targetValue, 0);
             float difference = targetValue-currentValue;
-            if(abs(difference) < 1 || w->getKind() == 2){ // kind 2 is a toggle
+            if(abs(difference) < 1 || w->getKind() == 2 || w->getKind() == 20){ // kind 2 is a toggle and 20 is ofxUIImageToggle
                 canDelete = true;
                 XML->setValue("Value", targetValue, 0);
                 w->loadState(XML);
@@ -976,6 +990,10 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             currentCueIndex++;
             string cueFileName = "newCue"+ofToString(currentCueIndex);
             string cuePath = "cues/"+cueFileName+".xml";
+            if(find(cues.begin(), cues.end(), cuePath) != cues.end()){
+                cueFileName += ".1";
+                cuePath = "cues/"+cueFileName+".xml";
+            }
             vector<string>::iterator it = cues.begin();
             cues.insert(it+currentCueIndex, cuePath);
             cueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
@@ -1129,12 +1147,12 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 
     if(e.getName() == "Particles Active"){
         ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
-        if(toggle->getValue() == false) markersParticles.killParticles();
+        if(toggle->getValue() == false) particleSystems[currentParticleSystem]->killParticles();
     }
 
     if(e.getName() == "Immortal"){
         ofxUIToggle *toggle = (ofxUIToggle *) e.widget;
-        if(toggle->getValue() == false) markersParticles.killParticles();
+        if(toggle->getValue() == false) particleSystems[currentParticleSystem]->killParticles();
     }
 }
 
@@ -1146,6 +1164,12 @@ void ofApp::exit(){
     if(!interpolatingWidgets && cues.size()) saveGUISettings(cues[currentCueIndex], false);
     saveGUISettings("settings/lastSettings.xml", true);
 
+//    while(!particleSystems.empty()) delete particleSystems.back(), particleSystems.pop_back();
+    delete contourParticles;
+    delete markerParticles;
+    delete gridParticles;
+    particleSystems.clear();
+
     delete gui0;
     delete gui1;
     delete gui2;
@@ -1155,6 +1179,7 @@ void ofApp::exit(){
     delete gui6;
     delete gui7;
     delete gui8;
+    guis.clear();
 }
 
 //--------------------------------------------------------------

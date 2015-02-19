@@ -67,8 +67,6 @@ void Sequence::draw(){
 
 void Sequence::load(const string path){
 
-    if(!ofFile::doesFileExist(path)) return;
-
     if(!xml.load(path)) return;
 
     // Initialize polylines sequence

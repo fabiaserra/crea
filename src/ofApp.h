@@ -71,9 +71,11 @@ class ofApp : public ofBaseApp{
         //--------------------------------------------------------------
         vector<irMarker> markers;
         //--------------------------------------------------------------
-        // TODO: vector<ParticleSystem> particles
-        ParticleSystem particles;
-        ParticleSystem markersParticles;
+        ParticleSystem *gridParticles;
+        ParticleSystem *markerParticles;
+        ParticleSystem *contourParticles;
+        vector<ParticleSystem *> particleSystems;
+        int currentParticleSystem;
         //--------------------------------------------------------------
         Contour contour;        // User silhouette contour
         //--------------------------------------------------------------
