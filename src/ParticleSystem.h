@@ -10,6 +10,7 @@ class ParticleSystem
 {
 	public:
 		ParticleSystem();
+		~ParticleSystem();
 
 		void setup(ParticleMode particleMode, int width , int height);
 		void update(float dt, vector<irMarker> &markers);
@@ -34,7 +35,7 @@ class ParticleSystem
         int width;              // Particle system boundaries
         int height;
 		//--------------------------------------------------------------
-		vector<Particle> particles;
+		vector<Particle *> particles;
 		//--------------------------------------------------------------
 		int numParticles;
 		int totalParticlesCreated;

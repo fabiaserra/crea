@@ -1,13 +1,13 @@
 #include "Particle.h"
 
 Particle::Particle(){
-    immortal        = false;
     isAlive         = true;
-    bounces         = true;
-    sizeAge         = true;
-    opacityAge      = true;
-    colorAge        = true;
-    flickersAge     = true;
+    immortal        = false;
+    bounces         = false;
+    sizeAge         = false;
+    opacityAge      = false;
+    colorAge        = false;
+    flickersAge     = false;
     isEmpty         = false;
     age             = 0;
     width           = ofGetWidth();
@@ -30,9 +30,9 @@ void Particle::setup(float id, ofPoint pos, ofPoint vel, ofColor color, float in
 void Particle::update(float dt){
     if(isAlive){
         // Perlin noise
-        // noise = ofNoise(pos.x*0.005f, pos.y*0.005f, dt*0.1f);
-        // float angle = noise*30.0f;
-        // acc = ofPoint(cos(angle), sin(angle)) * age * 0.1;
+//         noise = ofNoise(pos.x*0.005f, pos.y*0.005f, dt*0.1f);
+//         float angle = noise*30.0f;
+//         acc = ofPoint(cos(angle), sin(angle)) * age * 0.1;
 
         // Update position
         vel += acc;
@@ -86,31 +86,6 @@ void Particle::update(float dt){
     }
 }
 
-void Particle::update(float dt, vector<irMarker>& markers){
-
-    update(dt);
-
-    // Find closest marker to particle
-    float minDist = 5000;
-    markerDist = 0;
-    ofPoint markerPos;
-    color.set(255);
-
-    for(int i = 0; i < markers.size(); i++){
-        if (!markers[i].hasDisappeared){
-            markerDist = pos.squareDistance(markers[i].smoothPos);
-            if(markerDist < minDist){
-                dir = markers[i].smoothPos - pos;
-                minDist = markerDist;
-                markerPos = markers[i].smoothPos;
-                color = markers[i].color;
-                dir.normalize();
-            }
-        }
-    }
-
-}
-
 void Particle::draw(){
     if(isAlive){
         ofPushStyle();
@@ -127,8 +102,8 @@ void Particle::draw(){
 
         ofCircle(pos, radius);
 
-        ofLine(pos, prevPos);
-        prevPos = pos;
+//        ofLine(pos, prevPos);
+//        prevPos = pos;
 
         // // Draw arrows
         // if (markerDist == 0){
@@ -145,9 +120,73 @@ void Particle::draw(){
     }
 }
 
-void Particle::applyForce(ofPoint force){
+void Particle::addForce(ofPoint force){
     force /= mass;
     acc += force;
+}
+
+void Particle::addRepulsionForce(Particle &p, float radius, float scale){
+    addRepulsionForce(p.pos.x, p.pos.y, radius, scale);
+}
+
+void Particle::addRepulsionForce(float x, float y, float radius, float scale){
+
+    // ----------- (1) make a vector of where this position is:
+	ofPoint posOfForce;
+	posOfForce.set(x, y);
+
+    // ----------- (2) calculate the difference & length
+
+	ofPoint diff	= pos - posOfForce;
+	float length	= pos.squareDistance(posOfForce); // faster than length or distance (no square root)
+
+    // ----------- (3) check close enough
+
+    bool closeEnough = true;
+    if (radius > 0){
+        if (length > radius){
+            closeEnough = false;
+        }
+    }
+
+    // ----------- (4) if so, update force
+    if (closeEnough == true){
+		float pct = 1 - (length / radius);  // stronger on the inside
+        diff.normalize();
+        addForce(ofPoint(diff.x * scale * pct, diff.y * scale * pct));
+    }
+}
+
+void Particle::addAttractionForce(Particle &p, float radius, float scale){
+    addAttractionForce(p.pos.x, p.pos.y, radius, scale);
+}
+
+void Particle::addAttractionForce(float x, float y, float radius, float scale){
+
+    // ----------- (1) make a vector of where this position is:
+	ofPoint posOfForce;
+	posOfForce.set(x, y);
+
+    // ----------- (2) calculate the difference & length
+
+	ofPoint diff	= pos - posOfForce;
+	float length	= pos.squareDistance(posOfForce); // faster than length or distance (no square root)
+
+    // ----------- (3) check close enough
+
+    bool closeEnough = true;
+    if (radius > 0){
+        if (length > radius){
+            closeEnough = false;
+        }
+    }
+
+    // ----------- (4) if so, update force
+    if (closeEnough == true){
+		float pct = 1 - (length / radius);  // stronger on the inside
+        diff.normalize();
+        addForce(ofPoint(- diff.x * scale * pct, - diff.y * scale * pct));
+    }
 }
 
 void Particle::kill(){
