@@ -105,6 +105,8 @@ class ofApp : public ofBaseApp{
         ofxUISuperCanvas *gui8Grid;
         vector<ofxUISuperCanvas *> guis;
         //--------------------------------------------------------------
+        ofColor uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo;
+        //--------------------------------------------------------------
         ofxUIImageToggle *recordingSequence;  // Toggle to record gestures sequence
         ofxUILabel *sequenceFilename;         // Name of the sequence
         ofxUILabel *sequenceDuration;         // Duration of the sequence in seconds

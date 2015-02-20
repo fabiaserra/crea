@@ -9,9 +9,12 @@ class Particle
 
         void setup(float id, ofPoint pos, ofPoint vel, ofColor color, float initialRadius, float lifetime);
         void update(float dt);
-        void update(float dt, vector<irMarker>& markers);
         void draw();
-        void applyForce(ofPoint force);
+        void addForce(ofPoint force);
+        void addRepulsionForce(float x, float y, float radius, float scale);
+        void addAttractionForce(float x, float y, float radius, float scale);
+        void addRepulsionForce(Particle &p, float radius, float scale);
+        void addAttractionForce(Particle &p, float radius, float scale);
         void kill();
 //--------------------------------------------------------------
         ofPoint pos;            // Position
@@ -43,7 +46,8 @@ class Particle
         bool  isEmpty;          // Draw only contour of the particle
 // --------------------------------------------------------------
         float markerDist;       // Distance between particle and closest marker
-        ofPoint dir;            // Direction from particle to closest marker
+        ofPoint closestPos;     // Position of the closest marker
+        ofPoint closestDir;     // Direction from particle to closest marker
 // --------------------------------------------------------------
         int width;              // Particle boundaries
         int height;

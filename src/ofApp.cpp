@@ -128,6 +128,15 @@ void ofApp::setup(){
     guiWidth = 240;
     theme = OFX_UI_THEME_GRAYDAY;
 
+    // GUI COLORS
+    uiThemecb.set(128, 210), uiThemeco.set(192, 255), uiThemecoh.set(192, 255);
+    uiThemecf.set(255, 255); uiThemecfh.set(160, 255), uiThemecp.set(128, 192);
+    uiThemecpo.set(255, 192);
+
+//    uiThemecb.set(41, 34, 31, 192), uiThemeco.set(19, 116, 125, 192), uiThemecoh.set(41, 34, 31, 192);
+//    uiThemecf.set(252, 53, 76, 255); uiThemecfh.set(252, 247, 197, 255), uiThemecp.set(10, 191, 188, 192);
+//    uiThemecpo.set(19, 116, 125, 192);
+
     setupGUI0();
     setupGUI1();
     setupGUI2();
@@ -137,8 +146,9 @@ void ofApp::setup(){
     setupGUI6();
     setupGUI7();
     setupGUI8Marker();
+    setupGUI8Contour();
     setupGUI8Grid();
-//    setupgui8Marker(MARKER_PARTICLES);
+//    setupgui8(MARKER_PARTICLES);
 
     interpolatingWidgets = false;
     loadGUISettings("settings/lastSettings.xml", false, true);
@@ -334,8 +344,9 @@ void ofApp::draw(){
 
 //--------------------------------------------------------------
 void ofApp::setupGUI0(){
+
     gui0 = new ofxUISuperCanvas("0: MAIN WINDOW", 0, 0, guiWidth, ofGetHeight());
-    gui0->setTheme(theme);
+    gui0->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui0->addSpacer();
     gui0->addLabel("Press panel number 0 to 7 to", OFX_UI_FONT_SMALL);
@@ -387,8 +398,7 @@ void ofApp::setupGUI0(){
 //--------------------------------------------------------------
 void ofApp::setupGUI1(){
     gui1 = new ofxUISuperCanvas("1: BASICS", 0, 0, guiWidth, ofGetHeight());
-    gui1->setTheme(theme);
-    gui1->setTriggerWidgetsUponLoad(true);
+    gui1->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui1->addSpacer();
     gui1->addLabel("Press '1' to hide panel", OFX_UI_FONT_SMALL);
@@ -411,27 +421,6 @@ void ofApp::setupGUI1(){
 
     gui1->addSpacer();
 
-    gui1->addLabel("GUI THEME");
-    vector<string> themes;
-    themes.push_back("DEFAULT");
-    themes.push_back("HIPSTER");
-    themes.push_back("GRAYDAY");
-    themes.push_back("RUSTIC");
-    themes.push_back("LIMESTONE");
-    themes.push_back("VEGAN");
-    themes.push_back("BLUEBLUE");
-    themes.push_back("COOLCLAY");
-    themes.push_back("SPEARMINT");
-    themes.push_back("PEPTOBISMOL");
-    themes.push_back("MIDNIGHT");
-    themes.push_back("BERLIN");
-
-    ofxUIRadio *guiThemes;
-    guiThemes = gui1->addRadio("GUI Theme", themes, OFX_UI_ORIENTATION_VERTICAL);
-    guiThemes->activateToggle("GRAYDAY");
-
-    gui1->addSpacer();
-
     gui1->autoSizeToFitWidgets();
     gui1->setVisible(false);
     ofAddListener(gui1->newGUIEvent, this, &ofApp::guiEvent);
@@ -441,7 +430,7 @@ void ofApp::setupGUI1(){
 //--------------------------------------------------------------
 void ofApp::setupGUI2(){
     gui2 = new ofxUISuperCanvas("2: KINECT", 0, 0, guiWidth, ofGetHeight());
-    gui2->setTheme(theme);
+    gui2->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui2->addSpacer();
     gui2->addLabel("Press '2' to hide panel", OFX_UI_FONT_SMALL);
@@ -486,7 +475,7 @@ void ofApp::setupGUI2(){
 //--------------------------------------------------------------
 void ofApp::setupGUI3(){
     gui3 = new ofxUISuperCanvas("3: GESTURE SEQUENCE", 0, 0, guiWidth, ofGetHeight());
-    gui3->setTheme(theme);
+    gui3->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui3->addSpacer();
     gui3->addLabel("Press '3' to hide panel", OFX_UI_FONT_SMALL);
@@ -515,7 +504,7 @@ void ofApp::setupGUI3(){
 //--------------------------------------------------------------
 void ofApp::setupGUI4(){
     gui4 = new ofxUISuperCanvas("4: GESTURE TRACKER", 0, 0, guiWidth, ofGetHeight());
-    gui4->setTheme(theme);
+    gui4->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui4->addSpacer();
     gui4->addLabel("Press '4' to hide panel", OFX_UI_FONT_SMALL);
@@ -538,7 +527,7 @@ void ofApp::setupGUI4(){
 //--------------------------------------------------------------
 void ofApp::setupGUI5(){
     gui5 = new ofxUISuperCanvas("5: CUE LIST", 0, 0, guiWidth, ofGetHeight());
-    gui5->setTheme(theme);
+    gui5->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui5->addSpacer();
     gui5->addLabel("Press '5' to hide panel", OFX_UI_FONT_SMALL);
@@ -581,7 +570,7 @@ void ofApp::setupGUI5(){
 //--------------------------------------------------------------
 void ofApp::setupGUI6(){
     gui6 = new ofxUISuperCanvas("6: FLUID SOLVER", 0, 0, guiWidth, ofGetHeight());
-    gui6->setTheme(theme);
+    gui6->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui6->addSpacer();
     gui6->addLabel("Press '6' to hide panel", OFX_UI_FONT_SMALL);
@@ -600,7 +589,7 @@ void ofApp::setupGUI6(){
 //--------------------------------------------------------------
 void ofApp::setupGUI7(){
     gui7 = new ofxUISuperCanvas("7: DEPTH CONTOUR", 0, 0, guiWidth, ofGetHeight());
-    gui7->setTheme(theme);
+    gui7->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui7->addSpacer();
     gui7->addLabel("Press '7' to hide panel", OFX_UI_FONT_SMALL);
@@ -623,7 +612,7 @@ void ofApp::setupGUI7(){
 //--------------------------------------------------------------
 void ofApp::setupGUI8Marker(){
     gui8Marker = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
-    gui8Marker->setTheme(theme);
+    gui8Marker->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui8Marker->addSpacer();
     gui8Marker->addLabel("Press '8' to hide panel", OFX_UI_FONT_SMALL);
@@ -681,9 +670,9 @@ void ofApp::setupGUI8Marker(){
 }
 
 //--------------------------------------------------------------
-void ofApp::setupGUI8Grid(){
+void ofApp::setupGUI8Contour(){
     gui8Contour = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
-    gui8Contour->setTheme(theme);
+    gui8Contour->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui8Contour->addSpacer();
     gui8Contour->addLabel("Press '8' to hide panel", OFX_UI_FONT_SMALL);
@@ -709,7 +698,7 @@ void ofApp::setupGUI8Grid(){
 //--------------------------------------------------------------
 void ofApp::setupGUI8Grid(){
     gui8Grid = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
-    gui8Grid->setTheme(theme);
+    gui8Grid->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui8Grid->addSpacer();
     gui8Grid->addLabel("Press '8' to hide panel", OFX_UI_FONT_SMALL);
@@ -1182,36 +1171,6 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     //  cout << radio->getName() << " value: " << radio->getValue() << " active name: " << radio->getActiveName() << endl;
     // }
 
-    if(e.getName() == "GUI Theme"){
-        ofxUIRadio *radio = (ofxUIRadio *) e.widget;
-
-        string name = radio->getActiveName();
-        if(name == "DEFAULT")      theme = OFX_UI_THEME_DEFAULT;
-        if(name == "HIPSTER")      theme = OFX_UI_THEME_HIPSTER;
-        if(name == "GRAYDAY")      theme = OFX_UI_THEME_GRAYDAY;
-        if(name == "RUSTIC")       theme = OFX_UI_THEME_RUSTIC;
-        if(name == "LIMESTONE")    theme = OFX_UI_THEME_LIMESTONE;
-        if(name == "VEGAN")        theme = OFX_UI_THEME_VEGAN;
-        if(name == "BLUEBLUE")     theme = OFX_UI_THEME_BLUEBLUE;
-        if(name == "COOLCLAY")     theme = OFX_UI_THEME_COOLCLAY;
-        if(name == "SPEARMINT")    theme = OFX_UI_THEME_SPEARMINT;
-        if(name == "PEPTOBISMOL")  theme = OFX_UI_THEME_PEPTOBISMOL;
-        if(name == "MIDNIGHT")     theme = OFX_UI_THEME_MIDNIGHT;
-        if(name == "BERLIN")       theme = OFX_UI_THEME_BERLIN;
-
-        gui0->setTheme(theme);
-        gui1->setTheme(theme);
-        gui2->setTheme(theme);
-        gui3->setTheme(theme);
-        gui4->setTheme(theme);
-        gui5->setTheme(theme);
-        gui6->setTheme(theme);
-        gui7->setTheme(theme);
-        gui8Marker->setTheme(theme);
-        gui8Contour->setTheme(theme);
-        gui8Grid->setTheme(theme);
-    }
-
     if(e.getName() == "Previous Particle System"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if(button->getValue() == true){
@@ -1230,12 +1189,12 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 
     if(e.getName() == "Particles Active"){
         ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
-        if(toggle->getValue() == false) particleSystems[currentParticleSystem]->killParticles();
+//        if(toggle->getValue() == false) particleSystems[currentParticleSystem]->killParticles();
     }
 
     if(e.getName() == "Immortal"){
         ofxUIToggle *toggle = (ofxUIToggle *) e.widget;
-        if(toggle->getValue() == false) particleSystems[currentParticleSystem]->killParticles();
+//        if(toggle->getValue() == false) particleSystems[currentParticleSystem]->killParticles();
     }
 }
 
