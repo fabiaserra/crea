@@ -197,7 +197,7 @@ void ofApp::update(){
     if(drawSequence) sequence.update();
     
     // Load a saved image for playback
-    #ifdef KINECT_CONNECTED
+    #ifndef KINECT_CONNECTED
     ofImage *img = savedImages[currentSavedImage];
     depthImage.setFromPixels(img->getPixels(), img->getWidth(), img->getHeight(), OF_IMAGE_GRAYSCALE);
     #endif
