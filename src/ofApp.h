@@ -68,10 +68,10 @@ class ofApp : public ofBaseApp{
         bool  resetKinect;      // Reset kinect
         float reScale;          // Ratio to scale the Image to full screen
         //--------------------------------------------------------------
-        ofDirectory dir;                 // directory lister
-        int saveCounter;                 // saved image index for recording
-        vector<ofImage *> savedImages;     // the saved images for playback
-        int currentSavedImage;           // current image index
+        vector<ofImage *> savedDepthImages; // the saved Depth images for playback
+        vector<ofImage *> savedIrImages;    // the saved IR images for playback
+        int saveCounter;                    // saved image index for recording
+        int currentImage;                   // current image index
         //--------------------------------------------------------------
         ofImage irImage, irOriginal;
         ofImage depthImage, depthOriginal;
@@ -131,6 +131,7 @@ class ofApp : public ofBaseApp{
         float guiWidth;
         //--------------------------------------------------------------
         float red, green, blue;
+        //ofColor bgColor;
         //--------------------------------------------------------------
         float nearClipping, farClipping;
         float nearThreshold, farThreshold;

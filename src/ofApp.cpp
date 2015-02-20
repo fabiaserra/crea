@@ -17,19 +17,32 @@ void ofApp::setup(){
     // not connected
     #else
     // Load png files from file
+    ofDirectory dir;                    // directory lister
     dir.allowExt("png");
-    dir.setVerbose(false);
-    string folder = "01/";
-    totalImages = dir.listDir(folder);
+//    dir.setVerbose(false);
     saveCounter = 0;
-    currentSavedImage = 0;
+    currentImage = 0;
     
-    // load all recorded depth images in "data/01/"
+    string depthFolder = "depth01/";
+    int totalImages = dir.listDir(depthFolder);
+
+    // load all recorded depth images in "data/depth01/"
     for(int i = 0; i < totalImages; i++){
         ofImage *img = new ofImage();
-        img.loadImage(folder + dir.getName(i));
-        img.setImageType(OF_IMAGE_GRAYSCALE);
-        savedImages.push_back(img);
+        img->loadImage(depthFolder + dir.getName(i));
+        img->setImageType(OF_IMAGE_GRAYSCALE);
+        savedDepthImages.push_back(img);
+    }
+    
+    string irFolder = "ir01/";
+    totalImages = dir.listDir(irFolder);
+    
+    // load all recorded IR images in "data/ir01/"
+    for(int i = 0; i < totalImages; i++){
+        ofImage *img = new ofImage();
+        img->loadImage(irFolder + dir.getName(i));
+        img->setImageType(OF_IMAGE_GRAYSCALE);
+        savedIrImages.push_back(img);
     }
     
     #endif
@@ -198,8 +211,14 @@ void ofApp::update(){
     
     // Load a saved image for playback
     #ifndef KINECT_CONNECTED
-    ofImage *img = savedImages[currentSavedImage];
-    depthImage.setFromPixels(img->getPixels(), img->getWidth(), img->getHeight(), OF_IMAGE_GRAYSCALE);
+        ofImage *img = savedDepthImages[currentImage];
+        depthOriginal.setFromPixels(img->getPixels(), img->getWidth(), img->getHeight(), OF_IMAGE_GRAYSCALE);
+    
+        img = savedIrImages[currentImage];
+        irOriginal.setFromPixels(img->getPixels(), img->getWidth(), img->getHeight(), OF_IMAGE_GRAYSCALE);
+    
+        currentImage++;
+        if(currentImage >= savedDepthImages.size()) currentImage = 0;
     #endif
     
     // Nothing will happen here if the kinect is unplugged
@@ -208,22 +227,23 @@ void ofApp::update(){
         kinect.setDepthClipping(nearClipping, farClipping);
         depthOriginal.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
         if(flipKinect) depthOriginal.mirror(false, true);
-        
-        // Record the depth images to "data/01/" as long as we are running
-        #ifdef KINECT_RECORD
-        depthImage.saveImage("01/"+ofToString(saveCounter)+".png");
-        saveCounter++;
-        #endif
-
-        copy(depthOriginal, depthImage);
-        copy(depthOriginal, grayThreshNear);
-        copy(depthOriginal, grayThreshFar);
 
         irOriginal.setFromPixels(kinect.getPixels(), kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
         if(flipKinect) irOriginal.mirror(false, true);
-
-        copy(irOriginal, irImage);
+        
+        // Record the depth images to "data/depth01/" and "data/ir01/" as long as we are running
+        #ifdef KINECT_RECORD
+            depthOriginal.saveImage("depth01/"+ofToString(saveCounter)+".png");
+            irOriginal.saveImage("ir01/"+ofToString(saveCounter)+".png");
+            saveCounter++;
+        #endif
     }
+    
+    copy(irOriginal, irImage);
+    
+    copy(depthOriginal, depthImage);
+    copy(depthOriginal, grayThreshNear);
+    copy(depthOriginal, grayThreshFar);
 
     // Filter the IR image
     erode(irImage);
@@ -1293,11 +1313,17 @@ void ofApp::exit(){
 //    particleSystems.clear();
     
     // Cleanup any loaded images
-    for(int i = 0; i < savedImages.size(); i++){
-        ofImage *img = savedImages[i];
+    for(int i = 0; i < savedDepthImages.size(); i++){
+        ofImage *img = savedDepthImages[i];
         delete img;
     }
-    savedImages.clear();
+    savedDepthImages.clear();
+    
+    for(int i = 0; i < savedIrImages.size(); i++){
+        ofImage *img = savedIrImages[i];
+        delete img;
+    }
+    savedIrImages.clear();
 
     delete gui0;
     delete gui1;
