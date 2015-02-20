@@ -108,9 +108,6 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers){
                 addParticles(markers[i].bornRate, markers[i]);
             }
 		}
-		else{
-            killParticles();
-		}
 
 		// Update the particles
 		for(int i = 0; i < particles.size(); i++){
@@ -142,9 +139,6 @@ void ParticleSystem::update(float dt, Contour& contour){
             for(unsigned int i = 0; i < contour.contours.size(); i++){
                 addParticles(bornRate, contour.contours[i]);
             }
-		}
-        else{
-            killParticles();
 		}
 
 		// Update the particles
@@ -264,6 +258,13 @@ void ParticleSystem::killParticles(){
 	for(int i = 0; i < particles.size(); i++){
 		particles[i]->immortal = false;
 	}
+}
+
+void ParticleSystem::bornParticles(){
+    if(particleMode == GRID_PARTICLES){
+        immortal = true;
+        createParticleGrid(width, height);
+    }
 }
 
 void ParticleSystem::repulseParticles(){

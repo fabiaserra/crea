@@ -9,8 +9,30 @@ void ofApp::setup(){
     // ofEnableBlendMode(OF_BLENDMODE_ADD);
 
     // OPEN KINECT
+    // using a live kinect?
+    #ifdef KINECT_CONNECTED
     kinect.init(true); // shows infrared instead of RGB video Image
     kinect.open();
+    
+    // not connected
+    #else
+    // Load png files from file
+    dir.allowExt("png");
+    dir.setVerbose(false);
+    string folder = "01/";
+    totalImages = dir.listDir(folder);
+    saveCounter = 0;
+    currentSavedImage = 0;
+    
+    // load all recorded depth images in "data/01/"
+    for(int i = 0; i < totalImages; i++){
+        ofImage *img = new ofImage();
+        img.loadImage(folder + dir.getName(i));
+        img.setImageType(OF_IMAGE_GRAYSCALE);
+        savedImages.push_back(img);
+    }
+    
+    #endif
 
     reScale = (float)ofGetHeight() / (float)kinect.height;
     time0 = ofGetElapsedTimef();
@@ -119,13 +141,18 @@ void ofApp::setup(){
     theme = OFX_UI_THEME_GRAYDAY;
 
     // GUI COLORS
-    uiThemecb.set(128, 210), uiThemeco.set(192, 255), uiThemecoh.set(192, 255);
-    uiThemecf.set(255, 255); uiThemecfh.set(160, 255), uiThemecp.set(128, 192);
+//    uiThemecb.set(128, 210), uiThemeco.set(192, 255), uiThemecoh.set(192, 255);
+//    uiThemecf.set(255, 255); uiThemecfh.set(160, 255), uiThemecp.set(128, 192);
+//    uiThemecpo.set(255, 192);
+    
+    uiThemecb.set(64, 192), uiThemeco.set(192, 192), uiThemecoh.set(128, 192);
+    uiThemecf.set(240, 255); uiThemecfh.set(128, 255), uiThemecp.set(96, 192);
     uiThemecpo.set(255, 192);
 
 //    uiThemecb.set(41, 34, 31, 192), uiThemeco.set(19, 116, 125, 192), uiThemecoh.set(41, 34, 31, 192);
 //    uiThemecf.set(252, 53, 76, 255); uiThemecfh.set(252, 247, 197, 255), uiThemecp.set(10, 191, 188, 192);
 //    uiThemecpo.set(19, 116, 125, 192);
+
 
     setupGUI0();
     setupGUI1();
@@ -168,12 +195,25 @@ void ofApp::update(){
 
     // Update sequence playhead to draw gesture
     if(drawSequence) sequence.update();
-
+    
+    // Load a saved image for playback
+    #ifdef KINECT_CONNECTED
+    ofImage *img = savedImages[currentSavedImage];
+    depthImage.setFromPixels(img->getPixels(), img->getWidth(), img->getHeight(), OF_IMAGE_GRAYSCALE);
+    #endif
+    
+    // Nothing will happen here if the kinect is unplugged
     kinect.update();
     if(kinect.isFrameNew()){
         kinect.setDepthClipping(nearClipping, farClipping);
         depthOriginal.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
         if(flipKinect) depthOriginal.mirror(false, true);
+        
+        // Record the depth images to "data/01/" as long as we are running
+        #ifdef KINECT_RECORD
+        depthImage.saveImage("01/"+ofToString(saveCounter)+".png");
+        saveCounter++;
+        #endif
 
         copy(depthOriginal, depthImage);
         copy(depthOriginal, grayThreshNear);
@@ -183,86 +223,86 @@ void ofApp::update(){
         if(flipKinect) irOriginal.mirror(false, true);
 
         copy(irOriginal, irImage);
+    }
 
-        // Filter the IR image
-        erode(irImage);
-        blur(irImage, 21);
-        dilate(irImage);
-        threshold(irImage, irThreshold);
+    // Filter the IR image
+    erode(irImage);
+    blur(irImage, 21);
+    dilate(irImage);
+    threshold(irImage, irThreshold);
 
-        // Treshold and filter depth image
-        threshold(grayThreshNear, nearThreshold, true);
-        threshold(grayThreshFar, farThreshold);
-        bitwise_and(grayThreshNear, grayThreshFar, depthImage);
-        // erode(depthImage);
-        // blur(depthImage, 21);
-        // dilate(depthImage);
+    // Treshold and filter depth image
+    threshold(grayThreshNear, nearThreshold, true);
+    threshold(grayThreshFar, farThreshold);
+    bitwise_and(grayThreshNear, grayThreshFar, depthImage);
+    // erode(depthImage);
+    // blur(depthImage, 21);
+    // dilate(depthImage);
 
-        // Update images
-        irImage.update();
-        depthImage.update();
+    // Update images
+    irImage.update();
+    depthImage.update();
 
-        // Contour Finder + marker tracker in the IR Image
-        irMarkerFinder.findContours(irImage);
-        tracker.track(irMarkerFinder.getBoundingRects());
+    // Contour Finder + marker tracker in the IR Image
+    irMarkerFinder.findContours(irImage);
+    tracker.track(irMarkerFinder.getBoundingRects());
+    
+    // Contour Finder in the depth Image
+    contourFinder.findContours(depthImage);
 
-        // Contour Finder in the depth Image
-        contourFinder.findContours(depthImage);
+    // Track markers
+    vector<irMarker>& tempMarkers       = tracker.getFollowers();   // TODO: assign dead labels to new labels and have a MAX number of markers
+    vector<unsigned int> deadLabels     = tracker.getDeadLabels();
+    vector<unsigned int> currentLabels  = tracker.getCurrentLabels();
+    // vector<unsigned int> newLabels      = tracker.getNewLabels();
 
-        // Track markers
-        vector<irMarker>& tempMarkers       = tracker.getFollowers();   // TODO: assign dead labels to new labels and have a MAX number of markers
-        vector<unsigned int> deadLabels     = tracker.getDeadLabels();
-        vector<unsigned int> currentLabels  = tracker.getCurrentLabels();
-        // vector<unsigned int> newLabels      = tracker.getNewLabels();
+    // Update markers if we loose track of them
+    for(unsigned int i = 0; i < tempMarkers.size(); i++){
+        tempMarkers[i].updateLabels(deadLabels, currentLabels);
+    }
 
-        // Update markers if we loose track of them
-        for(unsigned int i = 0; i < tempMarkers.size(); i++){
-            tempMarkers[i].updateLabels(deadLabels, currentLabels);
-        }
+    // Record sequence when recording button is true
+    if(recordingSequence->getValue() == true) sequence.record(tempMarkers);
 
-        // Record sequence when recording button is true
-        if(recordingSequence->getValue() == true) sequence.record(tempMarkers);
+    // Print currentLabels
+    // cout << "Current:" << endl;
+    // for(unsigned int i = 0; i < currentLabels.size(); i++){
+    //     cout << currentLabels[i] << endl;
+    // }
 
-        // Print currentLabels
-        // cout << "Current:" << endl;
-        // for(unsigned int i = 0; i < currentLabels.size(); i++){
-        //     cout << currentLabels[i] << endl;
-        // }
+    // Print markers for debug
+    // cout << "markers:" << endl;
+    // for(unsigned int i = 0; i < tempMarkers.size(); i++){
+    //    cout << tempMarkers[i].getLabel() << endl;
+    // }
 
-        // Print markers for debug
-        // cout << "markers:" << endl;
-        // for(unsigned int i = 0; i < tempMarkers.size(); i++){
-        //    cout << tempMarkers[i].getLabel() << endl;
-        // }
+    // Update contour
+    contour.update(contourFinder);
 
-        // Update contour
-        contour.update(contourFinder);
+    // Update grid particles
+    gridParticles->update(dt, tempMarkers);
 
-        // Update grid particles
-        gridParticles->update(dt, tempMarkers);
+    // Update markers particles
+    markerParticles->update(dt, tempMarkers);
 
-        // Update markers particles
-//        markerParticles->update(dt, tempMarkers);
+    // Update contour particles
+    contourParticles->update(dt, contour);
 
-        // Update contour particles
-//        contourParticles->update(dt, contour);
-
-        // Gesture Tracking with VMO here?
-        if (tempMarkers.size()>1){
-            if (!stopTracking){
-                vector<float> obs; // Temporary code
-                for(unsigned int i = 0; i < 2; i++){
-                    obs.push_back(tempMarkers[i].smoothPos.x);
-                    obs.push_back(tempMarkers[i].smoothPos.y);
-                }
-                if(initStatus){
-                    currentBf = vmo::tracking_init(seqVmo, pttrList, obs);
-                    initStatus = false;
-                }
-                else{
-                    prevBf = currentBf;
-                    currentBf = vmo::tracking(seqVmo, pttrList, prevBf, obs);
-                }
+    // Gesture Tracking with VMO here?
+    if (tempMarkers.size()>1){
+        if (!stopTracking){
+            vector<float> obs; // Temporary code
+            for(unsigned int i = 0; i < 2; i++){
+                obs.push_back(tempMarkers[i].smoothPos.x);
+                obs.push_back(tempMarkers[i].smoothPos.y);
+            }
+            if(initStatus){
+                currentBf = vmo::tracking_init(seqVmo, pttrList, obs);
+                initStatus = false;
+            }
+            else{
+                prevBf = currentBf;
+                currentBf = vmo::tracking(seqVmo, pttrList, prevBf, obs);
             }
         }
     }
@@ -395,9 +435,9 @@ void ofApp::setupGUI1(){
 
     gui1->addSpacer();
     gui1->addLabel("SETTINGS");
-    gui1->addImageButton("Save Settings", "icons/save.png", false, dim, dim);
+    gui1->addImageButton("Save Settings", "icons/save.png", false, dim, dim)->setColorBack(ofColor(150, 255));
     gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui1->addImageButton("Load Settings", "icons/open.png", false, dim, dim);
+    gui1->addImageButton("Load Settings", "icons/open.png", false, dim, dim)->setColorBack(ofColor(150, 255));
     gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui1->addSpacer();
@@ -463,10 +503,11 @@ void ofApp::setupGUI3(){
 
     gui3->addSpacer();
     recordingSequence = gui3->addImageToggle("Record Sequence", "icons/record.png", false, dim, dim);
+    recordingSequence->setColorBack(ofColor(150, 255));
     gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui3->addImageButton("Save Sequence", "icons/save.png", false, dim, dim);
-    gui3->addImageButton("Load Sequence", "icons/open.png", false, dim, dim);
-    gui3->addImageToggle("Play Sequence", "icons/play.png", &drawSequence, dim, dim);
+    gui3->addImageButton("Save Sequence", "icons/save.png", false, dim, dim)->setColorBack(ofColor(150, 255));
+    gui3->addImageButton("Load Sequence", "icons/open.png", false, dim, dim)->setColorBack(ofColor(150, 255));
+    gui3->addImageToggle("Play Sequence", "icons/play.png", &drawSequence, dim, dim)->setColorBack(ofColor(150, 255));
     gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui3->addSpacer();
@@ -491,10 +532,10 @@ void ofApp::setupGUI4(){
     gui4->addLabel("Press '4' to hide panel", OFX_UI_FONT_SMALL);
 
     gui4->addSpacer();
-    gui4->addImageButton("Start vmo", "icons/play.png", false, dim, dim);
+    gui4->addImageButton("Start vmo", "icons/play.png", false, dim, dim)->setColorBack(ofColor(150, 255));
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui4->addImageButton("Stop vmo", "icons/delete.png", false, dim, dim);
-    gui4->addImageToggle("Show gesture patterns", "icons/show.png", &drawPatterns, dim, dim);
+    gui4->addImageButton("Stop vmo", "icons/delete.png", false, dim, dim)->setColorBack(ofColor(150, 255));
+    gui4->addImageToggle("Show gesture patterns", "icons/show.png", &drawPatterns, dim, dim)->setColorBack(ofColor(150, 255));
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui4->addSpacer();
@@ -529,14 +570,25 @@ void ofApp::setupGUI5(){
 
     gui5->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui5->addSpacer();
-    gui5->addImageButton("New Cue", "icons/add.png", false, dim, dim);
+    gui5->addImageButton("New Cue", "icons/add.png", false, dim, dim)->setColorBack(ofColor(150, 255));
     gui5->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui5->addImageButton("Save Cue", "icons/save.png", false, dim, dim);
-    gui5->addImageButton("Previous Cue", "icons/previous.png", false, dim, dim)->bindToKey(OF_KEY_LEFT);
-    gui5->addImageButton("Next Cue", "icons/play.png", false, dim, dim)->bindToKey(OF_KEY_RIGHT);
-    gui5->addImageButton("Load Cue", "icons/open.png", false, dim, dim);
-    gui5->addImageButton("Delete Cue", "icons/delete.png", false, dim, dim);
+    gui5->addImageButton("Save Cue", "icons/save.png", false, dim, dim)->setColorBack(ofColor(150, 255));
+    
+    ofxUIButton *previous;
+    previous = gui5->addImageButton("Previous Cue", "icons/previous.png", false, dim, dim);
+    previous->bindToKey(OF_KEY_LEFT);
+    previous->setColorBack(ofColor(150, 255));
+    
+    ofxUIButton *next;
+    next = gui5->addImageButton("Next Cue", "icons/play.png", false, dim, dim);
+    next->bindToKey(OF_KEY_RIGHT);
+    next->setColorBack(ofColor(150, 255));
+    
+    gui5->addImageButton("Load Cue", "icons/open.png", false, dim, dim)->setColorBack(ofColor(150, 255));
+    gui5->addImageButton("Delete Cue", "icons/delete.png", false, dim, dim)->setColorBack(ofColor(150, 255));
+    
     gui5->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN, OFX_UI_ALIGN_CENTER);
+    
     gui5->addSpacer();
     gui5->addLabelButton("GO", false, 230, 40)->bindToKey(' ');
 
@@ -601,8 +653,19 @@ void ofApp::setupGUI8Marker(){
     gui8Marker->addSpacer();
     gui8Marker->addImageToggle("Particles Active", "icons/show.png", &markerParticles->isActive, dim, dim);
     gui8Marker->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui8Marker->addImageButton("Previous Particle System", "icons/previous.png", false, dim, dim)->bindToKey(OF_KEY_LEFT);
-    gui8Marker->addImageButton("Next Particle System", "icons/play.png", false, dim, dim)->bindToKey(OF_KEY_RIGHT);
+    
+    ofxUIImageButton *previous;
+    previous = gui8Marker->addImageButton("Previous Particle System", "icons/previous.png", false, dim, dim);
+//    previous->bindToKey(OF_KEY_LEFT);
+//    previous->setTriggerType(OFX_UI_TRIGGER_BEGIN);
+    previous->setColorBack(ofColor(150, 255));
+    
+    ofxUIImageButton *next;
+    next = gui8Marker->addImageButton("Next Particle System", "icons/play.png", false, dim, dim);
+//    next->bindToKey(OF_KEY_RIGHT);
+//    next->setTriggerType(OFX_UI_TRIGGER_BEGIN);
+    next->setColorBack(ofColor(150, 255));
+
     gui8Marker->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui8Marker->addLabel("MARKER PARTICLES", OFX_UI_FONT_LARGE);
@@ -648,6 +711,7 @@ void ofApp::setupGUI8Marker(){
     gui8Marker->setVisible(false);
     ofAddListener(gui8Marker->newGUIEvent, this, &ofApp::guiEvent);
     guis.push_back(gui8Marker);
+    particleGuis.push_back(gui8Marker);
 }
 
 //--------------------------------------------------------------
@@ -661,8 +725,19 @@ void ofApp::setupGUI8Contour(){
     gui8Contour->addSpacer();
     gui8Contour->addImageToggle("Particles Active", "icons/show.png", &contourParticles->isActive, dim, dim);
     gui8Contour->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui8Contour->addImageButton("Previous Particle System", "icons/previous.png", false, dim, dim)->bindToKey(OF_KEY_LEFT);
-    gui8Contour->addImageButton("Next Particle System", "icons/play.png", false, dim, dim)->bindToKey(OF_KEY_RIGHT);
+    
+    ofxUIImageButton *previous;
+    previous = gui8Contour->addImageButton("Previous Particle System", "icons/previous.png", false, dim, dim);
+//    previous->bindToKey(OF_KEY_LEFT);
+//    previous->setTriggerType(OFX_UI_TRIGGER_BEGIN);
+    previous->setColorBack(ofColor(150, 255));
+    
+    ofxUIImageButton *next;
+    next = gui8Contour->addImageButton("Next Particle System", "icons/play.png", false, dim, dim);
+//    next->bindToKey(OF_KEY_RIGHT);
+//    next->setTriggerType(OFX_UI_TRIGGER_BEGIN);
+    next->setColorBack(ofColor(150, 255));
+    
     gui8Contour->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui8Contour->addLabel("CONTOUR PARTICLES", OFX_UI_FONT_LARGE);
@@ -674,6 +749,7 @@ void ofApp::setupGUI8Contour(){
     gui8Contour->setVisible(false);
     ofAddListener(gui8Contour->newGUIEvent, this, &ofApp::guiEvent);
     guis.push_back(gui8Contour);
+    particleGuis.push_back(gui8Contour);
 }
 
 //--------------------------------------------------------------
@@ -687,8 +763,19 @@ void ofApp::setupGUI8Grid(){
     gui8Grid->addSpacer();
     gui8Grid->addImageToggle("Particles Active", "icons/show.png", &gridParticles->isActive, dim, dim);
     gui8Grid->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui8Grid->addImageButton("Previous Particle System", "icons/previous.png", false, dim, dim)->bindToKey(OF_KEY_LEFT);
-    gui8Grid->addImageButton("Next Particle System", "icons/play.png", false, dim, dim)->bindToKey(OF_KEY_RIGHT);
+    
+    ofxUIImageButton *previous;
+    previous = gui8Grid->addImageButton("Previous Particle System", "icons/previous.png", false, dim, dim);
+//    previous->bindToKey(OF_KEY_LEFT);
+//    previous->setTriggerType(OFX_UI_TRIGGER_BEGIN);
+    previous->setColorBack(ofColor(150, 255));
+    
+    ofxUIImageButton *next;
+    next = gui8Grid->addImageButton("Next Particle System", "icons/play.png", false, dim, dim);
+//    next->bindToKey(OF_KEY_RIGHT);
+//    next->setTriggerType(OFX_UI_TRIGGER_BEGIN);
+    next->setColorBack(ofColor(150, 255));
+    
     gui8Grid->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui8Grid->addLabel("GRID PARTICLES", OFX_UI_FONT_LARGE);
@@ -700,6 +787,7 @@ void ofApp::setupGUI8Grid(){
     gui8Grid->setVisible(false);
     ofAddListener(gui8Grid->newGUIEvent, this, &ofApp::guiEvent);
     guis.push_back(gui8Grid);
+    particleGuis.push_back(gui8Grid);
 }
 
 //--------------------------------------------------------------
@@ -1006,7 +1094,6 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if(button->getValue() == true){
             stopTracking = true;
-            cout << "STOP VMO" << endl;
         }
     }
 
@@ -1155,27 +1242,33 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     if(e.getName() == "Previous Particle System"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if(button->getValue() == true){
-            if(currentCueIndex > 0) currentCueIndex--;
-            else currentCueIndex = particleSystems.size()-1;
+            particleGuis.at(currentParticleSystem)->setVisible(false);
+            if(currentParticleSystem > 0) currentParticleSystem--;
+            else currentParticleSystem = particleSystems.size()-1;
+            particleGuis.at(currentParticleSystem)->setVisible(true);
         }
     }
 
     if(e.getName() == "Next Particle System"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if(button->getValue() == true){
-            if(currentCueIndex < particleSystems.size()-1) currentCueIndex++;
-            else currentCueIndex = 0;
+            particleGuis.at(currentParticleSystem)->setVisible(false);
+            if(currentParticleSystem < particleSystems.size()-1) currentParticleSystem++;
+            else currentParticleSystem = 0;
+            particleGuis.at(currentParticleSystem)->setVisible(true);
         }
     }
 
     if(e.getName() == "Particles Active"){
         ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
-//        if(toggle->getValue() == false) particleSystems[currentParticleSystem]->killParticles();
+        if(toggle->getValue() == true) particleSystems[currentParticleSystem]->bornParticles();
+        else particleSystems[currentParticleSystem]->killParticles();
+        
     }
 
     if(e.getName() == "Immortal"){
         ofxUIToggle *toggle = (ofxUIToggle *) e.widget;
-//        if(toggle->getValue() == false) particleSystems[currentParticleSystem]->killParticles();
+        if(toggle->getValue() == false) particleSystems[currentParticleSystem]->killParticles();
     }
 }
 
@@ -1198,6 +1291,13 @@ void ofApp::exit(){
 //        particleSystems.at(i) = NULL;
 //    }
 //    particleSystems.clear();
+    
+    // Cleanup any loaded images
+    for(int i = 0; i < savedImages.size(); i++){
+        ofImage *img = savedImages[i];
+        delete img;
+    }
+    savedImages.clear();
 
     delete gui0;
     delete gui1;
@@ -1327,9 +1427,7 @@ void ofApp::keyPressed(int key){
                 gui5->setVisible(false);
                 gui6->toggleVisible();
                 gui7->setVisible(false);
-                gui8Marker->setVisible(false);
-                gui8Contour->setVisible(false);
-                gui8Grid->setVisible(false);
+                particleGuis.at(currentParticleSystem)->setVisible(false);
                 break;
 
             case '7':
@@ -1341,9 +1439,7 @@ void ofApp::keyPressed(int key){
                 gui5->setVisible(false);
                 gui6->setVisible(false);
                 gui7->toggleVisible();
-                gui8Marker->setVisible(false);
-                gui8Contour->setVisible(false);
-                gui8Grid->setVisible(false);
+                particleGuis.at(currentParticleSystem)->setVisible(false);
                 break;
 
             case '8':
@@ -1355,17 +1451,7 @@ void ofApp::keyPressed(int key){
                 gui5->setVisible(false);
                 gui6->setVisible(false);
                 gui7->setVisible(false);
-                switch(currentParticleSystem){
-                    case 0:
-                        gui8Marker->toggleVisible();
-                        break;
-                    case 1:
-                        gui8Contour->toggleVisible();
-                        break;
-                    case 2:
-                        gui8Grid->toggleVisible();
-                        break;
-                }
+                particleGuis.at(currentParticleSystem)->toggleVisible();
                 break;
 
             default:

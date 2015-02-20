@@ -5,6 +5,12 @@
 #include "ofxCv.h"
 #include "ofxKinect.h"
 
+// comment this to use the recorded images
+#define KINECT_CONNECTED
+
+// uncomment this to record
+//#define KINECT_RECORD
+
 #include "ParticleSystem.h"
 #include "irMarker.h"
 #include "Contour.h"
@@ -62,6 +68,11 @@ class ofApp : public ofBaseApp{
         bool  resetKinect;      // Reset kinect
         float reScale;          // Ratio to scale the Image to full screen
         //--------------------------------------------------------------
+        ofDirectory dir;                 // directory lister
+        int saveCounter;                 // saved image index for recording
+        vector<ofImage *> savedImages;     // the saved images for playback
+        int currentSavedImage;           // current image index
+        //--------------------------------------------------------------
         ofImage irImage, irOriginal;
         ofImage depthImage, depthOriginal;
         ofImage grayThreshNear;
@@ -103,6 +114,7 @@ class ofApp : public ofBaseApp{
         ofxUISuperCanvas *gui8Marker;
         ofxUISuperCanvas *gui8Contour;
         ofxUISuperCanvas *gui8Grid;
+        vector<ofxUISuperCanvas *> particleGuis;
         vector<ofxUISuperCanvas *> guis;
         //--------------------------------------------------------------
         ofColor uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo;
