@@ -429,8 +429,8 @@ vector<vector<ofPolyline> > vmo::processPttr(vmo& oracle, const vmo::pttr& pttrL
 }
 
 
-vmo::belief vmo::tracking_init(vmo& oracle, const vmo::pttr& pttrList, vector<float> &firstObs){
-	vmo::belief bf = vmo::belief();
+vmo::belief &vmo::tracking_init(vmo &oracle, vmo::belief &bf, const vmo::pttr &pttrList, vector<float> &firstObs){
+//	vmo::belief bf = vmo::belief();
 	bf.K = oracle.latent.size();
 	bf.path.assign(bf.K, 0);
 	bf.cost.assign(bf.K, 0.0);
@@ -460,9 +460,9 @@ vmo::belief vmo::tracking_init(vmo& oracle, const vmo::pttr& pttrList, vector<fl
 	return bf;
 }
 
-vmo::belief vmo::tracking(vmo& oracle,
-						  const vmo::pttr& pttrList,
-						  vmo::belief& prevBf, vector<float> &obs){
+vmo::belief &vmo::tracking(vmo &oracle,
+						   const vmo::pttr &pttrList,
+						   vmo::belief &prevBf, vector<float> &obs){
 	/*
 	 Real-time tracking function for VMO, not optimized yet.
 	 */

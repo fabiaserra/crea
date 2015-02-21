@@ -94,8 +94,6 @@ void ofApp::setup(){
 
     initStatus = true;
     stopTracking = true;
-//    // gestureInd = -1;
-//    // gestureCat = -1;
     // 2. Processing
     // 2.1 Load file into VMO
 //    int minLen = 1; // Temporary setting
@@ -105,11 +103,17 @@ void ofApp::setup(){
     int minLen = 3;
     float start = 11.0, step = 0.01, stop = 14.0;
 
-    float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
-    seqVmo = vmo::buildOracle(obs, dimensions, maxMarkers, t);
+//    float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
+	float t = 12.3; // for sequence.xml
+//	float t = 18.6; // for sequence2.xml
+//	float t = 16.8; // for sequence3.xml
+	seqVmo = vmo::buildOracle(obs, dimensions, maxMarkers, t);
     // 2.2 Output pattern list
     pttrList = vmo::findPttr(seqVmo, minLen);
     sequence.loadPatterns(vmo::processPttr(seqVmo, pttrList));
+	
+	currentBf = vmo::vmo::belief();
+	prevBf = vmo::vmo::belief();
 	
 //    cout << "pattern size: "<<sequence.patterns.size() << endl;
 //	for (int i = 0; i < pttrList.size; i++) {
@@ -266,7 +270,7 @@ void ofApp::update(){
                     obs.push_back(tempMarkers[i].smoothPos.y);
                 }
                 if(initStatus){
-                    currentBf = vmo::tracking_init(seqVmo, pttrList, obs);
+                    currentBf = vmo::tracking_init(seqVmo, currentBf, pttrList, obs);
                     initStatus = false;
                 }
                 else{
@@ -275,12 +279,12 @@ void ofApp::update(){
 					cout << "current index: "<<currentBf.currentIdx << endl;
                 }
 				gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
-				for (int i = 0; i < sequence.patterns.size(); i++) {
-					if(gestureUpdate.find(i) != gestureUpdate.end()) {
-						cout << "key: "<< i << endl;
-						cout << "percent:"<< gestureUpdate[i] << endl;
-					}
-				}
+//				for (int i = 0; i < sequence.patterns.size(); i++) {
+//					if(gestureUpdate.find(i) != gestureUpdate.end()) {
+//						cout << "key:2 "<< i << endl;
+//						cout << "percent:"<< gestureUpdate[i] << endl;
+//					}
+//				}
             }
         }
     }

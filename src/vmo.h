@@ -111,12 +111,12 @@ public:
 	// Analysis functions
 	static vmo::pttr findPttr(const vmo& oracle, int minLen);
 	static vector< vector<ofPolyline> > processPttr(vmo& oracle, const vmo::pttr& pttrList);
-	static vmo::belief tracking_init(vmo& oracle,
-									 const vmo::pttr& pttrList,
-									 vector<float> &firstObs);
-	static vmo::belief tracking(vmo& oracle,
-								const vmo::pttr& pttrList,
-								vmo::belief& prevState, vector<float> &obs);
+	static vmo::belief &tracking_init(vmo& oracle, vmo::belief &bf,
+									  const vmo::pttr& pttrList,
+									  vector<float> &firstObs);
+	static vmo::belief &tracking(vmo& oracle,
+								 const vmo::pttr& pttrList,
+								 vmo::belief& prevState, vector<float> &obs);
 
 private:
 	// Helper functions
