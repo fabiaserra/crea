@@ -135,13 +135,14 @@ void ofApp::setup(){
 //    float start = 0.0, step = 0.05, stop = 10.0;
 
     // For sequence4.xml
-    int minLen = 3;
-    float start = 11.0, step = 0.01, stop = 14.0;
+    int minLen = 2;
+    float start = 10.0, step = 0.01, stop = 20.0;
 
 //    float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
 	float t = 12.3; // for sequence.xml
 //	float t = 18.6; // for sequence2.xml
 //	float t = 16.8; // for sequence3.xml
+	cout << t << endl;
 	seqVmo = vmo::buildOracle(obs, dimensions, maxMarkers, t);
     // 2.2 Output pattern list
     pttrList = vmo::findPttr(seqVmo, minLen);
@@ -326,7 +327,7 @@ void ofApp::update(){
         if (tempMarkers.size()>1){
             if (!stopTracking){
                 vector<float> obs; // Temporary code
-                for(unsigned int i = 0; i < 2; i++){
+                for(unsigned int i = 0; i < sequence.maxMarkers; i++){
                     obs.push_back(tempMarkers[i].smoothPos.x);
                     obs.push_back(tempMarkers[i].smoothPos.y);
                 }

@@ -385,7 +385,7 @@ vmo::pttr vmo::findPttr(const vmo& oracle, int minLen = 0){
 					pttrList.sfxPts.push_back(pts);
 					pttrList.sfxLen.push_back(oracle.lrs[i]);
 				}
-				pttrList.size += 1;
+				pttrList.size = pttrList.sfxLen.size();
 			}
 			preSfx = s;
 
@@ -429,8 +429,9 @@ vector<vector<ofPolyline> > vmo::processPttr(vmo& oracle, const vmo::pttr& pttrL
 }
 
 
-vmo::belief &vmo::tracking_init(vmo &oracle, vmo::belief &bf, const vmo::pttr &pttrList, vector<float> &firstObs){
-//	vmo::belief bf = vmo::belief();
+vmo::belief &vmo::tracking_init(vmo &oracle, vmo::belief &bf,
+								const vmo::pttr &pttrList, vector<float> &firstObs){
+
 	bf.K = oracle.latent.size();
 	bf.path.assign(bf.K, 0);
 	bf.cost.assign(bf.K, 0.0);
@@ -479,16 +480,16 @@ vmo::belief &vmo::tracking(vmo &oracle,
 		int ind = -1;
 
 		// Self-transition
-		selfTrn = oracle.data[prevBf.path[k]];
-		for (int i = 0; i < oracle.latent[selfTrn].size(); i++) {
-			float d = getDistance(obs, oracle.obs[oracle.latent[selfTrn][i]]);
-			if (d < minD) {
-				minD = d;
-				ind = selfTrn;
-				prevBf.path[k] = ind;
-				prevBf.cost[k] = minD;
-			}
-		}
+//		selfTrn = oracle.data[prevBf.path[k]];
+//		for (int i = 0; i < oracle.latent[selfTrn].size(); i++) {
+//			float d = getDistance(obs, oracle.obs[oracle.latent[selfTrn][i]]);
+//			if (d < minD) {
+//				minD = d;
+//				ind = selfTrn;
+//				prevBf.path[k] = ind;
+//				prevBf.cost[k] = minD;
+//			}
+//		}
 
 		// Possible states from forward links
 		int sym = -1;
