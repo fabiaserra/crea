@@ -38,7 +38,6 @@ class Particle
 // --------------------------------------------------------------
         bool  immortal;         // Can the particle die?
         bool  isAlive;          // Is the particle alive?
-        bool  isTouched;        // Particle has been activated through some event
         bool  bounces;          // Particle bounces with the window margins?
         bool  sizeAge;          // Particle changes size with age?
         bool  opacityAge;       // Particle changes opacity with age?

@@ -52,116 +52,108 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
 }
 
 void ParticleSystem::update(float dt, vector<irMarker> &markers){
-    if(isActive){
-        if(particleMode == GRID_PARTICLES){
 
-            sort( particles.begin(), particles.end(), comparisonFunction );
+	if(particleMode == GRID_PARTICLES){
 
-//            ofPoint dir;
-            ofPoint closestPos;
-            bool closeEnough = false;
-            float radius = 50;
-            float minDist = radius;
-            float scale = 1;
+        sort( particles.begin(), particles.end(), comparisonFunction );
 
-//            repulseParticles();
+        ofPoint dir;
+        ofPoint closestPos;
+        bool closeEnough = false;
+        float radius = 50;
+        float minDist = radius;
+        float scale = 2;
 
-            for(int i = 0; i < particles.size(); i++){
-                // Get closest marker to particle
-                for(int markerIndex = 0; markerIndex < markers.size(); markerIndex++){
-                    if (!markers[markerIndex].hasDisappeared){
-                        float markerDist = particles[i]->pos.squareDistance(markers[markerIndex].smoothPos);
-                        if(markerDist < minDist){
-                            closeEnough = true;
-//                            dir = markers[markerIndex].smoothPos - particles[i]->pos;
-//                            dir.normalize();
-                            minDist = markerDist;
-                            closestPos = markers[markerIndex].smoothPos;
-    //                        color = markers[markerIndex].color;
-                        }
+        repulseParticles();
+
+		for(int i = 0; i < particles.size(); i++){
+		    // Get closest marker to particle
+		    for(int markerIndex = 0; markerIndex < markers.size(); markerIndex++){
+                if (!markers[markerIndex].hasDisappeared){
+                    float markerDist = particles[i]->pos.squareDistance(markers[markerIndex].smoothPos);
+                    if(markerDist < minDist){
+                        closeEnough = true;
+                        dir = markers[markerIndex].smoothPos - particles[i]->pos;
+                        dir.normalize();
+                        minDist = markerDist;
+                        closestPos = markers[markerIndex].smoothPos;
+//                        color = markers[markerIndex].color;
                     }
                 }
-                if(closeEnough){
-                    particles[i]->addRepulsionForce(closestPos.x, closestPos.y, radius, scale);
-                    particles[i]->isTouched = true;
-                }
-                if(particles[i]->isTouched){
-                    ofPoint gravityForce(0, gravity*particles[i]->mass);
-                    particles[i]->addForce(gravityForce);
-                }
-                particles[i]->update(dt);
             }
-        }
+            if(closeEnough) particles[i]->addRepulsionForce(closestPos.x, closestPos.y, radius, scale);
+			particles[i]->update(dt);
+		}
+	}
 
-        else if(particleMode == MARKER_PARTICLES){
-            // Delete inactive particles
-            int i = 0;
-            while (i < particles.size()){
-                if (!particles[i]->isAlive){
-                    delete particles.at(i);
-                    particles.erase(particles.begin() + i);
-                    numParticles--;
-                }
-                else{
-                    i++;
-                }
-            }
+	else if(particleMode == MARKER_PARTICLES){
+		// Delete inactive particles
+		int i = 0;
+		while (i < particles.size()){
+			if (!particles[i]->isAlive){
+                delete particles.at(i);
+				particles.erase(particles.begin() + i);
+				numParticles--;
+			}
+			else{
+				i++;
+			}
+		}
 
-            // Born new particles
+		// Born new particles
+		if(isActive){
             for(unsigned int i = 0; i < markers.size(); i++){
                 if (markers[i].hasDisappeared) markers[i].bornRate -= 0.5;
                 else markers[i].bornRate = bornRate;
                 addParticles(markers[i].bornRate, markers[i]);
             }
+		}
 
-            // Update the particles
-            for(int i = 0; i < particles.size(); i++){
-                ofPoint gravityForce(0, gravity*particles[i]->mass);
-                particles[i]->addForce(gravityForce);
-                particles[i]->update(dt);
-            }
-        }
-    }
+		// Update the particles
+		for(int i = 0; i < particles.size(); i++){
+            ofPoint gravityForce(0, gravity*particles[i]->mass);
+            particles[i]->addForce(gravityForce);
+			particles[i]->update(dt);
+		}
+	}
 }
 
 
 void ParticleSystem::update(float dt, Contour& contour){
-    if(isActive){
-        if(particleMode == CONTOUR_PARTICLES){
-            // Delete inactive particles
-            int i = 0;
-            while (i < particles.size()){
-                if (!particles[i]->isAlive){
-                    delete particles.at(i);
-                    particles.erase(particles.begin() + i);
-                    numParticles--;
-                }
-                else{
-                    i++;
-                }
-            }
+    if(particleMode == CONTOUR_PARTICLES){
+        // Delete inactive particles
+		int i = 0;
+		while (i < particles.size()){
+			if (!particles[i]->isAlive){
+                delete particles.at(i);
+				particles.erase(particles.begin() + i);
+				numParticles--;
+			}
+			else{
+				i++;
+			}
+		}
 
-            // Born new particles
+		// Born new particles
+		if(isActive){
             for(unsigned int i = 0; i < contour.contours.size(); i++){
                 addParticles(bornRate, contour.contours[i]);
             }
+		}
 
-            // Update the particles
-            for(int i = 0; i < particles.size(); i++){
-                ofPoint windForce(0.5, -0.1);
-                particles[i]->addForce(windForce*particles[i]->mass);
-                particles[i]->update(dt);
-            }
-        }
+		// Update the particles
+		for(int i = 0; i < particles.size(); i++){
+            ofPoint windForce(0.5, -0.1);
+            particles[i]->addForce(windForce*particles[i]->mass);
+			particles[i]->update(dt);
+		}
     }
 }
 
 void ParticleSystem::draw(){
-    if(isActive){
-        for(int i = 0; i < particles.size(); i++){
-            particles[i]->draw();
-        }
-    }
+	for(int i = 0; i < particles.size(); i++){
+		particles[i]->draw();
+	}
 }
 
 void ParticleSystem::addParticle(ofPoint pos, ofPoint vel, ofColor color, float radius, float lifetime){

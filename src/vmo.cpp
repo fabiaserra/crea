@@ -385,7 +385,7 @@ vmo::pttr vmo::findPttr(const vmo& oracle, int minLen = 0){
 					pttrList.sfxPts.push_back(pts);
 					pttrList.sfxLen.push_back(oracle.lrs[i]);
 				}
-				pttrList.size += 1;
+				pttrList.size = pttrList.sfxLen.size();
 			}
 			preSfx = s;
 
@@ -429,8 +429,9 @@ vector<vector<ofPolyline> > vmo::processPttr(vmo& oracle, const vmo::pttr& pttrL
 }
 
 
-vmo::belief vmo::tracking_init(vmo& oracle, const vmo::pttr& pttrList, vector<float> &firstObs){
-	vmo::belief bf = vmo::belief();
+vmo::belief &vmo::tracking_init(vmo &oracle, vmo::belief &bf,
+								const vmo::pttr &pttrList, vector<float> &firstObs){
+
 	bf.K = oracle.latent.size();
 	bf.path.assign(bf.K, 0);
 	bf.cost.assign(bf.K, 0.0);
@@ -442,14 +443,14 @@ vmo::belief vmo::tracking_init(vmo& oracle, const vmo::pttr& pttrList, vector<fl
 		int ind = -1;
 		float d = 0.0;
 		for (int i = 0; i < oracle.latent[k].size(); i++) {
-			int sym = oracle.latent[k][i];
-            d = getDistance(firstObs, oracle.obs[sym]);
+			int idx = oracle.latent[k][i];
+            d = getDistance(firstObs, oracle.obs[idx]);
 			if (d < minD) {
 				minD = d;
-				ind = sym;
+				ind = idx;
+				bf.path[k] = ind;
+				bf.cost[k] = minD;
 			}
-			bf.path[k] = sym;
-			bf.cost[k] = minD;
 		}
 		if (minD < firstCost) {
 			firstIdx = ind;
@@ -460,31 +461,28 @@ vmo::belief vmo::tracking_init(vmo& oracle, const vmo::pttr& pttrList, vector<fl
 	return bf;
 }
 
-vmo::belief vmo::tracking(vmo& oracle,
-						  const vmo::pttr& pttrList,
-						  vmo::belief& prevBf, vector<float> &obs){
+vmo::belief &vmo::tracking(vmo &oracle,
+						   const vmo::pttr &pttrList,
+						   vmo::belief &prevBf, vector<float> &obs){
 	/*
 	 Real-time tracking function for VMO, not optimized yet.
 	 */
-	vector1D stateCache;
-	vector<float> distCache;
+//	vector1D stateCache;
+//	vector<float> distCache;
 
 	int tempIdx = -1;
 	float tempCost = FLT_MAX;
-	int selfTrn = -1;
 	for (int k = 0; k < prevBf.K; k++) {
-		vector1D eta;
-		vector1D b;
 		float minD = FLT_MAX;
 		int ind = -1;
 
 		// Self-transition
-		selfTrn = oracle.data[prevBf.path[k]];
+		int selfTrn = oracle.data[prevBf.path[k]];
 		for (int i = 0; i < oracle.latent[selfTrn].size(); i++) {
 			float d = getDistance(obs, oracle.obs[oracle.latent[selfTrn][i]]);
 			if (d < minD) {
 				minD = d;
-				ind = selfTrn;
+				ind = oracle.latent[selfTrn][i];
 				prevBf.path[k] = ind;
 				prevBf.cost[k] = minD;
 			}
@@ -499,7 +497,7 @@ vmo::belief vmo::tracking(vmo& oracle,
 				d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
 				if (d < minD) {
 					minD = d;
-					ind = sym;
+					ind = oracle.latent[sym][i];
 					prevBf.path[k] = ind;
 					prevBf.cost[k] = minD;
 				}
