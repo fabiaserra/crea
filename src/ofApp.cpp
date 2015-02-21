@@ -15,13 +15,13 @@ void ofApp::setup(){
     #ifdef KINECT_CONNECTED
     kinect.init(true); // shows infrared instead of RGB video Image
     kinect.open();
+    saveCounter = 0;
 
     // not connected
     #else
     // Load png files from file
     ofDirectory dir;                    // directory lister
     dir.allowExt("png");
-    saveCounter = 0;
     currentImage = 0;
     lastFrameTime = ofGetElapsedTimeMillis();
 
@@ -344,7 +344,19 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-
+    
+//    ofSetRectMode(OF_RECTMODE_CENTER);
+//    ofSetColor(0);
+//    ofNoFill();
+//    ofPushMatrix();
+//    ofTranslate(ofGetWidth()/2, ofGetHeight()/2);  // Translate to the center of the screen
+//    for (int i=0; i<100; i++) {
+//        ofScale(1.1, 1.1);
+//        ofRotate(5);
+//        ofRect(0, 0, 50, 50);
+//    }
+//    ofPopMatrix();
+    
     ofPushMatrix();
 //    ofTranslate(guiWidth+10, 0);
 //    ofScale(1.2, 1.2);
@@ -997,7 +1009,7 @@ void ofApp::interpolateWidgetValues(){
                 w->loadState(XML);
             }
             else{
-                float highIncrement = highDifference/100.0;
+                float highIncrement = highDifference/100.0; // TODO: use float ofLerp(float start, float stop, float amt)
                 float lowIncrement = lowDifference/100.0;
                 XML->setValue("HighValue", currentHighValue+highIncrement, 0);
                 XML->setValue("LowValue", currentLowValue+lowIncrement, 0);

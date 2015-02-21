@@ -21,12 +21,13 @@ void Particle::setup(float id, ofPoint pos, ofPoint vel, ofColor color, float in
     this->vel = vel;
     this->color = color;
     this->initialRadius = initialRadius;
-    this->radius = initialRadius;
     this->lifetime = lifetime;
 
+    this->radius = initialRadius;
     this->mass = initialRadius * initialRadius * 0.005f;
-    this->originalHue = color.getHue();
     this->prevPos = pos;
+    this->iniPos = pos;
+    this->originalHue = color.getHue();
 }
 
 void Particle::update(float dt){
@@ -254,6 +255,30 @@ void Particle::addAttractionForce(float x, float y, float radius, float scale){
         frc.x = frc.x - diff.x * scale * pct;
         frc.y = frc.y - diff.y * scale * pct;
     }
+}
+
+//------------------------------------------------------------------
+void Particle::xenoToPoint(float spd){
+    
+    pos.x = spd * iniPos.x + (1-spd) * pos.x;
+    pos.y = spd * iniPos.y + (1-spd) * pos.y;
+    
+    // pos.x = spd * catchX + (1-spd) * pos.x; - Zachs equation
+    // xeno math explianed
+    // A------B--------------------C
+    // A is beginning, C is end
+    // say you wanna move .25 of the remaining dist each iteration
+    // your first iteration you moved to B, wich is 0.25 of the distance between A and C
+    // the next iteration you will move .25 the distance between B and C
+    // let the next iteration be called 'new'
+    // pos.new = pos.b + (pos.c-pos.b)*0.25
+    // now let's simplify this equation
+    // pos.new = pos.b(1-.25) + pos.c(.25)
+    // since pos.new and pos.b are analogous to pos.x
+    // and pos.c is analogous to catchX
+    // we can write pos.x = pos.x(1-.25) + catchX(.25)
+    // this equation is the same as Zachs simplified equation
+    
 }
 
 void Particle::kill(){

@@ -91,6 +91,9 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers){
                     ofPoint gravityForce(0, gravity*particles[i]->mass);
                     particles[i]->addForce(gravityForce);
                 }
+                
+                particles[i]->xenoToPoint(0.1);
+                
                 particles[i]->update(dt);
             }
         }
@@ -280,8 +283,8 @@ void ParticleSystem::bornParticles(){
 void ParticleSystem::repulseParticles(){
 	for(int i = 0; i < particles.size(); i++){
 		for(int j = i-1; j >= 0; j--){
-            if ( fabs(particles[j]->pos.x - particles[i]->pos.x) >	10) break;
-            particles[i]->addRepulsionForce( *particles[j], 10, 1.1f);
+            if ( fabs(particles[j]->pos.x - particles[i]->pos.x) >	5) break; // to speed the loop
+            particles[i]->addRepulsionForce( *particles[j], 5, 1.1f);
         }
 	}
 }

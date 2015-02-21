@@ -10,15 +10,19 @@ class Particle
         void setup(float id, ofPoint pos, ofPoint vel, ofColor color, float initialRadius, float lifetime);
         void update(float dt);
         void draw();
+    
         void addForce(ofPoint force);
         void addRepulsionForce(float x, float y, float radius, float scale);
         void addAttractionForce(float x, float y, float radius, float scale);
         void addRepulsionForce(Particle &p, float radius, float scale);
         void addAttractionForce(Particle &p, float radius, float scale);
+        void xenoToPoint(float spd);
+    
         void kill();
 //--------------------------------------------------------------
         ofPoint pos;            // Position
         ofPoint prevPos;        // Previous position
+        ofPoint iniPos;         // Initial position
         ofPoint vel;            // Velocity
         ofPoint acc;            // Acceleration
         ofPoint frc;            // Force
