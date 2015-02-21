@@ -72,6 +72,8 @@ class ofApp : public ofBaseApp{
         vector<ofImage *> savedIrImages;    // the saved IR images for playback
         int saveCounter;                    // saved image index for recording
         int currentImage;                   // current image index
+        bool newImage;                      // new image loaded
+        int lastFrameTime;
         //--------------------------------------------------------------
         ofImage irImage, irOriginal;
         ofImage depthImage, depthOriginal;

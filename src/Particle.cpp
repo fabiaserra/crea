@@ -2,6 +2,7 @@
 
 Particle::Particle(){
     isAlive         = true;
+    isTouched       = false;
     immortal        = false;
     bounces         = false;
     sizeAge         = false;
