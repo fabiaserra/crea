@@ -216,7 +216,8 @@ void ofApp::update(){
     #ifndef KINECT_CONNECTED
         int fps = 30;
         newImage = false;
-
+    
+//        if (ofGetFrameNum() % 2 == 0)
         if((ofGetElapsedTimeMillis()-lastFrameTime)<(1000./float(fps)));
         else{
             lastFrameTime = ofGetElapsedTimeMillis();
@@ -228,7 +229,7 @@ void ofApp::update(){
             irOriginal.setFromPixels(img->getPixels(), img->getWidth(), img->getHeight(), OF_IMAGE_GRAYSCALE);
 
             currentImage++;
-//            if(currentImage >= savedDepthImages.size()) currentImage = 0;
+//            if(currentImage >= savedDepthImages.size()) currentImage = 0; // loop sequence
             newImage = true;
         }
 

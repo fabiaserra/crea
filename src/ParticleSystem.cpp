@@ -49,6 +49,8 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
         immortal = true;
         createParticleGrid(width, height);
     }
+    
+    ofSetCircleResolution(6);
 }
 
 void ParticleSystem::update(float dt, vector<irMarker> &markers){

@@ -21,6 +21,7 @@ class Particle
         ofPoint prevPos;        // Previous position
         ofPoint vel;            // Velocity
         ofPoint acc;            // Acceleration
+        ofPoint frc;            // Force
         ofColor color;          // Color
 // --------------------------------------------------------------
         ofPolyline contour;     // Particle creation boundaries
