@@ -443,14 +443,14 @@ vmo::belief &vmo::tracking_init(vmo &oracle, vmo::belief &bf,
 		int ind = -1;
 		float d = 0.0;
 		for (int i = 0; i < oracle.latent[k].size(); i++) {
-			int sym = oracle.latent[k][i];
-            d = getDistance(firstObs, oracle.obs[sym]);
+			int idx = oracle.latent[k][i];
+            d = getDistance(firstObs, oracle.obs[idx]);
 			if (d < minD) {
 				minD = d;
-				ind = sym;
+				ind = idx;
+				bf.path[k] = ind;
+				bf.cost[k] = minD;
 			}
-			bf.path[k] = sym;
-			bf.cost[k] = minD;
 		}
 		if (minD < firstCost) {
 			firstIdx = ind;
@@ -467,29 +467,26 @@ vmo::belief &vmo::tracking(vmo &oracle,
 	/*
 	 Real-time tracking function for VMO, not optimized yet.
 	 */
-	vector1D stateCache;
-	vector<float> distCache;
+//	vector1D stateCache;
+//	vector<float> distCache;
 
 	int tempIdx = -1;
 	float tempCost = FLT_MAX;
-	int selfTrn = -1;
 	for (int k = 0; k < prevBf.K; k++) {
-		vector1D eta;
-		vector1D b;
 		float minD = FLT_MAX;
 		int ind = -1;
 
 		// Self-transition
-//		selfTrn = oracle.data[prevBf.path[k]];
-//		for (int i = 0; i < oracle.latent[selfTrn].size(); i++) {
-//			float d = getDistance(obs, oracle.obs[oracle.latent[selfTrn][i]]);
-//			if (d < minD) {
-//				minD = d;
-//				ind = selfTrn;
-//				prevBf.path[k] = ind;
-//				prevBf.cost[k] = minD;
-//			}
-//		}
+		int selfTrn = oracle.data[prevBf.path[k]];
+		for (int i = 0; i < oracle.latent[selfTrn].size(); i++) {
+			float d = getDistance(obs, oracle.obs[oracle.latent[selfTrn][i]]);
+			if (d < minD) {
+				minD = d;
+				ind = oracle.latent[selfTrn][i];
+				prevBf.path[k] = ind;
+				prevBf.cost[k] = minD;
+			}
+		}
 
 		// Possible states from forward links
 		int sym = -1;
@@ -500,7 +497,7 @@ vmo::belief &vmo::tracking(vmo &oracle,
 				d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
 				if (d < minD) {
 					minD = d;
-					ind = sym;
+					ind = oracle.latent[sym][i];
 					prevBf.path[k] = ind;
 					prevBf.cost[k] = minD;
 				}
