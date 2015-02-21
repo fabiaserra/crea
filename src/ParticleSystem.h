@@ -27,6 +27,7 @@ class ParticleSystem
 		void removeParticles(int n);
 
 		void killParticles();
+        void bornParticles();
 		void repulseParticles();
 
 		//--------------------------------------------------------------
