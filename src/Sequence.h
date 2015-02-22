@@ -23,6 +23,8 @@ class Sequence{
         void startRecording();
         void clearPlayback();
 
+        ofPoint getCurrentPoint(int markerIndex);
+
         //--------------------------------------------------------------
         ofxXmlSettings xml;
         //--------------------------------------------------------------

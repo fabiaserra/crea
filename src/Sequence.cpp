@@ -52,7 +52,7 @@ void Sequence::draw(){
 //        ofSetColor(255, 40);
 //        markersPosition[markerIndex].draw();
 
-        ofPoint currentPoint = markersPosition[markerIndex].getPointAtIndexInterpolated(calcCurrentFrameIndex());
+        ofPoint currentPoint = getCurrentPoint(markerIndex);
         markersPastPoints[markerIndex].addVertex(currentPoint);
 
         if(markerIndex == 0) ofSetColor(255, 0, 0);
@@ -63,6 +63,10 @@ void Sequence::draw(){
         ofFill();
         ofCircle(currentPoint, 3);
     }
+}
+
+ofPoint Sequence::getCurrentPoint(int markerIndex){
+    return markersPosition[markerIndex].getPointAtIndexInterpolated(calcCurrentFrameIndex());
 }
 
 void Sequence::load(const string path){
