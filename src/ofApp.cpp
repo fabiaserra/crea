@@ -10,7 +10,7 @@ void ofApp::setup(){
 
     // ofEnableBlendMode(OF_BLENDMODE_ADD);
 
-    
+
     // Using a live kinect?
     #ifdef KINECT_CONNECTED
         // OPEN KINECT
@@ -20,9 +20,9 @@ void ofApp::setup(){
     // Kinect not connected
     #else
         // Use xml sequence marker file
-        #if KINECT_SEQUENCE
+        #ifdef KINECT_SEQUENCE
             kinectSequence.setup(2);
-            kinectSequence.load("sequences/sequence3.xml");
+            kinectSequence.load("sequences/sequence2.xml");
         #endif // KINECT_SEQUENCE
 
         // Load png files from file
@@ -118,7 +118,7 @@ void ofApp::setup(){
     contour.setup();
 
     // SEQUENCE
-    int maxMarkers = 2;
+    int maxMarkers = 1;
     sequence.setup(maxMarkers);
     sequence.load("sequences/sequence2.xml");
     drawSequence = false;
@@ -145,8 +145,8 @@ void ofApp::setup(){
     float start = 10.0, step = 0.01, stop = 20.0;
 
 //    float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
-	float t = 12.3; // for sequence.xml
-//	float t = 18.6; // for sequence2.xml
+//	float t = 12.3; // for sequence.xml
+	float t = 18.6; // for sequence2.xml
 //	float t = 16.8; // for sequence3.xml
 	cout << t << endl;
 	seqVmo = vmo::buildOracle(obs, dimensions, maxMarkers, t);
@@ -330,7 +330,6 @@ void ofApp::update(){
                 ofPoint currentPoint = kinectSequence.getCurrentPoint(i);
                 obs.push_back(currentPoint.x);
                 obs.push_back(currentPoint.y);
-                cout << currentPoint.x << endl;
             }
             if(initStatus){
                 currentBf = vmo::tracking_init(seqVmo, currentBf, pttrList, obs);
@@ -339,15 +338,15 @@ void ofApp::update(){
             else{
                 prevBf = currentBf;
                 currentBf = vmo::tracking(seqVmo, pttrList, prevBf, obs);
-    //                cout << "current index: " << currentBf.currentIdx << endl;
+                cout << "current index: " << currentBf.currentIdx << endl;
             }
             gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
-    //        for (int i = 0; i < sequence.patterns.size(); i++) {
-    //            if(gestureUpdate.find(i) != gestureUpdate.end()) {
-    //                cout << "key: "<< i << endl;
-    //                cout << "percent:"<< gestureUpdate[i] << endl;
-    //            }
-    //        }
+            for (int i = 0; i < sequence.patterns.size(); i++) {
+                if(gestureUpdate.find(i) != gestureUpdate.end()) {
+                    cout << "key: "<< i << endl;
+                    cout << "percent:"<< gestureUpdate[i] << endl;
+                }
+            }
         }
 
     #else
@@ -390,7 +389,7 @@ void ofApp::draw(){
 //    ofTranslate(ofGetWidth()/2, ofGetHeight()/2);  // Translate to the center of the screen
     ofScale(reScale, reScale);
     ofBackground(red, green, blue, 255);
-    depthOriginal.draw(0,0);
+//    depthOriginal.draw(0,0);
 //    ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 //    ofEnableBlendMode(OF_BLENDMODE_ADD);
 
@@ -818,17 +817,17 @@ void ofApp::setupGUI8Contour(){
 
     gui8Contour->addLabel("CONTOUR", OFX_UI_FONT_LARGE);
     gui8Contour->addSpacer();
-    
+
     gui8Contour->addSpacer();
     gui8Contour->addLabel("Emitter");
     gui8Contour->addSlider("Particles/sec", 0.0, 20.0, &contourParticles->bornRate);
-    
+
     gui8Contour->addSlider("Velocity", 0.0, 100.0, &contourParticles->velocity);
     gui8Contour->addSlider("Velocity Random[%]", 0.0, 100.0, &contourParticles->velocityRnd);
     gui8Contour->addSlider("Velocity from Motion[%]", 0.0, 100.0, &contourParticles->velocityMotion);
-    
+
     gui8Contour->addSlider("Emitter size", 0.0, 60.0, &contourParticles->emitterSize);
-    
+
     gui8Contour->addSpacer();
     gui8Contour->addLabel("Particle");
     gui8Contour->addToggle("Immortal", &contourParticles->immortal);
@@ -840,7 +839,7 @@ void ofApp::setupGUI8Contour(){
     gui8Contour->addSlider("Life Random[%]", 0.0, 100.0, &contourParticles->lifetimeRnd);
     gui8Contour->addSlider("Radius", 0.1, 25.0, &contourParticles->radius);
     gui8Contour->addSlider("Radius Random[%]", 0.0, 100.0, &contourParticles->radiusRnd);
-    
+
     gui8Contour->addSpacer();
     gui8Contour->addLabel("Time behaviour");
     gui8Contour->addToggle("Size", &contourParticles->sizeAge);
@@ -849,7 +848,7 @@ void ofApp::setupGUI8Contour(){
     gui8Contour->addToggle("Flickers", &contourParticles->flickersAge);
     gui8Contour->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui8Contour->addToggle("Color", &contourParticles->colorAge);
-    
+
     gui8Contour->addSpacer();
     gui8Contour->addLabel("Physics");
     gui8Contour->addSlider("Friction", 0, 100, &contourParticles->friction);

@@ -204,7 +204,7 @@ void Sequence::drawPattern(const int patternPosition, const int patternIndex, co
             ofTranslate(0, ((patternPosition+1)/2 - 1) * (height+margin));
         }
 
-        int opacity;
+        int opacity = 60;
         if(highlight) opacity = 255;
         else          opacity = 60;
 

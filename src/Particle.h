@@ -10,14 +10,14 @@ class Particle
         void setup(float id, ofPoint pos, ofPoint vel, ofColor color, float initialRadius, float lifetime);
         void update(float dt);
         void draw();
-    
+
         void addForce(ofPoint force);
         void addRepulsionForce(float x, float y, float radius, float scale);
         void addAttractionForce(float x, float y, float radius, float scale);
         void addRepulsionForce(Particle &p, float radius, float scale);
         void addAttractionForce(Particle &p, float radius, float scale);
         void xenoToPoint(float spd);
-    
+
         void kill();
 //--------------------------------------------------------------
         ofPoint pos;            // Position
@@ -50,6 +50,7 @@ class Particle
         bool  flickersAge;      // Particle flickers opacity when about to die?
         bool  colorAge;         // Particle changes color with age?
         bool  isEmpty;          // Draw only contour of the particle
+        bool  drawLine;         // Draw particle as a line from prevPos to pos
 // --------------------------------------------------------------
         float markerDist;       // Distance between particle and closest marker
         ofPoint closestPos;     // Position of the closest marker
