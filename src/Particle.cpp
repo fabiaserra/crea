@@ -2,6 +2,7 @@
 
 Particle::Particle(){
     isAlive         = true;
+    isTouched		= false;
     immortal        = false;
     bounces         = false;
     sizeAge         = false;
@@ -22,9 +23,11 @@ void Particle::setup(float id, ofPoint pos, ofPoint vel, ofColor color, float in
     this->initialRadius = initialRadius;
     this->lifetime = lifetime;
 
+    this->radius = initialRadius;
     this->mass = initialRadius * initialRadius * 0.005f;
-    this->originalHue = color.getHue();
     this->prevPos = pos;
+    this->iniPos = pos;
+    this->originalHue = color.getHue();
 }
 
 void Particle::update(float dt){
@@ -35,21 +38,20 @@ void Particle::update(float dt){
 //         acc = ofPoint(cos(angle), sin(angle)) * age * 0.1;
 
         // Update position
+        acc += frc;
         vel += acc;
         pos += vel*dt;
         vel *= friction;
         acc.set(0, 0);
 
         // Update age and check if particle has to die
-        age += dt;
-        if(age >= lifetime){
-            if (immortal) age = 0;
-            else isAlive = false;
+        if(!immortal){
+        	age += dt;
+	        if(age >= lifetime) isAlive = false;
         }
 
         // Decrease particle radius with age
         if (sizeAge) radius = initialRadius * (1.0f - (age/lifetime));
-        else radius = initialRadius;
 
         // Decrease particle opacity with age
         opacity = 255;
@@ -66,21 +68,33 @@ void Particle::update(float dt){
 
         // Bounce particle with the window margins
         if(bounces){
+        	bool hasCollided = false;
+            bool collisionDamping = true;
+            
             if(pos.x > width-radius){
                 pos.x = width-radius;
                 vel.x *= -1.0;
+                hasCollided = true;
             }
-            if(pos.x < radius){
+            else if(pos.x < radius){
                 pos.x = radius;
                 vel.x *= -1.0;
+                hasCollided = true;
             }
+            
             if(pos.y > height-radius){
                 pos.y = height-radius;
                 vel.y *= -1.0;
+                hasCollided = true;
             }
-            if(pos.y < radius){
+            else if(pos.y < radius){
                 pos.y = radius;
                 vel.y *= -1.0;
+                hasCollided = true;
+            }
+            
+            if (hasCollided && collisionDamping){
+	            vel *= 0.3;
             }
         }
     }
@@ -121,12 +135,36 @@ void Particle::draw(){
 }
 
 void Particle::addForce(ofPoint force){
-    force /= mass;
-    acc += force;
+	frc += force/mass;
 }
 
 void Particle::addRepulsionForce(Particle &p, float radius, float scale){
-    addRepulsionForce(p.pos.x, p.pos.y, radius, scale);
+	
+	// ----------- (1) make a vector of where this particle p is:
+	ofPoint posOfForce;
+	posOfForce.set(p.pos.x,p.pos.y);
+	
+	// ----------- (2) calculate the difference & length
+	ofVec2f diff    = pos - posOfForce;
+	float length    = pos.squareDistance(posOfForce); // faster than length or distance (no square root)
+	
+	// ----------- (3) check close enough
+	bool closeEnough = true;
+	if (radius > 0){
+	    if (length > radius){
+	        closeEnough = false;
+	    }
+	}
+	
+	// ----------- (4) if so, update force
+	if (closeEnough == true){
+	    float pct = 1 - (length / radius);  // stronger on the inside
+	    diff.normalize();
+	    frc.x = frc.x + diff.x * scale * pct;
+	    frc.y = frc.y + diff.y * scale * pct;
+	    p.frc.x = p.frc.x - diff.x * scale * pct;
+	    p.frc.y = p.frc.y - diff.y * scale * pct;
+	}
 }
 
 void Particle::addRepulsionForce(float x, float y, float radius, float scale){
@@ -136,12 +174,10 @@ void Particle::addRepulsionForce(float x, float y, float radius, float scale){
 	posOfForce.set(x, y);
 
     // ----------- (2) calculate the difference & length
-
 	ofPoint diff	= pos - posOfForce;
 	float length	= pos.squareDistance(posOfForce); // faster than length or distance (no square root)
 
     // ----------- (3) check close enough
-
     bool closeEnough = true;
     if (radius > 0){
         if (length > radius){
@@ -153,12 +189,38 @@ void Particle::addRepulsionForce(float x, float y, float radius, float scale){
     if (closeEnough == true){
 		float pct = 1 - (length / radius);  // stronger on the inside
         diff.normalize();
-        addForce(ofPoint(diff.x * scale * pct, diff.y * scale * pct));
+        frc.x = frc.x + diff.x * scale * pct;
+        frc.y = frc.y + diff.y * scale * pct;
     }
 }
 
 void Particle::addAttractionForce(Particle &p, float radius, float scale){
-    addAttractionForce(p.pos.x, p.pos.y, radius, scale);
+
+	// ----------- (1) make a vector of where this particle p is:
+	ofPoint posOfForce;
+	posOfForce.set(p.pos.x,p.pos.y);
+	
+	// ----------- (2) calculate the difference & length
+	ofVec2f diff    = pos - posOfForce;
+	float length    = pos.squareDistance(posOfForce); // faster than length or distance (no square root)
+	
+	// ----------- (3) check close enough
+	bool closeEnough = true;
+	if (radius > 0){
+	    if (length > radius){
+	        closeEnough = false;
+	    }
+	}
+	
+	// ----------- (4) if so, update force
+	if (closeEnough == true){
+	    float pct = 1 - (length / radius);  // stronger on the inside
+	    diff.normalize();
+	    frc.x = frc.x - diff.x * scale * pct;
+	    frc.y = frc.y - diff.y * scale * pct;
+	    p.frc.x = p.frc.x + diff.x * scale * pct;
+	    p.frc.y = p.frc.y + diff.y * scale * pct;
+	}
 }
 
 void Particle::addAttractionForce(float x, float y, float radius, float scale){
@@ -185,8 +247,33 @@ void Particle::addAttractionForce(float x, float y, float radius, float scale){
     if (closeEnough == true){
 		float pct = 1 - (length / radius);  // stronger on the inside
         diff.normalize();
-        addForce(ofPoint(- diff.x * scale * pct, - diff.y * scale * pct));
+        frc.x = frc.x - diff.x * scale * pct;
+        frc.y = frc.y - diff.y * scale * pct;
     }
+}
+
+//------------------------------------------------------------------
+void Particle::xenoToPoint(float spd){
+    
+    pos.x = spd * iniPos.x + (1-spd) * pos.x;
+    pos.y = spd * iniPos.y + (1-spd) * pos.y;
+    
+    // pos.x = spd * catchX + (1-spd) * pos.x; - Zachs equation
+    // xeno math explianed
+    // A------B--------------------C
+    // A is beginning, C is end
+    // say you wanna move .25 of the remaining dist each iteration
+    // your first iteration you moved to B, wich is 0.25 of the distance between A and C
+    // the next iteration you will move .25 the distance between B and C
+    // let the next iteration be called 'new'
+    // pos.new = pos.b + (pos.c-pos.b)*0.25
+    // now let's simplify this equation
+    // pos.new = pos.b(1-.25) + pos.c(.25)
+    // since pos.new and pos.b are analogous to pos.x
+    // and pos.c is analogous to catchX
+    // we can write pos.x = pos.x(1-.25) + catchX(.25)
+    // this equation is the same as Zachs simplified equation
+    
 }
 
 void Particle::kill(){
