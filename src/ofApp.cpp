@@ -19,9 +19,9 @@ void ofApp::setup(){
     // not connected
     #else
 
-        #if KINECT_SEQUENCE
+        #ifdef KINECT_SEQUENCE
             kinectSequence.setup(2);
-            kinectSequence.load("sequences/sequence3.xml");
+            kinectSequence.load("sequences/sequence.xml");
         #endif // KINECT_SEQUENCE
 
         // Load png files from file
@@ -119,7 +119,7 @@ void ofApp::setup(){
     // SEQUENCE
     int maxMarkers = 2;
     sequence.setup(maxMarkers);
-    sequence.load("sequences/sequence2.xml");
+    sequence.load("sequences/sequence.xml");
     drawSequence = false;
 
     // MARKERS
@@ -144,12 +144,12 @@ void ofApp::setup(){
 //    float start = 0.0, step = 0.05, stop = 10.0;
 
     // For sequence4.xml
-    int minLen = 2;
+    int minLen = 7; // sequence3.xml
     float start = 10.0, step = 0.01, stop = 20.0;
 
 //    float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
-	float t = 12.3; // for sequence.xml
-//	float t = 18.6; // for sequence2.xml
+//	float t = 12.3; // for sequence.xml
+	float t = 18.6; // for sequence2.xml
 //	float t = 16.8; // for sequence3.xml
 	cout << t << endl;
 	seqVmo = vmo::buildOracle(obs, dimensions, maxMarkers, t);
@@ -333,7 +333,7 @@ void ofApp::update(){
                 ofPoint currentPoint = kinectSequence.getCurrentPoint(i);
                 obs.push_back(currentPoint.x);
                 obs.push_back(currentPoint.y);
-                cout << currentPoint.x << endl;
+//                cout << currentPoint.x << endl;
             }
             if(initStatus){
                 currentBf = vmo::tracking_init(seqVmo, currentBf, pttrList, obs);
@@ -342,15 +342,15 @@ void ofApp::update(){
             else{
                 prevBf = currentBf;
                 currentBf = vmo::tracking(seqVmo, pttrList, prevBf, obs);
-    //                cout << "current index: " << currentBf.currentIdx << endl;
+                cout << "current index: " << currentBf.currentIdx << endl;
             }
             gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
-    //        for (int i = 0; i < sequence.patterns.size(); i++) {
-    //            if(gestureUpdate.find(i) != gestureUpdate.end()) {
-    //                cout << "key: "<< i << endl;
-    //                cout << "percent:"<< gestureUpdate[i] << endl;
-    //            }
-    //        }
+            for (int i = 0; i < sequence.patterns.size(); i++) {
+                if(gestureUpdate.find(i) != gestureUpdate.end()) {
+                    cout << "key: "<< i << endl;
+                    cout << "percent:"<< gestureUpdate[i] << endl;
+                }
+            }
         }
 
     #else
@@ -393,7 +393,7 @@ void ofApp::draw(){
 //    ofTranslate(ofGetWidth()/2, ofGetHeight()/2);  // Translate to the center of the screen
     ofScale(reScale, reScale);
     ofBackground(red, green, blue, 255);
-    depthOriginal.draw(0,0);
+//    depthOriginal.draw(0,0); // Pre-recorded depth image
 //    ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 //    ofEnableBlendMode(OF_BLENDMODE_ADD);
 

@@ -515,7 +515,7 @@ vmo::belief &vmo::tracking(vmo &oracle,
 map<int, float> vmo::getGestureUpdate(int ind, vmo::pttr& pttrList){
 	map<int, float> out;
 	if (pttrCat[ind].size() == 0 || ind == -1) {
-		out[0] = 0.0;
+		out[-1] = 0.0;
 	}else{
 		float idx;
 		float len;
