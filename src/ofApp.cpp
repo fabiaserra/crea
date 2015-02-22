@@ -17,32 +17,41 @@ void ofApp::setup(){
 
     // not connected
     #else
+//    kinectSequence.preloadAllFrames();	//this way there is no stutter when loading frames
+////    kinectSequence.enableThreadedLoad(true);
+//    kinectSequence.setExtension("jpg");
+//    kinectSequence.loadSequence("depth1");
+    
+    //kinectSequence.setFrameRate(10); //set to ten frames per second for Muybridge's horse.
+    
     // Load png files from file
     ofDirectory dir;                    // directory lister
-    dir.allowExt("png");
+    dir.allowExt("jpg");
     currentImage = 0;
     
-    string depthFolder = "depth01/";
+    string depthFolder = "depth1/";
     int totalImages = dir.listDir(depthFolder);
-
+    
+    savedDepthImages.resize(totalImages);
+    
     // load all recorded depth images in "data/depth01/"
     for(int i = 0; i < totalImages; i++){
         ofImage *img = new ofImage();
         img->loadImage(depthFolder + dir.getName(i));
         img->setImageType(OF_IMAGE_GRAYSCALE);
-        savedDepthImages.push_back(img);
+        savedDepthImages[i] = img;
     }
     
-    string irFolder = "ir01/";
-    totalImages = dir.listDir(irFolder);
-    
-    // load all recorded IR images in "data/ir01/"
-    for(int i = 0; i < totalImages; i++){
-        ofImage *img = new ofImage();
-        img->loadImage(irFolder + dir.getName(i));
-        img->setImageType(OF_IMAGE_GRAYSCALE);
-        savedIrImages.push_back(img);
-    }
+//    string irFolder = "ir01/";
+//    totalImages = dir.listDir(irFolder);
+//    
+//    // load all recorded IR images in "data/ir01/"
+//    for(int i = 0; i < totalImages; i++){
+//        ofImage *img = new ofImage();
+//        img->loadImage(irFolder + dir.getName(i));
+//        img->setImageType(OF_IMAGE_GRAYSCALE);
+//        savedIrImages.push_back(img);
+//    }
     
     #endif
 
@@ -224,14 +233,32 @@ void ofApp::update(){
     
     // Load a saved image for playback
     #ifndef KINECT_CONNECTED
-        ofImage *img = savedDepthImages[currentImage];
-        depthOriginal.setFromPixels(img->getPixels(), img->getWidth(), img->getHeight(), OF_IMAGE_GRAYSCALE);
     
-        img = savedIrImages[currentImage];
-        irOriginal.setFromPixels(img->getPixels(), img->getWidth(), img->getHeight(), OF_IMAGE_GRAYSCALE);
+    // Get the size of the image sequence
+    int n = savedDepthImages.size();
     
-        currentImage++;
-        if(currentImage >= savedDepthImages.size()) currentImage = 0;
+    // Calculate sequence duration assuming 30 fps
+    float duration = n / 30.0;
+    
+    // Calculate playing position in sequence
+    float pos = fmodf(time, duration);
+    
+    // Convert pos in the frame number
+    int i = int(pos/duration * n);
+    
+    ofImage *img = savedDepthImages[i];
+    depthOriginal.setFromPixels(img->getPixels(), img->getWidth(), img->getHeight(), OF_IMAGE_GRAYSCALE);
+//
+//        img = savedIrImages[currentImage];
+//        irOriginal.setFromPixels(img->getPixels(), img->getWidth(), img->getHeight(), OF_IMAGE_GRAYSCALE);
+//    
+//        currentImage++;
+//        if(currentImage >= savedDepthImages.size()) currentImage = 0;
+    
+        //get the frame based on the current time and draw it
+//        ofTexture texture = kinectSequence.getTextureForTime(ofGetElapsedTimef());
+//        texture.draw(0,0);
+    
     #endif
     
     // Nothing will happen here if the kinect is unplugged
@@ -243,13 +270,6 @@ void ofApp::update(){
 
         irOriginal.setFromPixels(kinect.getPixels(), kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
         if(flipKinect) irOriginal.mirror(false, true);
-        
-        // Record the depth images to "data/depth01/" and "data/ir01/" as long as we are running
-        #ifdef KINECT_RECORD
-            depthOriginal.saveImage("depth01/"+ofToString(saveCounter)+".png");
-            irOriginal.saveImage("ir01/"+ofToString(saveCounter)+".png");
-            saveCounter++;
-        #endif
     }
     
     copy(irOriginal, irImage);

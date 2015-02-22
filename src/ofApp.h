@@ -6,10 +6,9 @@
 #include "ofxKinect.h"
 
 // comment this to use the recorded images
-#define KINECT_CONNECTED
+//#define KINECT_CONNECTED
 
-// uncomment this to record
-//#define KINECT_RECORD
+#include "ofxImageSequence.h"
 
 #include "ParticleSystem.h"
 #include "irMarker.h"
@@ -70,8 +69,8 @@ class ofApp : public ofBaseApp{
         //--------------------------------------------------------------
         vector<ofImage *> savedDepthImages; // the saved Depth images for playback
         vector<ofImage *> savedIrImages;    // the saved IR images for playback
-        int saveCounter;                    // saved image index for recording
         int currentImage;                   // current image index
+        ofxImageSequence kinectSequence;
         //--------------------------------------------------------------
         ofImage irImage, irOriginal;
         ofImage depthImage, depthOriginal;

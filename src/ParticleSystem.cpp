@@ -56,7 +56,6 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
 void ParticleSystem::update(float dt, vector<irMarker> &markers){
     if(isActive){
         if(particleMode == GRID_PARTICLES){
-
             sort( particles.begin(), particles.end(), comparisonFunction );
 
             ofPoint dir;
@@ -82,19 +81,19 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers){
     //                        color = markers[markerIndex].color;
                         }
                     }
+                }
 
-                    if(closeEnough){
-                        particles[i]->addRepulsionForce(closestPos.x, closestPos.y, radius, scale);
-                        particles[i]->isTouched = true;
-                    }
-                    if(particles[i]->isTouched){
-                        ofPoint gravityForce(0, gravity*particles[i]->mass);
-                        particles[i]->addForce(gravityForce);
-                    }
-                    
-                    particles[i]->xenoToPoint(0.1);
-                    
-                    particles[i]->update(dt);
+                if(closeEnough){
+                    particles[i]->addRepulsionForce(closestPos.x, closestPos.y, radius, scale);
+                    particles[i]->isTouched = true;
+                }
+                if(particles[i]->isTouched){
+                    ofPoint gravityForce(0, gravity*particles[i]->mass);
+                    particles[i]->addForce(gravityForce);
+                }
+                
+                particles[i]->xenoToPoint(0.1);
+                particles[i]->update(dt);
             }
         }
 
