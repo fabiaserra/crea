@@ -10,16 +10,18 @@ void ofApp::setup(){
 
     // ofEnableBlendMode(OF_BLENDMODE_ADD);
 
-    // OPEN KINECT
-    // using a live kinect?
+    
+    // Using a live kinect?
     #ifdef KINECT_CONNECTED
+        // OPEN KINECT
         kinect.init(true); // shows infrared instead of RGB video Image
         kinect.open();
 
-    // not connected
+    // Kinect not connected
     #else
 
         #ifdef KINECT_SEQUENCE
+        // Use xml sequence marker file
             kinectSequence.setup(2);
             kinectSequence.load("sequences/sequence.xml");
         #endif // KINECT_SEQUENCE
@@ -33,7 +35,7 @@ void ofApp::setup(){
         dir.sort();
         savedDepthImages.resize(totalImages);
 
-        // load all recorded depth images in "data/depth01/"
+        // Load all recorded depth images in "data/depth01/"
         for(int i = 0; i < totalImages; i++){
             ofImage *img = new ofImage();
             img->loadImage(depthFolder + dir.getName(i));
@@ -46,7 +48,7 @@ void ofApp::setup(){
         dir.sort();
         savedIrImages.resize(totalImages);
 
-        // load all recorded IR images in "data/ir01/"
+        // Load all recorded IR images in "data/ir01/"
         for(int i = 0; i < totalImages; i++){
             ofImage *img = new ofImage();
             img->loadImage(irFolder + dir.getName(i));
@@ -821,6 +823,42 @@ void ofApp::setupGUI8Contour(){
 
     gui8Contour->addLabel("CONTOUR", OFX_UI_FONT_LARGE);
     gui8Contour->addSpacer();
+    
+    gui8Contour->addSpacer();
+    gui8Contour->addLabel("Emitter");
+    gui8Contour->addSlider("Particles/sec", 0.0, 20.0, &contourParticles->bornRate);
+    
+    gui8Contour->addSlider("Velocity", 0.0, 100.0, &contourParticles->velocity);
+    gui8Contour->addSlider("Velocity Random[%]", 0.0, 100.0, &contourParticles->velocityRnd);
+    gui8Contour->addSlider("Velocity from Motion[%]", 0.0, 100.0, &contourParticles->velocityMotion);
+    
+    gui8Contour->addSlider("Emitter size", 0.0, 60.0, &contourParticles->emitterSize);
+    
+    gui8Contour->addSpacer();
+    gui8Contour->addLabel("Particle");
+    gui8Contour->addToggle("Immortal", &contourParticles->immortal);
+    gui8Contour->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8Contour->addToggle("Empty", &contourParticles->isEmpty);
+    gui8Contour->addToggle("Bounces", &contourParticles->bounce);
+    gui8Contour->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8Contour->addSlider("Lifetime", 0.0, 20.0, &contourParticles->lifetime);
+    gui8Contour->addSlider("Life Random[%]", 0.0, 100.0, &contourParticles->lifetimeRnd);
+    gui8Contour->addSlider("Radius", 0.1, 25.0, &contourParticles->radius);
+    gui8Contour->addSlider("Radius Random[%]", 0.0, 100.0, &contourParticles->radiusRnd);
+    
+    gui8Contour->addSpacer();
+    gui8Contour->addLabel("Time behaviour");
+    gui8Contour->addToggle("Size", &contourParticles->sizeAge);
+    gui8Contour->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8Contour->addToggle("Opacity", &contourParticles->opacityAge);
+    gui8Contour->addToggle("Flickers", &contourParticles->flickersAge);
+    gui8Contour->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8Contour->addToggle("Color", &contourParticles->colorAge);
+    
+    gui8Contour->addSpacer();
+    gui8Contour->addLabel("Physics");
+    gui8Contour->addSlider("Friction", 0, 100, &contourParticles->friction);
+    gui8Contour->addSlider("Gravity", 0.0, 15.0, &contourParticles->gravity);
 
     gui8Contour->addSpacer();
 
