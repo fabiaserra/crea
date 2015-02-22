@@ -62,8 +62,8 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers){
             ofPoint closestPos;
             bool closeEnough = false;
             float radius = 50;
-            float minDist = radius;
-            float scale = 2;
+            float minDist = radius*radius;
+            float scale = 1.5;
 
             repulseParticles();
 
@@ -88,11 +88,11 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers){
                     particles[i]->isTouched = true;
                 }
                 if(particles[i]->isTouched){
-                    ofPoint gravityForce(0, gravity*particles[i]->mass);
-                    particles[i]->addForce(gravityForce);
+//                    ofPoint gravityForce(0, gravity*particles[i]->mass);
+//                    particles[i]->addForce(gravityForce);
                 }
                 
-                particles[i]->xenoToPoint(0.1);
+                particles[i]->xenoToPoint(5.5);
                 particles[i]->update(dt);
             }
         }
@@ -122,7 +122,7 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers){
 
             // Update the particles
             for(int i = 0; i < particles.size(); i++){
-                ofPoint gravityForce(0, gravity*particles[i]->mass);
+                ofPoint gravityForce(0, gravity*particles[i]->mass/10);
                 particles[i]->addForce(gravityForce);
                 particles[i]->update(dt);
             }
@@ -277,6 +277,9 @@ void ParticleSystem::killParticles(){
 }
 
 void ParticleSystem::bornParticles(){
+    for(int i = 0; i < particles.size(); i++){
+        particles[i]->isAlive = false;
+    }
     if(particleMode == GRID_PARTICLES){
         immortal = true;
         createParticleGrid(width, height);
@@ -286,8 +289,8 @@ void ParticleSystem::bornParticles(){
 void ParticleSystem::repulseParticles(){
     for(int i = 0; i < particles.size(); i++){
         for(int j = i-1; j >= 0; j--){
-            if ( fabs(particles[j]->pos.x - particles[i]->pos.x) >  5) break; // to speed the loop
-            particles[i]->addRepulsionForce( *particles[j], 5, 1.1f);
+            if ( fabs(particles[j]->pos.x - particles[i]->pos.x) >  10) break; // to speed the loop
+            particles[i]->addRepulsionForce( *particles[j], 10, 0.5f);
         }
     }
 }
