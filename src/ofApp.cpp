@@ -10,7 +10,7 @@ void ofApp::setup(){
 
     // ofEnableBlendMode(OF_BLENDMODE_ADD);
 
-    
+
     // Using a live kinect?
     #ifdef KINECT_CONNECTED
         // OPEN KINECT
@@ -22,8 +22,9 @@ void ofApp::setup(){
 
         #ifdef KINECT_SEQUENCE
         // Use xml sequence marker file
+        #ifdef KINECT_SEQUENCE
             kinectSequence.setup(2);
-            kinectSequence.load("sequences/sequence.xml");
+            kinectSequence.load("sequences/sequence2.xml");
         #endif // KINECT_SEQUENCE
 
         // Load png files from file
@@ -119,7 +120,7 @@ void ofApp::setup(){
     contour.setup();
 
     // SEQUENCE
-    int maxMarkers = 2;
+    int maxMarkers = 1;
     sequence.setup(maxMarkers);
     sequence.load("sequences/sequence.xml");
     drawSequence = false;
@@ -335,7 +336,6 @@ void ofApp::update(){
                 ofPoint currentPoint = kinectSequence.getCurrentPoint(i);
                 obs.push_back(currentPoint.x);
                 obs.push_back(currentPoint.y);
-//                cout << currentPoint.x << endl;
             }
             if(initStatus){
                 currentBf = vmo::tracking_init(seqVmo, currentBf, pttrList, obs);
@@ -823,17 +823,17 @@ void ofApp::setupGUI8Contour(){
 
     gui8Contour->addLabel("CONTOUR", OFX_UI_FONT_LARGE);
     gui8Contour->addSpacer();
-    
+
     gui8Contour->addSpacer();
     gui8Contour->addLabel("Emitter");
     gui8Contour->addSlider("Particles/sec", 0.0, 20.0, &contourParticles->bornRate);
-    
+
     gui8Contour->addSlider("Velocity", 0.0, 100.0, &contourParticles->velocity);
     gui8Contour->addSlider("Velocity Random[%]", 0.0, 100.0, &contourParticles->velocityRnd);
     gui8Contour->addSlider("Velocity from Motion[%]", 0.0, 100.0, &contourParticles->velocityMotion);
-    
+
     gui8Contour->addSlider("Emitter size", 0.0, 60.0, &contourParticles->emitterSize);
-    
+
     gui8Contour->addSpacer();
     gui8Contour->addLabel("Particle");
     gui8Contour->addToggle("Immortal", &contourParticles->immortal);
@@ -845,7 +845,7 @@ void ofApp::setupGUI8Contour(){
     gui8Contour->addSlider("Life Random[%]", 0.0, 100.0, &contourParticles->lifetimeRnd);
     gui8Contour->addSlider("Radius", 0.1, 25.0, &contourParticles->radius);
     gui8Contour->addSlider("Radius Random[%]", 0.0, 100.0, &contourParticles->radiusRnd);
-    
+
     gui8Contour->addSpacer();
     gui8Contour->addLabel("Time behaviour");
     gui8Contour->addToggle("Size", &contourParticles->sizeAge);
@@ -854,7 +854,7 @@ void ofApp::setupGUI8Contour(){
     gui8Contour->addToggle("Flickers", &contourParticles->flickersAge);
     gui8Contour->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui8Contour->addToggle("Color", &contourParticles->colorAge);
-    
+
     gui8Contour->addSpacer();
     gui8Contour->addLabel("Physics");
     gui8Contour->addSlider("Friction", 0, 100, &contourParticles->friction);
