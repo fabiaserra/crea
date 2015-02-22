@@ -13,44 +13,46 @@ void ofApp::setup(){
     // OPEN KINECT
     // using a live kinect?
     #ifdef KINECT_CONNECTED
-    kinect.init(true); // shows infrared instead of RGB video Image
-    kinect.open();
-//    saveCounter = 0;
+        kinect.init(true); // shows infrared instead of RGB video Image
+        kinect.open();
 
     // not connected
     #else
-//    kinectSequence.loadMovie("depth1");
-    kinectSequence.setup(2);
-    kinectSequence.load("sequences/sequence3.xml");
 
-    // Load png files from file
-//    ofDirectory dir;                    // directory lister
-//    dir.allowExt("jpg");
-//    currentImage = 0;
-//
-//    string depthFolder = "depth1/";
-//    int totalImages = dir.listDir(depthFolder);
-//
-//    savedDepthImages.resize(totalImages);
-//
-//    // load all recorded depth images in "data/depth01/"
-//    for(int i = 0; i < totalImages; i++){
-//        ofImage *img = new ofImage();
-//        img->loadImage(depthFolder + dir.getName(i));
-//        img->setImageType(OF_IMAGE_GRAYSCALE);
-//        savedDepthImages[i] = img;
-//    }
+        #if KINECT_SEQUENCE
+            kinectSequence.setup(2);
+            kinectSequence.load("sequences/sequence3.xml");
+        #endif // KINECT_SEQUENCE
 
-//    string irFolder = "ir01/";
-//    totalImages = dir.listDir(irFolder);
-//
-//    // load all recorded IR images in "data/ir01/"
-//    for(int i = 0; i < totalImages; i++){
-//        ofImage *img = new ofImage();
-//        img->loadImage(irFolder + dir.getName(i));
-//        img->setImageType(OF_IMAGE_GRAYSCALE);
-//        savedIrImages.push_back(img);
-//    }
+        // Load png files from file
+        ofDirectory dir;                    // directory lister
+        dir.allowExt("jpg");
+
+        string depthFolder = "depth1/";
+        int totalImages = dir.listDir(depthFolder);
+        dir.sort();
+        savedDepthImages.resize(totalImages);
+
+        // load all recorded depth images in "data/depth01/"
+        for(int i = 0; i < totalImages; i++){
+            ofImage *img = new ofImage();
+            img->loadImage(depthFolder + dir.getName(i));
+            img->setImageType(OF_IMAGE_GRAYSCALE);
+            savedDepthImages[i] = img;
+        }
+
+        string irFolder = "ir1/";
+        totalImages = dir.listDir(irFolder);
+        dir.sort();
+        savedIrImages.resize(totalImages);
+
+        // load all recorded IR images in "data/ir01/"
+        for(int i = 0; i < totalImages; i++){
+            ofImage *img = new ofImage();
+            img->loadImage(irFolder + dir.getName(i));
+            img->setImageType(OF_IMAGE_GRAYSCALE);
+            savedIrImages[i] = img;
+        }
 
     #endif
 
@@ -233,35 +235,28 @@ void ofApp::update(){
     // Load a saved image for playback
     #ifndef KINECT_CONNECTED
 
-    kinectSequence.update();
+        #ifdef KINECT_SEQUENCE
+            kinectSequence.update();
+        #endif // KINECT_SEQUENCE
 
-//    depthOriginal.setFromPixelsRef
-//    depthOriginal.setFromPixels(kinectSequence.getPixels(), kinectSequence.getWidth(), kinectSequence.getHeight(), OF_IMAGE_GRAYSCALE);
+        // Get the size of the image sequence
+        int n = savedDepthImages.size();
 
-//    // Get the size of the image sequence
-//    int n = savedDepthImages.size();
-//
-//    // Calculate sequence duration assuming 30 fps
-//    float duration = n / 60.0;
-//
-//    // Calculate playing position in sequence
-//    float pos = fmodf(time, duration);
-//
-//    // Convert pos in the frame number
-//    int i = int(pos/duration * n);
-//
-//    ofImage *img = savedDepthImages[i];
-//    depthOriginal.setFromPixels(kinectSequence.getPixels(), kinectSequence.getWidth(), kinectSequence.getHeight(), OF_IMAGE_GRAYSCALE);
-//
-//        img = savedIrImages[currentImage];
-//        irOriginal.setFromPixels(img->getPixels(), img->getWidth(), img->getHeight(), OF_IMAGE_GRAYSCALE);
-//
-//        currentImage++;
-//        if(currentImage >= savedDepthImages.size()) currentImage = 0;
+        // Calculate sequence duration assuming 30 fps
+        float duration = n / 30.0;
 
-        //get the frame based on the current time and draw it
-//        ofTexture texture = kinectSequence.getTextureForTime(ofGetElapsedTimef());
-//        texture.draw(0,0);
+        // Calculate playing percent in sequence
+        float percent = time / duration;
+
+        // Convert percent in the frame number
+        if(percent < 0.0 || percent > 1.0) percent -= floor(percent);
+        int i = MIN((int)(percent*n), n-1);
+
+        ofImage *depthImg = savedDepthImages.at(i);
+        depthOriginal.setFromPixels(depthImg->getPixels(), depthImg->getWidth(), depthImg->getHeight(), OF_IMAGE_GRAYSCALE);
+
+        ofImage *irImg = savedIrImages.at(i);
+        irOriginal.setFromPixels(irImg->getPixels(), irImg->getWidth(), irImg->getHeight(), OF_IMAGE_GRAYSCALE);
 
     #endif // KINECT_CONNECTED
 
@@ -330,14 +325,15 @@ void ofApp::update(){
     // Update contour particles
     contourParticles->update(dt, contour);
 
-    #ifdef KINECT_CONNECTED
-    // Gesture Tracking with VMO here?
-    if (tempMarkers.size()>1){
+    #ifdef KINECT_SEQUENCE
+
         if (!stopTracking){
             vector<float> obs; // Temporary code
-            for(unsigned int i = 0; i < sequence.maxMarkers; i++){
-                obs.push_back(tempMarkers[i].smoothPos.x);
-                obs.push_back(tempMarkers[i].smoothPos.y);
+            for(unsigned int i = 0; i < kinectSequence.maxMarkers; i++){
+                ofPoint currentPoint = kinectSequence.getCurrentPoint(i);
+                obs.push_back(currentPoint.x);
+                obs.push_back(currentPoint.y);
+                cout << currentPoint.x << endl;
             }
             if(initStatus){
                 currentBf = vmo::tracking_init(seqVmo, currentBf, pttrList, obs);
@@ -346,67 +342,58 @@ void ofApp::update(){
             else{
                 prevBf = currentBf;
                 currentBf = vmo::tracking(seqVmo, pttrList, prevBf, obs);
-//                cout << "current index: " << currentBf.currentIdx << endl;
+    //                cout << "current index: " << currentBf.currentIdx << endl;
             }
             gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
-            for (int i = 0; i < sequence.patterns.size(); i++) {
-                if(gestureUpdate.find(i) != gestureUpdate.end()) {
-                    cout << "key: "<< i << endl;
-                    cout << "percent:"<< gestureUpdate[i] << endl;
+    //        for (int i = 0; i < sequence.patterns.size(); i++) {
+    //            if(gestureUpdate.find(i) != gestureUpdate.end()) {
+    //                cout << "key: "<< i << endl;
+    //                cout << "percent:"<< gestureUpdate[i] << endl;
+    //            }
+    //        }
+        }
+
+    #else
+
+        // Gesture Tracking with VMO here?
+        if (tempMarkers.size()>1){
+            if (!stopTracking){
+                vector<float> obs; // Temporary code
+                for(unsigned int i = 0; i < sequence.maxMarkers; i++){
+                    obs.push_back(tempMarkers[i].smoothPos.x);
+                    obs.push_back(tempMarkers[i].smoothPos.y);
+                }
+                if(initStatus){
+                    currentBf = vmo::tracking_init(seqVmo, currentBf, pttrList, obs);
+                    initStatus = false;
+                }
+                else{
+                    prevBf = currentBf;
+                    currentBf = vmo::tracking(seqVmo, pttrList, prevBf, obs);
+                    cout << "current index: " << currentBf.currentIdx << endl;
+                }
+                gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
+                for (int i = 0; i < sequence.patterns.size(); i++) {
+                    if(gestureUpdate.find(i) != gestureUpdate.end()) {
+                        cout << "key: "<< i << endl;
+                        cout << "percent:"<< gestureUpdate[i] << endl;
+                    }
                 }
             }
         }
-    }
 
-    #else
-    if (!stopTracking){
-        vector<float> obs; // Temporary code
-        for(unsigned int i = 0; i < kinectSequence.maxMarkers; i++){
-            ofPoint currentPoint = kinectSequence.getCurrentPoint(i);
-            obs.push_back(currentPoint.x);
-            obs.push_back(currentPoint.y);
-            cout << currentPoint.x << endl;
-        }
-        if(initStatus){
-            currentBf = vmo::tracking_init(seqVmo, currentBf, pttrList, obs);
-            initStatus = false;
-        }
-        else{
-            prevBf = currentBf;
-            currentBf = vmo::tracking(seqVmo, pttrList, prevBf, obs);
-//                cout << "current index: " << currentBf.currentIdx << endl;
-        }
-        gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
-//        for (int i = 0; i < sequence.patterns.size(); i++) {
-//            if(gestureUpdate.find(i) != gestureUpdate.end()) {
-//                cout << "key: "<< i << endl;
-//                cout << "percent:"<< gestureUpdate[i] << endl;
-//            }
-//        }
-    }
-    #endif // KINECT_CONNECTED
+    #endif // KINECT_SEQUENCE
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-//    ofSetRectMode(OF_RECTMODE_CENTER);
-//    ofSetColor(0);
-//    ofNoFill();
-//    ofPushMatrix();
-//    ofTranslate(ofGetWidth()/2, ofGetHeight()/2);  // Translate to the center of the screen
-//    for (int i=0; i<100; i++) {
-//        ofScale(1.1, 1.1);
-//        ofRotate(5);
-//        ofRect(0, 0, 50, 50);
-//    }
-//    ofPopMatrix();
-
     ofPushMatrix();
-//    ofTranslate(guiWidth+10, 0);
-//    ofScale(1.2, 1.2);
+//    ofSetRectMode(OF_RECTMODE_CENTER);
+//    ofTranslate(ofGetWidth()/2, ofGetHeight()/2);  // Translate to the center of the screen
     ofScale(reScale, reScale);
     ofBackground(red, green, blue, 255);
+    depthOriginal.draw(0,0);
 //    ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 //    ofEnableBlendMode(OF_BLENDMODE_ADD);
 
@@ -416,21 +403,18 @@ void ofApp::draw(){
 //    irImage.draw(0, 0);
 //    depthImage.draw(0, 0);
 
-    // OpenCV contour detection
-//    contourFinder.draw();
-    if(drawMarkers) irMarkerFinder.draw();
-
-    #ifndef KINECT_CONNECTED
-    kinectSequence.draw();
-    #endif // KINECT_CONNECTED
+    #ifdef KINECT_SEQUENCE
+        kinectSequence.draw();
+    #endif // KINECT_SEQUENCE
 
     // Graphics
-//    contour.draw();
-//    gridParticles->draw();
-//    markerParticles->draw();
-//    contourParticles->draw();
+    contour.draw();
+    gridParticles->draw();
+    markerParticles->draw();
+    contourParticles->draw();
 
     if(drawMarkers){
+        irMarkerFinder.draw();
         vector<irMarker>& tempMarkers = tracker.getFollowers();
         // Draw identified IR markers
         for (int i = 0; i < tempMarkers.size(); i++){
