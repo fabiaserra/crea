@@ -408,11 +408,10 @@ vector<vector<ofPolyline> > vmo::processPttr(vmo& oracle, const vmo::pttr& pttrL
 		len = pttrList.sfxLen[i];
 		vector<ofPolyline> ges(oracle.numFeature, vector<ofPoint>(len, ofPoint(0.0,0.0)));
 		pattern[i] = ges;
-		int cat = i+1;
 		for (int j = 0; j<pts.size(); j++) {
 			int offset = pts[j]-len+1;
 			for (int k = 0; k < len; k++) {
-				oracle.pttrCat[offset+k].push_back(cat);
+				oracle.pttrCat[offset+k].push_back(i);
 				oracle.pttrInd[offset+k].push_back(k+1);
 
 				for (int d = 0; d < oracle.numFeature; d++) {
@@ -420,7 +419,6 @@ vector<vector<ofPolyline> > vmo::processPttr(vmo& oracle, const vmo::pttr& pttrL
                                     + oracle.obs[offset+k][d*oracle.dimFeature]/float(j+1);
 					pattern[i][d][k].y = (pattern[i][d][k].y*float(j)/float(j+1))
                                     + oracle.obs[offset+k][d*oracle.dimFeature+1]/float(j+1);
-
 				}
 			}
 		}
@@ -521,7 +519,7 @@ map<int, float> vmo::getGestureUpdate(int ind, vmo::pttr& pttrList){
 		float len;
 		for (int i = 0; i < pttrCat[ind].size(); i++) {
 			idx = float(pttrInd[ind][i]);
-			len = float(pttrList.sfxLen[pttrCat[ind][i]-1]);
+			len = float(pttrList.sfxLen[pttrCat[ind][i]]);
 			out[pttrCat[ind][i]] = ofMap(idx, 0.0, len, 0.0, 1.0);
 		}
 	}

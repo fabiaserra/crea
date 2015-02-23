@@ -20,11 +20,11 @@ void ofApp::setup(){
     // Kinect not connected
     #else
 
-        #ifdef KINECT_SEQUENCE
+//        #ifdef KINECT_SEQUENCE
         // Use xml sequence marker file
         #ifdef KINECT_SEQUENCE
             kinectSequence.setup(2);
-            kinectSequence.load("sequences/sequence2.xml");
+            kinectSequence.load("sequences/sequence3.xml");
         #endif // KINECT_SEQUENCE
 
         // Load png files from file
@@ -120,9 +120,9 @@ void ofApp::setup(){
     contour.setup();
 
     // SEQUENCE
-    int maxMarkers = 1;
+    int maxMarkers = 2;
     sequence.setup(maxMarkers);
-    sequence.load("sequences/sequence.xml");
+    sequence.load("sequences/sequence3.xml");
     drawSequence = false;
 
     // MARKERS
@@ -147,13 +147,16 @@ void ofApp::setup(){
 //    float start = 0.0, step = 0.05, stop = 10.0;
 
     // For sequence4.xml
-    int minLen = 7; // sequence3.xml
-    float start = 10.0, step = 0.01, stop = 20.0;
+
+	float start = 10.0, step = 0.01, stop = 20.0;
 
 //    float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
+//	int minLen = 2; // sequence.xml
 //	float t = 12.3; // for sequence.xml
-	float t = 18.6; // for sequence2.xml
-//	float t = 16.8; // for sequence3.xml
+//	float t = 18.6; // for sequence2.xml
+	int minLen = 7; // sequence3.xml
+	float t = 16.8; // for sequence3.xml
+
 	cout << t << endl;
 	seqVmo = vmo::buildOracle(obs, dimensions, maxMarkers, t);
     // 2.2 Output pattern list
