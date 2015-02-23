@@ -10,7 +10,7 @@ Particle::Particle(){
     colorAge        = false;
     flickersAge     = false;
     isEmpty         = false;
-    drawLine        = false;
+    drawLine        = true;
     age             = 0;
     width           = ofGetWidth();
     height          = ofGetHeight();

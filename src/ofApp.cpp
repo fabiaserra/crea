@@ -120,7 +120,7 @@ void ofApp::setup(){
     // SEQUENCE
     int maxMarkers = 1;
     sequence.setup(maxMarkers);
-    sequence.load("sequences/sequence2.xml");
+    sequence.load("sequences/sequence1marker1.xml");
     drawSequence = false;
 
     // MARKERS
@@ -144,9 +144,9 @@ void ofApp::setup(){
     int minLen = 2;
     float start = 10.0, step = 0.01, stop = 20.0;
 
-//    float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
+    float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
 //	float t = 12.3; // for sequence.xml
-	float t = 18.6; // for sequence2.xml
+//	float t = 18.6; // for sequence2.xml
 //	float t = 16.8; // for sequence3.xml
 	cout << t << endl;
 	seqVmo = vmo::buildOracle(obs, dimensions, maxMarkers, t);
@@ -820,7 +820,7 @@ void ofApp::setupGUI8Contour(){
 
     gui8Contour->addSpacer();
     gui8Contour->addLabel("Emitter");
-    gui8Contour->addSlider("Particles/sec", 0.0, 20.0, &contourParticles->bornRate);
+    gui8Contour->addSlider("Particles/sec", 0.0, 60.0, &contourParticles->bornRate);
 
     gui8Contour->addSlider("Velocity", 0.0, 100.0, &contourParticles->velocity);
     gui8Contour->addSlider("Velocity Random[%]", 0.0, 100.0, &contourParticles->velocityRnd);
