@@ -147,7 +147,6 @@ void ofApp::setup(){
 
 	float start = 10.0, step = 0.01, stop = 20.0;
 
-
 //    float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
 //	int minLen = 2; // sequence.xml
 //	float t = 12.3; // for sequence.xml
@@ -835,7 +834,7 @@ void ofApp::setupGUI8Contour(){
 
     gui8Contour->addSpacer();
     gui8Contour->addLabel("Emitter");
-    gui8Contour->addSlider("Particles/sec", 0.0, 60.0, &contourParticles->bornRate);
+    gui8Contour->addSlider("Particles/sec", 0.0, 20.0, &contourParticles->bornRate);
 
     gui8Contour->addSlider("Velocity", 0.0, 100.0, &contourParticles->velocity);
     gui8Contour->addSlider("Velocity Random[%]", 0.0, 100.0, &contourParticles->velocityRnd);
