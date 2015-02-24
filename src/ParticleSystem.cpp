@@ -49,6 +49,7 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
     if(particleMode == GRID_PARTICLES){
         immortal = true;
         gridRes = 10;
+        friction = 100;
         createParticleGrid(width, height);
     }
 }
@@ -61,14 +62,15 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers){
             ofPoint dir;
             ofPoint closestPos;
             bool closeEnough;
-            float radius = 200;
-            float minDist = radius*radius;
-            float scale = 1.5;
+            float markerRadius = 50;
+            float scale = 0.2;
+            float minDist;
 
-//            repulseParticles();
+            repulseParticles();
 
             for(int i = 0; i < particles.size(); i++){
                 closeEnough = false;
+                minDist = markerRadius*markerRadius;
                 // Get closest marker to particle
                 for(int markerIndex = 0; markerIndex < markers.size(); markerIndex++){
                     if (!markers[markerIndex].hasDisappeared){
@@ -83,17 +85,17 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers){
                         }
                     }
                 }
-
                 if(closeEnough){
-                    particles[i]->addRepulsionForce(closestPos.x, closestPos.y, radius, scale);
+                    particles[i]->addRepulsionForce(closestPos.x, closestPos.y, markerRadius*markerRadius, scale);
                     particles[i]->isTouched = true;
+                    
                 }
-                if(particles[i]->isTouched){
-                    ofPoint gravityForce(0, gravity*particles[i]->mass);
-                    particles[i]->addForce(gravityForce);
-                }
+//                if(particles[i]->isTouched){
+//                    ofPoint gravityForce(0, 0.1*particles[i]->mass);
+//                    particles[i]->addForce(gravityForce);
+//                }
 
-//                particles[i]->xenoToPoint(5.5);
+//                particles[i]->xenoToPoint(0.3);
                 particles[i]->update(dt);
             }
         }
@@ -291,7 +293,7 @@ void ParticleSystem::repulseParticles(){
     for(int i = 0; i < particles.size(); i++){
         for(int j = i-1; j >= 0; j--){
             if ( fabs(particles[j]->pos.x - particles[i]->pos.x) >  10) break; // to speed the loop
-            particles[i]->addRepulsionForce( *particles[j], 10, 0.5f);
+            particles[i]->addRepulsionForce( *particles[j], 10*10, 0.1f);
         }
     }
 }

@@ -722,6 +722,8 @@ void ofApp::setupGUI7(){
     gui7->addToggle("Convex Hull", &contour.drawConvexHull);
     gui7->addToggle("Convex Hull Line", &contour.drawConvexHullLine);
     gui7->addToggle("Contour Line", &contour.drawContourLine);
+    gui7->addSlider("Velocity", 0.0, 100.0, &contour.smoothingSize);
+
 
     gui7->autoSizeToFitWidgets();
     gui7->setVisible(false);

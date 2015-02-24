@@ -95,7 +95,7 @@ void Particle::update(float dt){
             }
 
             if (hasCollided && collisionDamping){
-	            vel *= 0.5;
+	            vel *= 0.8;
             }
         }
     }
