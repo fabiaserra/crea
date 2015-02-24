@@ -159,8 +159,7 @@ void ParticleSystem::update(float dt, Contour& contour){
 
             // Update the particles
             for(int i = 0; i < particles.size(); i++){
-//                ofPoint windForce(0.05, -0.02); // TODO: add some turbulence
-                ofPoint windForce(ofRandom(-0.1, 0.1), ofRandom(-0.08, 0.06)); // TODO: add some turbulence
+                ofPoint windForce(0.5, -0.1);
                 particles[i]->addForce(windForce*particles[i]->mass);
                 particles[i]->update(dt);
             }

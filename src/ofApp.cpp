@@ -10,7 +10,7 @@ void ofApp::setup(){
 
     // ofEnableBlendMode(OF_BLENDMODE_ADD);
 
-
+	int maxMarkers = 1;
     // Using a live kinect?
     #ifdef KINECT_CONNECTED
         // OPEN KINECT
@@ -23,8 +23,8 @@ void ofApp::setup(){
 //        #ifdef KINECT_SEQUENCE
         // Use xml sequence marker file
         #ifdef KINECT_SEQUENCE
-            kinectSequence.setup(2);
-            kinectSequence.load("sequences/sequence3.xml");
+            kinectSequence.setup(maxMarkers);
+            kinectSequence.load("sequences/sequence1marker3.xml");
         #endif // KINECT_SEQUENCE
 
         // Load png files from file
@@ -122,9 +122,8 @@ void ofApp::setup(){
     contour.setup();
 
     // SEQUENCE
-    int maxMarkers = 2;
     sequence.setup(maxMarkers);
-    sequence.load("sequences/sequence1marker1.xml");
+    sequence.load("sequences/sequence1marker3.xml");
     drawSequence = false;
 
     // MARKERS
@@ -148,17 +147,22 @@ void ofApp::setup(){
 //    int minLen = 1; // Temporary setting
 //    float start = 0.0, step = 0.05, stop = 10.0;
 
-    // For sequence4.xml
-
 	float start = 10.0, step = 0.01, stop = 20.0;
-
 
 //    float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
 //	int minLen = 2; // sequence.xml
 //	float t = 12.3; // for sequence.xml
+
+//	int minLen = 7; // sequence3.xml
 //	float t = 18.6; // for sequence2.xml
-	int minLen = 7; // sequence3.xml
-	float t = 16.8; // for sequence3.xml
+//	float t = 16.8; // for sequence3.xml
+	
+//	int minLen = 7;
+//	float t = 4.5; // for sequence1marker1.xml
+//	int minLen = 10;
+//	float t = 5.7; // for sequence1marker2.xml
+	int minLen = 10;
+	float t = 6.0; // for sequence1marker3.xml
 
 	cout << t << endl;
 	seqVmo = vmo::buildOracle(obs, dimensions, maxMarkers, t);
@@ -835,7 +839,7 @@ void ofApp::setupGUI8Contour(){
 
     gui8Contour->addSpacer();
     gui8Contour->addLabel("Emitter");
-    gui8Contour->addSlider("Particles/sec", 0.0, 60.0, &contourParticles->bornRate);
+    gui8Contour->addSlider("Particles/sec", 0.0, 20.0, &contourParticles->bornRate);
 
     gui8Contour->addSlider("Velocity", 0.0, 100.0, &contourParticles->velocity);
     gui8Contour->addSlider("Velocity Random[%]", 0.0, 100.0, &contourParticles->velocityRnd);
