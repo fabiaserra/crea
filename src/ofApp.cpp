@@ -107,6 +107,8 @@ void ofApp::setup(){
 
     // GRID PARTICLES
     gridParticles = new ParticleSystem();
+    gridParticles->radius = 2;
+    gridParticles->bounce = true;
     gridParticles->setup(GRID_PARTICLES, kinect.width, kinect.height);
 
     // VECTOR OF PARTICLE SYSTEMS
@@ -775,6 +777,7 @@ void ofApp::setupGUI8Marker(){
     gui8Marker->addToggle("Empty", &markerParticles->isEmpty);
     gui8Marker->addToggle("Bounces", &markerParticles->bounce);
     gui8Marker->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8Marker->addToggle("Draw Line", &markerParticles->drawLine);
     gui8Marker->addSlider("Lifetime", 0.0, 20.0, &markerParticles->lifetime);
     gui8Marker->addSlider("Life Random[%]", 0.0, 100.0, &markerParticles->lifetimeRnd);
     gui8Marker->addSlider("Radius", 0.1, 25.0, &markerParticles->radius);
@@ -849,6 +852,7 @@ void ofApp::setupGUI8Contour(){
     gui8Contour->addToggle("Empty", &contourParticles->isEmpty);
     gui8Contour->addToggle("Bounces", &contourParticles->bounce);
     gui8Contour->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8Contour->addToggle("Draw Line", &contourParticles->drawLine);
     gui8Contour->addSlider("Lifetime", 0.0, 20.0, &contourParticles->lifetime);
     gui8Contour->addSlider("Life Random[%]", 0.0, 100.0, &contourParticles->lifetimeRnd);
     gui8Contour->addSlider("Radius", 0.1, 25.0, &contourParticles->radius);
@@ -897,14 +901,20 @@ void ofApp::setupGUI8Grid(){
 
     ofxUIImageButton *next;
     next = gui8Grid->addImageButton("Next Particle System", "icons/play.png", false, dim, dim);
-//    next->bindToKey(OF_KEY_RIGHT);
-//    next->setTriggerType(OFX_UI_TRIGGER_BEGIN);
     next->setColorBack(ofColor(150, 255));
 
     gui8Grid->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui8Grid->addLabel("GRID", OFX_UI_FONT_LARGE);
     gui8Grid->addSpacer();
+
+    gui8Grid->addSlider("Radius", 0.1, 25.0, &gridParticles->radius);
+    gui8Grid->addIntSlider("Resolution", 1, 20, &gridParticles->gridRes)->setStickyValue(1.0);
+
+    gui8Grid->addSpacer();
+    gui8Grid->addLabel("Physics");
+    gui8Grid->addSlider("Friction", 0, 100, &gridParticles->friction);
+    gui8Grid->addSlider("Gravity", 0.0, 15.0, &gridParticles->gravity);
 
     gui8Grid->addSpacer();
 

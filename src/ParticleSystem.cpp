@@ -24,9 +24,10 @@ ParticleSystem::ParticleSystem(){
     flickersAge     = false;        // Particle flickers opacity when about to die?
     colorAge        = false;        // Change color when particles get older?
     isEmpty         = false;        // Draw only contours of the particles?
+    drawLine        = false;        // Draw a line instead of a circle for the particle?
     bounce          = false;        // Bounce particles with the walls of the window?
 
-    friction        = 30;           // Decrease of the velocity
+    friction        = 30;           // Friction to velocity
     gravity         = 1.0f;         // Makes particles fall down in a natural way
 }
 
@@ -36,8 +37,6 @@ ParticleSystem::~ParticleSystem(){
         particles.at(i) = NULL;
     }
     particles.clear();
-
-    ofSetCircleResolution(6);
 }
 
 
@@ -49,6 +48,7 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
 
     if(particleMode == GRID_PARTICLES){
         immortal = true;
+        gridRes = 10;
         createParticleGrid(width, height);
     }
 }
@@ -60,14 +60,15 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers){
 
             ofPoint dir;
             ofPoint closestPos;
-            bool closeEnough = false;
-            float radius = 50;
+            bool closeEnough;
+            float radius = 200;
             float minDist = radius*radius;
             float scale = 1.5;
 
-            repulseParticles();
+//            repulseParticles();
 
             for(int i = 0; i < particles.size(); i++){
+                closeEnough = false;
                 // Get closest marker to particle
                 for(int markerIndex = 0; markerIndex < markers.size(); markerIndex++){
                     if (!markers[markerIndex].hasDisappeared){
@@ -88,11 +89,11 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers){
                     particles[i]->isTouched = true;
                 }
                 if(particles[i]->isTouched){
-//                    ofPoint gravityForce(0, gravity*particles[i]->mass);
-//                    particles[i]->addForce(gravityForce);
+                    ofPoint gravityForce(0, gravity*particles[i]->mass);
+                    particles[i]->addForce(gravityForce);
                 }
-                
-                particles[i]->xenoToPoint(5.5);
+
+//                particles[i]->xenoToPoint(5.5);
                 particles[i]->update(dt);
             }
         }
@@ -177,14 +178,15 @@ void ParticleSystem::addParticle(ofPoint pos, ofPoint vel, ofColor color, float 
     float id = totalParticlesCreated;
 
     newParticle->setup(id, pos, vel, color, radius, lifetime);
-    newParticle->immortal = immortal;
-    newParticle->sizeAge = sizeAge;
-    newParticle->opacityAge = opacityAge;
-    newParticle->flickersAge = flickersAge;
-    newParticle->colorAge = colorAge;
-    newParticle->isEmpty = isEmpty;
-    newParticle->bounces = bounce;
-    newParticle->friction = 1-friction/1000; // so we have a range between 0.90 and 1
+    newParticle->immortal       = immortal;
+    newParticle->sizeAge        = sizeAge;
+    newParticle->opacityAge     = opacityAge;
+    newParticle->flickersAge    = flickersAge;
+    newParticle->colorAge       = colorAge;
+    newParticle->isEmpty        = isEmpty;
+    newParticle->drawLine       = drawLine;
+    newParticle->bounces        = bounce;
+    newParticle->friction       = 1-friction/1000; // so we have a range between 0.90 and 1
 
     newParticle->width = width;
     newParticle->height = height;
@@ -245,13 +247,11 @@ void ParticleSystem::addParticles(int n, const ofPolyline &contour){
 }
 
 void ParticleSystem::createParticleGrid(int width, int height){
-    int res = 10;
-    float radius = 3;
-    for(int y = 0; y < height/res; y++){
-        for(int x = 0; x < width/res; x++){
-            int xi = (x + 0.5f) * res;
-            int yi = (y + 0.5f) * res;
-//            float initialRadius = (float)res / 2.0f;
+    for(int y = 0; y < height/gridRes; y++){
+        for(int x = 0; x < width/gridRes; x++){
+            int xi = (x + 0.5f) * gridRes;
+            int yi = (y + 0.5f) * gridRes;
+//            float initialRadius = (float)gridRes / 2.0f;
 //            float initialRadius = ofRandom(1.0f, 6.0f);
 //            float initialRadius = cos(yi * 0.1f) + sin(xi * 0.1f) + 2.0f;
 //            float initialRadius = (sin(yi * xi) + 1.0f) * 2.0f;
