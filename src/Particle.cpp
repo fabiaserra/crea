@@ -10,7 +10,7 @@ Particle::Particle(){
     colorAge        = false;
     flickersAge     = false;
     isEmpty         = false;
-    drawLine        = true;
+    drawLine        = false;
     age             = 0;
     width           = ofGetWidth();
     height          = ofGetHeight();
@@ -95,7 +95,7 @@ void Particle::update(float dt){
             }
 
             if (hasCollided && collisionDamping){
-	            vel *= 0.2;
+	            vel *= 0.5;
             }
         }
     }
@@ -115,7 +115,11 @@ void Particle::draw(){
             ofFill();
         }
 
-        if(!drawLine) ofCircle(pos, radius);
+        if(!drawLine){
+            int resolution = ofMap(radius, 0, 10, 6, 22, true);
+            ofSetCircleResolution(resolution);
+            ofCircle(pos, radius);
+        }
         else{
             ofLine(pos, prevPos);
             prevPos = pos;

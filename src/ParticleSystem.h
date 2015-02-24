@@ -53,6 +53,7 @@ class ParticleSystem
 		float lifetimeRnd;      // Randomness of lifetime
 		float radius;           // Radius of the particles
 		float radiusRnd;        // Randomness of radius
+		int   gridRes;          // Resolution of the grid
 		//--------------------------------------------------------------
 		bool immortal;          // Can the particles die?
 		bool sizeAge;           // Particles change size with age?
@@ -61,6 +62,7 @@ class ParticleSystem
 		bool colorAge;          // Particles change color with age?
 		bool bounce;            // Particles bounce with the window margins?
 		bool isEmpty;           // Particles are empty inside, only draw the contour?
+		bool drawLine;          // Particles are circles or we draw a line from prevpos to pos?
 		//--------------------------------------------------------------
 		float friction;        	// Multiply this value by the velocity every frame
         float gravity;          // Makes particles fall down in a natural way
