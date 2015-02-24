@@ -66,7 +66,7 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers){
             float scale = 0.2;
             float minDist;
 
-            repulseParticles();
+//            repulseParticles();
 
             for(int i = 0; i < particles.size(); i++){
                 closeEnough = false;
@@ -88,7 +88,7 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers){
                 if(closeEnough){
                     particles[i]->addRepulsionForce(closestPos.x, closestPos.y, markerRadius*markerRadius, scale);
                     particles[i]->isTouched = true;
-                    
+
                 }
 //                if(particles[i]->isTouched){
 //                    ofPoint gravityForce(0, 0.1*particles[i]->mass);
