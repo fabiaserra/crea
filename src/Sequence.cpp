@@ -174,10 +174,16 @@ void Sequence::drawPatterns(map<int, float> currentPatterns){
         bool highlight = false;
         float percent = 0;
         // If the pattern is is inside the map
-        if(currentPatterns.find(patternIndex) != currentPatterns.end()) {
+        if(currentPatterns.find(patternIndex) != currentPatterns.end()){
             highlight = true;
             percent = currentPatterns[patternIndex];
         }
+//        else{ // Either here or inside drawPattern
+//            // If is not inside the map we clear the polyline
+//            for(int markerIndex = 0; markerIndex < patterns[patternIndex].size(); markerIndex++){
+//                patternsPastPoints[patternIndex][markerIndex].clear();
+//            }
+//        }
         drawPattern(patternPosition, patternIndex, percent, highlight);
     }
 }
@@ -237,6 +243,9 @@ void Sequence::drawPattern(const int patternPosition, const int patternIndex, co
                 // Pattern current processing point
                 ofSetColor(240, 0, 20, opacity);
                 ofCircle(currentPoint, 10);
+            }
+            else{
+                patternsPastPoints[patternIndex][markerIndex].clear();
             }
         }
 

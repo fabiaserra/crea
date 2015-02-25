@@ -8,7 +8,7 @@ void ofApp::setup(){
 
 //    ofSetFrameRate(30);
 
-    int maxMarkers = 1;
+    int maxMarkers = 2;
 
     // Using a live kinect?
     #ifdef KINECT_CONNECTED
@@ -21,7 +21,8 @@ void ofApp::setup(){
         // Use xml sequence marker file
         #ifdef KINECT_SEQUENCE
             kinectSequence.setup(maxMarkers);
-            kinectSequence.load("sequences/sequence1marker3.xml");
+//            kinectSequence.load("sequences/sequence1marker2.xml");
+            kinectSequence.load("sequences/sequence2.xml");
         #endif // KINECT_SEQUENCE
 
         // Load png files from file
@@ -120,7 +121,8 @@ void ofApp::setup(){
 
     // SEQUENCE
     sequence.setup(maxMarkers);
-    sequence.load("sequences/sequence1marker3.xml");
+//    sequence.load("sequences/sequence1marker2.xml");
+    sequence.load("sequences/sequence2.xml");
     drawSequence = false;
 
     // MARKERS
@@ -150,8 +152,8 @@ void ofApp::setup(){
 //	int minLen = 2; // sequence.xml
 //	float t = 12.3; // for sequence.xml
 
-//	int minLen = 7; // sequence3.xml
-// 	float t = 18.6; // for sequence2.xml
+	int minLen = 7; // sequence3.xml
+ 	float t = 18.6; // for sequence2.xml
 //	float t = 16.8; // for sequence3.xml
 //
 //	int minLen = 7;
@@ -214,6 +216,7 @@ void ofApp::setup(){
 
     interpolatingWidgets = false;
     loadGUISettings("settings/lastSettings.xml", false, true);
+
 
     // CREATE DIRECTORIES IN /DATA IF THEY DONT EXIST
     string directory[3] = {"sequences", "settings", "cues"};
@@ -603,6 +606,15 @@ void ofApp::setupGUI3(){
     sequenceNumFrames = gui3->addLabel("Number of frames: "+ofToString(sequence.numFrames), OFX_UI_FONT_SMALL);
 
     gui3->addSpacer();
+    for(int i = 0; i < cues.size(); i++){
+        double n = cues.size();
+        string cueName = "Cue" + i;
+        gui3->addRangeSlider(cueName, 0, 100, (double)i/n, ((double)i+1.0)/n);
+//        gui3->addRangeSlider("Cue"+cues[i], 500, 5000, &nearClipping, &farClipping);
+    }
+
+
+    gui3->addSpacer();
 
     gui3->autoSizeToFitWidgets();
     gui3->setVisible(false);
@@ -722,7 +734,7 @@ void ofApp::setupGUI7(){
     gui7->addToggle("Convex Hull", &contour.drawConvexHull);
     gui7->addToggle("Convex Hull Line", &contour.drawConvexHullLine);
     gui7->addToggle("Contour Line", &contour.drawContourLine);
-    gui7->addSlider("Velocity", 0.0, 100.0, &contour.smoothingSize);
+    gui7->addSlider("Smoothing Size", 0.0, 40.0, &contour.smoothingSize);
 
 
     gui7->autoSizeToFitWidgets();
@@ -924,7 +936,7 @@ void ofApp::setupGUI8Grid(){
 }
 
 //--------------------------------------------------------------
-void ofApp::saveGUISettings(const string path, const bool saveCues){
+void ofApp::saveGUISettings(const string path, const bool isACue){
 
     // Create directory if this doesnt exist
     ofFile file(path);
@@ -938,7 +950,10 @@ void ofApp::saveGUISettings(const string path, const bool saveCues){
     for(vector<ofxUISuperCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
         ofxUICanvas *g = *it;
         int guiIndex = XML->addTag("GUI");
-        if(!saveCues && guiIndex == 2) continue; // guiIndex 2 are the kinect settings and we dont save them if it is for a cue file
+
+        // panel 2, 3, 4 and 5 are settings that for now we dont want to save in a cue file
+        if(isACue && guiIndex >= 2 && guiIndex <= 5) continue;
+
         XML->pushTag("GUI", guiIndex);
         vector<ofxUIWidget*> widgets = g->getWidgets();
         for(int i = 0; i < widgets.size(); i++){
@@ -958,8 +973,8 @@ void ofApp::saveGUISettings(const string path, const bool saveCues){
         XML->popTag();
     }
 
-    // Save Cues
-    if(saveCues){
+    // Save Cues if it is not a cue
+    if(!isACue){
         XML->addTag("CUES");
         XML->pushTag("CUES");
         XML->setValue("Active", currentCueIndex, 0);
@@ -974,7 +989,7 @@ void ofApp::saveGUISettings(const string path, const bool saveCues){
 }
 
 //--------------------------------------------------------------
-void ofApp::loadGUISettings(const string path, const bool interpolate, const bool loadCues){
+void ofApp::loadGUISettings(const string path, const bool interpolate, const bool isACue){
     ofxXmlSettings *XML = new ofxXmlSettings();
     if(!XML->loadFile(path)){
         ofLogWarning("File " + ofFilePath::getFileName(path) + " not found.");
@@ -986,7 +1001,13 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
     int guiIndex = 0;
     for(vector<ofxUISuperCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
         ofxUICanvas *g = *it;
-        if(!loadCues && guiIndex == 2){ // guiIndex 2 are the kinect settings and dont load them as a cue file
+        // For now we never want to load the settings from panel 4
+        if(guiIndex == 4){
+            guiIndex++;
+           continue;
+        }
+        // Panel 2, 3, 4 and 5 are settings we dont want to load from a cue file
+        if(isACue && && guiIndex >= 2 && guiIndex <= 5){
            guiIndex++;
            continue;
         }
@@ -1023,8 +1044,8 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
         XML->popTag();
     }
 
-    // Load cue list
-    if(loadCues){
+    // Load cue list if it is not a cue
+    if(!isACue){
         XML->pushTag("CUES");
         int numCues = XML->getNumTags("Cue");
         cues.clear();
@@ -1047,8 +1068,9 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
             string cueFileName = ofFilePath::getBaseName(cues[currentCueIndex]);
             cueName->setTextString(cueFileName);
             cueName->setVisible(true);
-            loadGUISettings(cues[currentCueIndex], false, false);
+            loadGUISettings(cues[currentCueIndex], false, true);
         }
+        else currentCueIndex = -1;
     }
 
     delete XML;
@@ -1154,7 +1176,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         if(button->getValue() == true){
             ofFileDialogResult result = ofSystemSaveDialog("sequence.xml", "Save current settings");
             if(result.bSuccess){
-                saveGUISettings(result.getPath(), true);
+                saveGUISettings(result.getPath(), false);
             }
         }
     }
@@ -1164,7 +1186,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         if(button->getValue() == true){
             ofFileDialogResult result = ofSystemLoadDialog("Select settings xml file.", false, ofToDataPath("settings/"));
             if(result.bSuccess){
-                loadGUISettings(result.getPath(), false, true);
+                loadGUISettings(result.getPath(), false, false);
             }
         }
     }
@@ -1241,7 +1263,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     if(e.getName() == "New Cue"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if(button->getValue() == true){
-            if(currentCueIndex >= 0) saveGUISettings(cues[currentCueIndex], false);
+            if(currentCueIndex >= 0) saveGUISettings(cues[currentCueIndex], true);
             currentCueIndex++;
             string cueFileName = "newCue"+ofToString(currentCueIndex);
             string cuePath = "cues/"+cueFileName+".xml";
@@ -1261,7 +1283,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if(button->getValue() == true){
             string cuePath = "cues/"+cueName->getTextString()+".xml";
-            saveGUISettings(cuePath, false);
+            saveGUISettings(cuePath, true);
         }
     }
 
@@ -1269,10 +1291,10 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if(button->getValue() == true){
             if(cues.size() == 0) return;
-            if(!interpolatingWidgets) saveGUISettings(cues[currentCueIndex], false);
+            if(!interpolatingWidgets) saveGUISettings(cues[currentCueIndex], true);
             if(currentCueIndex-1 >= 0) currentCueIndex--;
             else if(currentCueIndex-1 < 0) currentCueIndex = cues.size()-1;
-            loadGUISettings(cues[currentCueIndex], false, false);
+            loadGUISettings(cues[currentCueIndex], false, true);
             string cueFileName = ofFilePath::getBaseName(cues[currentCueIndex]);
             cueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
             cueName->setTextString(cueFileName);
@@ -1283,10 +1305,10 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if(button->getValue() == true){
             if(cues.size() == 0) return;
-            if(!interpolatingWidgets) saveGUISettings(cues[currentCueIndex], false);
+            if(!interpolatingWidgets) saveGUISettings(cues[currentCueIndex], true);
             if(currentCueIndex+1 < cues.size()) currentCueIndex++;
             else if(currentCueIndex+1 == cues.size()) currentCueIndex = 0;
-            loadGUISettings(cues[currentCueIndex], false, false);
+            loadGUISettings(cues[currentCueIndex], false, true);
             string cueFileName = ofFilePath::getBaseName(cues[currentCueIndex]);
             cueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
             cueName->setTextString(cueFileName);
@@ -1299,9 +1321,9 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             ofFileDialogResult result = ofSystemLoadDialog("Select cue file.", false, ofToDataPath("cues/"));
             if(result.bSuccess){
                 currentCueIndex++;
-                loadGUISettings(result.getPath(), false, false);
+                loadGUISettings(result.getPath(), false, true);
                 string cuePath = "cues/"+ofFilePath::getFileName(result.getPath());
-                saveGUISettings(cuePath, false);
+                saveGUISettings(cuePath, true);
                 vector<string>::iterator it = cues.begin();
                 cues.insert(it+currentCueIndex, cuePath);
                 string cueFileName = ofFilePath::getBaseName(cuePath);
@@ -1327,7 +1349,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
                 cueName->setVisible(false);
             }
             else{
-                loadGUISettings(cues[currentCueIndex], false, false);
+                loadGUISettings(cues[currentCueIndex], false, true);
                 string cueFileName = ofFilePath::getBaseName(cues[currentCueIndex]);
                 cueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
                 cueName->setTextString(cueFileName);
@@ -1339,10 +1361,10 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         ofxUILabelButton *button = (ofxUILabelButton *) e.widget;
         if(button->getValue() == true){
             if(cues.size() == 0) return;
-            if(!interpolatingWidgets) saveGUISettings(cues[currentCueIndex], false);
+            if(!interpolatingWidgets) saveGUISettings(cues[currentCueIndex], true);
             if(currentCueIndex+1 < cues.size()) currentCueIndex++;
             else if(currentCueIndex+1 == cues.size()) currentCueIndex = 0;
-            loadGUISettings(cues[currentCueIndex], true, false);
+            loadGUISettings(cues[currentCueIndex], true, true);
             string cueFileName = ofFilePath::getBaseName(cues[currentCueIndex]);
             cueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
             cueName->setTextString(cueFileName);
@@ -1468,9 +1490,7 @@ void ofApp::keyPressed(int key){
                 gui5->setVisible(false);
                 gui6->setVisible(false);
                 gui7->setVisible(false);
-                gui8Marker->setVisible(false);
-                gui8Contour->setVisible(false);
-                gui8Grid->setVisible(false);
+                particleGuis.at(currentParticleSystem)->setVisible(false);
                 break;
 
             case '0':
@@ -1483,9 +1503,7 @@ void ofApp::keyPressed(int key){
                 gui5->setVisible(false);
                 gui6->setVisible(false);
                 gui7->setVisible(false);
-                gui8Marker->setVisible(false);
-                gui8Contour->setVisible(false);
-                gui8Grid->setVisible(false);
+                particleGuis.at(currentParticleSystem)->setVisible(false);
                 break;
 
             case '1':
@@ -1497,9 +1515,7 @@ void ofApp::keyPressed(int key){
                 gui5->setVisible(false);
                 gui6->setVisible(false);
                 gui7->setVisible(false);
-                gui8Marker->setVisible(false);
-                gui8Contour->setVisible(false);
-                gui8Grid->setVisible(false);
+                particleGuis.at(currentParticleSystem)->setVisible(false);
                 break;
 
             case '2':
@@ -1511,9 +1527,7 @@ void ofApp::keyPressed(int key){
                 gui5->setVisible(false);
                 gui6->setVisible(false);
                 gui7->setVisible(false);
-                gui8Marker->setVisible(false);
-                gui8Contour->setVisible(false);
-                gui8Grid->setVisible(false);
+                particleGuis.at(currentParticleSystem)->setVisible(false);
                 break;
 
             case '3':
@@ -1525,9 +1539,7 @@ void ofApp::keyPressed(int key){
                 gui5->setVisible(false);
                 gui6->setVisible(false);
                 gui7->setVisible(false);
-                gui8Marker->setVisible(false);
-                gui8Contour->setVisible(false);
-                gui8Grid->setVisible(false);
+                particleGuis.at(currentParticleSystem)->setVisible(false);
                 break;
 
             case '4':
@@ -1539,9 +1551,7 @@ void ofApp::keyPressed(int key){
                 gui5->setVisible(false);
                 gui6->setVisible(false);
                 gui7->setVisible(false);
-                gui8Marker->setVisible(false);
-                gui8Contour->setVisible(false);
-                gui8Grid->setVisible(false);
+                particleGuis.at(currentParticleSystem)->setVisible(false);
                 break;
 
             case '5':
@@ -1553,9 +1563,7 @@ void ofApp::keyPressed(int key){
                 gui5->toggleVisible();
                 gui6->setVisible(false);
                 gui7->setVisible(false);
-                gui8Marker->setVisible(false);
-                gui8Contour->setVisible(false);
-                gui8Grid->setVisible(false);
+                particleGuis.at(currentParticleSystem)->setVisible(false);
                 break;
 
             case '6':

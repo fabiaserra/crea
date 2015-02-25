@@ -30,7 +30,7 @@ void Contour::update(ofxCv::ContourFinder & contourFinder){
 
             ofPolyline convexHull;
             convexHull = toOf(contourFinder.getConvexHull(i));
-            convexHull = convexHull.getSmoothed(smoothingSize, 0.5);
+//            convexHull = convexHull.getSmoothed(smoothingSize, 0.5);
             convexHulls.push_back(convexHull);
 
             ofPolyline contour;
