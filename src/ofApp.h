@@ -116,6 +116,7 @@ class ofApp : public ofBaseApp{
         ofxUISuperCanvas *gui8Grid;
         vector<ofxUISuperCanvas *> particleGuis;
         vector<ofxUISuperCanvas *> guis;
+        vector< pair<ofxUILabel *, ofxUIRangeSlider*> > cueSliders;
         //--------------------------------------------------------------
         ofColor uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo;
         //--------------------------------------------------------------

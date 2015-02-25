@@ -1071,14 +1071,20 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
             cueName->setVisible(true);
             loadGUISettings(cues[currentCueIndex], false, true);
 
-            cout << cues.size() << endl;
+            // Create map of the sliders so we can get the values outside
+            float n = cues.size();
             for(int i = 0; i < cues.size(); i++){
-                double n = cues.size();
-                gui3->addLabel(ofFilePath::getBaseName(cues[i]));
-                string cueName = "Cue " + ofToString(i);
-                gui3->addRangeSlider(cueName, 0, 100, (double)i/n*100, ((double)i+1.0)/n*100);
+                ofxUILabel *label;
+                label = gui3->addLabel(ofFilePath::getBaseName(cues[i]));
+                string cueName = "Sequence percent";
+                float low = (float)i/n*100;
+                float high = ((float)i+1.0)/n*100;
+                ofxUIRangeSlider *slider;
+                slider = gui3->addRangeSlider(cueName, 0, 100, low, high);
+                pair<ofxUILabel *, ofxUIRangeSlider*> cue(label, slider);
+                cueSliders.push_back(cue);
+//                gui3->addSpacer();
             }
-            gui3->addSpacer();
             gui3->autoSizeToFitWidgets();
 
         }
@@ -1252,6 +1258,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         if(ti->getInputTriggerType() == OFX_UI_TEXTINPUT_ON_UNFOCUS || ti->getInputTriggerType() == OFX_UI_TEXTINPUT_ON_ENTER){
             string cuePath = "cues/"+cueName->getTextString()+".xml";
             cues[currentCueIndex] = cuePath;
+            cueSliders[currentCueIndex].first->setLabel(ofFilePath::getBaseName(cuePath));
         }
     }
 
@@ -1262,15 +1269,35 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             currentCueIndex++;
             string cueFileName = "newCue"+ofToString(currentCueIndex);
             string cuePath = "cues/"+cueFileName+".xml";
-            if(find(cues.begin(), cues.end(), cuePath) != cues.end()){
+            while(find(cues.begin(), cues.end(), cuePath) != cues.end()){
                 cueFileName += ".1";
                 cuePath = "cues/"+cueFileName+".xml";
             }
-            vector<string>::iterator it = cues.begin();
-            cues.insert(it+currentCueIndex, cuePath);
+            cues.insert(cues.begin()+currentCueIndex, cuePath);
             cueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
             cueName->setTextString(cueFileName);
             cueName->setVisible(true);
+
+            // Add new empty cue in the end and modify all of them
+            ofxUILabel *label;
+            label = gui3->addLabel(" ");
+            string cueName = "Sequence percent";
+            ofxUIRangeSlider *slider;
+            slider = gui3->addRangeSlider(cueName, 0, 100, 0, 100);
+            pair<ofxUILabel *, ofxUIRangeSlider*> cue(label, slider);
+            cueSliders.push_back(cue);
+
+            float n = cueSliders.size();
+            for (int i = 0; i < cueSliders.size(); i++){
+                cueSliders.at(i).first->setLabel(ofFilePath::getBaseName(cues[i]));
+                cueSliders.at(i).first->setVisible(true);
+                cout << cueSliders.at(i).first->getName() << endl;
+                float low = (float)i/n*100;
+                float high = ((float)i+1.0)/n*100;
+                cueSliders.at(i).second->setValueLow(low);
+                cueSliders.at(i).second->setValueHigh(high);
+            }
+            gui3->autoSizeToFitWidgets();
         }
     }
 
@@ -1332,8 +1359,16 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if(button->getValue() == true){
             if(cues.size() == 0) return;
-            vector<string>::iterator it = cues.begin();
-            cues.erase(it+currentCueIndex);
+
+            // Delete cue string from vector
+            cues.erase(cues.begin()+currentCueIndex);
+
+            // Delete cue slider
+            gui3->removeWidget(cueSliders.at(currentCueIndex).first);
+            gui3->removeWidget(cueSliders.at(currentCueIndex).second);
+            cueSliders.erase(cueSliders.begin()+currentCueIndex);
+
+            // Show previous cue
             if(currentCueIndex-1 >= 0) currentCueIndex--;
             else if(currentCueIndex-1 < 0) currentCueIndex = cues.size()-1;
             if(cues.size() == 0){
@@ -1348,6 +1383,17 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
                 cueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
                 cueName->setTextString(cueFileName);
             }
+
+            // Modify all cue sliders after deleting the current one
+            float n = cueSliders.size();
+            for (int i = 0; i < cueSliders.size(); i++){
+                cueSliders.at(i).first->setLabel(ofFilePath::getBaseName(cues[i]));
+                float low = (float)i/n*100;
+                float high = ((float)i+1.0)/n*100;
+                cueSliders.at(i).second->setValueLow(low);
+                cueSliders.at(i).second->setValueHigh(high);
+            }
+            gui3->autoSizeToFitWidgets();
         }
     }
 
@@ -1439,6 +1485,9 @@ void ofApp::exit(){
 //        particleSystems.at(i) = NULL;
 //    }
 //    particleSystems.clear();
+
+    // Delete cue sliders map
+    cueSliders.clear();
 
     // Cleanup any loaded images
     for(int i = 0; i < savedDepthImages.size(); i++){
