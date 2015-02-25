@@ -1074,7 +1074,7 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
             cout << cues.size() << endl;
             for(int i = 0; i < cues.size(); i++){
                 double n = cues.size();
-                gui3->addLabel(ofFilePath::getBaseName(ofcues[i]));
+                gui3->addLabel(ofFilePath::getBaseName(cues[i]));
                 string cueName = "Cue " + ofToString(i);
                 gui3->addRangeSlider(cueName, 0, 100, (double)i/n*100, ((double)i+1.0)/n*100);
             }
