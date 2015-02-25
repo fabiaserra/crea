@@ -215,7 +215,7 @@ void ofApp::setup(){
 //    setupgui8(MARKER_PARTICLES);
 
     interpolatingWidgets = false;
-    loadGUISettings("settings/lastSettings.xml", false, true);
+    loadGUISettings("settings/lastSettings.xml", false, false);
 
 
     // CREATE DIRECTORIES IN /DATA IF THEY DONT EXIST
@@ -465,7 +465,6 @@ void ofApp::setupGUI0(){
     gui0->addLabel("them.", OFX_UI_FONT_SMALL);
     gui0->addSpacer();
     gui0->addLabel("Press 'h' to hide GUIs.", OFX_UI_FONT_SMALL);
-    gui0->addSpacer();
     gui0->addLabel("Press 'f' to fullscreen.", OFX_UI_FONT_SMALL);
     gui0->addSpacer();
 
@@ -604,15 +603,6 @@ void ofApp::setupGUI3(){
     sequenceFilename = gui3->addLabel("Filename: "+sequence.filename, OFX_UI_FONT_SMALL);
     sequenceDuration = gui3->addLabel("Duration: "+ofToString(sequence.duration, 2) + " s", OFX_UI_FONT_SMALL);
     sequenceNumFrames = gui3->addLabel("Number of frames: "+ofToString(sequence.numFrames), OFX_UI_FONT_SMALL);
-
-    gui3->addSpacer();
-    for(int i = 0; i < cues.size(); i++){
-        double n = cues.size();
-        string cueName = "Cue" + i;
-        gui3->addRangeSlider(cueName, 0, 100, (double)i/n, ((double)i+1.0)/n);
-//        gui3->addRangeSlider("Cue"+cues[i], 500, 5000, &nearClipping, &farClipping);
-    }
-
 
     gui3->addSpacer();
 
@@ -973,10 +963,16 @@ void ofApp::saveGUISettings(const string path, const bool isACue){
         XML->popTag();
     }
 
+    // Save active particles panel
+    XML->addTag("PARTICLES");
+    XML->pushTag("PARTICLES", 0);
+    XML->setValue("Active", currentParticleSystem, 0);
+    XML->popTag();
+
     // Save Cues if it is not a cue
     if(!isACue){
         XML->addTag("CUES");
-        XML->pushTag("CUES");
+        XML->pushTag("CUES", 0);
         XML->setValue("Active", currentCueIndex, 0);
         for(int i = 0; i < cues.size(); i++){
             XML->setValue("Cue", cues[i], i);
@@ -1004,10 +1000,10 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
         // For now we never want to load the settings from panel 4
         if(guiIndex == 4){
             guiIndex++;
-           continue;
+            continue;
         }
         // Panel 2, 3, 4 and 5 are settings we dont want to load from a cue file
-        if(isACue && && guiIndex >= 2 && guiIndex <= 5){
+        if(isACue && guiIndex >= 2 && guiIndex <= 5){
            guiIndex++;
            continue;
         }
@@ -1044,6 +1040,11 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
         XML->popTag();
     }
 
+    // Load active particles panel
+    XML->pushTag("PARTICLES", 0);
+    currentParticleSystem = XML->getValue("Active", 0, 0);
+    XML->popTag();
+
     // Load cue list if it is not a cue
     if(!isACue){
         XML->pushTag("CUES");
@@ -1069,29 +1070,23 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
             cueName->setTextString(cueFileName);
             cueName->setVisible(true);
             loadGUISettings(cues[currentCueIndex], false, true);
+
+            cout << cues.size() << endl;
+            for(int i = 0; i < cues.size(); i++){
+                double n = cues.size();
+                gui3->addLabel(ofFilePath::getBaseName(ofcues[i]));
+                string cueName = "Cue " + ofToString(i);
+                gui3->addRangeSlider(cueName, 0, 100, (double)i/n*100, ((double)i+1.0)/n*100);
+            }
+            gui3->addSpacer();
+            gui3->autoSizeToFitWidgets();
+
         }
         else currentCueIndex = -1;
     }
 
     delete XML;
 }
-
-//--------------------------------------------------------------
-//void ofApp::loadCuesVector(const string path){
-//
-//    // Load all cues from folder
-//    ofDirectory dir("cues/");
-//    // Only show .xml files
-//    dir.allowExt(".xml");
-//    // Populate the directory object
-//    dir.listDir();
-//    cout << dir.numFiles() << endl;
-//    cues.clear();
-//    // Go through and print out all the paths
-//    for(int i = 0; i < dir.numFiles(); i++){
-//        cues.push_back(dir.getPath(i));
-//    }
-//}
 
 //--------------------------------------------------------------
 void ofApp::interpolateWidgetValues(){
@@ -1320,12 +1315,11 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         if(button->getValue() == true){
             ofFileDialogResult result = ofSystemLoadDialog("Select cue file.", false, ofToDataPath("cues/"));
             if(result.bSuccess){
-                currentCueIndex++;
+                if(cues.size() == 0) currentCueIndex = 0;
                 loadGUISettings(result.getPath(), false, true);
                 string cuePath = "cues/"+ofFilePath::getFileName(result.getPath());
                 saveGUISettings(cuePath, true);
-                vector<string>::iterator it = cues.begin();
-                cues.insert(it+currentCueIndex, cuePath);
+                cues[currentCueIndex] = cuePath;
                 string cueFileName = ofFilePath::getBaseName(cuePath);
                 cueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
                 cueName->setTextString(cueFileName);
@@ -1433,7 +1427,7 @@ void ofApp::exit(){
     kinect.clear();
 
     if(!interpolatingWidgets && cues.size()) saveGUISettings(cues[currentCueIndex], false);
-    saveGUISettings("settings/lastSettings.xml", true);
+    saveGUISettings("settings/lastSettings.xml", false);
 
     delete contourParticles;
     delete markerParticles;
