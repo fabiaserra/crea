@@ -354,13 +354,38 @@ void ofApp::update(){
                 prevBf = currentBf;
                 currentBf = vmo::tracking(seqVmo, pttrList, prevBf, obs);
                 cout << "current index: " << currentBf.currentIdx << endl;
+
+                float currentPercent = ofMap(currentBf.currentIdx, 0, sequence.numFrames, 0, 100, true);
+                cout << "current percent: " << currentPercent << endl;
+                if(cues.size() != 0) {
+                    int cueSegment = currentCueIndex;
+                    for(int i = 0; i < cueSliders.size(); i++){
+                        float low = cueSliders.at(i).second->getValueLow();
+                        float high = cueSliders.at(i).second->getValueHigh();
+                        cout << "Low: " << low << endl;
+                        cout << "High: " << high << endl;
+                        if (low <= currentPercent && currentPercent <= high){
+                            cueSegment = i;
+                            break;
+                        }
+                    }
+                    // If tracking idx from sequence belongs to another cue different than the current
+                    // we interpolate settings to this other cue
+                    if(currentCueIndex != cueSegment){
+                        currentCueIndex = cueSegment;
+                        loadGUISettings(cues[currentCueIndex], true, true);
+                        string cueFileName = ofFilePath::getBaseName(cues[currentCueIndex]);
+                        cueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
+                        cueName->setTextString(cueFileName);
+                    }
+                }
             }
             gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
             for (int i = 0; i < sequence.patterns.size(); i++) {
-                if(gestureUpdate.find(i) != gestureUpdate.end()) {
-                    cout << "key: "<< i << endl;
-                    cout << "percent:"<< gestureUpdate[i] << endl;
-                }
+//                if(gestureUpdate.find(i) != gestureUpdate.end()) {
+//                    cout << "key: "<< i << endl;
+//                    cout << "percent:"<< gestureUpdate[i] << endl;
+//                }
             }
         }
 
@@ -382,13 +407,36 @@ void ofApp::update(){
                     prevBf = currentBf;
                     currentBf = vmo::tracking(seqVmo, pttrList, prevBf, obs);
                     cout << "current index: " << currentBf.currentIdx << endl;
+                    // We need the min/max of currentIdx
+                    float currentPercent = ofMap(currentBf.currentIdx, 0, sequence.numFrames, 0, 100, true);
+                    cout << "current percent: " << currentPercent << endl;
+                    if(cues.size() != 0) {
+                        int cueSegment = currentCueIndex;
+                        for(int i = 0; i < cueSliders.size(); i++){
+                            float low = cueSliders.at(currentCueIndex).second->getValueHigh();
+                            float high = cueSliders.at(currentCueIndex).second->getValueHigh();
+                            if (low <= currentPercent && currentPercent <= high){
+                                cueSegment = i;
+                                break;
+                            }
+                        }
+                        // If tracking idx from sequence belongs to another cue different than the current
+                        // we interpolate settings to this other cue
+                        if(currentCueIndex != cueSegment){
+                            currentCueIndex = cueSegment;
+                            loadGUISettings(cues[currentCueIndex], true, true);
+                            string cueFileName = ofFilePath::getBaseName(cues[currentCueIndex]);
+                            cueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
+                            cueName->setTextString(cueFileName);
+                        }
+                    }
                 }
                 gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
                 for (int i = 0; i < sequence.patterns.size(); i++) {
-                    if(gestureUpdate.find(i) != gestureUpdate.end()) {
-                        cout << "key: "<< i << endl;
-                        cout << "percent:"<< gestureUpdate[i] << endl;
-                    }
+//                    if(gestureUpdate.find(i) != gestureUpdate.end()) {
+//                        cout << "key: "<< i << endl;
+//                        cout << "percent:"<< gestureUpdate[i] << endl;
+//                    }
                 }
             }
         }
@@ -747,14 +795,10 @@ void ofApp::setupGUI8Marker(){
 
     ofxUIImageButton *previous;
     previous = gui8Marker->addImageButton("Previous Particle System", "icons/previous.png", false, dim, dim);
-//    previous->bindToKey(OF_KEY_LEFT);
-//    previous->setTriggerType(OFX_UI_TRIGGER_BEGIN);
     previous->setColorBack(ofColor(150, 255));
 
     ofxUIImageButton *next;
     next = gui8Marker->addImageButton("Next Particle System", "icons/play.png", false, dim, dim);
-//    next->bindToKey(OF_KEY_RIGHT);
-//    next->setTriggerType(OFX_UI_TRIGGER_BEGIN);
     next->setColorBack(ofColor(150, 255));
 
     gui8Marker->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
@@ -820,14 +864,10 @@ void ofApp::setupGUI8Contour(){
 
     ofxUIImageButton *previous;
     previous = gui8Contour->addImageButton("Previous Particle System", "icons/previous.png", false, dim, dim);
-//    previous->bindToKey(OF_KEY_LEFT);
-//    previous->setTriggerType(OFX_UI_TRIGGER_BEGIN);
     previous->setColorBack(ofColor(150, 255));
 
     ofxUIImageButton *next;
     next = gui8Contour->addImageButton("Next Particle System", "icons/play.png", false, dim, dim);
-//    next->bindToKey(OF_KEY_RIGHT);
-//    next->setTriggerType(OFX_UI_TRIGGER_BEGIN);
     next->setColorBack(ofColor(150, 255));
 
     gui8Contour->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
@@ -1083,7 +1123,6 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
                 slider = gui3->addRangeSlider(cueName, 0, 100, low, high);
                 pair<ofxUILabel *, ofxUIRangeSlider*> cue(label, slider);
                 cueSliders.push_back(cue);
-//                gui3->addSpacer();
             }
             gui3->autoSizeToFitWidgets();
 
@@ -1291,7 +1330,6 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             for (int i = 0; i < cueSliders.size(); i++){
                 cueSliders.at(i).first->setLabel(ofFilePath::getBaseName(cues[i]));
                 cueSliders.at(i).first->setVisible(true);
-                cout << cueSliders.at(i).first->getName() << endl;
                 float low = (float)i/n*100;
                 float high = ((float)i+1.0)/n*100;
                 cueSliders.at(i).second->setValueLow(low);
@@ -1408,6 +1446,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             string cueFileName = ofFilePath::getBaseName(cues[currentCueIndex]);
             cueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
             cueName->setTextString(cueFileName);
+            button->setValue(false);
         }
     }
 
