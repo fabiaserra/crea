@@ -9,7 +9,7 @@
 //#define KINECT_CONNECTED
 
 // Uncomment this to use an xml sequence file for the tracking
-#define KINECT_SEQUENCE
+//#define KINECT_SEQUENCE
 
 #include "ParticleSystem.h"
 #include "irMarker.h"
@@ -116,6 +116,7 @@ class ofApp : public ofBaseApp{
         ofxUISuperCanvas *gui8Grid;
         vector<ofxUISuperCanvas *> particleGuis;
         vector<ofxUISuperCanvas *> guis;
+        vector< pair<ofxUILabel *, ofxUIRangeSlider*> > cueSliders;
         //--------------------------------------------------------------
         ofColor uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo;
         //--------------------------------------------------------------
@@ -131,7 +132,6 @@ class ofApp : public ofBaseApp{
         float guiWidth;
         //--------------------------------------------------------------
         float red, green, blue;
-        //ofColor bgColor;
         //--------------------------------------------------------------
         float nearClipping, farClipping;
         float nearThreshold, farThreshold;
