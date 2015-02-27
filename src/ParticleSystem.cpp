@@ -40,22 +40,23 @@ ParticleSystem::~ParticleSystem(){
 }
 
 
-void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
+void ParticleSystem::setup(ParticleMode particleMode, InputSource inputSource, int width , int height){
 
     this->particleMode = particleMode;
+    this->inputSource = inputSource;
     this->width = width;
     this->height = height;
 
-    if(particleMode == GRID_PARTICLES){
+    if(particleMode == GRID){
         immortal = true;
         gridRes = 10;
-        friction = 20;
         createParticleGrid(width, height);
     }
 
-    if(particleMode == RANDOM_PARTICLES){
+    if(particleMode == RANDOM){
         immortal = true;
-        addParticles(1500);
+        int nParticles = 1500;
+        addParticles(nParticles);
     }
 }
 
@@ -64,30 +65,33 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
         // sort particles so it is more effective to do particle/particle interactions
         sort(particles.begin(), particles.end(), comparisonFunction);
 
-        if(particleMode == GRID_PARTICLES){
-            ofPoint dir;
+        if(particleMode == GRID){
             ofPoint closestPos;
             bool closeEnough;
             float markerRadius = 50;
             float scale = 5;
             float minDist;
+//            ofPoint dir;
 
 //            repulseParticles();
 
             for(int i = 0; i < particles.size(); i++){
                 closeEnough = false;
-                minDist = markerRadius*markerRadius;
-                // Get closest marker to particle
-                for(int markerIndex = 0; markerIndex < markers.size(); markerIndex++){
-                    if (!markers[markerIndex].hasDisappeared){
-                        float markerDist = particles[i]->pos.squareDistance(markers[markerIndex].smoothPos);
-                        if(markerDist < minDist){
-                            closeEnough = true;
-                            dir = markers[markerIndex].smoothPos - particles[i]->pos;
-                            dir.normalize();
-                            minDist = markerDist;
-                            closestPos = markers[markerIndex].smoothPos;
-    //                        color = markers[markerIndex].color;
+
+                if(inputSource == MARKERS){
+                    minDist = markerRadius*markerRadius;
+                    // Get closest marker to particle
+                    for(int markerIndex = 0; markerIndex < markers.size(); markerIndex++){
+                        if (!markers[markerIndex].hasDisappeared){
+                            float markerDist = particles[i]->pos.squareDistance(markers[markerIndex].smoothPos);
+                            if(markerDist < minDist){
+                                closeEnough = true;
+                                minDist = markerDist;
+                                closestPos = markers[markerIndex].smoothPos;
+//                                dir = markers[markerIndex].smoothPos - particles[i]->pos;
+//                                dir.normalize();
+//                                color = markers[markerIndex].color;
+                            }
                         }
                     }
                 }
@@ -103,7 +107,7 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
             }
         }
 
-        else if(particleMode == MARKER_PARTICLES || particleMode == CONTOUR_PARTICLES){
+        else if(particleMode == EMITTER){
             // Delete inactive particles
             int i = 0;
             while (i < particles.size()){
@@ -118,14 +122,14 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
             }
 
             // Born new particles
-            if(particleMode == MARKER_PARTICLES){
+            if(inputSource == MARKERS){
                 for(unsigned int i = 0; i < markers.size(); i++){
                     if (markers[i].hasDisappeared) markers[i].bornRate -= 0.5;
                     else markers[i].bornRate = bornRate;
                     addParticles(markers[i].bornRate, markers[i]);
                 }
             }
-            else if(particleMode == CONTOUR_PARTICLES){
+            else if(inputSource == CONTOUR){
                 for(unsigned int i = 0; i < contour.contours.size(); i++){
                     addParticles(bornRate, contour.contours[i]);
                 }
@@ -265,11 +269,12 @@ void ParticleSystem::bornParticles(){
         particles[i]->isAlive = false;
     }
 
-    if(particleMode == RANDOM_PARTICLES){
+    if(particleMode == RANDOM){
         immortal = true;
-        addParticles(1500);
+        int nParticles = 1500;
+        addParticles(nParticles);
     }
-    else if(particleMode == GRID_PARTICLES){
+    else if(particleMode == GRID){
         immortal = true;
         createParticleGrid(width, height);
     }

@@ -96,17 +96,17 @@ void ofApp::setup(){
 
     // MARKER PARTICLES
     markerParticles = new ParticleSystem();
-    markerParticles->setup(MARKER_PARTICLES, kinect.width, kinect.height);
+    markerParticles->setup(EMITTER, MARKERS, kinect.width, kinect.height);
 
     // CONTOUR PARTICLES
     contourParticles = new ParticleSystem();
-    contourParticles->setup(CONTOUR_PARTICLES, kinect.width, kinect.height);
+    contourParticles->setup(EMITTER, CONTOUR, kinect.width, kinect.height);
 
     // GRID PARTICLES
     gridParticles = new ParticleSystem();
     gridParticles->radius = 2;
     gridParticles->bounce = true;
-    gridParticles->setup(GRID_PARTICLES, kinect.width, kinect.height);
+    gridParticles->setup(GRID, MARKERS, kinect.width, kinect.height);
 
     // VECTOR OF PARTICLE SYSTEMS
     particleSystems.push_back(markerParticles);
@@ -872,8 +872,6 @@ void ofApp::setupGUI8Contour(){
     gui8Contour->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui8Contour->addLabel("CONTOUR", OFX_UI_FONT_LARGE);
-    gui8Contour->addSpacer();
-
     gui8Contour->addSpacer();
     gui8Contour->addLabel("Emitter");
     gui8Contour->addSlider("Particles/sec", 0.0, 60.0, &contourParticles->bornRate);

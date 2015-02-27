@@ -4,7 +4,8 @@
 #include "irMarker.h"
 #include "Contour.h"
 
-enum ParticleMode {MARKER_PARTICLES, CONTOUR_PARTICLES, GRID_PARTICLES, RANDOM_PARTICLES};
+enum ParticleMode {EMITTER, BOIDS, GRID, RANDOM};
+enum InputSource {MARKERS, CONTOUR};
 
 class ParticleSystem
 {
@@ -12,7 +13,7 @@ class ParticleSystem
 		ParticleSystem();
 		~ParticleSystem();
 
-		void setup(ParticleMode particleMode, int width , int height);
+		void setup(ParticleMode particleMode, InputSource inputSource, int width, int height);
 		void update(float dt, vector<irMarker> &markers, Contour &contour);
 		void draw();
 
@@ -42,6 +43,7 @@ class ParticleSystem
 		//--------------------------------------------------------------
 		ofColor color;
 		ParticleMode particleMode;
+		InputSource inputSource;
 		//--------------------------------------------------------------
 		float bornRate;         // Number of particles born per frame
 		float velocity;         // Initial velocity magnitude of newborn particles
@@ -52,6 +54,7 @@ class ParticleSystem
 		float lifetimeRnd;      // Randomness of lifetime
 		float radius;           // Radius of the particles
 		float radiusRnd;        // Randomness of radius
+		//--------------------------------------------------------------
 		int   gridRes;          // Resolution of the grid
 		//--------------------------------------------------------------
 		bool immortal;          // Can the particles die?
