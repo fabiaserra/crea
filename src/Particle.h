@@ -12,11 +12,13 @@ class Particle
         void draw();
 
         void addForce(ofPoint force);
+        void addNoise(float angle, float turbulence, float dt);
         void addRepulsionForce(float x, float y, float radius, float scale);
         void addAttractionForce(float x, float y, float radius, float scale);
         void addRepulsionForce(Particle &p, float radius, float scale);
+        void addRepulsionForce(Particle &p, float scale);
         void addAttractionForce(Particle &p, float radius, float scale);
-        void xenoToPoint(float spd);
+        void xenoToOrigin(float spd);
 
         void kill();
 //--------------------------------------------------------------
