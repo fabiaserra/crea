@@ -9,7 +9,7 @@
 //#define KINECT_CONNECTED
 
 // Uncomment this to use an xml sequence file for the tracking
-#define KINECT_SEQUENCE
+//#define KINECT_SEQUENCE
 
 #include "ParticleSystem.h"
 #include "irMarker.h"

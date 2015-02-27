@@ -21,7 +21,6 @@ void ofApp::setup(){
         // Use xml sequence marker file
         #ifdef KINECT_SEQUENCE
             kinectSequence.setup(maxMarkers);
-//            kinectSequence.load("sequences/sequence1marker2.xml");
             kinectSequence.load("sequences/sequence2.xml");
         #endif // KINECT_SEQUENCE
 
@@ -329,13 +328,13 @@ void ofApp::update(){
     contour.update(contourFinder);
 
     // Update grid particles
-    gridParticles->update(dt, tempMarkers);
+    gridParticles->update(dt, tempMarkers, contour);
 
     // Update markers particles
-    markerParticles->update(dt, tempMarkers);
+    markerParticles->update(dt, tempMarkers, contour);
 
     // Update contour particles
-    contourParticles->update(dt, contour);
+    contourParticles->update(dt, tempMarkers, contour);
 
     #ifdef KINECT_SEQUENCE
 
