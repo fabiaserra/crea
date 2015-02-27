@@ -161,8 +161,8 @@ void ofApp::setup(){
 //	float t = 4.5; // for sequence1marker1.xml
 //	int minLen = 10;
 //	float t = 5.7; // for sequence1marker2.xml
-	int minLen = 10;
-	float t = 6.0; // for sequence1marker3.xml
+//	int minLen = 10;
+//	float t = 6.0; // for sequence1marker3.xml
 
 	cout << t << endl;
 	seqVmo = vmo::buildOracle(obs, dimensions, maxMarkers, t);
