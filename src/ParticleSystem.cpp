@@ -70,7 +70,7 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
             bool closeEnough;
             float markerRadius = 50;
             float scale = 5;
-            float minDist;
+            float minDistSqrd;
 //            ofPoint dir;
 
 //            repulseParticles();
@@ -79,14 +79,14 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
                 closeEnough = false;
 
                 if(inputSource == MARKERS){
-                    minDist = markerRadius*markerRadius;
+                    minDistSqrd = markerRadius*markerRadius;
                     // Get closest marker to particle
                     for(int markerIndex = 0; markerIndex < markers.size(); markerIndex++){
                         if (!markers[markerIndex].hasDisappeared){
-                            float markerDist = particles[i]->pos.squareDistance(markers[markerIndex].smoothPos);
-                            if(markerDist < minDist){
+                            float markerDistSqrd = particles[i]->pos.squareDistance(markers[markerIndex].smoothPos);
+                            if(markerDistSqrd < minDistSqrd){
                                 closeEnough = true;
-                                minDist = markerDist;
+                                minDistSqrd = markerDistSqrd;
                                 closestPos = markers[markerIndex].smoothPos;
 //                                dir = markers[markerIndex].smoothPos - particles[i]->pos;
 //                                dir.normalize();

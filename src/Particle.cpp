@@ -146,7 +146,7 @@ void Particle::addNoise(float angle, float turbulence, float dt){
     frc += noiseVector * turbulence * age * 0.1;
 }
 
-void Particle::addRepulsionForce(Particle &p, float radius, float scale){
+void Particle::addRepulsionForce(Particle &p, float radiusSqrd, float scale){
 
 	// ----------- (1) make a vector of where this particle p is:
 	ofPoint posOfForce;
@@ -158,15 +158,15 @@ void Particle::addRepulsionForce(Particle &p, float radius, float scale){
 
 	// ----------- (3) check close enough
 	bool closeEnough = true;
-	if (radius > 0){
-	    if (lengthSqrd > radius){
+	if (radiusSqrd > 0){
+	    if (lengthSqrd > radiusSqrd){
 	        closeEnough = false;
 	    }
 	}
 
 	// ----------- (4) if so, update force
 	if (closeEnough == true){
-	    float pct = 1 - (lengthSqrd / radius);  // stronger on the inside
+	    float pct = 1 - (lengthSqrd / radiusSqrd);  // stronger on the inside
 	    dir.normalize();
 	    frc   += dir * scale * pct;
 	    p.frc -= dir * scale * pct;
@@ -182,26 +182,27 @@ void Particle::addRepulsionForce(Particle &p, float scale){
 	// ----------- (2) calculate the difference & length
 	ofVec2f dir         = pos - posOfForce;
 	float lengthSqrd    = pos.squareDistance(posOfForce); // faster than length or distance (no square root)
-	float radius        = this->radius + p.radius; // faster than length or distance (no square root)
+	float radius        = this->radius + p.radius;
+	float radiusSqrd    = radius*radius;
 
 	// ----------- (3) check close enough
 	bool closeEnough = true;
-	if (radius > 0){
-	    if (lengthSqrd > radius){
+	if (radiusSqrd > 0){
+	    if (lengthSqrd > radiusSqrd){
 	        closeEnough = false;
 	    }
 	}
 
 	// ----------- (4) if so, update force
 	if (closeEnough == true){
-	    float pct = 1 - (lengthSqrd / radius);  // stronger on the inside
+	    float pct = 1 - (lengthSqrd / radiusSqrd);  // stronger on the inside
 	    dir.normalize();
 	    frc   += dir * scale * pct;
 	    p.frc -= dir * scale * pct;
 	}
 }
 
-void Particle::addRepulsionForce(float x, float y, float radius, float scale){
+void Particle::addRepulsionForce(float x, float y, float radiusSqrd, float scale){
 
     // ----------- (1) make a vector of where this position is:
 	ofPoint posOfForce;
@@ -213,21 +214,21 @@ void Particle::addRepulsionForce(float x, float y, float radius, float scale){
 
     // ----------- (3) check close enough
     bool closeEnough = true;
-    if (radius > 0){
-        if (lengthSqrd > radius){
+    if (radiusSqrd > 0){
+        if (lengthSqrd > radiusSqrd){
             closeEnough = false;
         }
     }
 
     // ----------- (4) if so, update force
     if (closeEnough == true){
-		float pct = 1 - (lengthSqrd / radius);  // stronger on the inside
+		float pct = 1 - (lengthSqrd / radiusSqrd);  // stronger on the inside
         dir.normalize();
         frc += dir * scale * pct;
     }
 }
 
-void Particle::addAttractionForce(Particle &p, float radius, float scale){
+void Particle::addAttractionForce(Particle &p, float radiusSqrd, float scale){
 
 	// ----------- (1) make a vector of where this particle p is:
 	ofPoint posOfForce;
@@ -239,22 +240,22 @@ void Particle::addAttractionForce(Particle &p, float radius, float scale){
 
 	// ----------- (3) check close enough
 	bool closeEnough = true;
-	if (radius > 0){
-	    if (lengthSqrd > radius){
+	if (radiusSqrd > 0){
+	    if (lengthSqrd > radiusSqrd){
 	        closeEnough = false;
 	    }
 	}
 
 	// ----------- (4) if so, update force
 	if (closeEnough == true){
-	    float pct = 1 - (lengthSqrd / radius);  // stronger on the inside
+	    float pct = 1 - (lengthSqrd / radiusSqrd);  // stronger on the inside
 	    dir.normalize();
         frc   -= dir * scale * pct;
 	    p.frc += dir * scale * pct;
 	}
 }
 
-void Particle::addAttractionForce(float x, float y, float radius, float scale){
+void Particle::addAttractionForce(float x, float y, float radiusSqrd, float scale){
 
     // ----------- (1) make a vector of where this position is:
 	ofPoint posOfForce;
@@ -268,15 +269,15 @@ void Particle::addAttractionForce(float x, float y, float radius, float scale){
     // ----------- (3) check close enough
 
     bool closeEnough = true;
-    if (radius > 0){
-        if (lengthSqrd > radius){
+    if (radiusSqrd > 0){
+        if (lengthSqrd > radiusSqrd){
             closeEnough = false;
         }
     }
 
     // ----------- (4) if so, update force
     if (closeEnough == true){
-		float pct = 1 - (lengthSqrd / radius);  // stronger on the inside
+		float pct = 1 - (lengthSqrd / radiusSqrd);  // stronger on the inside
         dir.normalize();
         frc -= dir * scale * pct;
     }

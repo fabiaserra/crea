@@ -450,7 +450,7 @@ void ofApp::draw(){
 //    ofSetRectMode(OF_RECTMODE_CENTER);
 //    ofTranslate(ofGetWidth()/2, ofGetHeight()/2);  // Translate to the center of the screen
     ofScale(reScale, reScale);
-    ofBackground(red, green, blue, 255);
+    ofBackground(red, green, blue);
 //    depthOriginal.draw(0,0); // Pre-recorded depth image
 //    ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 //    ofEnableBlendMode(OF_BLENDMODE_ADD);
@@ -818,9 +818,8 @@ void ofApp::setupGUI8Marker(){
     gui8Marker->addToggle("Immortal", &markerParticles->immortal);
     gui8Marker->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui8Marker->addToggle("Empty", &markerParticles->isEmpty);
-    gui8Marker->addToggle("Bounces", &markerParticles->bounce);
-    gui8Marker->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui8Marker->addToggle("Draw Line", &markerParticles->drawLine);
+    gui8Marker->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui8Marker->addSlider("Lifetime", 0.0, 20.0, &markerParticles->lifetime);
     gui8Marker->addSlider("Life Random[%]", 0.0, 100.0, &markerParticles->lifetimeRnd);
     gui8Marker->addSlider("Radius", 0.1, 25.0, &markerParticles->radius);
@@ -839,6 +838,8 @@ void ofApp::setupGUI8Marker(){
     gui8Marker->addLabel("Physics");
     gui8Marker->addSlider("Friction", 0, 100, &markerParticles->friction);
     gui8Marker->addSlider("Gravity", 0.0, 15.0, &markerParticles->gravity);
+    gui8Marker->addToggle("Bounces", &markerParticles->bounce);
+
 
     gui8Marker->addSpacer();
 
@@ -887,9 +888,8 @@ void ofApp::setupGUI8Contour(){
     gui8Contour->addToggle("Immortal", &contourParticles->immortal);
     gui8Contour->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui8Contour->addToggle("Empty", &contourParticles->isEmpty);
-    gui8Contour->addToggle("Bounces", &contourParticles->bounce);
-    gui8Contour->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui8Contour->addToggle("Draw Line", &contourParticles->drawLine);
+    gui8Contour->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui8Contour->addSlider("Lifetime", 0.0, 20.0, &contourParticles->lifetime);
     gui8Contour->addSlider("Life Random[%]", 0.0, 100.0, &contourParticles->lifetimeRnd);
     gui8Contour->addSlider("Radius", 0.1, 25.0, &contourParticles->radius);
@@ -908,6 +908,7 @@ void ofApp::setupGUI8Contour(){
     gui8Contour->addLabel("Physics");
     gui8Contour->addSlider("Friction", 0, 100, &contourParticles->friction);
     gui8Contour->addSlider("Gravity", 0.0, 15.0, &contourParticles->gravity);
+    gui8Contour->addToggle("Bounces", &contourParticles->bounce);
 
     gui8Contour->addSpacer();
 

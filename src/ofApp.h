@@ -132,7 +132,6 @@ class ofApp : public ofBaseApp{
         float guiWidth;
         //--------------------------------------------------------------
         float red, green, blue;
-        //ofColor bgColor;
         //--------------------------------------------------------------
         float nearClipping, farClipping;
         float nearThreshold, farThreshold;
