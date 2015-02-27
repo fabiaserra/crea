@@ -4,7 +4,7 @@
 #include "irMarker.h"
 #include "Contour.h"
 
-enum ParticleMode {MARKER_PARTICLES, CONTOUR_PARTICLES, GRID_PARTICLES};
+enum ParticleMode {MARKER_PARTICLES, CONTOUR_PARTICLES, GRID_PARTICLES, RANDOM_PARTICLES};
 
 class ParticleSystem
 {
@@ -13,8 +13,7 @@ class ParticleSystem
 		~ParticleSystem();
 
 		void setup(ParticleMode particleMode, int width , int height);
-		void update(float dt, vector<irMarker> &markers);
-		void update(float dt, Contour &contour);
+		void update(float dt, vector<irMarker> &markers, Contour &contour);
 		void draw();
 
         void addParticle(ofPoint pos, ofPoint vel, ofColor color, float radius, float lifetime);

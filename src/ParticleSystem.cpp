@@ -49,21 +49,27 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
     if(particleMode == GRID_PARTICLES){
         immortal = true;
         gridRes = 10;
-        friction = 100;
+        friction = 20;
         createParticleGrid(width, height);
+    }
+
+    if(particleMode == RANDOM_PARTICLES){
+        immortal = true;
+        addParticles(1500);
     }
 }
 
-void ParticleSystem::update(float dt, vector<irMarker> &markers){
+void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contour){
     if(isActive){
-        if(particleMode == GRID_PARTICLES){
-            sort( particles.begin(), particles.end(), comparisonFunction );
+        // sort particles so it is more effective to do particle/particle interactions
+        sort(particles.begin(), particles.end(), comparisonFunction);
 
+        if(particleMode == GRID_PARTICLES){
             ofPoint dir;
             ofPoint closestPos;
             bool closeEnough;
             float markerRadius = 50;
-            float scale = 0.2;
+            float scale = 5;
             float minDist;
 
 //            repulseParticles();
@@ -87,20 +93,17 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers){
                 }
                 if(closeEnough){
                     particles[i]->addRepulsionForce(closestPos.x, closestPos.y, markerRadius*markerRadius, scale);
-                    particles[i]->isTouched = true;
-
-                }
-//                if(particles[i]->isTouched){
-//                    ofPoint gravityForce(0, 0.1*particles[i]->mass);
+//                    ofPoint gravityForce(0, gravity*particles[i]->mass);
 //                    particles[i]->addForce(gravityForce);
-//                }
+//                    particles[i]->isTouched = true;
+                }
 
-//                particles[i]->xenoToPoint(0.3);
+                particles[i]->xenoToOrigin(0.03);
                 particles[i]->update(dt);
             }
         }
 
-        else if(particleMode == MARKER_PARTICLES){
+        else if(particleMode == MARKER_PARTICLES || particleMode == CONTOUR_PARTICLES){
             // Delete inactive particles
             int i = 0;
             while (i < particles.size()){
@@ -115,53 +118,31 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers){
             }
 
             // Born new particles
-            if(isActive){
+            if(particleMode == MARKER_PARTICLES){
                 for(unsigned int i = 0; i < markers.size(); i++){
                     if (markers[i].hasDisappeared) markers[i].bornRate -= 0.5;
                     else markers[i].bornRate = bornRate;
                     addParticles(markers[i].bornRate, markers[i]);
                 }
             }
-
-            // Update the particles
-            for(int i = 0; i < particles.size(); i++){
-                ofPoint gravityForce(0, gravity*particles[i]->mass/10);
-                particles[i]->addForce(gravityForce);
-                particles[i]->update(dt);
-            }
-        }
-    }
-}
-
-
-void ParticleSystem::update(float dt, Contour& contour){
-    if(isActive){
-        if(particleMode == CONTOUR_PARTICLES){
-            // Delete inactive particles
-            int i = 0;
-            while (i < particles.size()){
-                if (!particles[i]->isAlive){
-                    delete particles.at(i);
-                    particles.erase(particles.begin() + i);
-                    numParticles--;
-                }
-                else{
-                    i++;
-                }
-            }
-
-            // Born new particles
-            if(isActive){
+            else if(particleMode == CONTOUR_PARTICLES){
                 for(unsigned int i = 0; i < contour.contours.size(); i++){
                     addParticles(bornRate, contour.contours[i]);
                 }
             }
 
+//            repulseParticles();
+
             // Update the particles
             for(int i = 0; i < particles.size(); i++){
+                ofPoint gravityForce(0, gravity*particles[i]->mass/10);
+//                particles[i]->addNoise(15.0, 0.5, dt);
+                particles[i]->addForce(gravityForce);
+
 //                ofPoint windForce(0.05, -0.02); // TODO: add some turbulence
-                ofPoint windForce(ofRandom(-0.1, 0.1), ofRandom(-0.08, 0.06)); // TODO: add some turbulence
-                particles[i]->addForce(windForce*particles[i]->mass);
+//                ofPoint windForce(ofRandom(-0.1, 0.1), ofRandom(-0.08, 0.06)); // TODO: add some turbulence
+//                particles[i]->addForce(windForce*particles[i]->mass);
+
                 particles[i]->update(dt);
             }
         }
@@ -202,7 +183,7 @@ void ParticleSystem::addParticle(ofPoint pos, ofPoint vel, ofColor color, float 
 
 void ParticleSystem::addParticles(int n){
     for(int i = 0; i < n; i++){
-        ofPoint pos = ofPoint(ofRandom(ofGetWidth()), ofRandom(ofGetHeight()));
+        ofPoint pos = ofPoint(ofRandom(width), ofRandom(height));
         ofPoint vel = randomVector()*(velocity+randomRange(velocityRnd, velocity));
 
         float initialRadius = radius + randomRange(radiusRnd, radius);
@@ -266,10 +247,9 @@ void ParticleSystem::createParticleGrid(int width, int height){
     }
 }
 
-
 void ParticleSystem::removeParticles(int n){
     for(int i = 0; i < n; i++){
-        particles.pop_back();
+        particles[i]->immortal = false;
     }
 }
 
@@ -280,10 +260,16 @@ void ParticleSystem::killParticles(){
 }
 
 void ParticleSystem::bornParticles(){
+    // Kill all the remaining particles before creating new ones
     for(int i = 0; i < particles.size(); i++){
         particles[i]->isAlive = false;
     }
-    if(particleMode == GRID_PARTICLES){
+
+    if(particleMode == RANDOM_PARTICLES){
+        immortal = true;
+        addParticles(1500);
+    }
+    else if(particleMode == GRID_PARTICLES){
         immortal = true;
         createParticleGrid(width, height);
     }
@@ -292,8 +278,9 @@ void ParticleSystem::bornParticles(){
 void ParticleSystem::repulseParticles(){
     for(int i = 0; i < particles.size(); i++){
         for(int j = i-1; j >= 0; j--){
-            if ( fabs(particles[j]->pos.x - particles[i]->pos.x) >  10) break; // to speed the loop
-            particles[i]->addRepulsionForce( *particles[j], 10*10, 0.1f);
+            if ( fabs(particles[j]->pos.x - particles[i]->pos.x) > radius*2) break; // to speed the loop
+//            particles[i]->addRepulsionForce( *particles[j], radius, 1.0);
+            particles[i]->addRepulsionForce( *particles[j], 1.0);
         }
     }
 }
