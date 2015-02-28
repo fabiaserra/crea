@@ -92,8 +92,11 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
             for(int i = 0; i < particles.size(); i++){
                 if(inputSource == MARKERS){
                     float markerRadius = 50;
+
                     // Get closest marker to particle
                     ofPoint closestMarker = getClosestMarker(*particles[i], markers, markerRadius);
+
+                    // Get direction vector to closest marker
 //                    dir = closestMarker - particles[i]->pos;
 //                    dir.normalize();
 
