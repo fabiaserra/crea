@@ -12,6 +12,7 @@ class Particle
         void draw();
 
         void addForce(ofPoint force);
+        void addFlockingForces();
         void addNoise(float angle, float turbulence, float dt);
         void addRepulsionForce(float x, float y, float radiusSqrd, float scale);
         void addAttractionForce(float x, float y, float radiusSqrd, float scale);
@@ -19,6 +20,13 @@ class Particle
         void addAttractionForce(Particle &p, float radiusSqrd, float scale);
         void addRepulsionForce(Particle &p, float scale);
         void xenoToOrigin(float spd);
+
+        void addForFlocking(Particle &p);
+        void separate(Particle &particle);
+        void align(Particle &particle);
+        void cohesion(Particle &particle);
+        void seek(ofPoint target);
+        void limitVelocity();
 
         void kill();
 //--------------------------------------------------------------

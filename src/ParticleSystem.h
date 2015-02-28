@@ -29,6 +29,7 @@ class ParticleSystem
 		void killParticles();
         void bornParticles();
 		void repulseParticles();
+		void flockParticles();
 
 		//--------------------------------------------------------------
 		bool isActive;          // Particle system active
@@ -55,7 +56,8 @@ class ParticleSystem
 		float radius;           // Radius of the particles
 		float radiusRnd;        // Randomness of radius
 		//--------------------------------------------------------------
-		int   gridRes;          // Resolution of the grid
+		int gridRes;            // Resolution of the grid
+		int nParticles;         // Number of particles
 		//--------------------------------------------------------------
 		bool immortal;          // Can the particles die?
 		bool sizeAge;           // Particles change size with age?
@@ -73,4 +75,5 @@ class ParticleSystem
 		// helper functions
 		ofPoint randomVector();
 		float randomRange(float percentage, float value);
+		ofPoint getClosestMarker(const Particle &particle, const vector<irMarker> &markers, float markerRadius);
 };
