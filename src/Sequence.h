@@ -16,6 +16,7 @@ class Sequence{
         void save(const string path);
         void draw();
         void drawPatterns(map<int, float> currentPatterns);
+        void drawPatternsInSequence(map<int, float> currentPatterns);
 
         void loadPatterns(vector< vector<ofPolyline> > patterns);
         void createPatterns(int nPatterns);
@@ -54,7 +55,7 @@ class Sequence{
         ofTrueTypeFont  verdana;
 
     protected:
-        void drawPattern(const int patternPosition, const int patternIndex, const float percent, const bool highlight);
+        void drawPattern(const int patternPosition, const int patternIndex, float percent, const bool highlight);
         void updatePlayhead();
         size_t calcCurrentFrameIndex();
 };

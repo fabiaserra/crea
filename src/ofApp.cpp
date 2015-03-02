@@ -107,7 +107,7 @@ void ofApp::setup(){
 //    gridParticles->radius = 2;
 //    gridParticles->bounce = true;
 //    gridParticles->setup(GRID, MARKERS, kinect.width, kinect.height);
-    
+
     // BOIDS PARTICLES
     gridParticles = new ParticleSystem();
     gridParticles->bounce = true;
@@ -487,9 +487,12 @@ void ofApp::draw(){
 
     if(drawSequence) sequence.draw();
 
+    #ifdef KINECT_SEQUENCE
+        sequence.drawPatternsInSequence(gestureUpdate);
+    #endif // KINECT_SEQUENCE
+
     ofPopMatrix();
 
-    gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
     if(drawPatterns) sequence.drawPatterns(gestureUpdate);
 
 //    // print percent of completion
@@ -958,11 +961,13 @@ void ofApp::setupGUI8Grid(){
     gui8Grid->addLabel("Physics");
     gui8Grid->addSlider("Friction", 0, 100, &gridParticles->friction);
     gui8Grid->addSlider("Gravity", 0.0, 15.0, &gridParticles->gravity);
-    
+    gui8Grid->addToggle("Bounces", &gridParticles->bounce);
+
+
     gui8Grid->addSlider("Alignment Radius", 0, 200, &gridParticles->alignmentDistance);
     gui8Grid->addSlider("Cohesion Radius", 0, 200, &gridParticles->cohesionDistance);
     gui8Grid->addSlider("Separation Radius", 0, 200, &gridParticles->separationDistance);
-    
+
     gui8Grid->addSlider("Alignment Strength", 0, 1, &gridParticles->alignmentStrength);
     gui8Grid->addSlider("Cohesion Strength", 0, 1, &gridParticles->cohesionStrength);
     gui8Grid->addSlider("Separation Strength", 0, 1, &gridParticles->separationStrength);
