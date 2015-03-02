@@ -287,70 +287,62 @@ void Particle::xenoToOrigin(float spd){
 
 void Particle::addForFlocking(Particle &p){
     ofPoint dirToParticle = p.pos - pos;
-
-//    separate(p);
-//    align(p);
-//    cohesion(p);
+    dirToParticle.normalize();
+    float distSqrd = pos.squareDistance(p.pos);
+    
+    // Separate
+    if(distSqrd > 0 && distSqrd < separation.distSqrd ){
+        separation.sum += dirToParticle/distSqrd;
+        separation.count++;
+        p.separation.sum -= dirToParticle/distSqrd;
+        p.separation.count++;
+    }
+    
+    // Cohesion
+    if( distSqrd > 0 && distSqrd < cohesion.distSqrd ){
+        cohesion.sum += p.pos;
+        cohesion.count++;
+        p.cohesion.sum += pos;
+        p.cohesion.count++;
+    }
+    
+    // Align
+    if(distSqrd > 0 && distSqrd < alignment.distSqrd){
+        alignment.sum += p.vel;
+        alignment.count++;
+        p.alignment.sum += vel;
+        p.alignment.count++;
+    }
 }
 
 void Particle::addFlockingForces(){
-//    float sepFrc = 1, aliFrc = 1, cohFrc = 1; // mult. scalars for each of the rules so we can vary the influence of each of them
-//    sep = sepFrc * separate(p);
-//    ali = aliFrc * align(p);
-//    coh = cohFrc * cohesion(p);
+    // Seperation
+    if(separation.count > 0){
+        separation.sum /= (float)separation.count;
+        frc -= (separation.sum.getNormalized() * separation.strength);
+    }
+    
+    // Cohesion
+    if(cohesion.count > 0){
+        cohesion.sum /= (float)cohesion.count;
+//        seek(cohesion.sum, cohesion.strength);
+        frc += (cohesion.sum.getNormalized() * cohesion.strength);
+    }
+    
+    // Alignment
+    if(alignment.count > 0){
+        alignment.sum /= (float)alignment.count;
+        frc -= (alignment.sum.getNormalized() * alignment.strength);
+    }
 }
 
-
-void Particle::seek(ofPoint target){
-//    float distSqrd = pos.squareDistance(target);
-//    ofPoint dirToTarget = pos - target;
-//    dirToTarget = dirToTarget.normalize();
-//    dirToTarget = dirToTarget/distSqrd;
-//    dirToTarget.normalize();
-//    dirToTarget *= maxSpeed;
+void Particle::seek(ofPoint target, float maxSpeed){
+    float distSqrd = pos.squareDistance(target);
+    ofPoint dirToTarget = pos - target;
+    dirToTarget.normalize();
+    dirToTarget *= maxSpeed;
+    addForce(dirToTarget-vel);
 }
-
-//void Particle::separate(vector<Particle *> &particles){
-//    float separationSqrd = 50;
-//    ofPoint sep(0, 0);
-//    int count = 0;
-//    for(int i = 0; i < particles.size(); i++){
-//        float distSqrd = pos.squareDistance(particles[i]->pos);
-//        // If distance greater than 0 (0 when is same particle) and less than separation amount we want
-//        if(distSqrd > 0 && distSqrd <= separationSqrd){
-//            // Calculate vector pointing away from neighbor
-//            ofPoint dir = pos - particles[i]->pos;
-//            dir = dir.normalize();
-//            // Closer it is bigger the magnitude
-//            dir = dir/distSqrd;
-//            sep += dir;
-//            count++;
-//        }
-//    }
-//    if(count > 0){
-//        sep /= (float)count; // Average
-//    }
-//
-//    frc += sep; // Sum separation force to total force
-//}
-//
-//void Particle::align(vector<Particle *> &particles){
-//    float neighborDistSqrd = 50;
-//    ofPoint ali(0, 0);
-//    int count = 0;
-//    for(int i = 0; i < particles.size(); i++){
-//        float distSqrd = pos.squareDistance(particles[i]->pos);
-//        // If distance greater than 0 (0 when is same particle) and less than neighbor region amount we want
-//        if(distSqrd > 0 && distSqrd <= neighborDistSqrd){
-//            ali += particles[i]->vel;
-//            count++;
-//        }
-//    }
-//    if(count > 0){
-//        ali /= (float)count; // Average
-//    }
-//}
-
 
 void Particle::kill(){
     isAlive = false;

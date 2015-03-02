@@ -103,10 +103,15 @@ void ofApp::setup(){
     contourParticles->setup(EMITTER, CONTOUR, kinect.width, kinect.height);
 
     // GRID PARTICLES
+//    gridParticles = new ParticleSystem();
+//    gridParticles->radius = 2;
+//    gridParticles->bounce = true;
+//    gridParticles->setup(GRID, MARKERS, kinect.width, kinect.height);
+    
+    // BOIDS PARTICLES
     gridParticles = new ParticleSystem();
-    gridParticles->radius = 2;
     gridParticles->bounce = true;
-    gridParticles->setup(GRID, MARKERS, kinect.width, kinect.height);
+    gridParticles->setup(BOIDS, MARKERS, kinect.width, kinect.height);
 
     // VECTOR OF PARTICLE SYSTEMS
     particleSystems.push_back(markerParticles);
@@ -953,6 +958,14 @@ void ofApp::setupGUI8Grid(){
     gui8Grid->addLabel("Physics");
     gui8Grid->addSlider("Friction", 0, 100, &gridParticles->friction);
     gui8Grid->addSlider("Gravity", 0.0, 15.0, &gridParticles->gravity);
+    
+    gui8Grid->addSlider("Alignment Radius", 0, 200, &gridParticles->alignmentDistance);
+    gui8Grid->addSlider("Cohesion Radius", 0, 200, &gridParticles->cohesionDistance);
+    gui8Grid->addSlider("Separation Radius", 0, 200, &gridParticles->separationDistance);
+    
+    gui8Grid->addSlider("Alignment Strength", 0, 1, &gridParticles->alignmentStrength);
+    gui8Grid->addSlider("Cohesion Strength", 0, 1, &gridParticles->cohesionStrength);
+    gui8Grid->addSlider("Separation Strength", 0, 1, &gridParticles->separationStrength);
 
     gui8Grid->addSpacer();
 

@@ -61,6 +61,14 @@ void ParticleSystem::setup(ParticleMode particleMode, InputSource inputSource, i
 
     else if(particleMode == BOIDS){ // TODO: BOIDS == RANDOM?
         nParticles = 500;
+        separationStrength = 1.5;
+        cohesionStrength = 1.0;
+        alignmentStrength = 1.0;
+        
+        separationDistance = radius*2;
+        alignmentDistance = 50;
+        cohesionDistance = 50;
+        
         addParticles(nParticles);
     }
 }
@@ -112,7 +120,26 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
         }
 
         else if(particleMode == BOIDS){
+            float scale = 5;
+            float markerRadius = 50;
+            for(int i = 0; i < particles.size(); i++){
+                particles[i]->separation.distSqrd   =   separationDistance * separationDistance;
+                particles[i]->cohesion.distSqrd     =   cohesionDistance * cohesionDistance;
+                particles[i]->alignment.distSqrd    =   alignmentDistance * alignmentDistance;
+                
+                particles[i]->separation.strength   =   separationStrength;
+                particles[i]->cohesion.strength     =   cohesionStrength;
+                particles[i]->alignment.strength    =   alignmentStrength;
+                
+                // Get closest marker to particle
+                ofPoint closestMarker = getClosestMarker(*particles[i], markers, markerRadius);
+                if(closestMarker != ofPoint(-1, -1))
+                    particles[i]->addRepulsionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, scale);
+                
+            }
+            
             flockParticles();
+            
             for(int i = 0; i < particles.size(); i++){
                 particles[i]->addFlockingForces();
             }
@@ -277,6 +304,11 @@ void ParticleSystem::bornParticles(){
         nParticles = 1500;
         addParticles(nParticles);
     }
+    else if(particleMode == BOIDS){
+        nParticles = 1000;
+        immortal = true;
+        addParticles(nParticles);
+    }
     else if(particleMode == GRID){
         immortal = true;
         createParticleGrid(width, height);
@@ -297,10 +329,18 @@ void ParticleSystem::flockParticles(){
     int flockRegionRadius = 100;
     for(int i = 0; i < particles.size(); i++){
         for(int j = i-1; j >= 0; j--){
-            if ( fabs(particles[j]->pos.x - particles[i]->pos.x) > flockRegionRadius) break;
+//            if ( fabs(particles[j]->pos.x - particles[i]->pos.x) > flockRegionRadius) break;
             particles[i]->addForFlocking(*particles[j]);
         }
     }
+    
+//    for (int i = 0; i < particles.size(); i++){
+//        for (int j = 0; j < particles.size(); j++){
+//            if (i != j){
+//                particles[i]->addForFlocking(*particles[j]);
+//            }
+//        }
+//    }
 }
 
 ofPoint ParticleSystem::randomVector(){

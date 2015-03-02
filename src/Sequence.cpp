@@ -49,8 +49,8 @@ void Sequence::draw(){
     // Draw entire sequence
     for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
 
-//        ofSetColor(255, 40);
-//        markersPosition[markerIndex].draw();
+        ofSetColor(255, 30);
+        markersPosition[markerIndex].draw();
 
         ofPoint currentPoint = getCurrentPoint(markerIndex);
         markersPastPoints[markerIndex].addVertex(currentPoint);
@@ -162,15 +162,32 @@ void Sequence::load(const string path){
     duration = timestampLastFrame - timestampFirstFrame;
 }
 
+//void Sequence::drawPatterns(map<int, float> currentPatterns){
+//    // If there are more patterns than maximum able to show in the window
+//    int nPatterns = MIN(maxPatternsWindow, patterns.size());
+//
+//    // TODO: show most important patterns if there are more than maxPatternsToShow
+//
+//    // Draw gesture patterns
+//    for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
+//        int patternPosition = patternIndex + 1;
+//        bool highlight = false;
+//        float percent = 0;
+//        // If the pattern is is inside the map
+//        if(currentPatterns.find(patternIndex) != currentPatterns.end()){
+//            highlight = true;
+//            percent = currentPatterns[patternIndex];
+//        }
+//        drawPattern(patternPosition, patternIndex, percent, highlight);
+//    }
+//}
+
+// DRAW PATTERNS INSIDE THE LONG SEQUENCE
 void Sequence::drawPatterns(map<int, float> currentPatterns){
-    // If there are more patterns than maximum able to show in the window
-    int nPatterns = MIN(maxPatternsWindow, patterns.size());
-
-    // TODO: show most important patterns if there are more than maxPatternsToShow
-
+    int nPatterns = patterns.size();
+    
     // Draw gesture patterns
     for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
-        int patternPosition = patternIndex + 1;
         bool highlight = false;
         float percent = 0;
         // If the pattern is is inside the map
@@ -178,13 +195,29 @@ void Sequence::drawPatterns(map<int, float> currentPatterns){
             highlight = true;
             percent = currentPatterns[patternIndex];
         }
-//        else{ // Either here or inside drawPattern
-//            // If is not inside the map we clear the polyline
-//            for(int markerIndex = 0; markerIndex < patterns[patternIndex].size(); markerIndex++){
-//                patternsPastPoints[patternIndex][markerIndex].clear();
-//            }
-//        }
-        drawPattern(patternPosition, patternIndex, percent, highlight);
+        
+        for(int markerIndex = 0; markerIndex < patterns[patternIndex].size(); markerIndex++){
+            int opacity = 60;
+            if(highlight) opacity = 255;
+            ofColor color;
+//            color.setHue((255/patternIndex)*10+10);
+//            ofSetColor(ofColor::fromHSB());
+            ofSetLineWidth(2);
+            patterns[patternIndex][markerIndex].draw();
+        
+            if(highlight){
+                ofPoint currentPoint = patterns[patternIndex][markerIndex].getPointAtPercent(percent);
+                patternsPastPoints[patternIndex][markerIndex].addVertex(currentPoint);
+            
+                // Pattern already processed lines
+                ofSetColor(255);
+                ofSetLineWidth(2);
+                patternsPastPoints[patternIndex][markerIndex].draw();
+            }
+            else{
+                patternsPastPoints[patternIndex][markerIndex].clear();
+            }
+        }
     }
 }
 
@@ -212,7 +245,6 @@ void Sequence::drawPattern(const int patternPosition, const int patternIndex, co
 
         int opacity = 60;
         if(highlight) opacity = 255;
-        else          opacity = 60;
 
         // Background pattern window box
         ofSetColor(0);

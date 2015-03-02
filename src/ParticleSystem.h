@@ -58,6 +58,13 @@ class ParticleSystem
 		//--------------------------------------------------------------
 		int gridRes;            // Resolution of the grid
 		int nParticles;         // Number of particles
+        //--------------------------------------------------------------
+        float separationDistance;
+        float alignmentDistance;
+        float cohesionDistance;
+        float separationStrength;
+        float alignmentStrength;
+        float cohesionStrength;
 		//--------------------------------------------------------------
 		bool immortal;          // Can the particles die?
 		bool sizeAge;           // Particles change size with age?

@@ -2,6 +2,14 @@
 #include "ofMain.h"
 #include "irMarker.h"
 
+class flockingForce {
+public:
+    ofPoint     sum;
+    int			count;
+    float		distSqrd;
+    float		strength;
+};
+
 class Particle
 {
     public:
@@ -22,10 +30,7 @@ class Particle
         void xenoToOrigin(float spd);
 
         void addForFlocking(Particle &p);
-        void separate(Particle &particle);
-        void align(Particle &particle);
-        void cohesion(Particle &particle);
-        void seek(ofPoint target);
+        void seek(ofPoint target, float maxSpeed);
         void limitVelocity();
 
         void kill();
@@ -62,11 +67,11 @@ class Particle
         bool  isEmpty;          // Draw only contour of the particle
         bool  drawLine;         // Draw particle as a line from prevPos to pos
 // --------------------------------------------------------------
-        float markerDist;       // Distance between particle and closest marker
-        ofPoint closestPos;     // Position of the closest marker
-        ofPoint closestDir;     // Direction from particle to closest marker
-// --------------------------------------------------------------
         int width;              // Particle boundaries
-        int height;
+        int height;    
+// --------------------------------------------------------------
+        flockingForce separation;
+        flockingForce alignment;
+        flockingForce cohesion;
 };
 
