@@ -26,6 +26,7 @@ ParticleSystem::ParticleSystem(){
     isEmpty         = false;        // Draw only contours of the particles?
     drawLine        = false;        // Draw a line instead of a circle for the particle?
     bounce          = false;        // Bounce particles with the walls of the window?
+    steer           = false;        // Steers direction before touching the walls of the window?
 
     friction        = 20;           // Friction to velocity 0~100
     gravity         = 0.0f;         // Makes particles fall down in a natural way
@@ -61,7 +62,8 @@ void ParticleSystem::setup(ParticleMode particleMode, InputSource inputSource, i
 
     else if(particleMode == BOIDS){ // TODO: BOIDS == RANDOM?
         immortal = true;
-        nParticles = 500;
+        steer = true;
+        nParticles = 1000;
 
         lowThresh = 0.1333;
         highThresh = 0.6867;
@@ -126,7 +128,7 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
 
         else if(particleMode == BOIDS){
             float scale = 5;
-            float markerRadius = 100;
+            float markerRadius = 200;
             for(int i = 0; i < particles.size(); i++){
                 particles[i]->flockingRadiusSqrd    =   flockingRadius * flockingRadius;
 
@@ -143,8 +145,8 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
 //                // Get closest marker to particle
                 ofPoint closestMarker = getClosestMarker(*particles[i], markers, markerRadius);
                 if(closestMarker != ofPoint(-1, -1)){
-                    particles[i]->addRepulsionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, scale);
-//                    particles[i]->seek(closestMarker);
+//                    particles[i]->addRepulsionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, scale);
+//                    particles[i]->seek(closestMarker, markerRadius*markerRadius);
                 }
             }
 
@@ -175,13 +177,16 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
             ofPoint gravityForce(0, gravity*particles[i]->mass/10);
             particles[i]->addForce(gravityForce);
 
-            particles[i]->addNoise(15.0, 10.5, dt);
+            particles[i]->addNoise(15.0, 0.5, dt);
 
 //            ofPoint windForce(0.05, -0.02); // TODO: add some turbulence
 //            ofPoint windForce(ofRandom(-0.1, 0.1), ofRandom(-0.08, 0.06)); // TODO: add some turbulence
 //            particles[i]->addForce(windForce*particles[i]->mass);
             particles[i]->immortal = immortal;
+            particles[i]->friction = 1-friction/1000;
             particles[i]->bounces = bounce;
+            particles[i]->steers = steer;
+
             particles[i]->update(dt);
         }
     }
@@ -205,7 +210,6 @@ void ParticleSystem::addParticle(ofPoint pos, ofPoint vel, ofColor color, float 
     newParticle->colorAge       = colorAge;
     newParticle->isEmpty        = isEmpty;
     newParticle->drawLine       = drawLine;
-    newParticle->friction       = 1-friction/1000; // so we have a range between 0.90 and 1
 
     newParticle->width = width;
     newParticle->height = height;
@@ -321,7 +325,7 @@ void ParticleSystem::bornParticles(){
 void ParticleSystem::repulseParticles(){
     for(int i = 0; i < particles.size(); i++){
         for(int j = i-1; j >= 0; j--){
-            if ( fabs(particles[j]->pos.x - particles[i]->pos.x) > radius*3) break; // to speed the loop
+            if (fabs(particles[j]->pos.x - particles[i]->pos.x) > radius*3) break; // to speed the loop
 //            particles[i]->addRepulsionForce( *particles[j], radius, 1.0);
             particles[i]->addRepulsionForce( *particles[j], 1.0);
         }
@@ -331,8 +335,8 @@ void ParticleSystem::repulseParticles(){
 void ParticleSystem::flockParticles(){
     for(int i = 0; i < particles.size(); i++){
         for(int j = i-1; j >= 0; j--){
-//            if ( fabs(particles[j]->pos.x - particles[i]->pos.x) > flockingRadius) break;
-            particles[i]->addForFlocking(*particles[j]);
+            if (fabs(particles[j]->pos.x - particles[i]->pos.x) > flockingRadius) break;
+            particles[i]->addFlockingForces(*particles[j]);
         }
     }
 }

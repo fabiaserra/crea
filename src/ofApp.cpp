@@ -110,7 +110,6 @@ void ofApp::setup(){
 
     // BOIDS PARTICLES
     gridParticles = new ParticleSystem();
-    gridParticles->bounce = false;
     gridParticles->setup(BOIDS, MARKERS, kinect.width, kinect.height);
 
     // VECTOR OF PARTICLE SYSTEMS
@@ -983,6 +982,8 @@ void ofApp::setupGUI8Grid(){
     lowThresh->setLabelPrecision(3);
     highThresh = gui8Grid->addSlider("Higher Threshold", 0.025, 1.0, &gridParticles->highThresh);
     highThresh->setLabelPrecision(3);
+
+    gui8Grid->addSlider("Max speed", 1.0, 100.0, &gridParticles->maxSpeed);
 
     gui8Grid->addSlider("Separation Strength", 0.001, 0.1, &gridParticles->separationStrength)->setLabelPrecision(3);
     gui8Grid->addSlider("Attraction Strength", 0.001, 0.1, &gridParticles->attractionStrength)->setLabelPrecision(3);
