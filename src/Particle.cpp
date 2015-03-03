@@ -29,12 +29,10 @@ void Particle::setup(float id, ofPoint pos, ofPoint vel, ofColor color, float in
     this->prevPos = pos;
     this->iniPos = pos;
     this->originalHue = color.getHue();
-    this->maxSpeed = 50;
 }
 
 void Particle::update(float dt){
     if(isAlive){
-
         // Update position
         acc += frc;
         vel += acc;
@@ -69,24 +67,25 @@ void Particle::update(float dt){
         // Bounce particle with the window margins
         if(bounces){
         	bool isBouncing = false;
+            float bounceMagnitude = 1.0;
 
             if(pos.x > width-radius){
                 pos.x = width-radius;
-                vel.x *= -1.0;
+                vel.x *= -1.0 * bounceMagnitude;
             }
             else if(pos.x < radius){
                 pos.x = radius;
-                vel.x *= -1.0;
+                vel.x *= -1.0 * bounceMagnitude;
             }
 
             if(pos.y > height-radius){
                 pos.y = height-radius;
-                vel.y *= -1.0;
+                vel.y *= -1.0 * bounceMagnitude;
                 isBouncing = true;
             }
             else if(pos.y < radius){
                 pos.y = radius;
-                vel.y *= -1.0;
+                vel.y *= -1.0 * bounceMagnitude;
                 isBouncing = true;
             }
 
@@ -287,57 +286,54 @@ void Particle::xenoToOrigin(float spd){
 }
 
 void Particle::addForFlocking(Particle &p){
-    ofPoint dirToParticle = p.pos - pos;
-    dirToParticle.normalize();
+    ofPoint dir = pos - p.pos;
     float distSqrd = pos.squareDistance(p.pos);
 
-    // Separate
-    if(distSqrd > 0 && distSqrd < separation.distSqrd ){
-        separation.sum += dirToParticle/distSqrd;
-        separation.count++;
-        p.separation.sum -= dirToParticle/distSqrd;
-        p.separation.count++;
-    }
+    if(0.01f < distSqrd && distSqrd < flockingRadiusSqrd){ // if neighbor particle within zone radius...
 
-    // Cohesion
-    if( distSqrd > 0 && distSqrd < cohesion.distSqrd ){
-        cohesion.sum += p.pos;
-        cohesion.count++;
-        p.cohesion.sum += pos;
-        p.cohesion.count++;
-    }
+        float percent = distSqrd/flockingRadiusSqrd;
 
-    // Align
-    if(distSqrd > 0 && distSqrd < alignment.distSqrd){
-        alignment.sum += p.vel;
-        alignment.count++;
-        p.alignment.sum += vel;
-        p.alignment.count++;
-    }
-}
-
-void Particle::addFlockingForces(){
-    // Seperation
-    if(separation.count > 0){
-        separation.sum /= (float)separation.count;
-        frc -= (separation.sum.getNormalized() * separation.strength);
-    }
-
-    // Cohesion
-    if(cohesion.count > 0){
-        cohesion.sum /= (float)cohesion.count;
-//        seek(cohesion.sum, cohesion.strength);
-        frc += (cohesion.sum.getNormalized() * cohesion.strength);
-    }
-
-    // Alignment
-    if(alignment.count > 0){
-        alignment.sum /= (float)alignment.count;
-        frc -= (alignment.sum.getNormalized() * alignment.strength);
+        // Separate
+        if(percent < lowThresh){            // ... and is within the lower threshold limits, separate
+            float F = (lowThresh/percent - 1.0f) * separationStrength;
+            dir = dir.getNormalized() * F;
+            frc += dir;
+            p.frc -= dir;
+        }
+        // Align
+        else if(percent < highThresh){      // ... else if it is within the higher threshold limits, align
+            float threshDelta = highThresh - lowThresh;
+            float adjustedPercent = (percent - lowThresh) / threshDelta;
+            float F = (0.5f - cos(adjustedPercent * M_PI * 2.0f) * 0.5f + 0.5f) * alignmentStrength;
+            frc += p.vel.getNormalized() * F;
+            p.frc += vel.getNormalized() * F;
+        }
+        // Attract
+        else{                               // ... else, attract
+            float threshDelta = 1.0f - highThresh;
+            float adjustedPercent = (percent - highThresh) / threshDelta;
+            float F = (0.5f - cos(adjustedPercent * M_PI * 2.0f) * 0.5f + 0.5f) * attractionStrength;
+            dir = dir.getNormalized() * F;
+            frc -= dir;
+            p.frc += dir;
+        }
     }
 }
 
-void Particle::seek(ofPoint target, float maxSpeed){
+void Particle::pullToCenter(){
+    ofPoint center(width/2, height/2);
+	ofPoint dirToCenter = pos - center;
+	float distToCenterSqrd = dirToCenter.lengthSquared();
+	float distThresh = 900.0f;
+
+	if(distToCenterSqrd > distThresh){
+		dirToCenter.normalize();
+		float pullStrength = 0.000015f;
+		vel -= dirToCenter * ( ( distToCenterSqrd - distThresh ) * pullStrength );
+	}
+}
+
+void Particle::seek(ofPoint target){
     float distSqrd = pos.squareDistance(target);
     ofPoint dirToTarget = pos - target;
     dirToTarget.normalize();
@@ -350,7 +346,7 @@ void Particle::kill(){
 }
 
 void Particle::limitVelocity(){
-    if(vel.squareDistance(vel) > (maxSpeed*maxSpeed)){
+    if(vel.lengthSquared() > (maxSpeed*maxSpeed)){
         vel.normalize();
         vel *= maxSpeed;
     }

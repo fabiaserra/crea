@@ -116,7 +116,6 @@ class ofApp : public ofBaseApp{
         ofxUISuperCanvas *gui8Grid;
         vector<ofxUISuperCanvas *> particleGuis;
         vector<ofxUISuperCanvas *> guis;
-        vector< pair<ofxUILabel *, ofxUIRangeSlider*> > cueSliders;
         //--------------------------------------------------------------
         ofColor uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo;
         //--------------------------------------------------------------
@@ -126,7 +125,9 @@ class ofApp : public ofBaseApp{
         ofxUILabel *sequenceNumFrames;        // Number of frames of the sequence
         ofxUILabel *cueIndexLabel;            // Current cue index
         ofxUITextInput *cueName;              // Name of the cue
-        int theme;
+        ofxUISlider *lowThresh;               // Flocking lower threshold
+        ofxUISlider *highThresh;              // Flocking higher threshold
+        vector< pair<ofxUILabel *, ofxUIRangeSlider*> > cueSliders; // Cue sliders to assign to long sequence
         //--------------------------------------------------------------
         float dim;                            // Size of GUI elements
         float guiWidth;

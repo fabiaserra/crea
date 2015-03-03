@@ -59,11 +59,8 @@ class ParticleSystem
 		int gridRes;            // Resolution of the grid
 		int nParticles;         // Number of particles
         //--------------------------------------------------------------
-        float separationDistance;
-        float alignmentDistance;
-        float attractionDistance;
-        //--------------------------------------------------------------
-        float zoneRadiusSqrd;
+        float flockingRadius;
+        float flockingRadiusSqrd;
         float lowThresh;        // separate
         float highThresh;       // align
         float separationStrength;

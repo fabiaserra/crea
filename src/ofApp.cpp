@@ -190,7 +190,6 @@ void ofApp::setup(){
     // SETUP GUIs
     dim = 32;
     guiWidth = 240;
-    theme = OFX_UI_THEME_GRAYDAY;
 
     // GUI COLORS
 //    uiThemecb.set(128, 210), uiThemeco.set(192, 255), uiThemecoh.set(192, 255);
@@ -588,6 +587,10 @@ void ofApp::setupGUI2(){
     gui2->addSpacer();
     gui2->addLabel("Press '2' to hide panel", OFX_UI_FONT_SMALL);
 
+    gui2->addSpacer();
+    gui2->addFPS(OFX_UI_FONT_SMALL);
+
+    gui2->addSpacer();
     gui2->addLabelButton("Reset Kinect", &resetKinect);
 
     gui2->addSpacer();
@@ -634,6 +637,9 @@ void ofApp::setupGUI3(){
     gui3->addLabel("Press '3' to hide panel", OFX_UI_FONT_SMALL);
 
     gui3->addSpacer();
+    gui3->addFPS(OFX_UI_FONT_SMALL);
+
+    gui3->addSpacer();
     recordingSequence = gui3->addImageToggle("Record Sequence", "icons/record.png", false, dim, dim);
     recordingSequence->setColorBack(ofColor(150, 255));
     gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
@@ -664,6 +670,9 @@ void ofApp::setupGUI4(){
     gui4->addLabel("Press '4' to hide panel", OFX_UI_FONT_SMALL);
 
     gui4->addSpacer();
+    gui4->addFPS(OFX_UI_FONT_SMALL);
+
+    gui4->addSpacer();
     gui4->addImageButton("Start vmo", "icons/play.png", false, dim, dim)->setColorBack(ofColor(150, 255));
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui4->addImageButton("Stop vmo", "icons/delete.png", false, dim, dim)->setColorBack(ofColor(150, 255));
@@ -689,9 +698,12 @@ void ofApp::setupGUI5(){
     gui5->addLabel("Press arrow keys to navigate", OFX_UI_FONT_SMALL);
     gui5->addLabel("through cues and space key", OFX_UI_FONT_SMALL);
     gui5->addLabel("to trigger next cue in the list.", OFX_UI_FONT_SMALL);
-
     gui5->addSpacer();
 
+    gui5->addSpacer();
+    gui5->addFPS(OFX_UI_FONT_SMALL);
+
+    gui5->addSpacer();
     gui5->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN, OFX_UI_ALIGN_CENTER);
     currentCueIndex = -1;
     cueIndexLabel = gui5->addLabel("", OFX_UI_FONT_MEDIUM);
@@ -741,6 +753,9 @@ void ofApp::setupGUI6(){
     gui6->addLabel("Press '6' to hide panel", OFX_UI_FONT_SMALL);
 
     gui6->addSpacer();
+    gui6->addFPS(OFX_UI_FONT_SMALL);
+
+    gui6->addSpacer();
     gui6->addLabel("Physics");
 
     gui6->addSpacer();
@@ -758,6 +773,9 @@ void ofApp::setupGUI7(){
 
     gui7->addSpacer();
     gui7->addLabel("Press '7' to hide panel", OFX_UI_FONT_SMALL);
+
+    gui7->addSpacer();
+    gui7->addFPS(OFX_UI_FONT_SMALL);
 
     gui7->addSpacer();
     gui7->addImageToggle("Show Contour", "icons/show.png", &contour.isActive, dim, dim);
@@ -783,6 +801,9 @@ void ofApp::setupGUI8Marker(){
 
     gui8Marker->addSpacer();
     gui8Marker->addLabel("Press '8' to hide panel", OFX_UI_FONT_SMALL);
+
+    gui8Marker->addSpacer();
+    gui8Marker->addFPS(OFX_UI_FONT_SMALL);
 
     gui8Marker->addSpacer();
     gui8Marker->addImageToggle("Particles Active", "icons/show.png", &markerParticles->isActive, dim, dim);
@@ -855,6 +876,9 @@ void ofApp::setupGUI8Contour(){
     gui8Contour->addLabel("Press '8' to hide panel", OFX_UI_FONT_SMALL);
 
     gui8Contour->addSpacer();
+    gui8Contour->addFPS(OFX_UI_FONT_SMALL);
+
+    gui8Contour->addSpacer();
     gui8Contour->addImageToggle("Particles Active", "icons/show.png", &contourParticles->isActive, dim, dim);
     gui8Contour->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
 
@@ -924,6 +948,9 @@ void ofApp::setupGUI8Grid(){
     gui8Grid->addLabel("Press '8' to hide panel", OFX_UI_FONT_SMALL);
 
     gui8Grid->addSpacer();
+    gui8Grid->addFPS(OFX_UI_FONT_SMALL);
+
+    gui8Grid->addSpacer();
     gui8Grid->addImageToggle("Particles Active", "icons/show.png", &gridParticles->isActive, dim, dim);
     gui8Grid->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
 
@@ -951,12 +978,15 @@ void ofApp::setupGUI8Grid(){
     gui8Grid->addSlider("Gravity", 0.0, 15.0, &gridParticles->gravity);
     gui8Grid->addToggle("Bounces", &gridParticles->bounce);
 
+    gui8Grid->addSlider("Flocking Radius", 10.0, 100.0, &gridParticles->flockingRadius);
+    lowThresh = gui8Grid->addSlider("Lower Threshold", 0.025, 1.0, &gridParticles->lowThresh);
+    lowThresh->setLabelPrecision(3);
+    highThresh = gui8Grid->addSlider("Higher Threshold", 0.025, 1.0, &gridParticles->highThresh);
+    highThresh->setLabelPrecision(3);
 
-//    gui8Grid->addSlider("Zone Radius", 10.0, 100.0, &gridParticles->zoneRadius);
-
-//    gui8Grid->addSlider("Alignment Strength", 0, 1, &gridParticles->alignmentStrength);
-//    gui8Grid->addSlider("Attraction Strength", 0, 1, &gridParticles->attractionStrength);
-//    gui8Grid->addSlider("Separation Strength", 0, 1, &gridParticles->separationStrength);
+    gui8Grid->addSlider("Separation Strength", 0.001, 0.1, &gridParticles->separationStrength)->setLabelPrecision(3);
+    gui8Grid->addSlider("Attraction Strength", 0.001, 0.1, &gridParticles->attractionStrength)->setLabelPrecision(3);
+    gui8Grid->addSlider("Alignment Strength", 0.001, 0.1, &gridParticles->alignmentStrength)->setLabelPrecision(3);
 
     gui8Grid->addSpacer();
 
@@ -1499,12 +1529,13 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
         if(toggle->getValue() == true) particleSystems[currentParticleSystem]->bornParticles();
         else particleSystems[currentParticleSystem]->killParticles();
-
     }
 
-    if(e.getName() == "Immortal"){
-        ofxUIToggle *toggle = (ofxUIToggle *) e.widget;
-        if(toggle->getValue() == false) particleSystems[currentParticleSystem]->killParticles();
+    if(e.getName() == "Lower Threshold" || e.getName() == "Higher Threshold"){
+        if(lowThresh->getValue() > highThresh->getValue()){
+            highThresh->setValue(lowThresh->getValue());
+//            lowThresh->setValue(highThresh->getValue());
+        }
     }
 }
 
