@@ -54,21 +54,22 @@ class Particle
         float radius;           // Radius of the particle
         float opacity;          // Radius of the particle
         float noise;            // Perlin noise to add some randomness
-        float originalHue;
+        float originalHue;      // Initial hue color
+        float maxSpeed;         // Maximum speed
 // --------------------------------------------------------------
-        bool  immortal;         // Can the particle die?
-        bool  isAlive;          // Is the particle alive?
-        bool  isTouched;        // Particle has been activated through some event
-        bool  bounces;          // Particle bounces with the window margins?
-        bool  sizeAge;          // Particle changes size with age?
-        bool  opacityAge;       // Particle changes opacity with age?
-        bool  flickersAge;      // Particle flickers opacity when about to die?
-        bool  colorAge;         // Particle changes color with age?
-        bool  isEmpty;          // Draw only contour of the particle
-        bool  drawLine;         // Draw particle as a line from prevPos to pos
+        bool immortal;         // Can the particle die?
+        bool isAlive;          // Is the particle alive?
+        bool isTouched;        // Particle has been activated through some event
+        bool bounces;          // Particle bounces with the window margins?
+        bool sizeAge;          // Particle changes size with age?
+        bool opacityAge;       // Particle changes opacity with age?
+        bool flickersAge;      // Particle flickers opacity when about to die?
+        bool colorAge;         // Particle changes color with age?
+        bool isEmpty;          // Draw only contour of the particle
+        bool drawLine;         // Draw particle as a line from prevPos to pos
 // --------------------------------------------------------------
         int width;              // Particle boundaries
-        int height;    
+        int height;
 // --------------------------------------------------------------
         flockingForce separation;
         flockingForce alignment;

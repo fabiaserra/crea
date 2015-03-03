@@ -29,6 +29,7 @@ void Particle::setup(float id, ofPoint pos, ofPoint vel, ofColor color, float in
     this->prevPos = pos;
     this->iniPos = pos;
     this->originalHue = color.getHue();
+    this->maxSpeed = 50;
 }
 
 void Particle::update(float dt){
@@ -38,7 +39,7 @@ void Particle::update(float dt){
         acc += frc;
         vel += acc;
         vel *= friction;
-        // Limit speed
+        limitVelocity();
         pos += vel*dt;
         acc.set(0, 0);
         frc.set(0, 0);
@@ -289,7 +290,7 @@ void Particle::addForFlocking(Particle &p){
     ofPoint dirToParticle = p.pos - pos;
     dirToParticle.normalize();
     float distSqrd = pos.squareDistance(p.pos);
-    
+
     // Separate
     if(distSqrd > 0 && distSqrd < separation.distSqrd ){
         separation.sum += dirToParticle/distSqrd;
@@ -297,7 +298,7 @@ void Particle::addForFlocking(Particle &p){
         p.separation.sum -= dirToParticle/distSqrd;
         p.separation.count++;
     }
-    
+
     // Cohesion
     if( distSqrd > 0 && distSqrd < cohesion.distSqrd ){
         cohesion.sum += p.pos;
@@ -305,7 +306,7 @@ void Particle::addForFlocking(Particle &p){
         p.cohesion.sum += pos;
         p.cohesion.count++;
     }
-    
+
     // Align
     if(distSqrd > 0 && distSqrd < alignment.distSqrd){
         alignment.sum += p.vel;
@@ -321,14 +322,14 @@ void Particle::addFlockingForces(){
         separation.sum /= (float)separation.count;
         frc -= (separation.sum.getNormalized() * separation.strength);
     }
-    
+
     // Cohesion
     if(cohesion.count > 0){
         cohesion.sum /= (float)cohesion.count;
 //        seek(cohesion.sum, cohesion.strength);
         frc += (cohesion.sum.getNormalized() * cohesion.strength);
     }
-    
+
     // Alignment
     if(alignment.count > 0){
         alignment.sum /= (float)alignment.count;
@@ -349,7 +350,6 @@ void Particle::kill(){
 }
 
 void Particle::limitVelocity(){
-    int maxSpeed = 50;
     if(vel.squareDistance(vel) > (maxSpeed*maxSpeed)){
         vel.normalize();
         vel *= maxSpeed;
