@@ -126,7 +126,7 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
 
         else if(particleMode == BOIDS){
             float scale = 5;
-            float markerRadius = 50;
+            float markerRadius = 100;
             for(int i = 0; i < particles.size(); i++){
                 particles[i]->flockingRadiusSqrd    =   flockingRadius * flockingRadius;
 
@@ -141,9 +141,11 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
 //                particles[i]->pullToCenter();
 
 //                // Get closest marker to particle
-//                ofPoint closestMarker = getClosestMarker(*particles[i], markers, markerRadius);
-//                if(closestMarker != ofPoint(-1, -1))
-//                    particles[i]->addRepulsionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, scale);
+                ofPoint closestMarker = getClosestMarker(*particles[i], markers, markerRadius);
+                if(closestMarker != ofPoint(-1, -1)){
+                    particles[i]->addRepulsionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, scale);
+//                    particles[i]->seek(closestMarker);
+                }
             }
 
             flockParticles();

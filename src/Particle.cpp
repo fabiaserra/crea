@@ -329,7 +329,7 @@ void Particle::pullToCenter(){
 	if(distToCenterSqrd > distThresh){
 		dirToCenter.normalize();
 		float pullStrength = 0.000015f;
-		vel -= dirToCenter * ( ( distToCenterSqrd - distThresh ) * pullStrength );
+		frc -= dirToCenter * ( ( distToCenterSqrd - distThresh ) * pullStrength );
 	}
 }
 
@@ -337,8 +337,8 @@ void Particle::seek(ofPoint target){
     float distSqrd = pos.squareDistance(target);
     ofPoint dirToTarget = pos - target;
     dirToTarget.normalize();
-    dirToTarget *= maxSpeed;
-    addForce(dirToTarget-vel);
+    float pullStrength = 300.0f;
+    frc -= dirToTarget * (1.0/distSqrd) * pullStrength;
 }
 
 void Particle::kill(){
