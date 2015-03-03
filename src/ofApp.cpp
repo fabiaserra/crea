@@ -110,7 +110,7 @@ void ofApp::setup(){
 
     // BOIDS PARTICLES
     gridParticles = new ParticleSystem();
-    gridParticles->bounce = true;
+    gridParticles->bounce = false;
     gridParticles->setup(BOIDS, MARKERS, kinect.width, kinect.height);
 
     // VECTOR OF PARTICLE SYSTEMS
@@ -494,18 +494,6 @@ void ofApp::draw(){
     ofPopMatrix();
 
     if(drawPatterns) sequence.drawPatterns(gestureUpdate);
-
-//    // print percent of completion
-//    for(int patternIndex = 0; patternIndex < gestureUpdate.size(); patternIndex++){
-//        cout << patternIndex << ": " << gestureUpdate[patternIndex] << endl;
-//    }
-
-//    map<int, float> currentPatterns;
-//    if(drawPatterns && testCounter < 0.6) testCounter += 0.05;
-//    currentPatterns[5] = testCounter;
-//    currentPatterns[3] = testCounter;
-//    currentPatterns[4] = testCounter;
-//    if(drawPatterns) sequence.drawPatterns(currentPatterns);
 }
 
 //--------------------------------------------------------------
@@ -964,13 +952,11 @@ void ofApp::setupGUI8Grid(){
     gui8Grid->addToggle("Bounces", &gridParticles->bounce);
 
 
-    gui8Grid->addSlider("Alignment Radius", 0, 200, &gridParticles->alignmentDistance);
-    gui8Grid->addSlider("Cohesion Radius", 0, 200, &gridParticles->cohesionDistance);
-    gui8Grid->addSlider("Separation Radius", 0, 200, &gridParticles->separationDistance);
+//    gui8Grid->addSlider("Zone Radius", 10.0, 100.0, &gridParticles->zoneRadius);
 
-    gui8Grid->addSlider("Alignment Strength", 0, 1, &gridParticles->alignmentStrength);
-    gui8Grid->addSlider("Cohesion Strength", 0, 1, &gridParticles->cohesionStrength);
-    gui8Grid->addSlider("Separation Strength", 0, 1, &gridParticles->separationStrength);
+//    gui8Grid->addSlider("Alignment Strength", 0, 1, &gridParticles->alignmentStrength);
+//    gui8Grid->addSlider("Attraction Strength", 0, 1, &gridParticles->attractionStrength);
+//    gui8Grid->addSlider("Separation Strength", 0, 1, &gridParticles->separationStrength);
 
     gui8Grid->addSpacer();
 

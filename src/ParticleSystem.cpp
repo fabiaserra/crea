@@ -61,14 +61,17 @@ void ParticleSystem::setup(ParticleMode particleMode, InputSource inputSource, i
 
     else if(particleMode == BOIDS){ // TODO: BOIDS == RANDOM?
         nParticles = 500;
-        separationStrength = 1.5;
-        cohesionStrength = 1.0;
-        alignmentStrength = 1.0;
-        
-        separationDistance = radius*2;
-        alignmentDistance = 50;
-        cohesionDistance = 50;
-        
+
+        lowThresh = 0.1333;
+        highThresh = 0.6867;
+
+        separationStrength = 0.01f;
+        attractionStrength = 0.004f;
+        alignmentStrength = 0.01f;
+
+        zoneRadiusSqrd = 3700;
+        maxSpeed = 10;
+
         addParticles(nParticles);
     }
 }
@@ -120,29 +123,29 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
         }
 
         else if(particleMode == BOIDS){
-            float scale = 5;
-            float markerRadius = 50;
-            for(int i = 0; i < particles.size(); i++){
-                particles[i]->separation.distSqrd   =   separationDistance * separationDistance;
-                particles[i]->cohesion.distSqrd     =   cohesionDistance * cohesionDistance;
-                particles[i]->alignment.distSqrd    =   alignmentDistance * alignmentDistance;
-                
-                particles[i]->separation.strength   =   separationStrength;
-                particles[i]->cohesion.strength     =   cohesionStrength;
-                particles[i]->alignment.strength    =   alignmentStrength;
-                
-                // Get closest marker to particle
-                ofPoint closestMarker = getClosestMarker(*particles[i], markers, markerRadius);
-                if(closestMarker != ofPoint(-1, -1))
-                    particles[i]->addRepulsionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, scale);
-                
-            }
-            
+//            float scale = 5;
+//            float markerRadius = 50;
+//            for(int i = 0; i < particles.size(); i++){
+//                particles[i]->separation.distSqrd   =   separationDistance * separationDistance;
+//                particles[i]->cohesion.distSqrd     =   cohesionDistance * cohesionDistance;
+//                particles[i]->alignment.distSqrd    =   alignmentDistance * alignmentDistance;
+//
+//                particles[i]->separation.strength   =   separationStrength;
+//                particles[i]->cohesion.strength     =   cohesionStrength;
+//                particles[i]->alignment.strength    =   alignmentStrength;
+//
+//                // Get closest marker to particle
+//                ofPoint closestMarker = getClosestMarker(*particles[i], markers, markerRadius);
+//                if(closestMarker != ofPoint(-1, -1))
+//                    particles[i]->addRepulsionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, scale);
+//
+//            }
+
             flockParticles();
-            
-            for(int i = 0; i < particles.size(); i++){
-                particles[i]->addFlockingForces();
-            }
+
+//            for(int i = 0; i < particles.size(); i++){
+//                particles[i]->addFlockingForces();
+//            }
         }
 
         else if(particleMode == EMITTER){
@@ -326,14 +329,14 @@ void ParticleSystem::repulseParticles(){
 }
 
 void ParticleSystem::flockParticles(){
-    int flockRegionRadius = 100;
-    for(int i = 0; i < particles.size(); i++){
-        for(int j = i-1; j >= 0; j--){
-//            if ( fabs(particles[j]->pos.x - particles[i]->pos.x) > flockRegionRadius) break;
-            particles[i]->addForFlocking(*particles[j]);
-        }
-    }
-    
+//    int flockRegionRadius = 100;
+//    for(int i = 0; i < particles.size(); i++){
+//        for(int j = i-1; j >= 0; j--){
+////            if ( fabs(particles[j]->pos.x - particles[i]->pos.x) > flockRegionRadius) break;
+//            particles[i]->addForFlocking(*particles[j]);
+//        }
+//    }
+
 //    for (int i = 0; i < particles.size(); i++){
 //        for (int j = 0; j < particles.size(); j++){
 //            if (i != j){
@@ -341,6 +344,54 @@ void ParticleSystem::flockParticles(){
 //            }
 //        }
 //    }
+
+    ofPoint dir;
+    float distSqrd;
+    float percent;
+    float F;
+    float thresh;
+
+    // Cinder tutorial
+    for(vector<Particle *>::iterator p1 = particles.begin(); p1 != particles.end(); ++p1){
+        Particle &a = *(*p1);
+        vector<Particle *>::iterator p2 = p1;
+        for(++p2; p2 != particles.end(); ++p2){
+            Particle &b = *(*p2);
+            dir = a.pos - b.pos;
+            distSqrd = a.pos.squareDistance(b.pos);
+
+            if(distSqrd < zoneRadiusSqrd && distSqrd > 0.01f){ // if neighbor within zone radius...
+
+                percent = distSqrd/zoneRadiusSqrd;
+
+                // Separate
+                if(percent < lowThresh){            // ... and is within the lower threshold limits, separate
+                    F = (lowThresh/percent - 1.0f) * separationStrength;
+//                    F = 1.0f/distSqrd;
+                    dir = dir.getNormalized() * F;
+                    a.frc += dir;
+                    b.frc -= dir;
+                }
+                // Align
+                else if(percent < highThresh){          // ... else if it is within the higher threshold limits, align
+                    float threshDelta = highThresh - lowThresh;
+                    float adjustedPercent = (percent - lowThresh) / threshDelta;
+                    F = (0.5f - cos(adjustedPercent * M_PI * 2.0f) * 0.5f + 0.5f) * alignmentStrength;
+                    a.frc += b.vel.getNormalized() * F;
+                    b.frc += a.vel.getNormalized() * F;
+                }
+                // Attract
+                else{                               // ... else, attract
+                    float threshDelta = 1.0f - highThresh;
+                    float adjustedPercent = (percent - highThresh) / threshDelta;
+                    float F = (0.5f - cos(adjustedPercent * M_PI * 2.0f) * 0.5f + 0.5f) * attractionStrength;
+                    dir = dir.getNormalized() * F;
+                    a.frc -= dir;
+                    b.frc += dir;
+                }
+            }
+        }
+    }
 }
 
 ofPoint ParticleSystem::randomVector(){

@@ -61,10 +61,15 @@ class ParticleSystem
         //--------------------------------------------------------------
         float separationDistance;
         float alignmentDistance;
-        float cohesionDistance;
+        float attractionDistance;
+        //--------------------------------------------------------------
+        float zoneRadiusSqrd;
+        float lowThresh;        // separate
+        float highThresh;       // align
         float separationStrength;
         float alignmentStrength;
-        float cohesionStrength;
+        float attractionStrength;
+        float maxSpeed;
 		//--------------------------------------------------------------
 		bool immortal;          // Can the particles die?
 		bool sizeAge;           // Particles change size with age?
