@@ -33,12 +33,12 @@ void Particle::setup(float id, ofPoint pos, ofPoint vel, ofColor color, float in
 
 void Particle::update(float dt){
     if(isAlive){
-
         // Update position
         acc += frc;
         vel += acc;
-        pos += vel*dt;
         vel *= friction;
+        limitVelocity();
+        pos += vel*dt;
         acc.set(0, 0);
         frc.set(0, 0);
 
@@ -67,24 +67,25 @@ void Particle::update(float dt){
         // Bounce particle with the window margins
         if(bounces){
         	bool isBouncing = false;
+            float bounceMagnitude = 1.0;
 
             if(pos.x > width-radius){
                 pos.x = width-radius;
-                vel.x *= -1.0;
+                vel.x *= -1.0 * bounceMagnitude;
             }
             else if(pos.x < radius){
                 pos.x = radius;
-                vel.x *= -1.0;
+                vel.x *= -1.0 * bounceMagnitude;
             }
 
             if(pos.y > height-radius){
                 pos.y = height-radius;
-                vel.y *= -1.0;
+                vel.y *= -1.0 * bounceMagnitude;
                 isBouncing = true;
             }
             else if(pos.y < radius){
                 pos.y = radius;
-                vel.y *= -1.0;
+                vel.y *= -1.0 * bounceMagnitude;
                 isBouncing = true;
             }
 
@@ -153,20 +154,20 @@ void Particle::addRepulsionForce(Particle &p, float radiusSqrd, float scale){
 	posOfForce.set(p.pos.x, p.pos.y);
 
 	// ----------- (2) calculate the difference & length
-	ofVec2f dir         = pos - posOfForce;
-	float lengthSqrd    = pos.squareDistance(posOfForce); // faster than length or distance (no square root)
+	ofPoint dir         = pos - posOfForce;
+	float distSqrd      = pos.squareDistance(posOfForce); // faster than length or distance (no square root)
 
 	// ----------- (3) check close enough
 	bool closeEnough = true;
 	if (radiusSqrd > 0){
-	    if (lengthSqrd > radiusSqrd){
+	    if (distSqrd > radiusSqrd){
 	        closeEnough = false;
 	    }
 	}
 
 	// ----------- (4) if so, update force
 	if (closeEnough == true){
-	    float pct = 1 - (lengthSqrd / radiusSqrd);  // stronger on the inside
+	    float pct = 1 - (distSqrd / radiusSqrd);  // stronger on the inside
 	    dir.normalize();
 	    frc   += dir * scale * pct;
 	    p.frc -= dir * scale * pct;
@@ -174,32 +175,11 @@ void Particle::addRepulsionForce(Particle &p, float radiusSqrd, float scale){
 }
 
 void Particle::addRepulsionForce(Particle &p, float scale){
-
-	// ----------- (1) make a vector of where this particle p is:
-	ofPoint posOfForce;
-	posOfForce.set(p.pos.x, p.pos.y);
-
-	// ----------- (2) calculate the difference & length
-	ofVec2f dir         = pos - posOfForce;
-	float lengthSqrd    = pos.squareDistance(posOfForce); // faster than length or distance (no square root)
-	float radius        = this->radius + p.radius;
+    // ----------- (1) make radius of repulsion equal particles radius sum
+    float radius        = this->radius + p.radius;
 	float radiusSqrd    = radius*radius;
-
-	// ----------- (3) check close enough
-	bool closeEnough = true;
-	if (radiusSqrd > 0){
-	    if (lengthSqrd > radiusSqrd){
-	        closeEnough = false;
-	    }
-	}
-
-	// ----------- (4) if so, update force
-	if (closeEnough == true){
-	    float pct = 1 - (lengthSqrd / radiusSqrd);  // stronger on the inside
-	    dir.normalize();
-	    frc   += dir * scale * pct;
-	    p.frc -= dir * scale * pct;
-	}
+	// ----------- (2) call addRepulsion force with the computed radius
+	addRepulsionForce(p, radiusSqrd, scale);
 }
 
 void Particle::addRepulsionForce(float x, float y, float radiusSqrd, float scale){
@@ -210,19 +190,19 @@ void Particle::addRepulsionForce(float x, float y, float radiusSqrd, float scale
 
     // ----------- (2) calculate the difference & length
 	ofPoint dir	        = pos - posOfForce;
-	float lengthSqrd	= pos.squareDistance(posOfForce); // faster than length or distance (no square root)
+	float distSqrd  	= pos.squareDistance(posOfForce); // faster than length or distance (no square root)
 
     // ----------- (3) check close enough
     bool closeEnough = true;
     if (radiusSqrd > 0){
-        if (lengthSqrd > radiusSqrd){
+        if (distSqrd > radiusSqrd){
             closeEnough = false;
         }
     }
 
     // ----------- (4) if so, update force
     if (closeEnough == true){
-		float pct = 1 - (lengthSqrd / radiusSqrd);  // stronger on the inside
+		float pct = 1 - (distSqrd / radiusSqrd);  // stronger on the inside
         dir.normalize();
         frc += dir * scale * pct;
     }
@@ -235,20 +215,20 @@ void Particle::addAttractionForce(Particle &p, float radiusSqrd, float scale){
 	posOfForce.set(p.pos.x, p.pos.y);
 
 	// ----------- (2) calculate the difference & length
-	ofVec2f dir         = pos - posOfForce;
-	float lengthSqrd    = pos.squareDistance(posOfForce); // faster than length or distance (no square root)
+	ofPoint dir         = pos - posOfForce;
+	float distSqrd      = pos.squareDistance(posOfForce); // faster than length or distance (no square root)
 
 	// ----------- (3) check close enough
 	bool closeEnough = true;
 	if (radiusSqrd > 0){
-	    if (lengthSqrd > radiusSqrd){
+	    if (distSqrd > radiusSqrd){
 	        closeEnough = false;
 	    }
 	}
 
 	// ----------- (4) if so, update force
 	if (closeEnough == true){
-	    float pct = 1 - (lengthSqrd / radiusSqrd);  // stronger on the inside
+	    float pct = 1 - (distSqrd / radiusSqrd);  // stronger on the inside
 	    dir.normalize();
         frc   -= dir * scale * pct;
 	    p.frc += dir * scale * pct;
@@ -264,20 +244,20 @@ void Particle::addAttractionForce(float x, float y, float radiusSqrd, float scal
     // ----------- (2) calculate the difference & length
 
 	ofPoint dir	        = pos - posOfForce;
-	float lengthSqrd	= pos.squareDistance(posOfForce); // faster than length or distance (no square root)
+	float distSqrd	    = pos.squareDistance(posOfForce); // faster than length or distance (no square root)
 
     // ----------- (3) check close enough
 
     bool closeEnough = true;
     if (radiusSqrd > 0){
-        if (lengthSqrd > radiusSqrd){
+        if (distSqrd > radiusSqrd){
             closeEnough = false;
         }
     }
 
     // ----------- (4) if so, update force
     if (closeEnough == true){
-		float pct = 1 - (lengthSqrd / radiusSqrd);  // stronger on the inside
+		float pct = 1 - (distSqrd / radiusSqrd);  // stronger on the inside
         dir.normalize();
         frc -= dir * scale * pct;
     }
@@ -285,7 +265,6 @@ void Particle::addAttractionForce(float x, float y, float radiusSqrd, float scal
 
 //------------------------------------------------------------------
 void Particle::xenoToOrigin(float spd){
-
     pos.x = spd * iniPos.x + (1-spd) * pos.x;
     pos.y = spd * iniPos.y + (1-spd) * pos.y;
 
@@ -304,10 +283,72 @@ void Particle::xenoToOrigin(float spd){
     // and pos.c is analogous to catchX
     // we can write pos.x = pos.x(1-.25) + catchX(.25)
     // this equation is the same as Zachs simplified equation
+}
 
+void Particle::addForFlocking(Particle &p){
+    ofPoint dir = pos - p.pos;
+    float distSqrd = pos.squareDistance(p.pos);
+
+    if(0.01f < distSqrd && distSqrd < flockingRadiusSqrd){ // if neighbor particle within zone radius...
+
+        float percent = distSqrd/flockingRadiusSqrd;
+
+        // Separate
+        if(percent < lowThresh){            // ... and is within the lower threshold limits, separate
+            float F = (lowThresh/percent - 1.0f) * separationStrength;
+            dir = dir.getNormalized() * F;
+            frc += dir;
+            p.frc -= dir;
+        }
+        // Align
+        else if(percent < highThresh){      // ... else if it is within the higher threshold limits, align
+            float threshDelta = highThresh - lowThresh;
+            float adjustedPercent = (percent - lowThresh) / threshDelta;
+            float F = (0.5f - cos(adjustedPercent * M_PI * 2.0f) * 0.5f + 0.5f) * alignmentStrength;
+            frc += p.vel.getNormalized() * F;
+            p.frc += vel.getNormalized() * F;
+        }
+        // Attract
+        else{                               // ... else, attract
+            float threshDelta = 1.0f - highThresh;
+            float adjustedPercent = (percent - highThresh) / threshDelta;
+            float F = (0.5f - cos(adjustedPercent * M_PI * 2.0f) * 0.5f + 0.5f) * attractionStrength;
+            dir = dir.getNormalized() * F;
+            frc -= dir;
+            p.frc += dir;
+        }
+    }
+}
+
+void Particle::pullToCenter(){
+    ofPoint center(width/2, height/2);
+	ofPoint dirToCenter = pos - center;
+	float distToCenterSqrd = dirToCenter.lengthSquared();
+	float distThresh = 900.0f;
+
+	if(distToCenterSqrd > distThresh){
+		dirToCenter.normalize();
+		float pullStrength = 0.000015f;
+		frc -= dirToCenter * ( ( distToCenterSqrd - distThresh ) * pullStrength );
+	}
+}
+
+void Particle::seek(ofPoint target){
+    float distSqrd = pos.squareDistance(target);
+    ofPoint dirToTarget = pos - target;
+    dirToTarget.normalize();
+    float pullStrength = 300.0f;
+    frc -= dirToTarget * (1.0/distSqrd) * pullStrength;
 }
 
 void Particle::kill(){
     isAlive = false;
+}
+
+void Particle::limitVelocity(){
+    if(vel.lengthSquared() > (maxSpeed*maxSpeed)){
+        vel.normalize();
+        vel *= maxSpeed;
+    }
 }
 

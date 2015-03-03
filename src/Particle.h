@@ -20,6 +20,11 @@ class Particle
         void addRepulsionForce(Particle &p, float scale);
         void xenoToOrigin(float spd);
 
+        void addForFlocking(Particle &p);
+        void seek(ofPoint target);
+        void pullToCenter();
+        void limitVelocity();
+
         void kill();
 //--------------------------------------------------------------
         ofPoint pos;            // Position
@@ -41,22 +46,26 @@ class Particle
         float radius;           // Radius of the particle
         float opacity;          // Radius of the particle
         float noise;            // Perlin noise to add some randomness
-        float originalHue;
+        float originalHue;      // Initial hue color
 // --------------------------------------------------------------
-        bool  immortal;         // Can the particle die?
-        bool  isAlive;          // Is the particle alive?
-        bool  isTouched;        // Particle has been activated through some event
-        bool  bounces;          // Particle bounces with the window margins?
-        bool  sizeAge;          // Particle changes size with age?
-        bool  opacityAge;       // Particle changes opacity with age?
-        bool  flickersAge;      // Particle flickers opacity when about to die?
-        bool  colorAge;         // Particle changes color with age?
-        bool  isEmpty;          // Draw only contour of the particle
-        bool  drawLine;         // Draw particle as a line from prevPos to pos
+        bool immortal;          // Can the particle die?
+        bool isAlive;           // Is the particle alive?
+        bool isTouched;         // Particle has been activated through some event
+        bool bounces;           // Particle bounces with the window margins?
+        bool sizeAge;           // Particle changes size with age?
+        bool opacityAge;        // Particle changes opacity with age?
+        bool flickersAge;       // Particle flickers opacity when about to die?
+        bool colorAge;          // Particle changes color with age?
+        bool isEmpty;           // Draw only contour of the particle
+        bool drawLine;          // Draw particle as a line from prevPos to pos
 // --------------------------------------------------------------
-        float markerDist;       // Distance between particle and closest marker
-        ofPoint closestPos;     // Position of the closest marker
-        ofPoint closestDir;     // Direction from particle to closest marker
+        float flockingRadiusSqrd;
+        float lowThresh;        // separate
+        float highThresh;       // align
+        float separationStrength;
+        float alignmentStrength;
+        float attractionStrength;
+        float maxSpeed;         // Maximum speed
 // --------------------------------------------------------------
         int width;              // Particle boundaries
         int height;

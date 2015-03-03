@@ -45,24 +45,29 @@ void Sequence::record(const vector<irMarker>& markers){
 }
 
 void Sequence::draw(){
-
+    ofPushStyle();
     // Draw entire sequence
     for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
 
-//        ofSetColor(255, 40);
-//        markersPosition[markerIndex].draw();
+        ofSetColor(255, 30);
+        markersPosition[markerIndex].draw();
 
         ofPoint currentPoint = getCurrentPoint(markerIndex);
         markersPastPoints[markerIndex].addVertex(currentPoint);
 
-        if(markerIndex == 0) ofSetColor(255, 0, 0);
-        if(markerIndex == 1) ofSetColor(0, 0, 255);
+        ofColor c;
+        if(markerIndex == 0) c.set(255, 0, 0);
+        if(markerIndex == 1) c.set(0, 0, 255);
+        ofSetColor(c);
         ofSetLineWidth(1.2);
         markersPastPoints[markerIndex].draw();
 
         ofFill();
+        c.setBrightness(150);
+        ofSetColor(c);
         ofCircle(currentPoint, 3);
     }
+    ofPopStyle();
 }
 
 ofPoint Sequence::getCurrentPoint(int markerIndex){
@@ -178,17 +183,51 @@ void Sequence::drawPatterns(map<int, float> currentPatterns){
             highlight = true;
             percent = currentPatterns[patternIndex];
         }
-//        else{ // Either here or inside drawPattern
-//            // If is not inside the map we clear the polyline
-//            for(int markerIndex = 0; markerIndex < patterns[patternIndex].size(); markerIndex++){
-//                patternsPastPoints[patternIndex][markerIndex].clear();
-//            }
-//        }
         drawPattern(patternPosition, patternIndex, percent, highlight);
     }
 }
 
-void Sequence::drawPattern(const int patternPosition, const int patternIndex, const float percent, const bool highlight){
+// Draw patterns inside the long sequence
+void Sequence::drawPatternsInSequence(map<int, float> currentPatterns){
+    ofPushStyle();
+    // Draw gesture patterns
+    int nPatterns = patterns.size();
+    for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
+        bool highlight = false;
+        float percent = 0;
+        // If the pattern is is inside the map
+        if(currentPatterns.find(patternIndex) != currentPatterns.end()){
+            highlight = true;
+            percent = currentPatterns[patternIndex];
+        }
+
+        ofColor c = ofColor::fromHsb(0, 255, 255);
+        c.setHue(ofMap(patternIndex, 0, nPatterns-1, 0, 255));
+
+        for(int markerIndex = 0; markerIndex < patterns[patternIndex].size(); markerIndex++){
+            int opacity = 60;
+            if(highlight) opacity = 255;
+
+            c.setBrightness(255);
+            ofSetColor(c, opacity);
+            ofSetLineWidth(1.8);
+            patterns[patternIndex][markerIndex].draw();
+
+            if(highlight){
+                if(percent > 0.98) percent = 0.98;
+                ofPoint currentPoint = patterns[patternIndex][markerIndex].getPointAtPercent(percent);
+
+                // Pattern current processing point
+                c.setBrightness(150);
+                ofSetColor(c, 255);
+                ofCircle(currentPoint, 3);
+            }
+        }
+    }
+    ofPopStyle();
+}
+
+void Sequence::drawPattern(const int patternPosition, const int patternIndex, float percent, const bool highlight){
 
     // Drawing window parameters
     float width = 640.0;
@@ -198,6 +237,7 @@ void Sequence::drawPattern(const int patternPosition, const int patternIndex, co
     float guiHeight = 800;
 
     ofPushMatrix();
+    ofPushStyle();
 
         ofScale(1.0/scale, 1.0/scale);
         ofTranslate(0, guiHeight);
@@ -212,7 +252,6 @@ void Sequence::drawPattern(const int patternPosition, const int patternIndex, co
 
         int opacity = 60;
         if(highlight) opacity = 255;
-        else          opacity = 60;
 
         // Background pattern window box
         ofSetColor(0);
@@ -232,6 +271,7 @@ void Sequence::drawPattern(const int patternPosition, const int patternIndex, co
             patterns[patternIndex][markerIndex].draw();
 
             if(highlight){
+                if(percent > 0.98) percent = 0.98;
                 ofPoint currentPoint = patterns[patternIndex][markerIndex].getPointAtPercent(percent);
                 patternsPastPoints[patternIndex][markerIndex].addVertex(currentPoint);
 
@@ -253,6 +293,7 @@ void Sequence::drawPattern(const int patternPosition, const int patternIndex, co
         ofSetColor(255, opacity+30);
         verdana.drawString(ofToString(patternIndex+1), 30, 100);
 
+    ofPopStyle();
     ofPopMatrix();
 }
 
