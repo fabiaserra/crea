@@ -12,6 +12,7 @@ Particle::Particle(){
     flickersAge     = false;
     isEmpty         = false;
     drawLine        = false;
+    limitSpeed      = false;
     age             = 0;
     width           = ofGetWidth();
     height          = ofGetHeight();
@@ -38,7 +39,7 @@ void Particle::update(float dt){
         acc += frc;
         vel += acc;
         vel *= friction;
-        limitVelocity();
+        if(limitSpeed) limitVelocity();
         pos += vel*dt;
         acc.set(0, 0);
         frc.set(0, 0);
@@ -165,8 +166,8 @@ void Particle::addNoise(float angle, float turbulence, float dt){
     // Perlin noise
 	float noise = ofNoise(pos.x * 0.005f,  pos.y * 0.005f, dt * 0.1f) * angle;
     ofPoint noiseVector(cos(noise), sin(noise));
-//    frc += noiseVector * turbulence * age * 0.1; // if immortal this doesn't affect, age == 0
-    frc += noiseVector * turbulence * 0.1;
+    if(!immortal) frc += noiseVector * turbulence * age * 0.1; // if immortal this doesn't affect, age == 0
+    else frc += noiseVector * turbulence * 0.1;
 }
 
 void Particle::addRepulsionForce(Particle &p, float radiusSqrd, float scale){

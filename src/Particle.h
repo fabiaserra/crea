@@ -57,8 +57,9 @@ class Particle
         bool opacityAge;        // Particle changes opacity with age?
         bool flickersAge;       // Particle flickers opacity when about to die?
         bool colorAge;          // Particle changes color with age?
-        bool isEmpty;           // Draw only contour of the particle
-        bool drawLine;          // Draw particle as a line from prevPos to pos
+        bool isEmpty;           // Draw only contour of the particle?
+        bool drawLine;          // Draw particle as a line from prevPos to pos?
+        bool limitSpeed;        // Limit the speed of the particle?
 // --------------------------------------------------------------
         float flockingRadiusSqrd;
         float lowThresh;        // separate

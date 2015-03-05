@@ -7,16 +7,16 @@ bool comparisonFunction(Particle * a, Particle * b) {
 ParticleSystem::ParticleSystem(){
     isActive        = true;         // Particle system is active?
 
-    bornRate        = 0;            // Number of particles born per frame
-    velocity        = 0;            // Initial velocity magnitude of newborn particles
-    velocityRnd     = 0;            // Magnitude randomness % of the initial velocity
-    velocityMotion  = 0;            // Marker motion contribution to the initial velocity
-    emitterSize     = 1.0f;         // Size of the emitter area
-    lifetime        = 5;            // Lifetime of particles
-    lifetimeRnd     = 0;            // Randomness of lifetime
+    bornRate        = 0.0;          // Number of particles born per frame
+    velocity        = 0.0;          // Initial velocity magnitude of newborn particles
+    velocityRnd     = 0.0;          // Magnitude randomness % of the initial velocity
+    velocityMotion  = 0.0;          // Marker motion contribution to the initial velocity
+    emitterSize     = 1.0;          // Size of the emitter area
+    lifetime        = 5.0;          // Lifetime of particles
+    lifetimeRnd     = 0.0;          // Randomness of lifetime
     color           = ofColor(255); // Color of the particles
-    radius          = 3;            // Radius of the particles
-    radiusRnd       = 0;            // Randomness of radius
+    radius          = 3.0;          // Radius of the particles
+    radiusRnd       = 0.0;          // Randomness of radius
 
     immortal        = false;        // Can particles die?
     sizeAge         = false;        // Decrease size when particles get older?
@@ -27,9 +27,11 @@ ParticleSystem::ParticleSystem(){
     drawLine        = false;        // Draw a line instead of a circle for the particle?
     bounce          = false;        // Bounce particles with the walls of the window?
     steer           = false;        // Steers direction before touching the walls of the window?
+    repulse         = false;        // Repulse particles between each other?
 
-    friction        = 20;           // Friction to velocity 0~100
+    friction        = 20.0;         // Friction to velocity 0~100
     gravity         = 0.0f;         // Makes particles fall down in a natural way
+    turbulence      = 0.5f;         // Add some perlin noise
 }
 
 ParticleSystem::~ParticleSystem(){
@@ -48,7 +50,11 @@ void ParticleSystem::setup(ParticleMode particleMode, InputSource inputSource, i
     this->width = width;
     this->height = height;
 
-    if(particleMode == GRID){
+    if(particleMode == EMITTER){
+        bornRate = 3.0;
+    }
+
+    else if(particleMode == GRID){
         immortal = true;
         gridRes = 10;
         createParticleGrid(width, height);
@@ -128,7 +134,7 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
 
         else if(particleMode == BOIDS){
             float scale = 5;
-            float markerRadius = 200;
+            float markerRadius = 50;
             for(int i = 0; i < particles.size(); i++){
                 particles[i]->flockingRadiusSqrd    =   flockingRadius * flockingRadius;
 
@@ -145,7 +151,7 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
 //                // Get closest marker to particle
                 ofPoint closestMarker = getClosestMarker(*particles[i], markers, markerRadius);
                 if(closestMarker != ofPoint(-1, -1)){
-//                    particles[i]->addRepulsionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, scale);
+                    particles[i]->addRepulsionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, scale);
 //                    particles[i]->seek(closestMarker, markerRadius*markerRadius);
                 }
             }
@@ -170,14 +176,14 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
             }
         }
 
-//        if(repulseParticles) repulseParticles();
+        if(repulse) repulseParticles();
 
         // Update the particles
         for(int i = 0; i < particles.size(); i++){
             ofPoint gravityForce(0, gravity*particles[i]->mass/10);
             particles[i]->addForce(gravityForce);
 
-            particles[i]->addNoise(15.0, 0.5, dt);
+            particles[i]->addNoise(15.0, turbulence, dt);
 
 //            ofPoint windForce(0.05, -0.02); // TODO: add some turbulence
 //            ofPoint windForce(ofRandom(-0.1, 0.1), ofRandom(-0.08, 0.06)); // TODO: add some turbulence
@@ -213,6 +219,8 @@ void ParticleSystem::addParticle(ofPoint pos, ofPoint vel, ofColor color, float 
 
     newParticle->width = width;
     newParticle->height = height;
+
+    if(particleMode == BOIDS) newParticle->limitSpeed = true;
 
     newParticle->setup(id, pos, vel, color, radius, lifetime);
     particles.push_back(newParticle);
@@ -325,9 +333,9 @@ void ParticleSystem::bornParticles(){
 void ParticleSystem::repulseParticles(){
     for(int i = 0; i < particles.size(); i++){
         for(int j = i-1; j >= 0; j--){
-            if (fabs(particles[j]->pos.x - particles[i]->pos.x) > radius*3) break; // to speed the loop
-//            particles[i]->addRepulsionForce( *particles[j], radius, 1.0);
-            particles[i]->addRepulsionForce( *particles[j], 1.0);
+            if (fabs(particles[j]->pos.x - particles[i]->pos.x) > radius*2) break; // to speed the loop
+            particles[i]->addRepulsionForce( *particles[j], radius*radius, 1.0);
+//            particles[i]->addRepulsionForce( *particles[j], 1.0);
         }
     }
 }
