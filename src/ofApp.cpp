@@ -901,7 +901,7 @@ void ofApp::setupGUI8Contour(){
     gui8Contour->addLabel("CONTOUR", OFX_UI_FONT_LARGE);
     gui8Contour->addSpacer();
     gui8Contour->addLabel("Emitter");
-    gui8Contour->addSlider("Particles/sec", 0.0, 60.0, &contourParticles->bornRate);
+    gui8Contour->addSlider("Particles/sec", 0.0, 20.0, &contourParticles->bornRate);
 
     gui8Contour->addSlider("Velocity", 0.0, 100.0, &contourParticles->velocity);
     gui8Contour->addSlider("Velocity Random[%]", 0.0, 100.0, &contourParticles->velocityRnd);

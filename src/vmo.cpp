@@ -437,23 +437,31 @@ vmo::belief &vmo::tracking_init(vmo &oracle, vmo::belief &bf,
 	int firstIdx = -1;
 	float firstCost = FLT_MAX;
 	for (int k = 0; k < bf.K; k++) {
-		float minD = FLT_MAX;
+//		float minD = FLT_MAX;
 		int ind = -1;
 		float d = 0.0;
-		for (int i = 0; i < oracle.latent[k].size(); i++) {
-			int idx = oracle.latent[k][i];
-            d = getDistance(firstObs, oracle.obs[idx]);
-			if (d < minD) {
-				minD = d;
-				ind = idx;
-				bf.path[k] = ind;
-				bf.cost[k] = minD;
-			}
-		}
-		if (minD < firstCost) {
+		d = getDistance(firstObs, oracle.obs[oracle.rsfx[0][k]]);
+		ind = oracle.rsfx[0][k];
+		bf.path[k] = ind;
+		bf.cost[k] = d;
+		if (d < firstCost) {
 			firstIdx = ind;
-			firstCost = minD;
+			firstCost = d;
 		}
+//		for (int i = 0; i < oracle.latent[k].size(); i++) {
+//			int idx = oracle.latent[k][i];
+//            d = getDistance(firstObs, oracle.obs[idx]);
+//			if (d < minD) {
+//				minD = d;
+//				ind = idx;
+//				bf.path[k] = ind;
+//				bf.cost[k] = minD;
+//			}
+//		}
+//		if (minD < firstCost) {
+//			firstIdx = ind;
+//			firstCost = minD;
+//		}
 	}
 	bf.currentIdx = firstIdx;
 	return bf;
