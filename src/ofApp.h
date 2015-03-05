@@ -6,10 +6,10 @@
 #include "ofxKinect.h"
 
 // comment this to use the recorded images
-#define KINECT_CONNECTED
+//#define KINECT_CONNECTED
 
 // Uncomment this to use an xml sequence file for the tracking
-//#define KINECT_SEQUENCE
+#define KINECT_SEQUENCE
 
 #include "ParticleSystem.h"
 #include "irMarker.h"
@@ -156,6 +156,7 @@ class ofApp : public ofBaseApp{
         vector<vector<float> > obs;
         // vector<vector<ofPolyline> > patterns;
         bool initStatus;
-        bool stopTracking;
+        bool isTracking;
+        float currentPercent;
         map<int, float> gestureUpdate;
 };
