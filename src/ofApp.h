@@ -20,6 +20,7 @@
 // Include VMO files here
 //-----------------------
 #include "vmo.h"
+#include "helper.h"
 //-----------------------
 
 class ofApp : public ofBaseApp{
@@ -153,6 +154,10 @@ class ofApp : public ofBaseApp{
         vmo::belief prevBf;
 
         // vector<ofPoint>& loadedFrames;
+		int maxMarkers;
+		int dimensions;
+		float slide;
+		vector<float> pastObs;
         vector<vector<float> > obs;
         // vector<vector<ofPolyline> > patterns;
         bool initStatus;

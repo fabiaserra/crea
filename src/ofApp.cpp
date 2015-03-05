@@ -8,7 +8,7 @@ void ofApp::setup(){
 
 //    ofSetFrameRate(30);
 
-    int maxMarkers = 1;
+    maxMarkers = 1;
 
     // Using a live kinect?
     #ifdef KINECT_CONNECTED
@@ -21,7 +21,7 @@ void ofApp::setup(){
         // Use xml sequence marker file
         #ifdef KINECT_SEQUENCE
             kinectSequence.setup(maxMarkers);
-            kinectSequence.load("sequences/simple5.xml");
+            kinectSequence.load("sequences/sequence1marker2.xml");
         #endif // KINECT_SEQUENCE
 
         // Load png files from file
@@ -124,7 +124,7 @@ void ofApp::setup(){
 
     // SEQUENCE
     sequence.setup(maxMarkers);
-    sequence.load("sequences/simple5.xml");
+    sequence.load("sequences/sequence1marker2.xml");
     drawSequence = false;
 
     // MARKERS
@@ -132,7 +132,9 @@ void ofApp::setup(){
     drawMarkers = false;
 
     // VMO SETUP
-    int dimensions = 2;
+    dimensions = 2;
+	slide = 10.0;
+	pastObs.assign(maxMarkers*dimensions, 0.0);
     obs.assign(sequence.numFrames, vector<float>(maxMarkers*dimensions));
     for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
         for(int frameIndex = 0; frameIndex < sequence.numFrames; frameIndex++){
@@ -169,7 +171,7 @@ void ofApp::setup(){
 	seqVmo = vmo::buildOracle(obs, dimensions, maxMarkers, t);
     // 2.2 Output pattern list
     pttrList = vmo::findPttr(seqVmo, minLen);
-    sequence.loadPatterns(vmo::processPttr(seqVmo, pttrList));
+    sequence.loadPatterns(processPttr(seqVmo, pttrList));
     drawPatterns = false;
     cout << sequence.patterns.size() << endl;
 
@@ -341,13 +343,21 @@ void ofApp::update(){
     #ifdef KINECT_SEQUENCE
 
         if (isTracking){
-            vector<float> obs; // Temporary code
+            vector<float> obs(maxMarkers*dimensions, 0.0); // Temporary code
             for(unsigned int i = 0; i < kinectSequence.maxMarkers; i++){
                 ofPoint currentPoint = kinectSequence.getCurrentPoint(i);
-                obs.push_back(currentPoint.x);
-                obs.push_back(currentPoint.y);
+				// Use the lowpass here??
+				obs[i] = lowpass(currentPoint.x, pastObs[i], slide);
+				obs[i+1] = lowpass(currentPoint.y, pastObs[i+1], slide);
+				pastObs[i] = obs[i];
+				pastObs[i+1] = obs[i+1];
+				
+                //obs[i] = currentPoint.x;
+                //obs[i+1] = currentPoint.y;
             }
             if(initStatus){
+				currentBf = vmo::vmo::belief();
+				pastObs.assign(maxMarkers*dimensions, 0.0);
                 currentBf = vmo::tracking_init(seqVmo, currentBf, pttrList, obs);
                 initStatus = false;
             }
