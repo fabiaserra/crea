@@ -22,13 +22,13 @@ void Sequence::record(const vector<irMarker>& markers){
     int frameNum = xml.addTag("frame");
     xml.pushTag("frame", frameNum);
     xml.setValue("timestamp", ofGetElapsedTimef(), frameNum);
-    for(int markerIndex = 0; markerIndex < markers.size(); markerIndex++){
+    for(int markerIdx = 0; markerIdx < markers.size(); markerIdx++){
         int numMarker = xml.addTag("marker");
         xml.pushTag("marker", numMarker);
-        xml.setValue("id", ofToString(markers[markerIndex].getLabel()), numMarker);
-        xml.setValue("x",  markers[markerIndex].smoothPos.x, numMarker);
-        xml.setValue("y",  markers[markerIndex].smoothPos.y, numMarker);
-        xml.setValue("disappeared", markers[markerIndex].hasDisappeared, numMarker);
+        xml.setValue("id", ofToString(markers[markerIdx].getLabel()), numMarker);
+        xml.setValue("x",  markers[markerIdx].smoothPos.x, numMarker);
+        xml.setValue("y",  markers[markerIdx].smoothPos.y, numMarker);
+        xml.setValue("disappeared", markers[markerIdx].hasDisappeared, numMarker);
         xml.popTag();
     }
 //    // fill with dummy markers if not enough markers
@@ -47,20 +47,30 @@ void Sequence::record(const vector<irMarker>& markers){
 void Sequence::draw(){
     ofPushStyle();
     // Draw entire sequence
-    for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
+    for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
 
         ofSetColor(255, 30);
-        markersPosition[markerIndex].draw();
+        markersPosition[markerIdx].draw();
 
-        ofPoint currentPoint = getCurrentPoint(markerIndex);
-        markersPastPoints[markerIndex].addVertex(currentPoint);
+        ofPoint currentPoint;
+        ofPolyline line;
+        size_t processedFrames = calcCurrentFrameIndex();
+        line.resize(processedFrames + 1);
+
+        for(size_t idx = 0; idx <= processedFrames; idx++){
+            currentPoint = markersPosition[markerIdx].getPointAtIndexInterpolated(idx);
+            line[idx] = currentPoint;
+        }
+
+//        cout << "drawPoint: " << currentPoint << endl;
 
         ofColor c;
-        if(markerIndex == 0) c.set(255, 0, 0);
-        if(markerIndex == 1) c.set(0, 0, 255);
+        if(markerIdx == 0) c.set(255, 0, 0);
+        else if(markerIdx == 1) c.set(0, 0, 255);
+        else if(markerIdx == 2) c.set(0, 255, 0);
         ofSetColor(c);
         ofSetLineWidth(1.2);
-        markersPastPoints[markerIndex].draw();
+        line.draw();
 
         ofFill();
         c.setBrightness(150);
@@ -70,8 +80,8 @@ void Sequence::draw(){
     ofPopStyle();
 }
 
-ofPoint Sequence::getCurrentPoint(int markerIndex){
-    return markersPosition[markerIndex].getPointAtIndexInterpolated(calcCurrentFrameIndex());
+ofPoint Sequence::getCurrentPoint(int markerIdx){
+    return markersPosition[markerIdx].getPointAtIndexInterpolated(calcCurrentFrameIndex());
 }
 
 void Sequence::load(const string path){
@@ -85,13 +95,6 @@ void Sequence::load(const string path){
         markersPosition.push_back(newPolyline);
     }
 
-    // Initialize previous points polylines sequence
-    markersPastPoints.clear();
-    for(int i = 0; i < maxMarkers; i++){
-        ofPolyline newPolyline;
-        markersPastPoints.push_back(newPolyline);
-    }
-
     // Number of frames of the sequence
     numFrames = xml.getNumTags("frame");
     float timestampFirstFrame = -1;
@@ -99,8 +102,8 @@ void Sequence::load(const string path){
     size_t emptyFrames = 0;
 
     // Load XML sequence in memory
-    for(size_t frameIndex = 0; frameIndex < numFrames; frameIndex++){
-        xml.pushTag("frame", frameIndex);
+    for(size_t frameIdx = 0; frameIdx < numFrames; frameIdx++){
+        xml.pushTag("frame", frameIdx);
 
         const size_t nMarkers = xml.getNumTags("marker");
 
@@ -116,15 +119,15 @@ void Sequence::load(const string path){
         }
 
         int addedMarkers = 0;
-        for(size_t markerIndex = 0; markerIndex < nMarkers; markerIndex++){
-            xml.pushTag("marker", markerIndex);
+        for(size_t markerIdx = 0; markerIdx < nMarkers; markerIdx++){
+            xml.pushTag("marker", markerIdx);
             unsigned int id = xml.getValue("id", -2.0);
             const float px = xml.getValue("x", -2.0);
             const float py = xml.getValue("y", -2.0);
             const bool disappeared = xml.getValue("disappeared", -1.0);
 
             // Number of markers we still have to take the value from
-            int aheadMarkers = (nMarkers-1) - markerIndex;
+            int aheadMarkers = (nMarkers-1) - markerIdx;
             // If marker is not disappeared in that frame we add it
             if(!disappeared){
                 markersPosition[addedMarkers].addVertex(ofPoint(px, py));
@@ -167,55 +170,66 @@ void Sequence::load(const string path){
     duration = timestampLastFrame - timestampFirstFrame;
 }
 
-void Sequence::drawPatterns(map<int, float> currentPatterns){
+// Draw patterns separate in a side of the screen
+void Sequence::drawPatterns(map<int, float>& currentPatterns){
     // If there are more patterns than maximum able to show in the window
     int nPatterns = MIN(maxPatternsWindow, patterns.size());
 
     // TODO: show most important patterns if there are more than maxPatternsToShow
 
     // Draw gesture patterns
-    for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
-        int patternPosition = patternIndex + 1;
+    for(int patternIdx = 0; patternIdx < nPatterns; patternIdx++){
+        int patternPosition = patternIdx + 1;
         bool highlight = false;
         float percent = 0;
         // If the pattern is is inside the map
-        if(currentPatterns.find(patternIndex) != currentPatterns.end()){
+        if(currentPatterns.find(patternIdx) != currentPatterns.end()){
             highlight = true;
-            percent = currentPatterns[patternIndex];
+            percent = currentPatterns[patternIdx];
         }
-        drawPattern(patternPosition, patternIndex, percent, highlight);
+        drawPattern(patternPosition, patternIdx, percent, highlight);
     }
 }
 
 // Draw patterns inside the long sequence
-void Sequence::drawPatternsInSequence(map<int, float> currentPatterns){
+void Sequence::drawPatternsInSequence(map<int, float>& currentPatterns){
     ofPushStyle();
     // Draw gesture patterns
     int nPatterns = patterns.size();
-    for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
+    for(int patternIdx = 0; patternIdx < nPatterns; patternIdx++){
         bool highlight = false;
         float percent = 0;
         // If the pattern is is inside the map
-        if(currentPatterns.find(patternIndex) != currentPatterns.end()){
+        if(currentPatterns.find(patternIdx) != currentPatterns.end()){
             highlight = true;
-            percent = currentPatterns[patternIndex];
+            percent = currentPatterns[patternIdx];
         }
 
         ofColor c = ofColor::fromHsb(0, 255, 255);
-        c.setHue(ofMap(patternIndex, 0, nPatterns-1, 0, 255));
+        c.setHue(ofMap(patternIdx, 0, nPatterns-1, 0, 255));
 
-        for(int markerIndex = 0; markerIndex < patterns[patternIndex].size(); markerIndex++){
+        for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
             int opacity = 60;
-            if(highlight) opacity = 255;
+            if(highlight) opacity = 150;
 
             c.setBrightness(255);
             ofSetColor(c, opacity);
             ofSetLineWidth(1.8);
-            patterns[patternIndex][markerIndex].draw();
+            patterns[patternIdx][markerIdx].draw();
 
             if(highlight){
-                if(percent > 0.98) percent = 0.98;
-                ofPoint currentPoint = patterns[patternIndex][markerIndex].getPointAtPercent(percent);
+                if(percent > 0.99) percent = 0.99;
+                ofPoint currentPoint;
+                ofPolyline line;
+                for(float p = 0.0; p <= percent; p += 0.001){
+                    currentPoint = patterns[patternIdx][markerIdx].getPointAtPercent(p);
+                    line.addVertex(currentPoint);
+                }
+
+                ofSetColor(c, 255);
+                ofSetLineWidth(2);
+                line.draw();
+
 
                 // Pattern current processing point
                 c.setBrightness(150);
@@ -227,7 +241,7 @@ void Sequence::drawPatternsInSequence(map<int, float> currentPatterns){
     ofPopStyle();
 }
 
-void Sequence::drawPattern(const int patternPosition, const int patternIndex, float percent, const bool highlight){
+void Sequence::drawPattern(const int patternPosition, const int patternIdx, float percent, const bool highlight){
 
     // Drawing window parameters
     float width = 640.0;
@@ -239,110 +253,156 @@ void Sequence::drawPattern(const int patternPosition, const int patternIndex, fl
     ofPushMatrix();
     ofPushStyle();
 
-        ofScale(1.0/scale, 1.0/scale);
-        ofTranslate(0, guiHeight);
+    ofScale(1.0/scale, 1.0/scale);
+    ofTranslate(0, guiHeight);
 
-        // Position window pattern in the screen
-        if(patternPosition%2 == 0){
-            ofTranslate(width+margin, (patternPosition/2 - 1) * (height+margin));
-        }
-        else{
-            ofTranslate(0, ((patternPosition+1)/2 - 1) * (height+margin));
-        }
+    // Position window pattern in the screen
+    if(patternPosition%2 == 0){
+        ofTranslate(width+margin, (patternPosition/2 - 1) * (height+margin));
+    }
+    else{
+        ofTranslate(0, ((patternPosition+1)/2 - 1) * (height+margin));
+    }
 
-        int opacity = 60;
-        if(highlight) opacity = 255;
+    int opacity = 60;
+    if(highlight) opacity = 255;
 
-        // Background pattern window box
-        ofSetColor(0);
-        ofFill();
-        ofRect(0, 0, width, height);
+    // Background pattern window box
+    ofSetColor(0);
+    ofFill();
+    ofRect(0, 0, width, height);
 
-        // Contour pattern window box
-        ofSetColor(255, opacity);
+    // Contour pattern window box
+    ofSetColor(255, opacity);
+    ofSetLineWidth(2);
+    ofNoFill();
+    ofRect(0, 0, width, height);
+
+    for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
+        // Pattern lines
+        ofSetColor(120, opacity);
         ofSetLineWidth(2);
-        ofNoFill();
-        ofRect(0, 0, width, height);
+        patterns[patternIdx][markerIdx].draw();
 
-        for(int markerIndex = 0; markerIndex < patterns[patternIndex].size(); markerIndex++){
-            // Pattern lines
-            ofSetColor(120, opacity);
+        if(highlight){
+            if(percent > 0.99) percent = 0.99; // so it doesn't jump to the beginning
+
+            ofPoint currentPoint;
+            ofPolyline line;
+            for(float p = 0.0; p <= percent; p += 0.001){
+                currentPoint = patterns[patternIdx][markerIdx].getPointAtPercent(p);
+                line.addVertex(currentPoint);
+            }
+
+            // Pattern already processed points
+            ofSetColor(255);
             ofSetLineWidth(2);
-            patterns[patternIndex][markerIndex].draw();
+            line.draw();
 
-            if(highlight){
-                if(percent > 0.98) percent = 0.98;
-                ofPoint currentPoint = patterns[patternIndex][markerIndex].getPointAtPercent(percent);
-                patternsPastPoints[patternIndex][markerIndex].addVertex(currentPoint);
-
-                // Pattern already processed lines
-                ofSetColor(255);
-                ofSetLineWidth(2);
-                patternsPastPoints[patternIndex][markerIndex].draw();
-
-                // Pattern current processing point
-                ofSetColor(240, 0, 20, opacity);
-                ofCircle(currentPoint, 10);
-            }
-            else{
-                patternsPastPoints[patternIndex][markerIndex].clear();
-            }
+            // Pattern current processing point
+            ofSetColor(240, 0, 20, opacity);
+            ofCircle(currentPoint, 10);
         }
+    }
 
-        // Pattern label number
-        ofSetColor(255, opacity+30);
-        verdana.drawString(ofToString(patternIndex+1), 30, 100);
+    // Pattern label number
+    ofSetColor(255, opacity+30);
+    verdana.drawString(ofToString(patternIdx+1), 30, 100);
 
     ofPopStyle();
     ofPopMatrix();
 }
 
-void Sequence::loadPatterns(vector< vector<ofPolyline> > patterns){
-    this->patterns = patterns;
+// Draw current point in the tracking of the sequence
+void Sequence::drawSequenceTracking(float percent){
+    ofPushStyle();
+    for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
+        ofColor c(0,255,0);
+//        if(markerIdx == 0) c.set(255, 0, 0);
+//        else if(markerIdx == 1) c.set(0, 0, 255);
+//        else if(markerIdx == 2) c.set(0, 255, 0);
 
-    // Clear and initialize memory of previous points polylines patterns
-    patternsPastPoints.clear();
-    for(int patternIndex = 0; patternIndex < patterns.size(); patternIndex++){
-        vector<ofPolyline> newPattern;
-        for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
-            ofPolyline newPolyline;
-            newPattern.push_back(newPolyline);
-        }
-        patternsPastPoints.push_back(newPattern);
+        ofSetColor(c, 30);
+        markersPosition[markerIdx].draw();
+
+//        // Draw all past points
+//        ofPoint currentPoint;
+//        ofPolyline line;
+//        for(float p = 0.0; p <= percent; p += 0.001){
+//            currentPoint = markersPosition[markerIdx].getPointAtPercent(p);
+//            line.addVertex(currentPoint);
+//        }
+//        ofSetColor(c, 255);
+//        line.draw();
+
+        // Current point
+        ofPoint currentPoint = markersPosition[markerIdx].getPointAtPercent(percent);
+
+        ofFill();
+        c.setBrightness(150);
+        ofSetColor(c, 255);
+        ofCircle(currentPoint, 3);
     }
+    ofPopStyle();
 }
 
+// Draw the segment of the sequence that belongs to the different cues
+void Sequence::drawCueSegments(const vector< pair<float, float> >& cueSegmentsPcts){
+    ofPushStyle();
+    for(int segmentIdx = 0; segmentIdx < cueSegmentsPcts.size(); segmentIdx++){
+        vector<ofPolyline> segment = getCueSegment(cueSegmentsPcts[segmentIdx]);
+
+        ofColor c = ofColor::fromHsb(0, 255, 255);
+        c.setHue(ofMap(segmentIdx, 0, cueSegmentsPcts.size()-1, 0, 255));
+        ofSetColor(c);
+
+        for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
+            segment[markerIdx].draw();
+        }
+    }
+    ofPopStyle();
+}
+
+vector<ofPolyline> Sequence::getCueSegment(const pair<float, float>& cueSegmentPct){
+    float lowPct = cueSegmentPct.first;
+    float highPct = cueSegmentPct.second;
+    vector<ofPolyline> segment;
+    for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
+        ofPolyline markerSegment;
+        for(float pct = lowPct; pct < highPct; pct += 0.001){
+            ofPoint p = markersPosition[markerIdx].getPointAtPercent(pct);
+            markerSegment.addVertex(p);
+        }
+        segment.push_back(markerSegment);
+    }
+    return segment;
+}
+
+void Sequence::loadPatterns(vector< vector<ofPolyline> > patterns){
+    this->patterns = patterns;
+}
+
+// Create some dummy patterns from the long sequence
 void Sequence::createPatterns(int nPatterns){
     // Clear and initialize memory of polylines patterns
     patterns.clear();
-    for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
+    for(int patternIdx = 0; patternIdx < nPatterns; patternIdx++){
         vector<ofPolyline> newPattern;
-        for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
+        for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
             ofPolyline newPolyline;
             newPattern.push_back(newPolyline);
         }
         patterns.push_back(newPattern);
     }
 
-    // Clear and initialize memory of previous points polylines patterns
-    patternsPastPoints.clear();
-    for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
-        vector<ofPolyline> newPattern;
-        for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
-            ofPolyline newPolyline;
-            newPattern.push_back(newPolyline);
-        }
-        patternsPastPoints.push_back(newPattern);
-    }
-
     // Break sequence in n patterns
-    for(int patternIndex = 0; patternIndex < nPatterns; patternIndex++){
-        for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
-            int startIndex = markersPosition[markerIndex].getIndexAtPercent(patternIndex * (1.01/nPatterns));
-            int endIndex = markersPosition[markerIndex].getIndexAtPercent((patternIndex+1) * (1.01/nPatterns))+1;
-            if (endIndex == 1) endIndex = markersPosition[markerIndex].size();
-            for(int i = startIndex; i < endIndex; i++){
-                patterns[patternIndex][markerIndex].addVertex(markersPosition[markerIndex][i]);
+    for(int patternIdx = 0; patternIdx < nPatterns; patternIdx++){
+        for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
+            int startIdx = markersPosition[markerIdx].getIndexAtPercent(patternIdx * (1.01/nPatterns));
+            int endIdx = markersPosition[markerIdx].getIndexAtPercent((patternIdx+1) * (1.01/nPatterns))+1;
+            if (endIdx == 1) endIdx = markersPosition[markerIdx].size();
+            for(int i = startIdx; i < endIdx; i++){
+                patterns[patternIdx][markerIdx].addVertex(markersPosition[markerIdx][i]);
             }
         }
     }
@@ -357,12 +417,6 @@ void Sequence::startRecording(){
 }
 
 void Sequence::clearPlayback(){
-    // Clear and Initialize previous points polylines sequence
-    markersPastPoints.clear();
-    for(int i = 0; i < maxMarkers; i++){
-        ofPolyline newPolyline;
-        markersPastPoints.push_back(newPolyline);
-    }
     playhead = 0;
     elapsedTime = 0;
 }
@@ -380,10 +434,10 @@ void Sequence::updatePlayhead()
 
 size_t Sequence::calcCurrentFrameIndex()
 {
-    size_t frameIndex = floor(numFrames * playhead);
+    size_t frameIdx = floor(numFrames * playhead);
 
-    if(frameIndex >= numFrames) frameIndex = numFrames-1;
+    if(frameIdx >= numFrames) frameIdx = numFrames-1;
 
-    return frameIndex;
+    return frameIdx;
 }
 
