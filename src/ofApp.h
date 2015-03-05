@@ -97,6 +97,8 @@ class ofApp : public ofBaseApp{
         bool drawPatterns;
         bool drawSequence;
         bool drawMarkers;
+        bool drawSequenceSegments;
+        bool drawPatternsInSequence;
         //--------------------------------------------------------------
         vector<string> cues;
         int currentCueIndex;

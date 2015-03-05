@@ -347,31 +347,55 @@ void Sequence::drawSequenceTracking(float percent){
 }
 
 // Draw the segment of the sequence that belongs to the different cues
-void Sequence::drawCueSegments(const vector< pair<float, float> >& cueSegmentsPcts){
+void Sequence::drawSequenceSegments(){
     ofPushStyle();
-    for(int segmentIdx = 0; segmentIdx < cueSegmentsPcts.size(); segmentIdx++){
-        vector<ofPolyline> segment = getCueSegment(cueSegmentsPcts[segmentIdx]);
+    for(int segmentIdx = 0; segmentIdx < sequenceSegments.size(); segmentIdx++){
 
-        ofColor c = ofColor::fromHsb(0, 255, 255);
-        c.setHue(ofMap(segmentIdx, 0, cueSegmentsPcts.size()-1, 0, 255));
+//        ofColor c = ofColor::fromHsb(0, 255, 255);
+//        c.setHue(ofMap(segmentIdx, 0, sequenceSegments.size(), 0, 255));
+
+        ofColor c(255);
+        if(segmentIdx == 0) c.set(0, 0, 255);
+        else if(segmentIdx == 1) c.set(0, 255, 0);
+
+        ofSetLineWidth(3);
         ofSetColor(c);
-
         for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
-            segment[markerIdx].draw();
+            sequenceSegments[segmentIdx][markerIdx].draw();
         }
     }
     ofPopStyle();
 }
 
-vector<ofPolyline> Sequence::getCueSegment(const pair<float, float>& cueSegmentPct){
-    float lowPct = cueSegmentPct.first;
-    float highPct = cueSegmentPct.second;
+// Update the segments of the sequence that belong to the different cues
+void Sequence::updateSequenceSegments(const vector< pair<float, float> >& sequencePcts){
+    for(int segmentIdx = 0; segmentIdx < sequenceSegments.size(); segmentIdx++){
+        for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
+            sequenceSegments[segmentIdx][markerIdx].clear();
+        }
+        sequenceSegments[segmentIdx].clear();
+    }
+    sequenceSegments.clear();
+
+    for(int segmentIdx = 0; segmentIdx < sequencePcts.size(); segmentIdx++){
+        vector<ofPolyline> segment = getSequenceSegment(sequencePcts[segmentIdx]);
+        sequenceSegments.push_back(segment);
+    }
+}
+
+vector<ofPolyline> Sequence::getSequenceSegment(const pair<float, float>& sequenceSegmentPct){
+    float lowPct = sequenceSegmentPct.first/100.0;
+    float highPct = sequenceSegmentPct.second/100.0;
+    cout << lowPct << endl;
+    cout << highPct << endl;
+
     vector<ofPolyline> segment;
     for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
         ofPolyline markerSegment;
-        for(float pct = lowPct; pct < highPct; pct += 0.001){
+        for(float pct = lowPct; pct < highPct; pct += 0.01){
             ofPoint p = markersPosition[markerIdx].getPointAtPercent(pct);
             markerSegment.addVertex(p);
+            cout << pct << endl;
         }
         segment.push_back(markerSegment);
     }

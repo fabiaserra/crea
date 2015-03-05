@@ -126,6 +126,7 @@ void ofApp::setup(){
     sequence.setup(maxMarkers);
     sequence.load("sequences/simple5.xml");
     drawSequence = false;
+    drawSequenceSegments = false;
 
     // MARKERS
     markers.resize(maxMarkers);
@@ -171,6 +172,7 @@ void ofApp::setup(){
     pttrList = vmo::findPttr(seqVmo, minLen);
     sequence.loadPatterns(vmo::processPttr(seqVmo, pttrList));
     drawPatterns = false;
+    drawPatternsInSequence = false;
     cout << sequence.patterns.size() << endl;
 
 	currentBf = vmo::vmo::belief();
@@ -354,9 +356,9 @@ void ofApp::update(){
             else{
                 prevBf = currentBf;
                 currentBf = vmo::tracking(seqVmo, pttrList, prevBf, obs);
-                cout << "current index: " << currentBf.currentIdx << endl;
+//                cout << "current index: " << currentBf.currentIdx << endl;
                 currentPercent = ofMap(currentBf.currentIdx, 0, sequence.numFrames, 0.0, 1.0, true);
-                cout << currentPercent << endl;
+//                cout << currentPercent << endl;
                 if(cues.size() != 0) {
                     int cueSegment = currentCueIndex;
                     for(int i = 0; i < cueSliders.size(); i++){
@@ -481,12 +483,9 @@ void ofApp::draw(){
     }
 
     if(drawSequence) sequence.draw();
-
-    #ifdef KINECT_SEQUENCE
-//        if(isTracking) sequence.drawPatternsInSequence(gestureUpdate);
-    #endif // KINECT_SEQUENCE
-
+    if(drawPatternsInSequence) sequence.drawPatternsInSequence(gestureUpdate);
     if(isTracking) sequence.drawSequenceTracking(currentPercent);
+    if(drawSequenceSegments) sequence.drawSequenceSegments();
 
     ofPopMatrix();
 
@@ -652,6 +651,11 @@ void ofApp::setupGUI3(){
     sequenceNumFrames = gui3->addLabel("Number of frames: "+ofToString(sequence.numFrames), OFX_UI_FONT_SMALL);
 
     gui3->addSpacer();
+    gui3->addLabel("SEQUENCE SEGMENTATION");
+    gui3->addImageToggle("Show sequence segmentation", "icons/show.png", &drawSequenceSegments, dim, dim)->setColorBack(ofColor(150, 255));
+    gui3->addSpacer();
+
+    gui3->addSpacer();
 
     gui3->autoSizeToFitWidgets();
     gui3->setVisible(false);
@@ -676,6 +680,8 @@ void ofApp::setupGUI4(){
     gui4->addImageButton("Stop vmo", "icons/delete.png", false, dim, dim)->setColorBack(ofColor(150, 255));
     gui4->addImageToggle("Show gesture patterns", "icons/show.png", &drawPatterns, dim, dim)->setColorBack(ofColor(150, 255));
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui4->addImageToggle("Show patterns in sequence", "icons/show.png", &drawPatternsInSequence, dim, dim)->setColorBack(ofColor(150, 255));
+
 
     gui4->addSpacer();
 
@@ -1163,10 +1169,20 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
                 float high = ((float)i+1.0)/n*100;
                 ofxUIRangeSlider *slider;
                 slider = gui3->addRangeSlider(cueName, 0, 100, low, high);
+//                slider->setTriggerType(OFX_UI_TRIGGER_END);
                 pair<ofxUILabel *, ofxUIRangeSlider*> cue(label, slider);
                 cueSliders.push_back(cue);
             }
             gui3->autoSizeToFitWidgets();
+
+            vector< pair<float, float> > sequencePcts;
+            for (int i = 0; i < cueSliders.size(); i++){
+                pair<float, float> pcts;
+                pcts.first = cueSliders.at(i).second->getValueLow();
+                pcts.second = cueSliders.at(i).second->getValueHigh();
+                sequencePcts.push_back(pcts);
+            }
+            sequence.updateSequenceSegments(sequencePcts);
 
         }
         else currentCueIndex = -1;
@@ -1365,6 +1381,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             string cueName = "Sequence percent";
             ofxUIRangeSlider *slider;
             slider = gui3->addRangeSlider(cueName, 0, 100, 0, 100);
+//            slider->setTriggerType(OFX_UI_TRIGGER_END);
             pair<ofxUILabel *, ofxUIRangeSlider*> cue(label, slider);
             cueSliders.push_back(cue);
 
@@ -1545,6 +1562,17 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         if(lowThresh->getValue() > highThresh->getValue()){
             highThresh->setValue(lowThresh->getValue());
         }
+    }
+
+    if(e.getName() == "Sequence percent"){
+        vector< pair<float, float> > sequencePcts;
+        for (int i = 0; i < cueSliders.size(); i++){
+            pair<float, float> pcts;
+            pcts.first = cueSliders.at(i).second->getValueLow();
+            pcts.second = cueSliders.at(i).second->getValueHigh();
+            sequencePcts.push_back(pcts);
+        }
+        sequence.updateSequenceSegments(sequencePcts);
     }
 }
 
