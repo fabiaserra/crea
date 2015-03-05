@@ -5,12 +5,14 @@ Particle::Particle(){
     isTouched		= false;
     immortal        = false;
     bounces         = false;
+    steers          = false;
     sizeAge         = false;
     opacityAge      = false;
     colorAge        = false;
     flickersAge     = false;
     isEmpty         = false;
     drawLine        = false;
+    limitSpeed      = false;
     age             = 0;
     width           = ofGetWidth();
     height          = ofGetHeight();
@@ -37,7 +39,7 @@ void Particle::update(float dt){
         acc += frc;
         vel += acc;
         vel *= friction;
-        limitVelocity();
+        if(limitSpeed) limitVelocity();
         pos += vel*dt;
         acc.set(0, 0);
         frc.set(0, 0);
@@ -67,25 +69,24 @@ void Particle::update(float dt){
         // Bounce particle with the window margins
         if(bounces){
         	bool isBouncing = false;
-            float bounceMagnitude = 1.0;
 
             if(pos.x > width-radius){
                 pos.x = width-radius;
-                vel.x *= -1.0 * bounceMagnitude;
+                vel.x *= -1.0;
             }
             else if(pos.x < radius){
                 pos.x = radius;
-                vel.x *= -1.0 * bounceMagnitude;
+                vel.x *= -1.0;
             }
 
             if(pos.y > height-radius){
                 pos.y = height-radius;
-                vel.y *= -1.0 * bounceMagnitude;
+                vel.y *= -1.0;
                 isBouncing = true;
             }
             else if(pos.y < radius){
                 pos.y = radius;
-                vel.y *= -1.0 * bounceMagnitude;
+                vel.y *= -1.0;
                 isBouncing = true;
             }
 
@@ -93,6 +94,27 @@ void Particle::update(float dt){
 	            vel *= 0.9;
 //	            vel.y *= -0.5;
             }
+        }
+
+        else if(steers){
+            float margin = radius*10;
+            bool isInside = false;
+            ofPoint desired;
+
+            if(pos.x > width-margin){
+                vel.x -= ofMap(pos.x, width-margin, width, maxSpeed/1000.0, maxSpeed/10.0);
+            }
+            else if(pos.x < margin){
+                vel.x += ofMap(pos.x, 0, margin, maxSpeed/1000.0, maxSpeed/10.0);
+            }
+
+            if(pos.y > height-margin){
+                vel.y -= ofMap(pos.y, height-margin, height, maxSpeed/1000.0, maxSpeed/10.0);
+            }
+            else if(pos.y < margin){
+                vel.y += ofMap(pos.y, 0, margin, maxSpeed/1000.0, maxSpeed/10.0);
+            }
+
         }
     }
 }
@@ -144,7 +166,8 @@ void Particle::addNoise(float angle, float turbulence, float dt){
     // Perlin noise
 	float noise = ofNoise(pos.x * 0.005f,  pos.y * 0.005f, dt * 0.1f) * angle;
     ofPoint noiseVector(cos(noise), sin(noise));
-    frc += noiseVector * turbulence * age * 0.1;
+    if(!immortal) frc += noiseVector * turbulence * age * 0.1; // if immortal this doesn't affect, age == 0
+    else frc += noiseVector * turbulence * 0.1;
 }
 
 void Particle::addRepulsionForce(Particle &p, float radiusSqrd, float scale){
@@ -285,7 +308,7 @@ void Particle::xenoToOrigin(float spd){
     // this equation is the same as Zachs simplified equation
 }
 
-void Particle::addForFlocking(Particle &p){
+void Particle::addFlockingForces(Particle &p){
     ofPoint dir = pos - p.pos;
     float distSqrd = pos.squareDistance(p.pos);
 
@@ -333,12 +356,19 @@ void Particle::pullToCenter(){
 	}
 }
 
-void Particle::seek(ofPoint target){
-    float distSqrd = pos.squareDistance(target);
-    ofPoint dirToTarget = pos - target;
+void Particle::seek(ofPoint target, float radiusSqrd){
+    ofPoint dirToTarget = target - pos;
     dirToTarget.normalize();
-    float pullStrength = 300.0f;
-    frc -= dirToTarget * (1.0/distSqrd) * pullStrength;
+    float distSqrd = pos.squareDistance(target);
+    if(distSqrd < radiusSqrd){
+        float F = ofMap(distSqrd, 0, radiusSqrd, 0, 400);
+        dirToTarget *= F;
+    }
+    else{
+        dirToTarget *= 400;
+    }
+    ofPoint steer = dirToTarget - vel;
+    frc += steer;
 }
 
 void Particle::kill(){

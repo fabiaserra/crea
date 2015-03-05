@@ -8,7 +8,8 @@ void ofApp::setup(){
 
 //    ofSetFrameRate(30);
 
-    int maxMarkers = 2;
+    int maxMarkers = 1;
+
     // Using a live kinect?
     #ifdef KINECT_CONNECTED
         // OPEN KINECT
@@ -20,7 +21,7 @@ void ofApp::setup(){
         // Use xml sequence marker file
         #ifdef KINECT_SEQUENCE
             kinectSequence.setup(maxMarkers);
-            kinectSequence.load("sequences/sequence2.xml");
+            kinectSequence.load("sequences/simple5.xml");
         #endif // KINECT_SEQUENCE
 
         // Load png files from file
@@ -109,14 +110,13 @@ void ofApp::setup(){
 
     // BOIDS PARTICLES
     gridParticles = new ParticleSystem();
-    gridParticles->bounce = false;
     gridParticles->setup(BOIDS, MARKERS, kinect.width, kinect.height);
 
     // VECTOR OF PARTICLE SYSTEMS
     particleSystems.push_back(markerParticles);
     particleSystems.push_back(contourParticles);
     particleSystems.push_back(gridParticles);
-    currentParticleSystem = 2;
+    currentParticleSystem = 0;
 
     // DEPTH CONTOUR
     // smoothingSize = 0;
@@ -124,8 +124,7 @@ void ofApp::setup(){
 
     // SEQUENCE
     sequence.setup(maxMarkers);
-//    sequence.load("sequences/sequence1marker2.xml");
-    sequence.load("sequences/sequence2.xml");
+    sequence.load("sequences/simple5.xml");
     drawSequence = false;
 
     // MARKERS
@@ -143,7 +142,7 @@ void ofApp::setup(){
     }
 
     initStatus = true;
-    stopTracking = true;
+    isTracking = false;
     // 2. Processing
     // 2.1 Load file into VMO
 //    int minLen = 1; // Temporary setting
@@ -155,14 +154,14 @@ void ofApp::setup(){
 //	int minLen = 2; // sequence.xml
 //	float t = 12.3; // for sequence.xml
 
-	int minLen = 7; // sequence3.xml
- 	float t = 18.6; // for sequence2.xml
+//	int minLen = 7; // sequence3.xml
+// 	float t = 18.6; // for sequence2.xml
 //	float t = 16.8; // for sequence3.xml
 //
 //	int minLen = 7;
 //	float t = 4.5; // for sequence1marker1.xml
-//	int minLen = 10;
-//	float t = 5.7; // for sequence1marker2.xml
+	int minLen = 10;
+	float t = 5.7; // for sequence1marker2.xml
 //	int minLen = 10;
 //	float t = 6.0; // for sequence1marker3.xml
 
@@ -341,7 +340,7 @@ void ofApp::update(){
 
     #ifdef KINECT_SEQUENCE
 
-        if (!stopTracking){
+        if (isTracking){
             vector<float> obs; // Temporary code
             for(unsigned int i = 0; i < kinectSequence.maxMarkers; i++){
                 ofPoint currentPoint = kinectSequence.getCurrentPoint(i);
@@ -356,16 +355,15 @@ void ofApp::update(){
                 prevBf = currentBf;
                 currentBf = vmo::tracking(seqVmo, pttrList, prevBf, obs);
                 cout << "current index: " << currentBf.currentIdx << endl;
-
-                float currentPercent = ofMap(currentBf.currentIdx, 0, sequence.numFrames, 0, 100, true);
-                cout << "current percent: " << currentPercent << endl;
+                currentPercent = ofMap(currentBf.currentIdx, 0, sequence.numFrames, 0.0, 1.0, true);
+                cout << currentPercent << endl;
                 if(cues.size() != 0) {
                     int cueSegment = currentCueIndex;
                     for(int i = 0; i < cueSliders.size(); i++){
-                        float low = cueSliders.at(i).second->getValueLow();
-                        float high = cueSliders.at(i).second->getValueHigh();
-                        cout << "Low: " << low << endl;
-                        cout << "High: " << high << endl;
+                        float low = cueSliders.at(i).second->getValueLow()/100.0;
+                        float high = cueSliders.at(i).second->getValueHigh()/100.0;
+//                        cout << "Low: " << low << endl;
+//                        cout << "High: " << high << endl;
                         if (low <= currentPercent && currentPercent <= high){
                             cueSegment = i;
                             break;
@@ -383,19 +381,19 @@ void ofApp::update(){
                 }
             }
             gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
-            for (int i = 0; i < sequence.patterns.size(); i++) {
+//            for (int i = 0; i < sequence.patterns.size(); i++) {
 //                if(gestureUpdate.find(i) != gestureUpdate.end()) {
 //                    cout << "key: "<< i << endl;
 //                    cout << "percent:"<< gestureUpdate[i] << endl;
 //                }
-            }
+//            }
         }
 
     #else
 
         // Gesture Tracking with VMO here?
         if (tempMarkers.size()>1){
-            if (!stopTracking){
+            if (isTracking){
                 vector<float> obs; // Temporary code
                 for(unsigned int i = 0; i < sequence.maxMarkers; i++){
                     obs.push_back(tempMarkers[i].smoothPos.x);
@@ -410,13 +408,13 @@ void ofApp::update(){
                     currentBf = vmo::tracking(seqVmo, pttrList, prevBf, obs);
                     cout << "current index: " << currentBf.currentIdx << endl;
                     // We need the min/max of currentIdx
-                    float currentPercent = ofMap(currentBf.currentIdx, 0, sequence.numFrames, 0, 100, true);
+                    currentPercent = ofMap(currentBf.currentIdx, 0, sequence.numFrames, 0.0, 1.0, true);
                     cout << "current percent: " << currentPercent << endl;
                     if(cues.size() != 0) {
                         int cueSegment = currentCueIndex;
                         for(int i = 0; i < cueSliders.size(); i++){
-                            float low = cueSliders.at(currentCueIndex).second->getValueHigh();
-                            float high = cueSliders.at(currentCueIndex).second->getValueHigh();
+                            float low = cueSliders.at(currentCueIndex).second->getValueHigh()/100.0;
+                            float high = cueSliders.at(currentCueIndex).second->getValueHigh()/100.0;
                             if (low <= currentPercent && currentPercent <= high){
                                 cueSegment = i;
                                 break;
@@ -434,12 +432,12 @@ void ofApp::update(){
                     }
                 }
                 gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
-                for (int i = 0; i < sequence.patterns.size(); i++) {
+//                for (int i = 0; i < sequence.patterns.size(); i++) {
 //                    if(gestureUpdate.find(i) != gestureUpdate.end()) {
 //                        cout << "key: "<< i << endl;
 //                        cout << "percent:"<< gestureUpdate[i] << endl;
 //                    }
-                }
+//                }
             }
         }
 
@@ -455,8 +453,7 @@ void ofApp::draw(){
     ofScale(reScale, reScale);
     ofBackground(red, green, blue);
 //    depthOriginal.draw(0,0); // Pre-recorded depth image
-//    ofEnableBlendMode(OF_BLENDMODE_ALPHA);
-//    ofEnableBlendMode(OF_BLENDMODE_ADD);
+//    ofEnableBlendMode(OF_BLENDMODE_SCREEN);
 
     ofSetColor(255);
 
@@ -486,8 +483,10 @@ void ofApp::draw(){
     if(drawSequence) sequence.draw();
 
     #ifdef KINECT_SEQUENCE
-        sequence.drawPatternsInSequence(gestureUpdate);
+//        if(isTracking) sequence.drawPatternsInSequence(gestureUpdate);
     #endif // KINECT_SEQUENCE
+
+    if(isTracking) sequence.drawSequenceTracking(currentPercent);
 
     ofPopMatrix();
 
@@ -693,14 +692,15 @@ void ofApp::setupGUI5(){
 
     gui5->addSpacer();
     gui5->addLabel("Press '5' to hide panel", OFX_UI_FONT_SMALL);
+
+    gui5->addSpacer();
+    gui5->addFPS(OFX_UI_FONT_SMALL);
+
     gui5->addSpacer();
     gui5->addLabel("Press arrow keys to navigate", OFX_UI_FONT_SMALL);
     gui5->addLabel("through cues and space key", OFX_UI_FONT_SMALL);
     gui5->addLabel("to trigger next cue in the list.", OFX_UI_FONT_SMALL);
     gui5->addSpacer();
-
-    gui5->addSpacer();
-    gui5->addFPS(OFX_UI_FONT_SMALL);
 
     gui5->addSpacer();
     gui5->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN, OFX_UI_ALIGN_CENTER);
@@ -754,8 +754,8 @@ void ofApp::setupGUI6(){
     gui6->addSpacer();
     gui6->addFPS(OFX_UI_FONT_SMALL);
 
-    gui6->addSpacer();
-    gui6->addLabel("Physics");
+//    gui6->addSpacer();
+//    gui6->addLabel("Physics");
 
     gui6->addSpacer();
 
@@ -854,8 +854,9 @@ void ofApp::setupGUI8Marker(){
     gui8Marker->addLabel("Physics");
     gui8Marker->addSlider("Friction", 0, 100, &markerParticles->friction);
     gui8Marker->addSlider("Gravity", 0.0, 15.0, &markerParticles->gravity);
+    gui8Marker->addSlider("Turbulence", 0.0, 20.0, &markerParticles->turbulence);
     gui8Marker->addToggle("Bounces", &markerParticles->bounce);
-
+    gui8Marker->addToggle("Repulse", &markerParticles->repulse);
 
     gui8Marker->addSpacer();
 
@@ -927,7 +928,10 @@ void ofApp::setupGUI8Contour(){
     gui8Contour->addLabel("Physics");
     gui8Contour->addSlider("Friction", 0, 100, &contourParticles->friction);
     gui8Contour->addSlider("Gravity", 0.0, 15.0, &contourParticles->gravity);
+    gui8Contour->addSlider("Turbulence", 0.0, 20.0, &contourParticles->turbulence);
+
     gui8Contour->addToggle("Bounces", &contourParticles->bounce);
+    gui8Contour->addToggle("Repulse", &contourParticles->repulse);
 
     gui8Contour->addSpacer();
 
@@ -971,11 +975,7 @@ void ofApp::setupGUI8Grid(){
     gui8Grid->addSlider("Radius", 0.1, 25.0, &gridParticles->radius);
     gui8Grid->addIntSlider("Resolution", 1, 20, &gridParticles->gridRes)->setStickyValue(1.0);
 
-    gui8Grid->addSpacer();
-    gui8Grid->addLabel("Physics");
-    gui8Grid->addSlider("Friction", 0, 100, &gridParticles->friction);
-    gui8Grid->addSlider("Gravity", 0.0, 15.0, &gridParticles->gravity);
-    gui8Grid->addToggle("Bounces", &gridParticles->bounce);
+    gui8Grid->addLabel("Flocking");
 
     gui8Grid->addSlider("Flocking Radius", 10.0, 100.0, &gridParticles->flockingRadius);
     lowThresh = gui8Grid->addSlider("Lower Threshold", 0.025, 1.0, &gridParticles->lowThresh);
@@ -983,9 +983,20 @@ void ofApp::setupGUI8Grid(){
     highThresh = gui8Grid->addSlider("Higher Threshold", 0.025, 1.0, &gridParticles->highThresh);
     highThresh->setLabelPrecision(3);
 
+    gui8Grid->addSlider("Max speed", 1.0, 100.0, &gridParticles->maxSpeed);
+
     gui8Grid->addSlider("Separation Strength", 0.001, 0.1, &gridParticles->separationStrength)->setLabelPrecision(3);
     gui8Grid->addSlider("Attraction Strength", 0.001, 0.1, &gridParticles->attractionStrength)->setLabelPrecision(3);
     gui8Grid->addSlider("Alignment Strength", 0.001, 0.1, &gridParticles->alignmentStrength)->setLabelPrecision(3);
+
+    gui8Grid->addSpacer();
+    gui8Grid->addLabel("Physics");
+    gui8Grid->addSlider("Friction", 0, 100, &gridParticles->friction);
+    gui8Grid->addSlider("Gravity", 0.0, 15.0, &gridParticles->gravity);
+    gui8Grid->addSlider("Turbulence", 0.0, 20.0, &gridParticles->turbulence);
+    gui8Grid->addToggle("Bounces", &gridParticles->bounce);
+
+    gui8Grid->addToggle("Repulse", &gridParticles->repulse);
 
     gui8Grid->addSpacer();
 
@@ -1312,14 +1323,14 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if(button->getValue() == true){
             initStatus = true;
-            stopTracking = false;
+            isTracking = true;
         }
     }
 
     if(e.getName() == "Stop vmo"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if(button->getValue() == true){
-            stopTracking = true;
+            isTracking = false;
         }
     }
 
@@ -1477,7 +1488,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             string cueFileName = ofFilePath::getBaseName(cues[currentCueIndex]);
             cueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
             cueName->setTextString(cueFileName);
-            button->setValue(false);
+//            button->setValue(false);
         }
     }
 
@@ -1533,7 +1544,6 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     if(e.getName() == "Lower Threshold" || e.getName() == "Higher Threshold"){
         if(lowThresh->getValue() > highThresh->getValue()){
             highThresh->setValue(lowThresh->getValue());
-//            lowThresh->setValue(highThresh->getValue());
         }
     }
 }

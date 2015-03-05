@@ -74,11 +74,14 @@ class ParticleSystem
 		bool flickersAge;       // Particles flicker opacity when about to die?
 		bool colorAge;          // Particles change color with age?
 		bool bounce;            // Particles bounce with the window margins?
+		bool steer;             // Particles steer with the window margins?
 		bool isEmpty;           // Particles are empty inside, only draw the contour?
 		bool drawLine;          // Particles are circles or we draw a line from prevpos to pos?
+		bool repulse;           // Repulse particles between each other?;
 		//--------------------------------------------------------------
 		float friction;        	// Multiply this value by the velocity every frame
         float gravity;          // Makes particles fall down in a natural way
+        float turbulence;       // Perlin noise
 
 	protected:
 		// helper functions

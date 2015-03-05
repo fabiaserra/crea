@@ -15,8 +15,10 @@ class Sequence{
         void load(const string path);
         void save(const string path);
         void draw();
-        void drawPatterns(map<int, float> currentPatterns);
-        void drawPatternsInSequence(map<int, float> currentPatterns);
+        void drawPatterns(map<int, float>& currentPatterns);
+        void drawPatternsInSequence(map<int, float>& currentPatterns);
+        void drawSequenceTracking(float percent);
+        void drawCueSegments(const vector< pair<float, float> >& cueSegmentsPcts);
 
         void loadPatterns(vector< vector<ofPolyline> > patterns);
         void createPatterns(int nPatterns);
@@ -24,7 +26,7 @@ class Sequence{
         void startRecording();
         void clearPlayback();
 
-        ofPoint getCurrentPoint(int markerIndex);
+        ofPoint getCurrentPoint(int markerIdx);
 
         //--------------------------------------------------------------
         ofxXmlSettings xml;
@@ -34,16 +36,8 @@ class Sequence{
         int maxPatternsWindow;
         //--------------------------------------------------------------
         vector<ofPolyline> markersPosition;                 // Markers positions through all the sequence
-        vector<ofPolyline> markersPastPoints;               // Percentage completion fragment of the sequence
-
-//        map<int, vector<ofPolyline> > markersPosition;      // Markers positions through all the sequence with label
-        // Other ideas
-        // vector< vector<ofPoint> > markersPosition;
-        // vector< vector<Marker> > markersPosition;
-        // vector< Frame > frames;
         //--------------------------------------------------------------
         vector< vector<ofPolyline> > patterns;              // identified patterns from the sequence
-        vector< vector<ofPolyline> > patternsPastPoints;    // Percentage completion fragments of the patterns
         //--------------------------------------------------------------
         string filename;
         float duration;
@@ -55,7 +49,8 @@ class Sequence{
         ofTrueTypeFont  verdana;
 
     protected:
-        void drawPattern(const int patternPosition, const int patternIndex, float percent, const bool highlight);
+        void drawPattern(const int patternPosition, const int patternIdx, float percent, const bool highlight);
+        vector<ofPolyline> getCueSegment(const pair<float, float>& cueSegmentPct);
         void updatePlayhead();
         size_t calcCurrentFrameIndex();
 };

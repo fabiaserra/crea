@@ -20,8 +20,8 @@ class Particle
         void addRepulsionForce(Particle &p, float scale);
         void xenoToOrigin(float spd);
 
-        void addForFlocking(Particle &p);
-        void seek(ofPoint target);
+        void addFlockingForces(Particle &p);
+        void seek(ofPoint target, float radiusSqrd);
         void pullToCenter();
         void limitVelocity();
 
@@ -52,12 +52,14 @@ class Particle
         bool isAlive;           // Is the particle alive?
         bool isTouched;         // Particle has been activated through some event
         bool bounces;           // Particle bounces with the window margins?
+        bool steers;            // Particle steers direction before touching the walls?
         bool sizeAge;           // Particle changes size with age?
         bool opacityAge;        // Particle changes opacity with age?
         bool flickersAge;       // Particle flickers opacity when about to die?
         bool colorAge;          // Particle changes color with age?
-        bool isEmpty;           // Draw only contour of the particle
-        bool drawLine;          // Draw particle as a line from prevPos to pos
+        bool isEmpty;           // Draw only contour of the particle?
+        bool drawLine;          // Draw particle as a line from prevPos to pos?
+        bool limitSpeed;        // Limit the speed of the particle?
 // --------------------------------------------------------------
         float flockingRadiusSqrd;
         float lowThresh;        // separate
