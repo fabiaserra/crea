@@ -38,9 +38,10 @@ class ofApp : public ofBaseApp{
         void setupGUI5();
         void setupGUI6();
         void setupGUI7();
-        void setupGUI8Marker();
-        void setupGUI8Contour();
+        void setupGUI8Emitter();
+//        void setupGUI8Contour();
         void setupGUI8Grid();
+        void setupGUI8Boids();
 
         void saveGUISettings(const string path, const bool saveCues);
         void loadGUISettings(const string path, const bool interpolate, const bool loadCues);
@@ -79,15 +80,19 @@ class ofApp : public ofBaseApp{
         ofImage grayThreshNear;
         ofImage grayThreshFar;
         //--------------------------------------------------------------
+        ofFbo fbo;
+        float history;
+        //--------------------------------------------------------------
         ofxCv::ContourFinder contourFinder;
         ofxCv::ContourFinder irMarkerFinder;
         ofxCv::RectTrackerFollower<irMarker> tracker;
         //--------------------------------------------------------------
         vector<irMarker> markers;
         //--------------------------------------------------------------
+        ParticleSystem *emitterParticles;
         ParticleSystem *gridParticles;
-        ParticleSystem *markerParticles;
-        ParticleSystem *contourParticles;
+        ParticleSystem *boidsParticles;
+//        ParticleSystem *contourParticles;
         vector<ParticleSystem *> particleSystems;
         int currentParticleSystem;
         //--------------------------------------------------------------
@@ -112,9 +117,10 @@ class ofApp : public ofBaseApp{
         ofxUISuperCanvas *gui5;
         ofxUISuperCanvas *gui6;
         ofxUISuperCanvas *gui7;
-        ofxUISuperCanvas *gui8Marker;
-        ofxUISuperCanvas *gui8Contour;
+        ofxUISuperCanvas *gui8Emitter;
+//        ofxUISuperCanvas *gui8Contour;
         ofxUISuperCanvas *gui8Grid;
+        ofxUISuperCanvas *gui8Boids;
         vector<ofxUISuperCanvas *> particleGuis;
         vector<ofxUISuperCanvas *> guis;
         //--------------------------------------------------------------

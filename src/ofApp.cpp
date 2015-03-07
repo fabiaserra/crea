@@ -7,9 +7,9 @@ using namespace cv;
 void ofApp::setup(){
 
 //    ofSetFrameRate(30);
-
+	// Number of IR markers
     maxMarkers = 1;
-
+	
     // Using a live kinect?
     #ifdef KINECT_CONNECTED
         // OPEN KINECT
@@ -58,7 +58,10 @@ void ofApp::setup(){
 
     reScale = (float)ofGetHeight() / (float)kinect.height;
     time0 = ofGetElapsedTimef();
-
+    
+    // BACKGROUND COLOR
+    red = 0; green = 0; blue = 0;
+    
     // ALLOCATE IMAGES
     depthImage.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
     depthOriginal.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
@@ -66,9 +69,15 @@ void ofApp::setup(){
     grayThreshFar.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
     irImage.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
     irOriginal.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
-
-    // BACKGROUND COLOR
-    red = 0; green = 0; blue = 0;
+    
+    // ALLOCATE FBO AND FILL WITH BG COLOR
+    fbo.allocate(kinect.width, kinect.height, GL_RGB32F_ARB);
+    fbo.begin();
+//    ofClear(red, green, blue);
+    ofClear(255, 255, 255);
+    fbo.end();
+    
+    history = 0.8;
 
     // KINECT PARAMETERS
     flipKinect      = false;
@@ -95,27 +104,23 @@ void ofApp::setup(){
     tracker.setMaximumDistance(trackerMaxDistance); // an object can move up to 'trackerMaxDistance' pixels per frame
 
     // MARKER PARTICLES
-    markerParticles = new ParticleSystem();
-    markerParticles->setup(EMITTER, MARKERS, kinect.width, kinect.height);
-
-    // CONTOUR PARTICLES
-    contourParticles = new ParticleSystem();
-    contourParticles->setup(EMITTER, CONTOUR, kinect.width, kinect.height);
+    emitterParticles = new ParticleSystem();
+    emitterParticles->setup(EMITTER, MARKERS, kinect.width, kinect.height);
 
     // GRID PARTICLES
-//    gridParticles = new ParticleSystem();
-//    gridParticles->radius = 2;
-//    gridParticles->bounce = true;
-//    gridParticles->setup(GRID, MARKERS, kinect.width, kinect.height);
+    gridParticles = new ParticleSystem();
+    gridParticles->radius = 2;
+    gridParticles->bounce = true;
+    gridParticles->setup(GRID, MARKERS, kinect.width, kinect.height);
 
     // BOIDS PARTICLES
-    gridParticles = new ParticleSystem();
-    gridParticles->setup(BOIDS, MARKERS, kinect.width, kinect.height);
+    boidsParticles = new ParticleSystem();
+    boidsParticles->setup(BOIDS, MARKERS, kinect.width, kinect.height);
 
     // VECTOR OF PARTICLE SYSTEMS
-    particleSystems.push_back(markerParticles);
-    particleSystems.push_back(contourParticles);
+    particleSystems.push_back(emitterParticles);
     particleSystems.push_back(gridParticles);
+    particleSystems.push_back(boidsParticles);
     currentParticleSystem = 0;
 
     // DEPTH CONTOUR
@@ -128,7 +133,7 @@ void ofApp::setup(){
     drawSequence = false;
 
     // MARKERS
-    markers.resize(maxMarkers);
+//    markers.resize(maxMarkers);
     drawMarkers = false;
 
     // VMO SETUP
@@ -215,9 +220,9 @@ void ofApp::setup(){
     setupGUI5();
     setupGUI6();
     setupGUI7();
-    setupGUI8Marker();
-    setupGUI8Contour();
+    setupGUI8Emitter();
     setupGUI8Grid();
+    setupGUI8Boids();
 //    setupgui8(MARKER_PARTICLES);
 
     interpolatingWidgets = false;
@@ -334,14 +339,14 @@ void ofApp::update(){
     // Update contour
     contour.update(contourFinder);
 
+    // Update emitter particles
+    emitterParticles->update(dt, tempMarkers, contour);
+    
     // Update grid particles
     gridParticles->update(dt, tempMarkers, contour);
 
-    // Update markers particles
-    markerParticles->update(dt, tempMarkers, contour);
-
-    // Update contour particles
-    contourParticles->update(dt, tempMarkers, contour);
+    // Update boids particles
+    boidsParticles->update(dt, tempMarkers, contour);
 
     #ifdef KINECT_SEQUENCE
 
@@ -477,13 +482,31 @@ void ofApp::draw(){
     #ifdef KINECT_SEQUENCE
         kinectSequence.draw();
     #endif // KINECT_SEQUENCE
-
+    
+    fbo.begin();
+    
+    // Draw semi-transparent white rectangle to slightly clear buffer (depends on the history value)
+    ofEnableAlphaBlending(); // Enable transparency
+    
+    float alpha = (1-history) * 255;
+    ofSetColor(red, green, blue, alpha);
+    ofFill();
+    ofRect(0, 0, kinect.width, kinect.height);
+    
+    ofDisableAlphaBlending(); // Disable transparency
+    
     // Graphics
+    ofSetColor(255);
     contour.draw();
     gridParticles->draw();
-    markerParticles->draw();
-    contourParticles->draw();
-
+    emitterParticles->draw();
+    boidsParticles->draw();
+    
+    fbo.end();
+    
+    // Draw buffer (graphics) on the screen
+    fbo.draw(0, 0);
+    
     if(drawMarkers){
         irMarkerFinder.draw();
         vector<irMarker>& tempMarkers = tracker.getFollowers();
@@ -807,152 +830,93 @@ void ofApp::setupGUI7(){
 }
 
 //--------------------------------------------------------------
-void ofApp::setupGUI8Marker(){
-    gui8Marker = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
-    gui8Marker->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
+void ofApp::setupGUI8Emitter(){
+    gui8Emitter = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
+    gui8Emitter->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
-    gui8Marker->addSpacer();
-    gui8Marker->addLabel("Press '8' to hide panel", OFX_UI_FONT_SMALL);
+    gui8Emitter->addSpacer();
+    gui8Emitter->addLabel("Press '8' to hide panel", OFX_UI_FONT_SMALL);
 
-    gui8Marker->addSpacer();
-    gui8Marker->addFPS(OFX_UI_FONT_SMALL);
+    gui8Emitter->addSpacer();
+    gui8Emitter->addFPS(OFX_UI_FONT_SMALL);
 
-    gui8Marker->addSpacer();
-    gui8Marker->addImageToggle("Particles Active", "icons/show.png", &markerParticles->isActive, dim, dim);
-    gui8Marker->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8Emitter->addSpacer();
+    gui8Emitter->addImageToggle("Particles Active", "icons/show.png", &emitterParticles->isActive, dim, dim);
+    gui8Emitter->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
 
     ofxUIImageButton *previous;
-    previous = gui8Marker->addImageButton("Previous Particle System", "icons/previous.png", false, dim, dim);
+    previous = gui8Emitter->addImageButton("Previous Particle System", "icons/previous.png", false, dim, dim);
     previous->setColorBack(ofColor(150, 255));
 
     ofxUIImageButton *next;
-    next = gui8Marker->addImageButton("Next Particle System", "icons/play.png", false, dim, dim);
+    next = gui8Emitter->addImageButton("Next Particle System", "icons/play.png", false, dim, dim);
     next->setColorBack(ofColor(150, 255));
 
-    gui8Marker->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8Emitter->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    
+    gui8Emitter->addSpacer();
+    gui8Emitter->addToggle("Marker", &emitterParticles->markersInput);
+    gui8Emitter->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8Emitter->setWidgetSpacing(15);
+    gui8Emitter->addToggle("Contour", &emitterParticles->contourInput);
+    gui8Emitter->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8Emitter->setWidgetSpacing(3);
+    gui8Emitter->addSpacer();
+    
+    gui8Emitter->addLabel("EMITTER", OFX_UI_FONT_LARGE);
+    
+    gui8Emitter->addSpacer();
+    gui8Emitter->addLabel("Emitter");
+    gui8Emitter->addSlider("Particles/sec", 0.0, 60.0, &emitterParticles->bornRate);
+    gui8Emitter->addSlider("Velocity", 0.0, 100.0, &emitterParticles->velocity);
+    gui8Emitter->addSlider("Velocity Random[%]", 0.0, 100.0, &emitterParticles->velocityRnd);
+    gui8Emitter->addSlider("Velocity from Motion[%]", 0.0, 100.0, &emitterParticles->velocityMotion);
+    gui8Emitter->addSlider("Emitter size", 0.0, 60.0, &emitterParticles->emitterSize);
 
-    gui8Marker->addLabel("MARKER", OFX_UI_FONT_LARGE);
-    gui8Marker->addSpacer();
-    gui8Marker->addLabel("Emitter");
-    gui8Marker->addSlider("Particles/sec", 0.0, 20.0, &markerParticles->bornRate);
+    gui8Emitter->addSpacer();
+    gui8Emitter->addLabel("Particle");
+    gui8Emitter->addToggle("Immortal", &emitterParticles->immortal);
+    gui8Emitter->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8Emitter->setWidgetSpacing(10);
+    gui8Emitter->addToggle("Empty", &emitterParticles->isEmpty);
+    gui8Emitter->addToggle("Draw Line", &emitterParticles->drawLine);
+    gui8Emitter->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8Emitter->setWidgetSpacing(3);
+    gui8Emitter->addSlider("Lifetime", 0.0, 20.0, &emitterParticles->lifetime);
+    gui8Emitter->addSlider("Life Random[%]", 0.0, 100.0, &emitterParticles->lifetimeRnd);
+    gui8Emitter->addSlider("Radius", 0.1, 25.0, &emitterParticles->radius);
+    gui8Emitter->addSlider("Radius Random[%]", 0.0, 100.0, &emitterParticles->radiusRnd);
 
-    gui8Marker->addSlider("Velocity", 0.0, 100.0, &markerParticles->velocity);
-    gui8Marker->addSlider("Velocity Random[%]", 0.0, 100.0, &markerParticles->velocityRnd);
-    gui8Marker->addSlider("Velocity from Motion[%]", 0.0, 100.0, &markerParticles->velocityMotion);
+    gui8Emitter->addSpacer();
+    gui8Emitter->addLabel("Time behaviour");
+    gui8Emitter->addToggle("Size", &emitterParticles->sizeAge);
+    gui8Emitter->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8Emitter->setWidgetSpacing(10);
+    gui8Emitter->addToggle("Opacity", &emitterParticles->opacityAge);
+    gui8Emitter->addToggle("Flickers", &emitterParticles->flickersAge);
+    gui8Emitter->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8Emitter->setWidgetSpacing(3);
+    gui8Emitter->addToggle("Color", &emitterParticles->colorAge);
 
-    gui8Marker->addSlider("Emitter size", 0.0, 60.0, &markerParticles->emitterSize);
+    gui8Emitter->addSpacer();
+    gui8Emitter->addLabel("Physics");
+    gui8Emitter->addSlider("Friction", 0, 100, &emitterParticles->friction);
+    gui8Emitter->addSlider("Gravity", 0.0, 15.0, &emitterParticles->gravity);
+    gui8Emitter->addSlider("Turbulence", 0.0, 20.0, &emitterParticles->turbulence);
+    gui8Emitter->addToggle("Bounces", &emitterParticles->bounce);
+    gui8Emitter->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8Emitter->setWidgetSpacing(10);
+    gui8Emitter->addToggle("Repulse", &emitterParticles->repulse);
+    gui8Emitter->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8Emitter->setWidgetSpacing(3);
 
-    gui8Marker->addSpacer();
-    gui8Marker->addLabel("Particle");
-    gui8Marker->addToggle("Immortal", &markerParticles->immortal);
-    gui8Marker->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui8Marker->addToggle("Empty", &markerParticles->isEmpty);
-    gui8Marker->addToggle("Draw Line", &markerParticles->drawLine);
-    gui8Marker->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui8Marker->addSlider("Lifetime", 0.0, 20.0, &markerParticles->lifetime);
-    gui8Marker->addSlider("Life Random[%]", 0.0, 100.0, &markerParticles->lifetimeRnd);
-    gui8Marker->addSlider("Radius", 0.1, 25.0, &markerParticles->radius);
-    gui8Marker->addSlider("Radius Random[%]", 0.0, 100.0, &markerParticles->radiusRnd);
+    gui8Emitter->addSpacer();
 
-    gui8Marker->addSpacer();
-    gui8Marker->addLabel("Time behaviour");
-    gui8Marker->addToggle("Size", &markerParticles->sizeAge);
-    gui8Marker->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui8Marker->addToggle("Opacity", &markerParticles->opacityAge);
-    gui8Marker->addToggle("Flickers", &markerParticles->flickersAge);
-    gui8Marker->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui8Marker->addToggle("Color", &markerParticles->colorAge);
-
-    gui8Marker->addSpacer();
-    gui8Marker->addLabel("Physics");
-    gui8Marker->addSlider("Friction", 0, 100, &markerParticles->friction);
-    gui8Marker->addSlider("Gravity", 0.0, 15.0, &markerParticles->gravity);
-    gui8Marker->addSlider("Turbulence", 0.0, 20.0, &markerParticles->turbulence);
-    gui8Marker->addToggle("Bounces", &markerParticles->bounce);
-    gui8Marker->addToggle("Repulse", &markerParticles->repulse);
-
-    gui8Marker->addSpacer();
-
-    gui8Marker->autoSizeToFitWidgets();
-    gui8Marker->setVisible(false);
-    ofAddListener(gui8Marker->newGUIEvent, this, &ofApp::guiEvent);
-    guis.push_back(gui8Marker);
-    particleGuis.push_back(gui8Marker);
-}
-
-//--------------------------------------------------------------
-void ofApp::setupGUI8Contour(){
-    gui8Contour = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
-    gui8Contour->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
-
-    gui8Contour->addSpacer();
-    gui8Contour->addLabel("Press '8' to hide panel", OFX_UI_FONT_SMALL);
-
-    gui8Contour->addSpacer();
-    gui8Contour->addFPS(OFX_UI_FONT_SMALL);
-
-    gui8Contour->addSpacer();
-    gui8Contour->addImageToggle("Particles Active", "icons/show.png", &contourParticles->isActive, dim, dim);
-    gui8Contour->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-
-    ofxUIImageButton *previous;
-    previous = gui8Contour->addImageButton("Previous Particle System", "icons/previous.png", false, dim, dim);
-    previous->setColorBack(ofColor(150, 255));
-
-    ofxUIImageButton *next;
-    next = gui8Contour->addImageButton("Next Particle System", "icons/play.png", false, dim, dim);
-    next->setColorBack(ofColor(150, 255));
-
-    gui8Contour->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-
-    gui8Contour->addLabel("CONTOUR", OFX_UI_FONT_LARGE);
-    gui8Contour->addSpacer();
-    gui8Contour->addLabel("Emitter");
-    gui8Contour->addSlider("Particles/sec", 0.0, 20.0, &contourParticles->bornRate);
-
-    gui8Contour->addSlider("Velocity", 0.0, 100.0, &contourParticles->velocity);
-    gui8Contour->addSlider("Velocity Random[%]", 0.0, 100.0, &contourParticles->velocityRnd);
-    gui8Contour->addSlider("Velocity from Motion[%]", 0.0, 100.0, &contourParticles->velocityMotion);
-
-    gui8Contour->addSlider("Emitter size", 0.0, 60.0, &contourParticles->emitterSize);
-
-    gui8Contour->addSpacer();
-    gui8Contour->addLabel("Particle");
-    gui8Contour->addToggle("Immortal", &contourParticles->immortal);
-    gui8Contour->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui8Contour->addToggle("Empty", &contourParticles->isEmpty);
-    gui8Contour->addToggle("Draw Line", &contourParticles->drawLine);
-    gui8Contour->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui8Contour->addSlider("Lifetime", 0.0, 20.0, &contourParticles->lifetime);
-    gui8Contour->addSlider("Life Random[%]", 0.0, 100.0, &contourParticles->lifetimeRnd);
-    gui8Contour->addSlider("Radius", 0.1, 25.0, &contourParticles->radius);
-    gui8Contour->addSlider("Radius Random[%]", 0.0, 100.0, &contourParticles->radiusRnd);
-
-    gui8Contour->addSpacer();
-    gui8Contour->addLabel("Time behaviour");
-    gui8Contour->addToggle("Size", &contourParticles->sizeAge);
-    gui8Contour->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui8Contour->addToggle("Opacity", &contourParticles->opacityAge);
-    gui8Contour->addToggle("Flickers", &contourParticles->flickersAge);
-    gui8Contour->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui8Contour->addToggle("Color", &contourParticles->colorAge);
-
-    gui8Contour->addSpacer();
-    gui8Contour->addLabel("Physics");
-    gui8Contour->addSlider("Friction", 0, 100, &contourParticles->friction);
-    gui8Contour->addSlider("Gravity", 0.0, 15.0, &contourParticles->gravity);
-    gui8Contour->addSlider("Turbulence", 0.0, 20.0, &contourParticles->turbulence);
-
-    gui8Contour->addToggle("Bounces", &contourParticles->bounce);
-    gui8Contour->addToggle("Repulse", &contourParticles->repulse);
-
-    gui8Contour->addSpacer();
-
-    gui8Contour->autoSizeToFitWidgets();
-    gui8Contour->setVisible(false);
-    ofAddListener(gui8Contour->newGUIEvent, this, &ofApp::guiEvent);
-    guis.push_back(gui8Contour);
-    particleGuis.push_back(gui8Contour);
+    gui8Emitter->autoSizeToFitWidgets();
+    gui8Emitter->setVisible(false);
+    ofAddListener(gui8Emitter->newGUIEvent, this, &ofApp::guiEvent);
+    guis.push_back(gui8Emitter);
+    particleGuis.push_back(gui8Emitter);
 }
 
 //--------------------------------------------------------------
@@ -981,6 +945,15 @@ void ofApp::setupGUI8Grid(){
     next->setColorBack(ofColor(150, 255));
 
     gui8Grid->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    
+    gui8Grid->addSpacer();
+    gui8Grid->addToggle("Marker", &gridParticles->markersInput);
+    gui8Grid->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8Grid->setWidgetSpacing(15);
+    gui8Grid->addToggle("Contour", &gridParticles->contourInput);
+    gui8Grid->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8Grid->setWidgetSpacing(3);
+    gui8Grid->addSpacer();
 
     gui8Grid->addLabel("GRID", OFX_UI_FONT_LARGE);
     gui8Grid->addSpacer();
@@ -988,28 +961,17 @@ void ofApp::setupGUI8Grid(){
     gui8Grid->addSlider("Radius", 0.1, 25.0, &gridParticles->radius);
     gui8Grid->addIntSlider("Resolution", 1, 20, &gridParticles->gridRes)->setStickyValue(1.0);
 
-    gui8Grid->addLabel("Flocking");
-
-    gui8Grid->addSlider("Flocking Radius", 10.0, 100.0, &gridParticles->flockingRadius);
-    lowThresh = gui8Grid->addSlider("Lower Threshold", 0.025, 1.0, &gridParticles->lowThresh);
-    lowThresh->setLabelPrecision(3);
-    highThresh = gui8Grid->addSlider("Higher Threshold", 0.025, 1.0, &gridParticles->highThresh);
-    highThresh->setLabelPrecision(3);
-
-    gui8Grid->addSlider("Max speed", 1.0, 100.0, &gridParticles->maxSpeed);
-
-    gui8Grid->addSlider("Separation Strength", 0.001, 0.1, &gridParticles->separationStrength)->setLabelPrecision(3);
-    gui8Grid->addSlider("Attraction Strength", 0.001, 0.1, &gridParticles->attractionStrength)->setLabelPrecision(3);
-    gui8Grid->addSlider("Alignment Strength", 0.001, 0.1, &gridParticles->alignmentStrength)->setLabelPrecision(3);
-
     gui8Grid->addSpacer();
     gui8Grid->addLabel("Physics");
     gui8Grid->addSlider("Friction", 0, 100, &gridParticles->friction);
     gui8Grid->addSlider("Gravity", 0.0, 15.0, &gridParticles->gravity);
     gui8Grid->addSlider("Turbulence", 0.0, 20.0, &gridParticles->turbulence);
     gui8Grid->addToggle("Bounces", &gridParticles->bounce);
-
+    gui8Grid->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8Grid->setWidgetSpacing(10);
     gui8Grid->addToggle("Repulse", &gridParticles->repulse);
+    gui8Grid->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8Grid->setWidgetSpacing(3);
 
     gui8Grid->addSpacer();
 
@@ -1018,6 +980,78 @@ void ofApp::setupGUI8Grid(){
     ofAddListener(gui8Grid->newGUIEvent, this, &ofApp::guiEvent);
     guis.push_back(gui8Grid);
     particleGuis.push_back(gui8Grid);
+}
+
+//--------------------------------------------------------------
+void ofApp::setupGUI8Boids(){
+    gui8Boids = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
+    gui8Boids->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
+    
+    gui8Boids->addSpacer();
+    gui8Boids->addLabel("Press '8' to hide panel", OFX_UI_FONT_SMALL);
+    
+    gui8Boids->addSpacer();
+    gui8Boids->addFPS(OFX_UI_FONT_SMALL);
+    
+    gui8Boids->addSpacer();
+    gui8Boids->addImageToggle("Particles Active", "icons/show.png", &boidsParticles->isActive, dim, dim);
+    gui8Boids->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    
+    ofxUIImageButton *previous;
+    previous = gui8Boids->addImageButton("Previous Particle System", "icons/previous.png", false, dim, dim);
+    previous->setColorBack(ofColor(150, 255));
+    
+    ofxUIImageButton *next;
+    next = gui8Boids->addImageButton("Next Particle System", "icons/play.png", false, dim, dim);
+    next->setColorBack(ofColor(150, 255));
+    
+    gui8Boids->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8Boids->addSpacer();
+    gui8Boids->addToggle("Marker", &boidsParticles->markersInput);
+    gui8Boids->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8Boids->setWidgetSpacing(15);
+    gui8Boids->addToggle("Contour", &boidsParticles->contourInput);
+    gui8Boids->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8Boids->setWidgetSpacing(3);
+    gui8Boids->addSpacer();
+    
+    gui8Boids->addSpacer();
+    gui8Boids->addLabel("BOIDS", OFX_UI_FONT_LARGE);
+    gui8Boids->addSpacer();
+    
+    gui8Boids->addSlider("Particles radius", 0.1, 25.0, &boidsParticles->radius);
+    
+    gui8Boids->addSlider("Flocking Radius", 10.0, 100.0, &boidsParticles->flockingRadius);
+    lowThresh = gui8Boids->addSlider("Lower Threshold", 0.025, 1.0, &boidsParticles->lowThresh);
+    lowThresh->setLabelPrecision(3);
+    highThresh = gui8Boids->addSlider("Higher Threshold", 0.025, 1.0, &boidsParticles->highThresh);
+    highThresh->setLabelPrecision(3);
+    
+    gui8Boids->addSlider("Max speed", 1.0, 100.0, &boidsParticles->maxSpeed);
+    
+    gui8Boids->addSlider("Separation Strength", 0.001, 0.1, &boidsParticles->separationStrength)->setLabelPrecision(3);
+    gui8Boids->addSlider("Attraction Strength", 0.001, 0.1, &boidsParticles->attractionStrength)->setLabelPrecision(3);
+    gui8Boids->addSlider("Alignment Strength", 0.001, 0.1, &boidsParticles->alignmentStrength)->setLabelPrecision(3);
+    
+    gui8Boids->addSpacer();
+    gui8Boids->addLabel("Physics");
+    gui8Boids->addSlider("Friction", 0, 100, &boidsParticles->friction);
+    gui8Boids->addSlider("Gravity", 0.0, 15.0, &boidsParticles->gravity);
+    gui8Boids->addSlider("Turbulence", 0.0, 20.0, &boidsParticles->turbulence);
+    gui8Boids->addToggle("Bounces", &boidsParticles->bounce);
+    gui8Boids->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8Boids->setWidgetSpacing(10);
+    gui8Boids->addToggle("Repulse", &boidsParticles->repulse);
+    gui8Boids->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8Boids->setWidgetSpacing(3);
+    
+    gui8Boids->addSpacer();
+    
+    gui8Boids->autoSizeToFitWidgets();
+    gui8Boids->setVisible(false);
+    ofAddListener(gui8Boids->newGUIEvent, this, &ofApp::guiEvent);
+    guis.push_back(gui8Boids);
+    particleGuis.push_back(gui8Boids);
 }
 
 //--------------------------------------------------------------
@@ -1136,9 +1170,11 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
     }
 
     // Load active particles panel
-    XML->pushTag("PARTICLES", 0);
-    currentParticleSystem = XML->getValue("Active", 0, 0);
-    XML->popTag();
+    if(!isTracking){
+        XML->pushTag("PARTICLES", 0);
+        currentParticleSystem = XML->getValue("Active", 0, 0);
+        XML->popTag();
+    }
 
     // Load cue list if it is not a cue
     if(!isACue){
@@ -1568,10 +1604,10 @@ void ofApp::exit(){
 
     if(!interpolatingWidgets && cues.size()) saveGUISettings(cues[currentCueIndex], false);
     saveGUISettings("settings/lastSettings.xml", false);
-
-    delete contourParticles;
-    delete markerParticles;
+    
+    delete emitterParticles;
     delete gridParticles;
+    delete boidsParticles;
     particleSystems.clear();
 
 //    for (int i=0; i<particleSystems.size(); i++) {
@@ -1604,9 +1640,9 @@ void ofApp::exit(){
     delete gui5;
     delete gui6;
     delete gui7;
-    delete gui8Marker;
-    delete gui8Contour;
+    delete gui8Emitter;
     delete gui8Grid;
+    delete gui8Boids;
     guis.clear();
 }
 
