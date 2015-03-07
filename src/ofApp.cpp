@@ -69,15 +69,6 @@ void ofApp::setup(){
     grayThreshFar.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
     irImage.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
     irOriginal.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
-    
-    // ALLOCATE FBO AND FILL WITH BG COLOR
-    fbo.allocate(kinect.width, kinect.height, GL_RGB32F_ARB);
-    fbo.begin();
-//    ofClear(red, green, blue);
-    ofClear(255, 255, 255);
-    fbo.end();
-    
-    history = 0.8;
 
     // KINECT PARAMETERS
     flipKinect      = false;
@@ -227,7 +218,14 @@ void ofApp::setup(){
 
     interpolatingWidgets = false;
     loadGUISettings("settings/lastSettings.xml", false, false);
-
+    
+    // ALLOCATE FBO AND FILL WITH BG COLOR
+    fbo.allocate(kinect.width, kinect.height, GL_RGB32F_ARB);
+    fbo.begin();
+    ofClear(red, green, blue);
+    fbo.end();
+    
+    history = 0.8;
 
     // CREATE DIRECTORIES IN /DATA IF THEY DONT EXIST
     string directory[3] = {"sequences", "settings", "cues"};
@@ -310,6 +308,7 @@ void ofApp::update(){
     threshold(grayThreshNear, nearThreshold, true);
     threshold(grayThreshFar, farThreshold);
     bitwise_and(grayThreshNear, grayThreshFar, depthImage);
+    blur(depthImage, 21);
 
     // Update images
     irImage.update();
@@ -493,19 +492,19 @@ void ofApp::draw(){
     ofFill();
     ofRect(0, 0, kinect.width, kinect.height);
     
-    ofDisableAlphaBlending(); // Disable transparency
-    
     // Graphics
     ofSetColor(255);
     contour.draw();
     gridParticles->draw();
     emitterParticles->draw();
     boidsParticles->draw();
-    
+
     fbo.end();
     
     // Draw buffer (graphics) on the screen
+    ofEnableAlphaBlending(); // Enable transparency
     fbo.draw(0, 0);
+    ofDisableAlphaBlending();
     
     if(drawMarkers){
         irMarkerFinder.draw();

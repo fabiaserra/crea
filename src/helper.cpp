@@ -13,8 +13,7 @@ float lowpass(float input, float past, float slide){
 }
 
 
-vector<vector<ofPolyline> > processPttr(vmo& oracle, const vmo::pttr& pttrList){
-	
+vector<vector<ofPolyline> > processPttr(vmo& oracle, const vmo::pttr& pttrList){	
 	vector<vector<ofPolyline> > pattern(pttrList.size,
 										vector<ofPolyline>(oracle.numFeature,
 														   vector<ofPoint>(0)));
