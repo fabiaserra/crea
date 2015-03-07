@@ -70,15 +70,6 @@ void ofApp::setup(){
     grayThreshFar.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
     irImage.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
     irOriginal.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
-    
-    // ALLOCATE FBO AND FILL WITH BG COLOR
-    fbo.allocate(kinect.width, kinect.height, GL_RGB32F_ARB);
-    fbo.begin();
-//    ofClear(red, green, blue);
-    ofClear(255, 255, 255);
-    fbo.end();
-    
-    history = 0.8;
 
     // KINECT PARAMETERS
     flipKinect      = false;
@@ -139,7 +130,11 @@ void ofApp::setup(){
     drawMarkers = false;
 
     // VMO SETUP
-    int dimensions = 2;
+    dimensions = 2;
+    slide = 1.0;
+    decay = 0.5;
+    pastObs.assign(maxMarkers*dimensions, 0.0);
+    
     obs.assign(sequence.numFrames, vector<float>(maxMarkers*dimensions));
     for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
         for(int frameIndex = 0; frameIndex < sequence.numFrames; frameIndex++){
@@ -167,16 +162,18 @@ void ofApp::setup(){
 //
 //	int minLen = 7;
 //	float t = 4.5; // for sequence1marker1.xml
-	int minLen = 10;
-	float t = 5.7; // for sequence1marker2.xml
+//	int minLen = 10;
+//	float t = 5.7; // for sequence1marker2.xml
 //	int minLen = 10;
 //	float t = 6.0; // for sequence1marker3.xml
+    int minLen = 2;
+    float t = 3.6; // for simple5.xml
 
 	cout << t << endl;
 	seqVmo = vmo::buildOracle(obs, dimensions, maxMarkers, t);
     // 2.2 Output pattern list
     pttrList = vmo::findPttr(seqVmo, minLen);
-    sequence.loadPatterns(vmo::processPttr(seqVmo, pttrList));
+    sequence.loadPatterns(processPttr(seqVmo, pttrList));
     drawPatterns = false;
     drawPatternsInSequence = false;
     cout << sequence.patterns.size() << endl;
@@ -225,7 +222,14 @@ void ofApp::setup(){
 
     interpolatingWidgets = false;
     loadGUISettings("settings/lastSettings.xml", false, false);
-
+    
+    // ALLOCATE FBO AND FILL WITH BG COLOR
+    fbo.allocate(kinect.width, kinect.height, GL_RGB32F_ARB);
+    fbo.begin();
+    ofClear(red, green, blue);
+    fbo.end();
+    
+    history = 0.8;
 
     // CREATE DIRECTORIES IN /DATA IF THEY DONT EXIST
     string directory[3] = {"sequences", "settings", "cues"};
@@ -349,22 +353,34 @@ void ofApp::update(){
     #ifdef KINECT_SEQUENCE
 
         if (isTracking){
-            vector<float> obs; // Temporary code
+            vector<float> obs(maxMarkers*dimensions, 0.0); // Temporary code
             for(unsigned int i = 0; i < kinectSequence.maxMarkers; i++){
                 ofPoint currentPoint = kinectSequence.getCurrentPoint(i);
                 obs.push_back(currentPoint.x);
                 obs.push_back(currentPoint.y);
+                
+                // Use the lowpass here??
+                obs.push_back(currentPoint.y);
+                obs[i] = lowpass(currentPoint.x, pastObs[i], slide);
+                obs[i+1] = lowpass(currentPoint.y, pastObs[i+1], slide);
+                pastObs[i] = obs[i];
+                pastObs[i+1] = obs[i+1];
+
+                //obs[i] = currentPoint.x;
+                //obs[i+1] = currentPoint.y;
             }
             if(initStatus){
+                currentBf = vmo::vmo::belief();
+                pastObs.assign(maxMarkers*dimensions, 0.0);
                 currentBf = vmo::tracking_init(seqVmo, currentBf, pttrList, obs);
                 initStatus = false;
             }
             else{
-                prevBf = currentBf;
-                currentBf = vmo::tracking(seqVmo, pttrList, prevBf, obs);
-//                cout << "current index: " << currentBf.currentIdx << endl;
+//                prevBf = currentBf;
+                currentBf = vmo::tracking(seqVmo, pttrList, currentBf, obs, decay);
+                cout << "current index: " << currentBf.currentIdx << endl;
                 currentPercent = ofMap(currentBf.currentIdx, 0, sequence.numFrames, 0.0, 1.0, true);
-//                cout << currentPercent << endl;
+                cout << currentPercent << endl;
                 if(cues.size() != 0) {
                     int cueSegment = currentCueIndex;
                     for(int i = 0; i < cueSliders.size(); i++){
@@ -413,7 +429,7 @@ void ofApp::update(){
                 }
                 else{
                     prevBf = currentBf;
-                    currentBf = vmo::tracking(seqVmo, pttrList, prevBf, obs);
+                    currentBf = vmo::tracking(seqVmo, pttrList, prevBf, obs, decay);
                     cout << "current index: " << currentBf.currentIdx << endl;
                     // We need the min/max of currentIdx
                     currentPercent = ofMap(currentBf.currentIdx, 0, sequence.numFrames, 0.0, 1.0, true);
@@ -483,19 +499,19 @@ void ofApp::draw(){
     ofFill();
     ofRect(0, 0, kinect.width, kinect.height);
     
-    ofDisableAlphaBlending(); // Disable transparency
-    
     // Graphics
     ofSetColor(255);
     contour.draw();
     gridParticles->draw();
     emitterParticles->draw();
     boidsParticles->draw();
-    
+
     fbo.end();
     
     // Draw buffer (graphics) on the screen
+    ofEnableAlphaBlending(); // Enable transparency
     fbo.draw(0, 0);
+    ofDisableAlphaBlending();
     
     if(drawMarkers){
         irMarkerFinder.draw();
