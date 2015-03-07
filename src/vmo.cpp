@@ -396,35 +396,35 @@ vmo::pttr vmo::findPttr(const vmo& oracle, int minLen = 0){
 	return pttrList;
 }
 
-vector<vector<ofPolyline> > vmo::processPttr(vmo& oracle, const vmo::pttr& pttrList){
-
-	vector<vector<ofPolyline> > pattern(pttrList.size,
-										vector<ofPolyline>(oracle.numFeature,
-														   vector<ofPoint>(0)));
-	vector1D pts(0);
-	int len = 0;
-	for (int i = 0; i < pttrList.size; i++) {
-		pts = pttrList.sfxPts[i];
-		len = pttrList.sfxLen[i];
-		vector<ofPolyline> ges(oracle.numFeature, vector<ofPoint>(len, ofPoint(0.0,0.0)));
-		pattern[i] = ges;
-		for (int j = 0; j<pts.size(); j++) {
-			int offset = pts[j]-len+1;
-			for (int k = 0; k < len; k++) {
-				oracle.pttrCat[offset+k].push_back(i);
-				oracle.pttrInd[offset+k].push_back(k+1);
-
-				for (int d = 0; d < oracle.numFeature; d++) {
-					pattern[i][d][k].x = (pattern[i][d][k].x*float(j)/float(j+1))
-                                    + oracle.obs[offset+k][d*oracle.dimFeature]/float(j+1);
-					pattern[i][d][k].y = (pattern[i][d][k].y*float(j)/float(j+1))
-                                    + oracle.obs[offset+k][d*oracle.dimFeature+1]/float(j+1);
-				}
-			}
-		}
-	}
-	return pattern;
-}
+//vector<vector<ofPolyline> > vmo::processPttr(vmo& oracle, const vmo::pttr& pttrList){
+//
+//	vector<vector<ofPolyline> > pattern(pttrList.size,
+//										vector<ofPolyline>(oracle.numFeature,
+//														   vector<ofPoint>(0)));
+//	vector1D pts(0);
+//	int len = 0;
+//	for (int i = 0; i < pttrList.size; i++) {
+//		pts = pttrList.sfxPts[i];
+//		len = pttrList.sfxLen[i];
+//		vector<ofPolyline> ges(oracle.numFeature, vector<ofPoint>(len, ofPoint(0.0,0.0)));
+//		pattern[i] = ges;
+//		for (int j = 0; j<pts.size(); j++) {
+//			int offset = pts[j]-len+1;
+//			for (int k = 0; k < len; k++) {
+//				oracle.pttrCat[offset+k].push_back(i);
+//				oracle.pttrInd[offset+k].push_back(k+1);
+//
+//				for (int d = 0; d < oracle.numFeature; d++) {
+//					pattern[i][d][k].x = (pattern[i][d][k].x*float(j)/float(j+1))
+//                                    + oracle.obs[offset+k][d*oracle.dimFeature]/float(j+1);
+//					pattern[i][d][k].y = (pattern[i][d][k].y*float(j)/float(j+1))
+//                                    + oracle.obs[offset+k][d*oracle.dimFeature+1]/float(j+1);
+//				}
+//			}
+//		}
+//	}
+//	return pattern;
+//}
 
 
 vmo::belief &vmo::tracking_init(vmo &oracle, vmo::belief &bf,
@@ -437,31 +437,31 @@ vmo::belief &vmo::tracking_init(vmo &oracle, vmo::belief &bf,
 	int firstIdx = -1;
 	float firstCost = FLT_MAX;
 	for (int k = 0; k < bf.K; k++) {
-//		float minD = FLT_MAX;
+		float minD = FLT_MAX;
 		int ind = -1;
-		float d = 0.0;
-		d = getDistance(firstObs, oracle.obs[oracle.rsfx[0][k]]);
-		ind = oracle.rsfx[0][k];
-		bf.path[k] = ind;
-		bf.cost[k] = d;
-		if (d < firstCost) {
-			firstIdx = ind;
-			firstCost = d;
-		}
-//		for (int i = 0; i < oracle.latent[k].size(); i++) {
-//			int idx = oracle.latent[k][i];
-//            d = getDistance(firstObs, oracle.obs[idx]);
-//			if (d < minD) {
-//				minD = d;
-//				ind = idx;
-//				bf.path[k] = ind;
-//				bf.cost[k] = minD;
-//			}
-//		}
-//		if (minD < firstCost) {
+//		float d = 0.0;
+//		d = getDistance(firstObs, oracle.obs[oracle.rsfx[0][k]]);
+//		ind = oracle.rsfx[0][k];
+//		bf.path[k] = ind;
+//		bf.cost[k] = d;
+//		if (d < firstCost) {
 //			firstIdx = ind;
-//			firstCost = minD;
+//			firstCost = d;
 //		}
+		for (int i = 0; i < oracle.latent[k].size(); i++) {
+			int idx = oracle.latent[k][i];
+            float d = getDistance(firstObs, oracle.obs[idx]);
+			if (d < minD) {
+				minD = d;
+				ind = idx;
+				bf.path[k] = ind;
+				bf.cost[k] = minD;
+			}
+		}
+		if (minD < firstCost) {
+			firstIdx = ind;
+			firstCost = minD;
+		}
 	}
 	bf.currentIdx = firstIdx;
 	return bf;
@@ -469,7 +469,7 @@ vmo::belief &vmo::tracking_init(vmo &oracle, vmo::belief &bf,
 
 vmo::belief &vmo::tracking(vmo &oracle,
 						   const vmo::pttr &pttrList,
-						   vmo::belief &prevBf, vector<float> &obs){
+						   vmo::belief &prevBf, vector<float> &obs, float decay){
 	/*
 	 Real-time tracking function for VMO, not optimized yet.
 	 */
@@ -480,24 +480,26 @@ vmo::belief &vmo::tracking(vmo &oracle,
 	float tempCost = FLT_MAX;
 	for (int k = 0; k < prevBf.K; k++) {
 		float minD = FLT_MAX;
+		float tmpCostK = 0.0;
 		int ind = -1;
-
+		
 		// Self-transition
-		int selfTrn = oracle.data[prevBf.path[k]];
-		for (int i = 0; i < oracle.latent[selfTrn].size(); i++) {
-			float d = getDistance(obs, oracle.obs[oracle.latent[selfTrn][i]]);
-			if (d < minD) {
-				minD = d;
-				ind = oracle.latent[selfTrn][i];
-				prevBf.path[k] = ind;
-				prevBf.cost[k] = minD;
-			}
-		}
+//		int selfTrn = oracle.data[prevBf.path[k]];
+//		for (int i = 0; i < oracle.latent[selfTrn].size(); i++) {
+//			float d = getDistance(obs, oracle.obs[oracle.latent[selfTrn][i]]);
+//			if (d < minD) {
+//				minD = d;
+//				ind = oracle.latent[selfTrn][i];
+//				prevBf.path[k] = ind;
+//				prevBf.cost[k] = minD;
+//			}
+//		}
 
 		// Possible states from forward links
 		int sym = -1;
-		for (int j = 0; j < oracle.trn[prevBf.path[k]].size(); j++) {
-			sym = oracle.data[oracle.trn[prevBf.path[k]][j]];
+		int prevPath = prevBf.path[k];
+		for (int j = 0; j < oracle.trn[prevPath].size(); j++) {
+			sym = oracle.data[oracle.trn[prevPath][j]];
 			float d = 0.0;
 			for (int i = 0; i < oracle.latent[sym].size(); i++) {
 				d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
@@ -505,12 +507,49 @@ vmo::belief &vmo::tracking(vmo &oracle,
 					minD = d;
 					ind = oracle.latent[sym][i];
 					prevBf.path[k] = ind;
-					prevBf.cost[k] = minD;
+					tmpCostK = minD;
 				}
 			}
 		}
-		if (minD < tempCost) {
-			tempCost = minD;
+
+		// Possible states from one suffix back
+		sym = -1;
+		int prevSfx = oracle.sfx[prevBf.path[k]];
+		for (int j = 0; j < oracle.trn[prevSfx].size(); j++) {
+			sym = oracle.data[oracle.trn[prevSfx][j]];
+			float d = 0.0;
+			for (int i = 0; i < oracle.latent[sym].size(); i++) {
+				d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
+				if (d < minD) {
+					minD = d;
+					ind = oracle.latent[sym][i];
+					prevBf.path[k] = ind;
+					tmpCostK = minD;
+				}
+			}
+		}
+
+		// Possible states from one reverse suffix forward
+		sym = -1;
+		int prevRsfx = oracle.rsfx[prevBf.path[k]][0]; // Just the first one
+		for (int j = 0; j < oracle.trn[prevPath].size(); j++) {
+			sym = oracle.data[oracle.trn[prevPath][j]];
+			float d = 0.0;
+			for (int i = 0; i < oracle.latent[sym].size(); i++) {
+				d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
+				if (d < minD) {
+					minD = d;
+					ind = oracle.latent[sym][i];
+					prevBf.path[k] = ind;
+					tmpCostK = minD;
+				}
+			}
+		}
+		
+		prevBf.cost[k] = prevBf.cost[k]*decay + tmpCostK;
+		float accumCostK = prevBf.cost[k];
+		if (accumCostK < tempCost) {
+			tempCost = accumCostK;
 			tempIdx = ind;
 		}
 	}

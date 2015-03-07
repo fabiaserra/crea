@@ -20,8 +20,7 @@
  Adapted by Cheng-i Wang on 1/25/15.
  -------------------------------------------------------------------------
  */
-
-
+#pragma once
 #ifndef ____vmo__
 #define ____vmo__
 
@@ -110,13 +109,13 @@ public:
 
 	// Analysis functions
 	static vmo::pttr findPttr(const vmo& oracle, int minLen);
-	static vector< vector<ofPolyline> > processPttr(vmo& oracle, const vmo::pttr& pttrList);
+//	static vector< vector<ofPolyline> > processPttr(vmo& oracle, const vmo::pttr& pttrList);
 	static vmo::belief &tracking_init(vmo& oracle, vmo::belief &bf,
 									  const vmo::pttr& pttrList,
 									  vector<float> &firstObs);
 	static vmo::belief &tracking(vmo& oracle,
 								 const vmo::pttr& pttrList,
-								 vmo::belief& prevState, vector<float> &obs);
+								 vmo::belief& prevState, vector<float> &obs, float decay);
 
 private:
 	// Helper functions

@@ -20,6 +20,7 @@
 // Include VMO files here
 //-----------------------
 #include "vmo.h"
+#include "helper.h"
 //-----------------------
 
 class ofApp : public ofBaseApp{
@@ -102,8 +103,6 @@ class ofApp : public ofBaseApp{
         bool drawPatterns;
         bool drawSequence;
         bool drawMarkers;
-        bool drawSequenceSegments;
-        bool drawPatternsInSequence;
         //--------------------------------------------------------------
         vector<string> cues;
         int currentCueIndex;
@@ -161,6 +160,11 @@ class ofApp : public ofBaseApp{
         vmo::belief prevBf;
 
         // vector<ofPoint>& loadedFrames;
+		int maxMarkers;
+		int dimensions;
+		float slide;
+		float decay;
+		vector<float> pastObs;
         vector<vector<float> > obs;
         // vector<vector<ofPolyline> > patterns;
         bool initStatus;
