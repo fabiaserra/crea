@@ -46,9 +46,17 @@ ParticleSystem::~ParticleSystem(){
 void ParticleSystem::setup(ParticleMode particleMode, InputSource inputSource, int width , int height){
 
     this->particleMode = particleMode;
-    this->inputSource = inputSource;
     this->width = width;
     this->height = height;
+    
+    if(inputSource == MARKERS){
+        markersInput = true;
+        contourInput = false;
+    }
+    else if(inputSource == CONTOUR){
+        contourInput = true;
+        markersInput = false;
+    }
 
     if(particleMode == EMITTER){
         bornRate = 3.0;
@@ -111,7 +119,7 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
         if(particleMode == GRID){
             float scale = 5;
             for(int i = 0; i < particles.size(); i++){
-                if(inputSource == MARKERS){
+                if(markersInput){
                     float markerRadius = 50;
 
                     // Get closest marker to particle
@@ -160,16 +168,15 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
         }
 
         else if(particleMode == EMITTER){
-
             // Born new particles
-            if(inputSource == MARKERS){
+            if(markersInput){
                 for(unsigned int i = 0; i < markers.size(); i++){
                     if (markers[i].hasDisappeared) markers[i].bornRate -= 0.5;
                     else markers[i].bornRate = bornRate;
                     addParticles(markers[i].bornRate, markers[i]);
                 }
             }
-            else if(inputSource == CONTOUR){
+            if(contourInput){
                 for(unsigned int i = 0; i < contour.contours.size(); i++){
                     addParticles(bornRate, contour.contours[i]);
                 }

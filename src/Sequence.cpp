@@ -386,16 +386,13 @@ void Sequence::updateSequenceSegments(const vector< pair<float, float> >& sequen
 vector<ofPolyline> Sequence::getSequenceSegment(const pair<float, float>& sequenceSegmentPct){
     float lowPct = sequenceSegmentPct.first/100.0;
     float highPct = sequenceSegmentPct.second/100.0;
-    cout << lowPct << endl;
-    cout << highPct << endl;
 
     vector<ofPolyline> segment;
     for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
         ofPolyline markerSegment;
-        for(float pct = lowPct; pct < highPct; pct += 0.01){
+        for(float pct = lowPct; pct < highPct; pct += 0.005){
             ofPoint p = markersPosition[markerIdx].getPointAtPercent(pct);
             markerSegment.addVertex(p);
-            cout << pct << endl;
         }
         segment.push_back(markerSegment);
     }

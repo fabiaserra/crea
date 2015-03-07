@@ -44,7 +44,8 @@ class ParticleSystem
 		//--------------------------------------------------------------
 		ofColor color;
 		ParticleMode particleMode;
-		InputSource inputSource;
+        bool markersInput;
+        bool contourInput;
 		//--------------------------------------------------------------
 		float bornRate;         // Number of particles born per frame
 		float velocity;         // Initial velocity magnitude of newborn particles
