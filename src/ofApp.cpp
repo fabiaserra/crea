@@ -21,7 +21,7 @@ void ofApp::setup(){
         // Use xml sequence marker file
         #ifdef KINECT_SEQUENCE
             kinectSequence.setup(maxMarkers);
-            kinectSequence.load("sequences/simple5.xml");
+            kinectSequence.load("sequences/sequence1marker2.xml");
         #endif // KINECT_SEQUENCE
 
         // Load png files from file
@@ -129,7 +129,7 @@ void ofApp::setup(){
 
     // SEQUENCE
     sequence.setup(maxMarkers);
-    sequence.load("sequences/simple5.xml");
+    sequence.load("sequences/sequence1marker2.xml");
     drawSequence = false;
 
     // MARKERS
@@ -139,7 +139,7 @@ void ofApp::setup(){
     // VMO SETUP
     dimensions = 2;
 	slide = 1.0;
-	decay = 0.5;
+	decay = .25;
 	pastObs.assign(maxMarkers*dimensions, 0.0);
     obs.assign(sequence.numFrames, vector<float>(maxMarkers*dimensions));
     for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
@@ -169,11 +169,11 @@ void ofApp::setup(){
 //	int minLen = 7;
 //	float t = 4.5; // for sequence1marker1.xml
 //	int minLen = 10;
-//	float t = 5.7; // for sequence1marker2.xml
-//	int minLen = 10;
+	float t = 5.7; // for sequence1marker2.xml
+	int minLen = 10;
 //	float t = 6.0; // for sequence1marker3.xml
-	int minLen = 2;
-	float t = 3.6; // for simple5.xml
+//	int minLen = 2;
+//	float t = 3.6; // for simple5.xml
 
 	cout << t << endl;
 	seqVmo = vmo::buildOracle(obs, dimensions, maxMarkers, t);

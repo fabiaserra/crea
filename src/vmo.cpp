@@ -497,10 +497,10 @@ vmo::belief &vmo::tracking(vmo &oracle,
 
 		// Possible states from forward links
 		int sym = -1;
+		float d = 0.0;
 		int prevPath = prevBf.path[k];
 		for (int j = 0; j < oracle.trn[prevPath].size(); j++) {
 			sym = oracle.data[oracle.trn[prevPath][j]];
-			float d = 0.0;
 			for (int i = 0; i < oracle.latent[sym].size(); i++) {
 				d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
 				if (d < minD) {
@@ -513,11 +513,11 @@ vmo::belief &vmo::tracking(vmo &oracle,
 		}
 
 		// Possible states from one suffix back
-		sym = -1;
-		int prevSfx = oracle.sfx[prevBf.path[k]];
+//		sym = -1;
+		int prevSfx = oracle.sfx[prevPath];
 		for (int j = 0; j < oracle.trn[prevSfx].size(); j++) {
 			sym = oracle.data[oracle.trn[prevSfx][j]];
-			float d = 0.0;
+//			float d = 0.0;
 			for (int i = 0; i < oracle.latent[sym].size(); i++) {
 				d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
 				if (d < minD) {
@@ -530,11 +530,11 @@ vmo::belief &vmo::tracking(vmo &oracle,
 		}
 
 		// Possible states from one reverse suffix forward
-		sym = -1;
-		int prevRsfx = oracle.rsfx[prevBf.path[k]][0]; // Just the first one
-		for (int j = 0; j < oracle.trn[prevPath].size(); j++) {
-			sym = oracle.data[oracle.trn[prevPath][j]];
-			float d = 0.0;
+//		sym = -1;
+		int prevRsfx = oracle.rsfx[prevPath][0]; // Just the first one
+		for (int j = 0; j < oracle.trn[prevRsfx].size(); j++) {
+			sym = oracle.data[oracle.trn[prevRsfx][j]];
+//			float d = 0.0;
 			for (int i = 0; i < oracle.latent[sym].size(); i++) {
 				d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
 				if (d < minD) {
@@ -547,9 +547,8 @@ vmo::belief &vmo::tracking(vmo &oracle,
 		}
 		
 		prevBf.cost[k] = prevBf.cost[k]*decay + tmpCostK;
-		float accumCostK = prevBf.cost[k];
-		if (accumCostK < tempCost) {
-			tempCost = accumCostK;
+		if (prevBf.cost[k] < tempCost) {
+			tempCost = prevBf.cost[k];
 			tempIdx = ind;
 		}
 	}
