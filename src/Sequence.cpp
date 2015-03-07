@@ -363,7 +363,7 @@ void Sequence::drawCueSegments(const vector< pair<float, float> >& cueSegmentsPc
     ofPopStyle();
 }
 
-vector<ofPolyline> Sequence::getSequenceSegment(const pair<float, float>& sequenceSegmentPct){
+vector<ofPolyline> Sequence::getCueSegment(const pair<float, float>& sequenceSegmentPct){
     float lowPct = sequenceSegmentPct.first/100.0;
     float highPct = sequenceSegmentPct.second/100.0;
 
