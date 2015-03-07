@@ -115,7 +115,7 @@ public:
 									  vector<float> &firstObs);
 	static vmo::belief &tracking(vmo& oracle,
 								 const vmo::pttr& pttrList,
-								 vmo::belief& prevState, vector<float> &obs);
+								 vmo::belief& prevState, vector<float> &obs, float decay);
 
 private:
 	// Helper functions

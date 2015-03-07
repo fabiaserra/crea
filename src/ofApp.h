@@ -98,8 +98,6 @@ class ofApp : public ofBaseApp{
         bool drawPatterns;
         bool drawSequence;
         bool drawMarkers;
-        bool drawSequenceSegments;
-        bool drawPatternsInSequence;
         //--------------------------------------------------------------
         vector<string> cues;
         int currentCueIndex;
@@ -159,6 +157,7 @@ class ofApp : public ofBaseApp{
 		int maxMarkers;
 		int dimensions;
 		float slide;
+		float decay;
 		vector<float> pastObs;
         vector<vector<float> > obs;
         // vector<vector<ofPolyline> > patterns;

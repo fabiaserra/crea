@@ -18,9 +18,7 @@ class Sequence{
         void drawPatterns(map<int, float>& currentPatterns);
         void drawPatternsInSequence(map<int, float>& currentPatterns);
         void drawSequenceTracking(float percent);
-        void drawSequenceSegments();
-
-        void updateSequenceSegments(const vector< pair<float, float> >& sequencePcts);
+        void drawCueSegments(const vector< pair<float, float> >& cueSegmentsPcts);
 
         void loadPatterns(vector< vector<ofPolyline> > patterns);
         void createPatterns(int nPatterns);
@@ -39,9 +37,7 @@ class Sequence{
         //--------------------------------------------------------------
         vector<ofPolyline> markersPosition;                 // Markers positions through all the sequence
         //--------------------------------------------------------------
-        vector< vector<ofPolyline> > patterns;              // Identified patterns from the sequence
-        //--------------------------------------------------------------
-        vector< vector<ofPolyline> > sequenceSegments;      // Sequence segments belonging to the different cues
+        vector< vector<ofPolyline> > patterns;              // identified patterns from the sequence
         //--------------------------------------------------------------
         string filename;
         float duration;
@@ -54,7 +50,7 @@ class Sequence{
 
     protected:
         void drawPattern(const int patternPosition, const int patternIdx, float percent, const bool highlight);
-        vector<ofPolyline> getSequenceSegment(const pair<float, float>& sequenceSegmentPct);
+        vector<ofPolyline> getCueSegment(const pair<float, float>& cueSegmentPct);
         void updatePlayhead();
         size_t calcCurrentFrameIndex();
 };
