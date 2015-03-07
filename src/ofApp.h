@@ -39,7 +39,6 @@ class ofApp : public ofBaseApp{
         void setupGUI6();
         void setupGUI7();
         void setupGUI8Emitter();
-//        void setupGUI8Contour();
         void setupGUI8Grid();
         void setupGUI8Boids();
 
@@ -72,7 +71,6 @@ class ofApp : public ofBaseApp{
         //--------------------------------------------------------------
         vector<ofImage *> savedDepthImages; // the saved Depth images for playback
         vector<ofImage *> savedIrImages;    // the saved IR images for playback
-//        ofxImageSequencePlayer kinectSequence;
         Sequence kinectSequence;
         //--------------------------------------------------------------
         ofImage irImage, irOriginal;
@@ -92,7 +90,6 @@ class ofApp : public ofBaseApp{
         ParticleSystem *emitterParticles;
         ParticleSystem *gridParticles;
         ParticleSystem *boidsParticles;
-//        ParticleSystem *contourParticles;
         vector<ParticleSystem *> particleSystems;
         int currentParticleSystem;
         //--------------------------------------------------------------
@@ -120,7 +117,6 @@ class ofApp : public ofBaseApp{
         ofxUISuperCanvas *gui6;
         ofxUISuperCanvas *gui7;
         ofxUISuperCanvas *gui8Emitter;
-//        ofxUISuperCanvas *gui8Contour;
         ofxUISuperCanvas *gui8Grid;
         ofxUISuperCanvas *gui8Boids;
         vector<ofxUISuperCanvas *> particleGuis;
@@ -151,8 +147,6 @@ class ofApp : public ofBaseApp{
         float minMarkerSize, maxMarkerSize;
         float trackerPersistence;
         float trackerMaxDistance;
-        //--------------------------------------------------------------
-        // float smoothingSize;
         //--------------------------------------------------------------
 
         //------VMO Declaration-----------------------------------------

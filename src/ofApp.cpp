@@ -312,6 +312,7 @@ void ofApp::update(){
     threshold(grayThreshNear, nearThreshold, true);
     threshold(grayThreshFar, farThreshold);
     bitwise_and(grayThreshNear, grayThreshFar, depthImage);
+    blur(depthImage, 21);
 
     // Update images
     irImage.update();
