@@ -49,7 +49,8 @@ void Sequence::draw(){
     // Draw entire sequence
     for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
 
-        ofSetColor(255, 30);
+        ofSetColor(255, 50);
+        ofSetLineWidth(1.5);
         markersPosition[markerIdx].draw();
 
         ofPoint currentPoint;
@@ -69,7 +70,7 @@ void Sequence::draw(){
         else if(markerIdx == 1) c.set(0, 0, 255);
         else if(markerIdx == 2) c.set(0, 255, 0);
         ofSetColor(c);
-        ofSetLineWidth(1.2);
+        ofSetLineWidth(2.5);
         line.draw();
 
         ofFill();
@@ -248,7 +249,7 @@ void Sequence::drawPattern(const int patternPosition, const int patternIdx, floa
     float height = 480.0;
     float scale = 5.5;
     float margin = 40.0;
-    float guiHeight = 800;
+    float guiHeight = 850;
 
     ofPushMatrix();
     ofPushStyle();
@@ -322,8 +323,9 @@ void Sequence::drawSequenceTracking(float percent){
 //        else if(markerIdx == 1) c.set(0, 0, 255);
 //        else if(markerIdx == 2) c.set(0, 255, 0);
 
-        ofSetColor(c, 30);
-        markersPosition[markerIdx].draw();
+//        ofSetColor(c, 50);
+//        ofSetLineWidth(1.5);
+//        markersPosition[markerIdx].draw();
 
 //        // Draw all past points
 //        ofPoint currentPoint;
