@@ -477,15 +477,11 @@ void ofApp::draw(){
 //    // Kinect images
 //    irImage.draw(0, 0);
 //    depthImage.draw(0, 0);
-
-    #ifdef KINECT_SEQUENCE
-        kinectSequence.draw();
-    #endif // KINECT_SEQUENCE
     
     fbo.begin();
     
     // Draw semi-transparent white rectangle to slightly clear buffer (depends on the history value)
-    ofEnableAlphaBlending(); // Enable transparency
+//    ofEnableAlphaBlending(); // Enable transparency
     
     float alpha = (1-history) * 255;
     ofSetColor(red, green, blue, alpha);
@@ -502,9 +498,9 @@ void ofApp::draw(){
     fbo.end();
     
     // Draw buffer (graphics) on the screen
-    ofEnableAlphaBlending(); // Enable transparency
+//    ofEnableAlphaBlending(); // Enable transparency
     fbo.draw(0, 0);
-    ofDisableAlphaBlending();
+//    ofDisableAlphaBlending();
     
     if(drawMarkers){
         irMarkerFinder.draw();
@@ -514,6 +510,10 @@ void ofApp::draw(){
             tempMarkers[i].draw();
         }
     }
+    
+    #ifdef KINECT_SEQUENCE
+        kinectSequence.draw();
+    #endif // KINECT_SEQUENCE
 
     if(drawSequence) sequence.draw();
 
@@ -586,7 +586,7 @@ void ofApp::setupGUI1(){
     gui1->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui1->addSpacer();
-    gui1->addLabel("Press '1' to hide panel", OFX_UI_FONT_SMALL);
+    gui1->addLabel("Press '1' to toggle panel", OFX_UI_FONT_SMALL);
 
     gui1->addSpacer();
     gui1->addFPS(OFX_UI_FONT_SMALL);
@@ -618,7 +618,7 @@ void ofApp::setupGUI2(){
     gui2->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui2->addSpacer();
-    gui2->addLabel("Press '2' to hide panel", OFX_UI_FONT_SMALL);
+    gui2->addLabel("Press '2' to toggle panel", OFX_UI_FONT_SMALL);
 
     gui2->addSpacer();
     gui2->addFPS(OFX_UI_FONT_SMALL);
@@ -667,7 +667,7 @@ void ofApp::setupGUI3(){
     gui3->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui3->addSpacer();
-    gui3->addLabel("Press '3' to hide panel", OFX_UI_FONT_SMALL);
+    gui3->addLabel("Press '3' to toggle panel", OFX_UI_FONT_SMALL);
 
     gui3->addSpacer();
     gui3->addFPS(OFX_UI_FONT_SMALL);
@@ -687,6 +687,11 @@ void ofApp::setupGUI3(){
     sequenceNumFrames = gui3->addLabel("Number of frames: "+ofToString(sequence.numFrames), OFX_UI_FONT_SMALL);
 
     gui3->addSpacer();
+    gui3->addLabel("SEQUENCE SEGMENTATION");
+    gui3->addToggle("Show sequence segmentation", &drawSequenceSegments);
+    gui3->addSpacer();
+
+    gui3->addSpacer();
 
     gui3->autoSizeToFitWidgets();
     gui3->setVisible(false);
@@ -700,7 +705,7 @@ void ofApp::setupGUI4(){
     gui4->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui4->addSpacer();
-    gui4->addLabel("Press '4' to hide panel", OFX_UI_FONT_SMALL);
+    gui4->addLabel("Press '4' to toggle panel", OFX_UI_FONT_SMALL);
 
     gui4->addSpacer();
     gui4->addFPS(OFX_UI_FONT_SMALL);
@@ -709,9 +714,10 @@ void ofApp::setupGUI4(){
     gui4->addImageButton("Start vmo", "icons/play.png", false, dim, dim)->setColorBack(ofColor(150, 255));
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui4->addImageButton("Stop vmo", "icons/delete.png", false, dim, dim)->setColorBack(ofColor(150, 255));
-    gui4->addImageToggle("Show gesture patterns", "icons/show.png", &drawPatterns, dim, dim)->setColorBack(ofColor(150, 255));
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-
+    gui4->addToggle("Show patterns in the side", &drawPatterns);
+    gui4->addToggle("Show patterns inside sequence", &drawPatternsInSequence);
+    
     gui4->addSpacer();
 
     gui4->autoSizeToFitWidgets();
@@ -726,7 +732,7 @@ void ofApp::setupGUI5(){
     gui5->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui5->addSpacer();
-    gui5->addLabel("Press '5' to hide panel", OFX_UI_FONT_SMALL);
+    gui5->addLabel("Press '5' to toggle panel", OFX_UI_FONT_SMALL);
 
     gui5->addSpacer();
     gui5->addFPS(OFX_UI_FONT_SMALL);
@@ -784,7 +790,7 @@ void ofApp::setupGUI6(){
     gui6->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui6->addSpacer();
-    gui6->addLabel("Press '6' to hide panel", OFX_UI_FONT_SMALL);
+    gui6->addLabel("Press '6' to toggle panel", OFX_UI_FONT_SMALL);
 
     gui6->addSpacer();
     gui6->addFPS(OFX_UI_FONT_SMALL);
@@ -806,7 +812,7 @@ void ofApp::setupGUI7(){
     gui7->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui7->addSpacer();
-    gui7->addLabel("Press '7' to hide panel", OFX_UI_FONT_SMALL);
+    gui7->addLabel("Press '7' to toggle panel", OFX_UI_FONT_SMALL);
 
     gui7->addSpacer();
     gui7->addFPS(OFX_UI_FONT_SMALL);
@@ -834,7 +840,7 @@ void ofApp::setupGUI8Emitter(){
     gui8Emitter->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui8Emitter->addSpacer();
-    gui8Emitter->addLabel("Press '8' to hide panel", OFX_UI_FONT_SMALL);
+    gui8Emitter->addLabel("Press '8' to toggle panel", OFX_UI_FONT_SMALL);
 
     gui8Emitter->addSpacer();
     gui8Emitter->addFPS(OFX_UI_FONT_SMALL);
@@ -924,7 +930,7 @@ void ofApp::setupGUI8Grid(){
     gui8Grid->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui8Grid->addSpacer();
-    gui8Grid->addLabel("Press '8' to hide panel", OFX_UI_FONT_SMALL);
+    gui8Grid->addLabel("Press '8' to toggle panel", OFX_UI_FONT_SMALL);
 
     gui8Grid->addSpacer();
     gui8Grid->addFPS(OFX_UI_FONT_SMALL);
@@ -987,7 +993,7 @@ void ofApp::setupGUI8Boids(){
     gui8Boids->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
     
     gui8Boids->addSpacer();
-    gui8Boids->addLabel("Press '8' to hide panel", OFX_UI_FONT_SMALL);
+    gui8Boids->addLabel("Press '8' to toggle panel", OFX_UI_FONT_SMALL);
     
     gui8Boids->addSpacer();
     gui8Boids->addFPS(OFX_UI_FONT_SMALL);
@@ -1593,6 +1599,19 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         if(lowThresh->getValue() > highThresh->getValue()){
             highThresh->setValue(lowThresh->getValue());
         }
+    }
+    if(e.getName() == "Sequence percent"){
+        vector< pair<float, float> > sequencePcts;
+        for (int i = 0; i < cueSliders.size(); i++){
+            pair<float, float> pcts;
+            pcts.first = cueSliders.at(i).second->getValueLow();
+            pcts.second = cueSliders.at(i).second->getValueHigh();
+            if((i < cueSliders.size()-1) && (pcts.second > cueSliders.at(i+1).second->getValueLow())){
+                cueSliders.at(i).second->setValueHigh(cueSliders.at(i+1).second->getValueLow());
+            }
+            sequencePcts.push_back(pcts);
+        }
+        sequence.updateSequenceSegments(sequencePcts);
     }
 }
 
