@@ -130,7 +130,7 @@ void ofApp::setup(){
     // VMO SETUP
     dimensions = 2;
 	slide = 1.0;
-	decay = .25;
+	decay = 0.75;
 	pastObs.assign(maxMarkers*dimensions, 0.0);
     obs.assign(sequence.numFrames, vector<float>(maxMarkers*dimensions));
     for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
@@ -175,7 +175,7 @@ void ofApp::setup(){
     cout << sequence.patterns.size() << endl;
 
 	currentBf = vmo::vmo::belief();
-	prevBf = vmo::vmo::belief();
+//	prevBf = vmo::vmo::belief();
 
 //    cout << "pattern size: "<<sequence.patterns.size() << endl;
 //	for (int i = 0; i < pttrList.size; i++) {
@@ -369,8 +369,7 @@ void ofApp::update(){
                 initStatus = false;
             }
             else{
-//                prevBf = currentBf;
-                currentBf = vmo::tracking(seqVmo, pttrList, currentBf, obs, decay);
+                currentBf = vmo::tracking(seqVmo, currentBf, pttrList, obs, decay);
                 cout << "current index: " << currentBf.currentIdx << endl;
                 currentPercent = ofMap(currentBf.currentIdx, 0, sequence.numFrames, 0.0, 1.0, true);
                 cout << currentPercent << endl;
@@ -407,7 +406,6 @@ void ofApp::update(){
         }
 
     #else
-
         // Gesture Tracking with VMO here?
         if (tempMarkers.size()>1){
             if (isTracking){
@@ -422,7 +420,7 @@ void ofApp::update(){
                 }
                 else{
                     prevBf = currentBf;
-                    currentBf = vmo::tracking(seqVmo, pttrList, prevBf, obs, decay);
+                    currentBf = vmo::tracking(seqVmo, prevBf, pttrList, obs, decay);
                     cout << "current index: " << currentBf.currentIdx << endl;
                     // We need the min/max of currentIdx
                     currentPercent = ofMap(currentBf.currentIdx, 0, sequence.numFrames, 0.0, 1.0, true);
@@ -449,12 +447,6 @@ void ofApp::update(){
                     }
                 }
                 gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
-//                for (int i = 0; i < sequence.patterns.size(); i++) {
-//                    if(gestureUpdate.find(i) != gestureUpdate.end()) {
-//                        cout << "key: "<< i << endl;
-//                        cout << "percent:"<< gestureUpdate[i] << endl;
-//                    }
-//                }
             }
         }
 
@@ -688,7 +680,7 @@ void ofApp::setupGUI3(){
 
     gui3->addSpacer();
     gui3->addLabel("SEQUENCE SEGMENTATION");
-    gui3->addToggle("Show sequence segmentation", &drawSequenceSegments);
+//    gui3->addToggle("Show sequence segmentation", &drawSequenceSegments);
     gui3->addSpacer();
 
     gui3->addSpacer();
@@ -716,7 +708,7 @@ void ofApp::setupGUI4(){
     gui4->addImageButton("Stop vmo", "icons/delete.png", false, dim, dim)->setColorBack(ofColor(150, 255));
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui4->addToggle("Show patterns in the side", &drawPatterns);
-    gui4->addToggle("Show patterns inside sequence", &drawPatternsInSequence);
+    gui4->addToggle("Show patterns inside sequence", &Sequence::drawPatternsInSequence);
     
     gui4->addSpacer();
 
@@ -1611,7 +1603,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             }
             sequencePcts.push_back(pcts);
         }
-        sequence.updateSequenceSegments(sequencePcts);
+        sequence.drawCueSegments(sequencePcts);
     }
 }
 

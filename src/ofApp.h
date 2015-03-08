@@ -151,7 +151,7 @@ class ofApp : public ofBaseApp{
         vmo seqVmo;
         vmo::pttr pttrList;
         vmo::belief currentBf;
-        vmo::belief prevBf;
+//        vmo::belief prevBf;
 
         // vector<ofPoint>& loadedFrames;
 		int maxMarkers;

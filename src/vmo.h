@@ -113,9 +113,9 @@ public:
 	static vmo::belief &tracking_init(vmo& oracle, vmo::belief &bf,
 									  const vmo::pttr& pttrList,
 									  vector<float> &firstObs);
-	static vmo::belief &tracking(vmo& oracle,
+	static vmo::belief &tracking(vmo& oracle, vmo::belief& prevState, 
 								 const vmo::pttr& pttrList,
-								 vmo::belief& prevState, vector<float> &obs, float decay);
+								 vector<float> &obs, float decay);
 
 private:
     // Helper functions
