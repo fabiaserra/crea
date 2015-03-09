@@ -565,9 +565,9 @@ void ofApp::draw(){
     #endif // KINECT_SEQUENCE
 
     if(drawSequence) sequence.draw();
-    if(drawPatternsInSequence) sequence.drawPatternsInSequence(gestureUpdate);
-    if(isTracking) sequence.drawSequenceTracking(currentPercent);
+    if(draw4PatternsInSequence) sequence.drawPatternsInSequence(gestureUpdate);
     if(drawSequenceSegments) sequence.drawSequenceSegments();
+    if(isTracking) sequence.drawSequenceTracking(currentPercent);
 
     ofPopMatrix();
 
@@ -1102,6 +1102,70 @@ void ofApp::setupGUI8Boids(){
     ofAddListener(gui8Boids->newGUIEvent, this, &ofApp::guiEvent);
     guis.push_back(gui8Boids);
     particleGuis.push_back(gui8Boids);
+}
+
+//--------------------------------------------------------------
+void ofApp::setupGUI8Animations(){
+    gui8Animations = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
+    gui8Animations->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
+
+    gui8Animations->addSpacer();
+    gui8Animations->addLabel("Press '8' to toggle panel", OFX_UI_FONT_SMALL);
+
+    gui8Animations->addSpacer();
+    gui8Animations->addFPS(OFX_UI_FONT_SMALL);
+
+    gui8Animations->addSpacer();
+    gui8Animations->addImageToggle("Particles Active", "icons/show.png", &animationsParticles->isActive, dim, dim);
+    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+
+    ofxUIImageButton *previous;
+    previous = gui8Animations->addImageButton("Previous Particle System", "icons/previous.png", false, dim, dim);
+    previous->setColorBack(ofColor(150, 255));
+
+    ofxUIImageButton *next;
+    next = gui8Animations->addImageButton("Next Particle System", "icons/play.png", false, dim, dim);
+    next->setColorBack(ofColor(150, 255));
+
+    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8Animations->addSpacer();
+    gui8Animations->addToggle("Marker", &animationsParticles->markersInput);
+    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8Animations->setWidgetSpacing(15);
+    gui8Animations->addToggle("Contour", &animationsParticles->contourInput);
+    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8Animations->setWidgetSpacing(3);
+
+    gui8Animations->addSpacer();
+    gui8Animations->addLabel("ANIMATIONS", OFX_UI_FONT_LARGE);
+    gui8Animations->addSpacer();
+
+    gui8Animations->addSlider("Particles radius", 0.1, 25.0, &animationsParticles->radius);
+
+    gui8Animations->addToggle("Rain", false);
+    gui8Animations->addToggle("Snow", false);
+    gui8Animations->addToggle("Wind", false);
+    gui8Animations->addToggle("Explosion", false);
+
+    gui8Animations->addSpacer();
+    gui8Animations->addLabel("Physics");
+    gui8Animations->addSlider("Friction", 0, 100, &animationsParticles->friction);
+    gui8Animations->addSlider("Gravity", 0.0, 15.0, &animationsParticles->gravity);
+    gui8Animations->addSlider("Turbulence", 0.0, 20.0, &animationsParticles->turbulence);
+    gui8Animations->addToggle("Bounces", &animationsParticles->bounce);
+    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8Animations->setWidgetSpacing(10);
+    gui8Animations->addToggle("Repulse", &animationsParticles->repulse);
+    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8Animations->setWidgetSpacing(3);
+
+    gui8Animations->addSpacer();
+
+    gui8Animations->autoSizeToFitWidgets();
+    gui8Animations->setVisible(false);
+    ofAddListener(gui8Animations->newGUIEvent, this, &ofApp::guiEvent);
+    guis.push_back(gui8Animations);
+    particleGuis.push_back(gui8Animations);
 }
 
 //--------------------------------------------------------------
@@ -1700,6 +1764,7 @@ void ofApp::exit(){
     delete emitterParticles;
     delete gridParticles;
     delete boidsParticles;
+    delete animationsParticles;
     particleSystems.clear();
 
 //    for (int i=0; i<particleSystems.size(); i++) {
@@ -1735,6 +1800,7 @@ void ofApp::exit(){
     delete gui8Emitter;
     delete gui8Grid;
     delete gui8Boids;
+    delete gui8Animations;
     guis.clear();
 }
 

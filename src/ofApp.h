@@ -41,6 +41,7 @@ class ofApp : public ofBaseApp{
         void setupGUI8Emitter();
         void setupGUI8Grid();
         void setupGUI8Boids();
+        void setupGUI8Animations();
 
         void saveGUISettings(const string path, const bool saveCues);
         void loadGUISettings(const string path, const bool interpolate, const bool loadCues);
@@ -90,6 +91,7 @@ class ofApp : public ofBaseApp{
         ParticleSystem *emitterParticles;
         ParticleSystem *gridParticles;
         ParticleSystem *boidsParticles;
+        ParticleSystem *animationsParticles;
         vector<ParticleSystem *> particleSystems;
         int currentParticleSystem;
         //--------------------------------------------------------------
@@ -119,6 +121,7 @@ class ofApp : public ofBaseApp{
         ofxUISuperCanvas *gui8Emitter;
         ofxUISuperCanvas *gui8Grid;
         ofxUISuperCanvas *gui8Boids;
+        ofxUISuperCanvas *gui8Animations;
         vector<ofxUISuperCanvas *> particleGuis;
         vector<ofxUISuperCanvas *> guis;
         //--------------------------------------------------------------
@@ -147,8 +150,6 @@ class ofApp : public ofBaseApp{
         float minMarkerSize, maxMarkerSize;
         float trackerPersistence;
         float trackerMaxDistance;
-        //--------------------------------------------------------------
-
         //------VMO Declaration-----------------------------------------
         vmo seqVmo;
         vmo::pttr pttrList;

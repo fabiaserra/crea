@@ -350,12 +350,12 @@ void Sequence::drawSequenceSegments(){
     ofPushStyle();
     for(int segmentIdx = 0; segmentIdx < sequenceSegments.size(); segmentIdx++){
 
-//        ofColor c = ofColor::fromHsb(0, 255, 255);
-//        c.setHue(ofMap(segmentIdx, 0, sequenceSegments.size(), 0, 255));
+        ofColor c = ofColor::fromHsb(0, 255, 255);
+        c.setHue(ofMap(segmentIdx, 0, sequenceSegments.size(), 0, 255));
 
-        ofColor c(255);
-        if(segmentIdx == 0) c.set(0, 0, 255);
-        else if(segmentIdx == 1) c.set(0, 255, 0);
+//        ofColor c(255);
+//        if(segmentIdx == 0) c.set(0, 0, 255);
+//        else if(segmentIdx == 1) c.set(0, 255, 0);
 
         ofSetLineWidth(3);
         ofSetColor(c);
