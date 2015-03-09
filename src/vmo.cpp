@@ -55,11 +55,11 @@ vmo::belief::belief(){
 vmo::vmo(){
 }
 
-void vmo::setup(int dim = 1, int num = 1, float threshold = 0.0){
+void vmo::setup(int numElement, float threshold = 0.0){
     
     nStates = 1;
-    this->dimFeature = dim;
-    this->numFeature = num;
+    this->nElement = numElement;
+//    this->numFeature = num;
     this->thresh = threshold;
     
     // Suffix link vector
@@ -108,7 +108,7 @@ void vmo::setup(int dim = 1, int num = 1, float threshold = 0.0){
     pttrInd.push_back(zeroStatePttrInd);
     
     // Observation vector
-    vector<float> zeroStateObs(dimFeature*numFeature, 0.0);
+    vector<float> zeroStateObs(nElement, 0.0);
     obs.clear();
     obs.reserve(INIT_VMO_SIZE);
     obs.push_back(zeroStateObs);
@@ -218,7 +218,7 @@ void vmo::addState(vector<float>& newData){
     while (k >= 0) {
         vector1D trnList(0);
         vector<float> trnVec(0);
-        vector<vector<float> > tmp(trn[k].size(), vector<float>(dimFeature*numFeature, 0.0));
+        vector<vector<float> > tmp(trn[k].size(), vector<float>(nElement, 0.0));
         for (int i = 0; i < trn[k].size(); i++) {
             tmp[i] = obs[trn[k][i]];
         }
@@ -255,7 +255,7 @@ void vmo::addState(vector<float>& newData){
     rsfx[sfx[ind]].push_back(ind);
 }
 
-vector<float> vmo::cumsum(vector<float> cw){
+vector<float> vmo::cumsum(vector<float> &cw){
     vector<float> out;
     float sum = 0;
     for(int i = 0; i < cw.size(); i++){
@@ -306,11 +306,11 @@ void vmo::print(string attr){
     
 }
 
-float vmo::findThreshold(vector<vector<float> > &obs, int dim = 1, int num = 1,float start = 0.0, float step = 0.01, float end = 2.0){
+float vmo::findThreshold(vector<vector<float> > &obs, int numElement = 4, float start = 0.0, float step = 0.01, float end = 2.0){
     float t = start;
     float ir = 0.0;
     while (start <= end) {
-        vmo tmpVmo = buildOracle(obs, dim, num, start);
+        vmo tmpVmo = buildOracle(obs, numElement, start);
         float tmpIr = tmpVmo.getIR();
         if (tmpIr >= ir) {
             ir = tmpIr;
@@ -321,9 +321,9 @@ float vmo::findThreshold(vector<vector<float> > &obs, int dim = 1, int num = 1,f
     return t;
 }
 
-vmo vmo::buildOracle(vector<vector<float> > &obs, int dim = 1, int num = 1, float threshold = 0.0){
+vmo vmo::buildOracle(vector<vector<float> > &obs, int numElement = 4, float threshold = 0.0){
     vmo oracle = vmo();
-    oracle.setup(dim, num, threshold);
+    oracle.setup(numElement, threshold);
     
     for (int i = 0; i<obs.size(); i++) {
         oracle.addState(obs[i]);
@@ -396,43 +396,12 @@ vmo::pttr vmo::findPttr(const vmo& oracle, int minLen = 0){
     return pttrList;
 }
 
-//vector<vector<ofPolyline> > vmo::processPttr(vmo& oracle, const vmo::pttr& pttrList){
-//
-//	vector<vector<ofPolyline> > pattern(pttrList.size,
-//										vector<ofPolyline>(oracle.numFeature,
-//														   vector<ofPoint>(0)));
-//	vector1D pts(0);
-//	int len = 0;
-//	for (int i = 0; i < pttrList.size; i++) {
-//		pts = pttrList.sfxPts[i];
-//		len = pttrList.sfxLen[i];
-//		vector<ofPolyline> ges(oracle.numFeature, vector<ofPoint>(len, ofPoint(0.0,0.0)));
-//		pattern[i] = ges;
-//		for (int j = 0; j<pts.size(); j++) {
-//			int offset = pts[j]-len+1;
-//			for (int k = 0; k < len; k++) {
-//				oracle.pttrCat[offset+k].push_back(i);
-//				oracle.pttrInd[offset+k].push_back(k+1);
-//
-//				for (int d = 0; d < oracle.numFeature; d++) {
-//					pattern[i][d][k].x = (pattern[i][d][k].x*float(j)/float(j+1))
-//                                    + oracle.obs[offset+k][d*oracle.dimFeature]/float(j+1);
-//					pattern[i][d][k].y = (pattern[i][d][k].y*float(j)/float(j+1))
-//                                    + oracle.obs[offset+k][d*oracle.dimFeature+1]/float(j+1);
-//				}
-//			}
-//		}
-//	}
-//	return pattern;
-//}
-
-
 vmo::belief &vmo::tracking_init(vmo &oracle, vmo::belief &bf,
 								const vmo::pttr &pttrList, vector<float> &firstObs){
 
 	bf.K = oracle.latent.size();
-	bf.path.assign(bf.K, 0);
-	bf.cost.assign(bf.K, 0.0);
+	bf.path.assign(oracle.latent.size(), 0);
+	bf.cost.assign(oracle.latent.size(), 0.0);
 
 	int firstIdx = -1;
 	float firstCost = FLT_MAX;

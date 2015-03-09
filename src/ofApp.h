@@ -151,17 +151,20 @@ class ofApp : public ofBaseApp{
         vmo seqVmo;
         vmo::pttr pttrList;
         vmo::belief currentBf;
-//        vmo::belief prevBf;
+        vmo::belief prevBf;
 
-        // vector<ofPoint>& loadedFrames;
 		int maxMarkers;
 		int dimensions;
+		int numElements;
 		float slide;
 		float decay;
 		vector<float> pastObs;
-        vector<vector<float> > obs;
-        // vector<vector<ofPolyline> > patterns;
-        bool initStatus;
+//		vector<float> pastFeatures;
+		vector<float> currentFeatures;
+        vector<vector<float> > savedObs;
+		vector<vector<float> > vmoObs;
+		bool isConv;
+		bool initStatus;
         bool isTracking;
         float currentPercent;
         map<int, float> gestureUpdate;
