@@ -394,7 +394,7 @@ void ofApp::update(){
 
     #ifdef KINECT_SEQUENCE
 
-        if (isTracking){
+        if(isTracking){
             vector<float> obs(maxMarkers*dimensions, 0.0); // Temporary code
             for(unsigned int i = 0; i < kinectSequence.maxMarkers; i++){
                 ofPoint currentPoint = kinectSequence.getCurrentPoint(i);
@@ -407,11 +407,10 @@ void ofApp::update(){
                 //obs[i] = currentPoint.x;
                 //obs[i+1] = currentPoint.y;
             }
-			if (isConv){
-				currentFeatures = cov_cal(pastObs, obs, numElements);
-			}else{
-				currentFeatures = obs;
-			}
+
+			if (isConv) currentFeatures = cov_cal(pastObs, obs, numElements);
+			else currentFeatures = obs;
+
             if(initStatus){
 				pastObs = obs;
 //				pastFeatures.assign(numElements, 0.0);
@@ -1671,6 +1670,23 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             sequencePcts.push_back(pcts);
         }
         sequence.updateSequenceSegments(sequencePcts);
+    }
+
+    if(e.getName() == "Show sequence segmentation"){
+        ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
+        if(toggle->getValue() == true){
+            vector< pair<float, float> > sequencePcts;
+            for (int i = 0; i < cueSliders.size(); i++){
+                pair<float, float> pcts;
+                pcts.first = cueSliders.at(i).second->getValueLow();
+                pcts.second = cueSliders.at(i).second->getValueHigh();
+                if((i < cueSliders.size()-1) && (pcts.second > cueSliders.at(i+1).second->getValueLow())){
+                    cueSliders.at(i).second->setValueHigh(cueSliders.at(i+1).second->getValueLow());
+                }
+                sequencePcts.push_back(pcts);
+            }
+            sequence.updateSequenceSegments(sequencePcts);
+        }
     }
 }
 

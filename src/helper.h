@@ -26,3 +26,4 @@ vector< vector< float> > covarianceMat(vector< vector< float> > &input, int numM
 vector< vector< float> > centroidSplit(vector< vector< float> > &input, int numMarker, int dim);
 
 vector<float> cov_cal(vector<float> &prevObs, vector<float> &obs, int numElements);
+
