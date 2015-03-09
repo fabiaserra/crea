@@ -146,7 +146,6 @@ void ofApp::setup(){
 				savedObs[frameIndex][markerIndex*dimensions+1] = sequence.markersPosition[markerIndex][frameIndex].y;
 			}
 		}
-		
 		vmoObs = covarianceMat(savedObs, maxMarkers, dimensions);
 		
 		// 2. Processing
@@ -165,9 +164,11 @@ void ofApp::setup(){
 		pttrList = vmo::findPttr(seqVmo, minLen);
 		sequence.loadPatterns(processPttr(seqVmo, savedObs, pttrList, maxMarkers, dimensions));
 		drawPatterns = false;
+        drawPatternsInSequence = false;
 		cout << sequence.patterns.size() << endl;
 
-	}else{
+	}
+	else{
 		numElements = maxMarkers*dimensions;
 		savedObs.assign(sequence.numFrames, vector<float>(numElements));
 		for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
@@ -188,7 +189,6 @@ void ofApp::setup(){
 		//    float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
 		//	int minLen = 2; // sequence.xml
 		//	float t = 12.3; // for sequence.xml
-		
 		//	int minLen = 7; // sequence3.xml
 		// 	float t = 18.6; // for sequence2.xml
 		//	float t = 16.8; // for sequence3.xml
@@ -201,30 +201,30 @@ void ofApp::setup(){
 		//	float t = 6.0; // for sequence1marker3.xml
 		//	int minLen = 2;
 		//	float t = 3.6; // for simple5.xml
-		
 		cout << t << endl;
 		seqVmo = vmo::buildOracle(savedObs, numElements, t);
 		// 2.2 Output pattern list
 		pttrList = vmo::findPttr(seqVmo, minLen);
 		sequence.loadPatterns(processPttr(seqVmo, savedObs, pttrList, maxMarkers, dimensions));
 		drawPatterns = false;
+        drawPatternsInSequence = false;
 		cout << sequence.patterns.size() << endl;
 	}
-	pastObs.assign(maxMarkers*dimensions, 0.0);
-//	pastFeatures.assign(numElements, 0.0);
-	currentFeatures.assign(numElements,0.0);
+    pastObs.assign(maxMarkers*dimensions, 0.0);
+//    pastFeatures.assign(numElements, 0.0);
+    currentFeatures.assign(numElements,0.0);
 
-	currentBf = vmo::vmo::belief();
-//	prevBf = vmo::vmo::belief();
-
+    currentBf = vmo::vmo::belief();
+//    prevBf = vmo::vmo::belief();
+//
 //    cout << "pattern size: "<<sequence.patterns.size() << endl;
-//	for (int i = 0; i < pttrList.size; i++) {
-//		cout << "pattern "<< i+1 << endl;
-//		for (int j = 0; j<pttrList.sfxPts[i].size(); j++){
-//			cout << "	begin: "<< pttrList.sfxPts[i][j] - pttrList.sfxLen[i]<< endl;
-//			cout << "	end  :"<< pttrList.sfxPts[i][j] << endl;
-//		}
-//	}
+//    for (int i = 0; i < pttrList.size; i++) {
+//        cout << "pattern "<< i+1 << endl;
+//        for (int j = 0; j<pttrList.sfxPts[i].size(); j++){
+//            cout << "	begin: "<< pttrList.sfxPts[i][j] - pttrList.sfxLen[i]<< endl;
+//            cout << "	end  :"<< pttrList.sfxPts[i][j] << endl;
+//        }
+//    }
 
     // SETUP GUIs
     dim = 32;

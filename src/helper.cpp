@@ -29,7 +29,6 @@ vector<vector<ofPolyline> > processPttr(vmo& oracle, vector< vector< float> > &o
 			for (int k = 0; k < len; k++) {
 				oracle.pttrCat[offset+k].push_back(i);
 				oracle.pttrInd[offset+k].push_back(k+1);
-				
 				for (int d = 0; d < nFeature; d++) {
 					pattern[i][d][k].x = (pattern[i][d][k].x*float(j)/float(j+1))
 					+ obs[offset+k][d*dim]/float(j+1);
@@ -45,7 +44,6 @@ vector<vector<ofPolyline> > processPttr(vmo& oracle, vector< vector< float> > &o
 vector< vector< float> > covarianceMat(vector< vector< float> > &input, int numMarker, int dim){
 	vector< vector<float> > tmpIn = input;
 	vector< vector<float> >::iterator it = tmpIn.begin();
-	
 	tmpIn.insert(it, input[0]);
 	vector< vector<float> > out(input.size(), vector< float>());
 	int nElements = (numMarker*dim+1)*(numMarker*dim)/2;

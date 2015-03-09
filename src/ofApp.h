@@ -98,6 +98,7 @@ class ofApp : public ofBaseApp{
         Sequence sequence;      // Gestures sequence
         //--------------------------------------------------------------
         bool drawPatterns;
+		bool drawPatternsInSequence;
         bool drawSequence;
         bool drawMarkers;
         //--------------------------------------------------------------
@@ -165,6 +166,7 @@ class ofApp : public ofBaseApp{
 		vector<vector<float> > vmoObs;
 		bool isConv;
 		bool initStatus;
+
         bool isTracking;
         float currentPercent;
         map<int, float> gestureUpdate;
