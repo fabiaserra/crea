@@ -133,62 +133,103 @@ void ofApp::setup(){
     dimensions = 2;
     slide = 1.0;
     decay = 0.75;
-    pastObs.assign(maxMarkers*dimensions, 0.0);
-
-    obs.assign(sequence.numFrames, vector<float>(maxMarkers*dimensions));
-    for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
-        for(int frameIndex = 0; frameIndex < sequence.numFrames; frameIndex++){
-            obs[frameIndex][markerIndex*dimensions] = sequence.markersPosition[markerIndex][frameIndex].x;
-            obs[frameIndex][markerIndex*dimensions+1] = sequence.markersPosition[markerIndex][frameIndex].y;
-        }
-    }
 
     initStatus = true;
     isTracking = false;
-    // 2. Processing
-    // 2.1 Load file into VMO
-//    int minLen = 1; // Temporary setting
-//    float start = 0.0, step = 0.05, stop = 10.0;
+    isConv = false; //Don`t try this, too slow.
 
-	float start = 10.0, step = 0.01, stop = 20.0;
+    if (isConv){
+		numElements = (maxMarkers*dimensions+1)*(maxMarkers*dimensions)/2;
+		savedObs.assign(sequence.numFrames, vector<float>(maxMarkers*dimensions));
+		vmoObs.assign(sequence.numFrames, vector<float>(numElements));
+		for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
+			for(int frameIndex = 0; frameIndex < sequence.numFrames; frameIndex++){
+				savedObs[frameIndex][markerIndex*dimensions] = sequence.markersPosition[markerIndex][frameIndex].x;
+				savedObs[frameIndex][markerIndex*dimensions+1] = sequence.markersPosition[markerIndex][frameIndex].y;
+			}
+		}
 
-//    float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
-//	int minLen = 2; // sequence.xml
-//	float t = 12.3; // for sequence.xml
+		vmoObs = covarianceMat(savedObs, maxMarkers, dimensions);
 
-//	int minLen = 7; // sequence3.xml
-// 	float t = 18.6; // for sequence2.xml
-//	float t = 16.8; // for sequence3.xml
+		// 2. Processing
+		// 2.1 Load file into VMO
+		//    int minLen = 1; // Temporary setting
+		//    float start = 0.0, step = 0.05, stop = 10.0;
+
+		float start = 0.0, step = 0.05, stop = 5.0;
+
+		float t = vmo::findThreshold(vmoObs, numElements, start, step, stop); // Temporary threshold range and step
+		int minLen = 10;
+
+		cout << t << endl;
+		seqVmo = vmo::buildOracle(vmoObs, numElements, t);
+		// 2.2 Output pattern list
+		pttrList = vmo::findPttr(seqVmo, minLen);
+		sequence.loadPatterns(processPttr(seqVmo, savedObs, pttrList, maxMarkers, dimensions));
+		drawPatterns = false;
+        drawPatternsInSequence = false;
+		cout << sequence.patterns.size() << endl;
+
+	}
+	else{
+		numElements = maxMarkers*dimensions;
+		savedObs.assign(sequence.numFrames, vector<float>(numElements));
+		for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
+			for(int frameIndex = 0; frameIndex < sequence.numFrames; frameIndex++){
+				savedObs[frameIndex][markerIndex*dimensions] = sequence.markersPosition[markerIndex][frameIndex].x;
+				savedObs[frameIndex][markerIndex*dimensions+1] = sequence.markersPosition[markerIndex][frameIndex].y;
+			}
+		}
+
+		// 2. Processing
+		// 2.1 Load file into VMO
+		//    int minLen = 1; // Temporary setting
+		//    float start = 0.0, step = 0.05, stop = 10.0;
+
+		float start = 10.0, step = 0.01, stop = 20.0;
+
+		//    float t = vmo::findThreshold(obs, numElements, start, step, stop); // Temporary threshold range and step
+		//    float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
+		//	int minLen = 2; // sequence.xml
+		//	float t = 12.3; // for sequence.xml
+
+		//	int minLen = 7; // sequence3.xml
+		// 	float t = 18.6; // for sequence2.xml
+		//	float t = 16.8; // for sequence3.xml
+		//
+		//	int minLen = 7;
+		//	float t = 4.5; // for sequence1marker1.xml
+		//	int minLen = 10;
+		float t = 5.7; // for sequence1marker2.xml
+		int minLen = 10;
+		//	float t = 6.0; // for sequence1marker3.xml
+		//	int minLen = 2;
+		//	float t = 3.6; // for simple5.xml
+
+		cout << t << endl;
+		seqVmo = vmo::buildOracle(savedObs, numElements, t);
+		// 2.2 Output pattern list
+		pttrList = vmo::findPttr(seqVmo, minLen);
+		sequence.loadPatterns(processPttr(seqVmo, savedObs, pttrList, maxMarkers, dimensions));
+		drawPatterns = false;
+        drawPatternsInSequence = false;
+		cout << sequence.patterns.size() << endl;
+	}
+    pastObs.assign(maxMarkers*dimensions, 0.0);
+//    pastFeatures.assign(numElements, 0.0);
+    currentFeatures.assign(numElements,0.0);
+
+    currentBf = vmo::vmo::belief();
+//    prevBf = vmo::vmo::belief();
 //
-//	int minLen = 7;
-//	float t = 4.5; // for sequence1marker1.xml
-	int minLen = 10;
-	float t = 5.7; // for sequence1marker2.xml
-//	int minLen = 10;
-//	float t = 6.0; // for sequence1marker3.xml
-//    int minLen = 2;
-//    float t = 3.6; // for simple5.xml
-
-	cout << t << endl;
-	seqVmo = vmo::buildOracle(obs, dimensions, maxMarkers, t);
-    // 2.2 Output pattern list
-    pttrList = vmo::findPttr(seqVmo, minLen);
-    sequence.loadPatterns(processPttr(seqVmo, pttrList));
-    drawPatterns = false;
-    drawPatternsInSequence = false;
-    cout << sequence.patterns.size() << endl;
-
-	currentBf = vmo::vmo::belief();
-//	prevBf = vmo::vmo::belief();
-
 //    cout << "pattern size: "<<sequence.patterns.size() << endl;
-//	for (int i = 0; i < pttrList.size; i++) {
-//		cout << "pattern "<< i+1 << endl;
-//		for (int j = 0; j<pttrList.sfxPts[i].size(); j++){
-//			cout << "	begin: "<< pttrList.sfxPts[i][j] - pttrList.sfxLen[i]<< endl;
-//			cout << "	end  :"<< pttrList.sfxPts[i][j] << endl;
-//		}
-//	}
+//    for (int i = 0; i < pttrList.size; i++) {
+//        cout << "pattern "<< i+1 << endl;
+//        for (int j = 0; j<pttrList.sfxPts[i].size(); j++){
+//            cout << "	begin: "<< pttrList.sfxPts[i][j] - pttrList.sfxLen[i]<< endl;
+//            cout << "	end  :"<< pttrList.sfxPts[i][j] << endl;
+//        }
+//    }
 
     // SETUP GUIs
     dim = 32;
@@ -357,24 +398,29 @@ void ofApp::update(){
             vector<float> obs(maxMarkers*dimensions, 0.0); // Temporary code
             for(unsigned int i = 0; i < kinectSequence.maxMarkers; i++){
                 ofPoint currentPoint = kinectSequence.getCurrentPoint(i);
-                // Use the lowpass here??
-                obs.push_back(currentPoint.y);
-                obs[i] = lowpass(currentPoint.x, pastObs[i], slide);
-                obs[i+1] = lowpass(currentPoint.y, pastObs[i+1], slide);
-                pastObs[i] = obs[i];
-                pastObs[i+1] = obs[i+1];
+				// Use the lowpass here??
+				obs[i] = lowpass(currentPoint.x, pastObs[i], slide);
+				obs[i+1] = lowpass(currentPoint.y, pastObs[i+1], slide);
+				pastObs[i] = obs[i];
+				pastObs[i+1] = obs[i+1];
 
                 //obs[i] = currentPoint.x;
                 //obs[i+1] = currentPoint.y;
             }
+			if (isConv){
+				currentFeatures = cov_cal(pastObs, obs, numElements);
+			}else{
+				currentFeatures = obs;
+			}
             if(initStatus){
-                currentBf = vmo::vmo::belief();
-                pastObs.assign(maxMarkers*dimensions, 0.0);
-                currentBf = vmo::tracking_init(seqVmo, currentBf, pttrList, obs);
+				pastObs = obs;
+//				pastFeatures.assign(numElements, 0.0);
+                currentBf = vmo::tracking_init(seqVmo, currentBf, pttrList, currentFeatures);
                 initStatus = false;
             }
             else{
-                currentBf = vmo::tracking(seqVmo, currentBf, pttrList, obs, decay);
+//				prevBf = currentBf;
+				currentBf = vmo::tracking(seqVmo, currentBf, pttrList, currentFeatures, decay);
                 cout << "current index: " << currentBf.currentIdx << endl;
                 currentPercent = ofMap(currentBf.currentIdx, 0, sequence.numFrames, 0.0, 1.0, true);
                 cout << currentPercent << endl;

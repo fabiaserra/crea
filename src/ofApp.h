@@ -158,11 +158,15 @@ class ofApp : public ofBaseApp{
         // vector<ofPoint>& loadedFrames;
         int maxMarkers;
         int dimensions;
+        int numElements;
         float slide;
         float decay;
         vector<float> pastObs;
-        vector<vector<float> > obs;
-        // vector<vector<ofPolyline> > patterns;
+//        vector<float> pastFeatures;
+        vector<float> currentFeatures;
+        vector<vector<float> > savedObs;
+        vector<vector<float> > vmoObs;
+        bool isConv;
         bool initStatus;
         bool isTracking;
         float currentPercent;
