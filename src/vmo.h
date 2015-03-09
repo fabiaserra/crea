@@ -55,7 +55,6 @@ public:
             vector2D sfxPts;
             vector1D sfxLen;
 	};
-
 	class belief{
         public:
             belief();
@@ -64,7 +63,6 @@ public:
             vector1D path;
             vector<float> cost;
 	};
-
 	vmo();
 	// Main functions
 	void setup(int numElement, float threshold);
@@ -110,7 +108,6 @@ public:
 
 	static float findThreshold(vector<vector<float> > &obs, int numElement, float start, float step, float end);
 	static vmo buildOracle(vector<vector<float> > &obs, int numElement, float threshold);
-
 	// Analysis functions
 	static vmo::pttr findPttr(const vmo& oracle, int minLen);
 	static vmo::belief &tracking_init(vmo& oracle, vmo::belief &bf,

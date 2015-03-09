@@ -98,10 +98,9 @@ class ofApp : public ofBaseApp{
         Sequence sequence;      // Gestures sequence
         //--------------------------------------------------------------
         bool drawPatterns;
+		bool drawPatternsInSequence;
         bool drawSequence;
         bool drawMarkers;
-        bool drawSequenceSegments;
-        bool drawPatternsInSequence;
         //--------------------------------------------------------------
         vector<string> cues;
         int currentCueIndex;
@@ -155,19 +154,19 @@ class ofApp : public ofBaseApp{
         vmo::belief currentBf;
         vmo::belief prevBf;
 
-        // vector<ofPoint>& loadedFrames;
-        int maxMarkers;
-        int dimensions;
-        int numElements;
-        float slide;
-        float decay;
-        vector<float> pastObs;
-//        vector<float> pastFeatures;
-        vector<float> currentFeatures;
+		int maxMarkers;
+		int dimensions;
+		int numElements;
+		float slide;
+		float decay;
+		vector<float> pastObs;
+//		vector<float> pastFeatures;
+		vector<float> currentFeatures;
         vector<vector<float> > savedObs;
-        vector<vector<float> > vmoObs;
-        bool isConv;
-        bool initStatus;
+		vector<vector<float> > vmoObs;
+		bool isConv;
+		bool initStatus;
+
         bool isTracking;
         float currentPercent;
         map<int, float> gestureUpdate;
