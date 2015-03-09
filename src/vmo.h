@@ -3,19 +3,19 @@
  vmo - Variable Markov Oracle
  implements the Variable Markov Oracle for time series analysis and
  generation
- 
+
  copyright 2015 greg surges & Cheng-i Wang
- 
+
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
- 
+
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
  vmo.h
- 
+
  Original code by Greg Surges.
  Adapted by Cheng-i Wang on 1/25/15.
  -------------------------------------------------------------------------
@@ -55,7 +55,6 @@ public:
             vector2D sfxPts;
             vector1D sfxLen;
 	};
-	
 	class belief{
         public:
             belief();
@@ -64,7 +63,6 @@ public:
             vector1D path;
             vector<float> cost;
 	};
-	
 	vmo();
 	// Main functions
 	void setup(int numElement, float threshold);
@@ -110,13 +108,12 @@ public:
 
 	static float findThreshold(vector<vector<float> > &obs, int numElement, float start, float step, float end);
 	static vmo buildOracle(vector<vector<float> > &obs, int numElement, float threshold);
-	
 	// Analysis functions
 	static vmo::pttr findPttr(const vmo& oracle, int minLen);
 	static vmo::belief &tracking_init(vmo& oracle, vmo::belief &bf,
 									  const vmo::pttr& pttrList,
 									  vector<float> &firstObs);
-	static vmo::belief &tracking(vmo& oracle, vmo::belief& prevState, 
+	static vmo::belief &tracking(vmo& oracle, vmo::belief& prevState,
 								 const vmo::pttr& pttrList,
 								 vector<float> &obs, float decay);
 
@@ -124,7 +121,7 @@ private:
     // Helper functions
     static float getDistance(vector<float> &x, vector<float> &y);
     static vector<float> getDistArray(vector<float> &x, vector<vector<float> > &y);
-    
+
     int lenCommonSfx(int p1, int p2);
     vector<float> cumsum(vector<float> &cw);
     vector2D encode();

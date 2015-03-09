@@ -3,25 +3,25 @@
  vmo - Variable Markov Oracle
  implements the Variable Markov Oracle for time series analysis and
  generation
- 
+
  copyright 2015 greg surges & Cheng-i Wang
- 
+
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
- 
+
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
- 
+
+
  vmo.cpp
- 
+
  Original code by Greg Surges.
  Adapted by Cheng-i Wang on 1/25/15.
  -------------------------------------------------------------------------
@@ -31,11 +31,11 @@
 
 vmo::pttr::pttr(){
     size = 0;
-    
+
     vector2D tmpPts(0);
     sfxPts = tmpPts;
     //	sfxPts.reserve(INIT_VMO_SIZE);
-    
+
     vector1D tmpLen(0);
     sfxLen = tmpLen;
     //	sfxLen.reserve(INIT_VMO_SIZE);
@@ -44,10 +44,10 @@ vmo::pttr::pttr(){
 vmo::belief::belief(){
     K = 0;
     currentIdx = -1;
-    
+
     vector1D tmpPath(0);
     path = tmpPath;
-    
+
     vector<float> tmpCost(0);
     cost = tmpCost;
 }
@@ -56,68 +56,67 @@ vmo::vmo(){
 }
 
 void vmo::setup(int numElement, float threshold = 0.0){
-    
     nStates = 1;
     this->nElement = numElement;
 //    this->numFeature = num;
     this->thresh = threshold;
-    
+
     // Suffix link vector
     sfx.clear();
     sfx.reserve(INIT_VMO_SIZE);
     sfx.push_back(-1);
-    
+
     // Longest repeated suffix
     lrs.clear();
     lrs.reserve(INIT_VMO_SIZE);
     lrs.push_back(0);
-    
+
     // Data vector - symbolized token for time series
     data.clear();
     data.reserve(INIT_VMO_SIZE);
     data.push_back(-1); //MARK: Might be problematic to initialize 0th state`s symbol as -1.
-    
+
     // Foward link vector
     vector1D zeroStateTrn(0);
     trn.clear();
     trn.reserve(INIT_VMO_SIZE);
     trn.push_back(zeroStateTrn);
-    
+
     // Reverse suffix link vector
     vector1D zeroStateRsfx;
     rsfx.clear();
     rsfx.reserve(INIT_VMO_SIZE);
     rsfx.push_back(zeroStateRsfx);
-    
+
     // State cluster vector
     //	vector1D zeroStateLatent;
     latent.clear();
     latent.reserve(INIT_VMO_K);
     //	latent.push_back(zeroStateLatent);
-    
+
     // Pattern label vector
     vector1D zeroStatePttrCat;
     pttrCat.clear();
     pttrCat.reserve(INIT_VMO_SIZE);
     pttrCat.push_back(zeroStatePttrCat);
-    
+
     // Pattern sequence index vector
     vector1D zeroStatePttrInd;
     pttrInd.clear();
     pttrInd.reserve(INIT_VMO_SIZE);
     pttrInd.push_back(zeroStatePttrInd);
-    
+
     // Observation vector
     vector<float> zeroStateObs(nElement, 0.0);
     obs.clear();
     obs.reserve(INIT_VMO_SIZE);
     obs.push_back(zeroStateObs);
-    
+
     // IR (information rate) vector
     ir.clear();
     ir.reserve(INIT_VMO_SIZE);
     ir.push_back(0.0);
-    
+
     // Maximum LRS
     //	maxLrs.clear();
     //	maxLrs.assign(INIT_VMO_SIZE, 0);
@@ -127,7 +126,7 @@ void vmo::setup(int numElement, float threshold = 0.0){
 void vmo::reset(){
     nStates = 0;
     thresh = 0.1;
-    
+
     trn.clear();
     sfx.clear();
     rsfx.clear();
@@ -195,26 +194,26 @@ vector2D vmo::encode(){
 
 void vmo::addState(vector<float>& newData){
     // Add a new state to VMO
-    
+
     // Update attributes
     sfx.push_back(0);
     rsfx.push_back(vector1D(0));
     trn.push_back(vector1D(0));
     lrs.push_back(0);
     obs.push_back(newData);
-    
+
     pttrCat.push_back(vector1D(0));
     pttrInd.push_back(vector1D(0));
-    
+
     nStates++;
     int ind = nStates - 1; // Local index
     trn[ind-1].push_back(ind);
-    
+
     int k = sfx[ind-1];
     int piOne = ind-1;
-    
+
     int sfxCandidate = 0;
-    
+
     while (k >= 0) {
         vector1D trnList(0);
         vector<float> trnVec(0);
@@ -239,7 +238,7 @@ void vmo::addState(vector<float>& newData){
             break;
         }
     }
-    
+
     if (k == -1) {
         sfx[ind] = 0;
         lrs[ind] = 0;
@@ -251,7 +250,7 @@ void vmo::addState(vector<float>& newData){
         latent[data[sfx[ind]]].push_back(ind);
         data.push_back(data[sfx[ind]]);
     }
-    
+
     rsfx[sfx[ind]].push_back(ind);
 }
 
@@ -271,7 +270,7 @@ float vmo::getIR(){
     vector<float> cw1 (nStates-1, 0.0);
     vector<float> block (nStates-1, 0.0);
     vector<float> ir (nStates-1, 0.0);
-    
+
     int j = 0;
     for (int i = 0; i<code.size(); i++) {
         if (code[i][0] == 0) {
@@ -286,10 +285,10 @@ float vmo::getIR(){
             j+=len;
         }
     }
-    
+
     vector<float> h0 = cumsum(cw0);
     vector<float> h1 = cumsum(cw1);
-    
+
     float irSum = 0.0;
     for (int i = 0; i < nStates-1; i++) {
         h0[i] = log2f(h0[i]+FLT_MIN);
@@ -303,7 +302,7 @@ float vmo::getIR(){
 }
 
 void vmo::print(string attr){
-    
+
 }
 
 float vmo::findThreshold(vector<vector<float> > &obs, int numElement = 4, float start = 0.0, float step = 0.01, float end = 2.0){
@@ -324,7 +323,6 @@ float vmo::findThreshold(vector<vector<float> > &obs, int numElement = 4, float 
 vmo vmo::buildOracle(vector<vector<float> > &obs, int numElement = 4, float threshold = 0.0){
     vmo oracle = vmo();
     oracle.setup(numElement, threshold);
-    
     for (int i = 0; i<obs.size(); i++) {
         oracle.addState(obs[i]);
     }
@@ -334,12 +332,12 @@ vmo vmo::buildOracle(vector<vector<float> > &obs, int numElement = 4, float thre
 vmo::pttr vmo::findPttr(const vmo& oracle, int minLen = 0){
     vmo::pttr pttrList = vmo::pttr();
     int preSfx = -1;
-    
+
     for (int i = oracle.nStates-1; i > minLen; i--) {
         int s = oracle.sfx[i];
         vector1D r = oracle.rsfx[i];
         bool pttrFound = false;
-        
+
         if (
             (s != 0) &&
             ((i - oracle.lrs[i]+1) > s) &&
@@ -388,7 +386,7 @@ vmo::pttr vmo::findPttr(const vmo& oracle, int minLen = 0){
                 pttrList.size = pttrList.sfxLen.size();
             }
             preSfx = s;
-            
+
         }else{
             preSfx = -1;
         }
@@ -437,7 +435,7 @@ vmo::belief &vmo::tracking_init(vmo &oracle, vmo::belief &bf,
 	return bf;
 }
 
-vmo::belief &vmo::tracking(vmo &oracle, vmo::belief &prevBf, 
+vmo::belief &vmo::tracking(vmo &oracle, vmo::belief &prevBf,
 						   const vmo::pttr &pttrList,
 						   vector<float> &obs, float decay){
 	/*
@@ -452,7 +450,6 @@ vmo::belief &vmo::tracking(vmo &oracle, vmo::belief &prevBf,
 		float minD = FLT_MAX;
 		float tmpCostK = 0.0;
 		int ind = -1;
-		
 		// Self-transition
 //		int selfTrn = oracle.data[prevBf.path[k]];
 //		for (int i = 0; i < oracle.latent[selfTrn].size(); i++) {
@@ -511,7 +508,6 @@ vmo::belief &vmo::tracking(vmo &oracle, vmo::belief &prevBf,
 				}
 			}
 		}
-		
 		// If next symbol is the same as current one, try advance for one step.
 		if (prevPath<oracle.nStates-1 && oracle.data[prevPath] == oracle.data[prevPath+1]) {
 			int nextPath = prevPath + 1;
@@ -527,7 +523,6 @@ vmo::belief &vmo::tracking(vmo &oracle, vmo::belief &prevBf,
 					}
 				}
 			}
-			
 			// Possible states from one suffix back
 			int prevSfx = oracle.sfx[nextPath];
 			for (int j = 0; j < oracle.trn[prevSfx].size(); j++) {
@@ -542,7 +537,6 @@ vmo::belief &vmo::tracking(vmo &oracle, vmo::belief &prevBf,
 					}
 				}
 			}
-			
 			// Possible states from one reverse suffix forward
 			int prevRsfx = oracle.rsfx[nextPath][0]; // Just the first one
 			for (int j = 0; j < oracle.trn[prevRsfx].size(); j++) {
@@ -556,9 +550,9 @@ vmo::belief &vmo::tracking(vmo &oracle, vmo::belief &prevBf,
 						tmpCostK = minD;
 					}
 				}
-			} 
+			}
 		}
-		
+
 		prevBf.cost[k] = (1.0-decay)*prevBf.cost[k] + decay*tmpCostK;
 		if (prevBf.cost[k] < tempCost) {
 			tempCost = prevBf.cost[k];
