@@ -565,7 +565,7 @@ void ofApp::draw(){
     #endif // KINECT_SEQUENCE
 
     if(drawSequence) sequence.draw();
-    if(draw4PatternsInSequence) sequence.drawPatternsInSequence(gestureUpdate);
+    if(drawPatternsInSequence) sequence.drawPatternsInSequence(gestureUpdate);
     if(drawSequenceSegments) sequence.drawSequenceSegments();
     if(isTracking) sequence.drawSequenceTracking(currentPercent);
 
