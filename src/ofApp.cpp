@@ -121,7 +121,7 @@ void ofApp::setup(){
 
     // SEQUENCE
     sequence.setup(maxMarkers);
-    sequence.load("sequences/simple5.xml");
+    sequence.load("sequences/sequence1marker2.xml");
     drawSequence = false;
     drawSequenceSegments = false;
 

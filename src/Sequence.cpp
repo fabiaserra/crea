@@ -63,8 +63,6 @@ void Sequence::draw(){
             line[idx] = currentPoint;
         }
 
-//        cout << "drawPoint: " << currentPoint << endl;
-
         ofColor c;
         if(markerIdx == 0) c.set(255, 0, 0);
         else if(markerIdx == 1) c.set(0, 0, 255);
@@ -390,9 +388,10 @@ vector<ofPolyline> Sequence::getSequenceSegment(const pair<float, float>& sequen
     float highPct = sequenceSegmentPct.second/100.0;
 
     vector<ofPolyline> segment;
+    float increment = 0.0005; // TODO: change it depending on how many frames has the sequence
     for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
         ofPolyline markerSegment;
-        for(float pct = lowPct; pct < highPct; pct += 0.005){
+        for(float pct = lowPct; pct < highPct; pct += increment){
             ofPoint p = markersPosition[markerIdx].getPointAtPercent(pct);
             markerSegment.addVertex(p);
         }
