@@ -19,4 +19,10 @@
 
 float lowpass(float input, float past, float slide);
 
-vector< vector<ofPolyline> > processPttr(vmo& oracle, const vmo::pttr& pttrList);
+vector< vector<ofPolyline> > processPttr(vmo& oracle, vector< vector< float> > &obs, const vmo::pttr& pttrList, int nFeature, int dim);
+
+vector< vector< float> > covarianceMat(vector< vector< float> > &input, int numMarker, int dim);
+
+vector< vector< float> > centroidSplit(vector< vector< float> > &input, int numMarker, int dim);
+
+vector<float> cov_cal(vector<float> &prevObs, vector<float> &obs, int numElements);
