@@ -9,7 +9,7 @@ void ofApp::setup(){
 //    ofSetFrameRate(30);
 
     // Number of IR markers
-    int maxMarkers = 1;
+    maxMarkers = 1;
 
     // Using a live kinect?
     #ifdef KINECT_CONNECTED
@@ -217,7 +217,7 @@ void ofApp::setup(){
 	}
     pastObs.assign(maxMarkers*dimensions, 0.0);
 //    pastFeatures.assign(numElements, 0.0);
-    currentFeatures.assign(numElements,0.0);
+    currentFeatures.assign(numElements, 0.0);
 
     currentBf = vmo::vmo::belief();
 //    prevBf = vmo::vmo::belief();
@@ -259,7 +259,6 @@ void ofApp::setup(){
     setupGUI8Emitter();
     setupGUI8Grid();
     setupGUI8Boids();
-//    setupgui8(MARKER_PARTICLES);
 
     interpolatingWidgets = false;
     loadGUISettings("settings/lastSettings.xml", false, false);
@@ -530,8 +529,6 @@ void ofApp::draw(){
     fbo.begin();
 
     // Draw semi-transparent white rectangle to slightly clear buffer (depends on the history value)
-//    ofEnableAlphaBlending(); // Enable transparency
-
     float alpha = (1-history) * 255;
     ofSetColor(red, green, blue, alpha);
     ofFill();
@@ -540,16 +537,19 @@ void ofApp::draw(){
     // Graphics
     ofSetColor(255);
     contour.draw();
-    gridParticles->draw();
-    emitterParticles->draw();
-    boidsParticles->draw();
+//    gridParticles->draw();
+//    emitterParticles->draw();
+//    boidsParticles->draw();
 
     fbo.end();
 
     // Draw buffer (graphics) on the screen
-//    ofEnableAlphaBlending(); // Enable transparency
     fbo.draw(0, 0);
-//    ofDisableAlphaBlending();
+
+    // Draw Particles
+    gridParticles->draw();
+    emitterParticles->draw();
+    boidsParticles->draw();
 
     if(drawMarkers){
         irMarkerFinder.draw();
@@ -1064,7 +1064,6 @@ void ofApp::setupGUI8Boids(){
     gui8Boids->addToggle("Contour", &boidsParticles->contourInput);
     gui8Boids->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui8Boids->setWidgetSpacing(3);
-    gui8Boids->addSpacer();
 
     gui8Boids->addSpacer();
     gui8Boids->addLabel("BOIDS", OFX_UI_FONT_LARGE);
