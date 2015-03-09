@@ -3,25 +3,25 @@
  vmo - Variable Markov Oracle
  implements the Variable Markov Oracle for time series analysis and
  generation
- 
+
  copyright 2015 greg surges & Cheng-i Wang
- 
+
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
- 
+
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
- 
+
+
  vmo.cpp
- 
+
  Original code by Greg Surges.
  Adapted by Cheng-i Wang on 1/25/15.
  -------------------------------------------------------------------------
@@ -31,11 +31,11 @@
 
 vmo::pttr::pttr(){
     size = 0;
-    
+
     vector2D tmpPts(0);
     sfxPts = tmpPts;
     //	sfxPts.reserve(INIT_VMO_SIZE);
-    
+
     vector1D tmpLen(0);
     sfxLen = tmpLen;
     //	sfxLen.reserve(INIT_VMO_SIZE);
@@ -44,10 +44,10 @@ vmo::pttr::pttr(){
 vmo::belief::belief(){
     K = 0;
     currentIdx = -1;
-    
+
     vector1D tmpPath(0);
     path = tmpPath;
-    
+
     vector<float> tmpCost(0);
     cost = tmpCost;
 }
@@ -55,69 +55,69 @@ vmo::belief::belief(){
 vmo::vmo(){
 }
 
-void vmo::setup(int dim = 1, int num = 1, float threshold = 0.0){
-    
+void vmo::setup(int numElement, float threshold = 0.0){
+
     nStates = 1;
-    this->dimFeature = dim;
-    this->numFeature = num;
+    this->nElement = numElement;
+//    this->numFeature = num;
     this->thresh = threshold;
-    
+
     // Suffix link vector
     sfx.clear();
     sfx.reserve(INIT_VMO_SIZE);
     sfx.push_back(-1);
-    
+
     // Longest repeated suffix
     lrs.clear();
     lrs.reserve(INIT_VMO_SIZE);
     lrs.push_back(0);
-    
+
     // Data vector - symbolized token for time series
     data.clear();
     data.reserve(INIT_VMO_SIZE);
     data.push_back(-1); //MARK: Might be problematic to initialize 0th state`s symbol as -1.
-    
+
     // Foward link vector
     vector1D zeroStateTrn(0);
     trn.clear();
     trn.reserve(INIT_VMO_SIZE);
     trn.push_back(zeroStateTrn);
-    
+
     // Reverse suffix link vector
     vector1D zeroStateRsfx;
     rsfx.clear();
     rsfx.reserve(INIT_VMO_SIZE);
     rsfx.push_back(zeroStateRsfx);
-    
+
     // State cluster vector
     //	vector1D zeroStateLatent;
     latent.clear();
     latent.reserve(INIT_VMO_K);
     //	latent.push_back(zeroStateLatent);
-    
+
     // Pattern label vector
     vector1D zeroStatePttrCat;
     pttrCat.clear();
     pttrCat.reserve(INIT_VMO_SIZE);
     pttrCat.push_back(zeroStatePttrCat);
-    
+
     // Pattern sequence index vector
     vector1D zeroStatePttrInd;
     pttrInd.clear();
     pttrInd.reserve(INIT_VMO_SIZE);
     pttrInd.push_back(zeroStatePttrInd);
-    
+
     // Observation vector
-    vector<float> zeroStateObs(dimFeature*numFeature, 0.0);
+    vector<float> zeroStateObs(nElement, 0.0);
     obs.clear();
     obs.reserve(INIT_VMO_SIZE);
     obs.push_back(zeroStateObs);
-    
+
     // IR (information rate) vector
     ir.clear();
     ir.reserve(INIT_VMO_SIZE);
     ir.push_back(0.0);
-    
+
     // Maximum LRS
     //	maxLrs.clear();
     //	maxLrs.assign(INIT_VMO_SIZE, 0);
@@ -127,7 +127,7 @@ void vmo::setup(int dim = 1, int num = 1, float threshold = 0.0){
 void vmo::reset(){
     nStates = 0;
     thresh = 0.1;
-    
+
     trn.clear();
     sfx.clear();
     rsfx.clear();
@@ -195,30 +195,30 @@ vector2D vmo::encode(){
 
 void vmo::addState(vector<float>& newData){
     // Add a new state to VMO
-    
+
     // Update attributes
     sfx.push_back(0);
     rsfx.push_back(vector1D(0));
     trn.push_back(vector1D(0));
     lrs.push_back(0);
     obs.push_back(newData);
-    
+
     pttrCat.push_back(vector1D(0));
     pttrInd.push_back(vector1D(0));
-    
+
     nStates++;
     int ind = nStates - 1; // Local index
     trn[ind-1].push_back(ind);
-    
+
     int k = sfx[ind-1];
     int piOne = ind-1;
-    
+
     int sfxCandidate = 0;
-    
+
     while (k >= 0) {
         vector1D trnList(0);
         vector<float> trnVec(0);
-        vector<vector<float> > tmp(trn[k].size(), vector<float>(dimFeature*numFeature, 0.0));
+        vector<vector<float> > tmp(trn[k].size(), vector<float>(nElement, 0.0));
         for (int i = 0; i < trn[k].size(); i++) {
             tmp[i] = obs[trn[k][i]];
         }
@@ -239,7 +239,7 @@ void vmo::addState(vector<float>& newData){
             break;
         }
     }
-    
+
     if (k == -1) {
         sfx[ind] = 0;
         lrs[ind] = 0;
@@ -251,11 +251,11 @@ void vmo::addState(vector<float>& newData){
         latent[data[sfx[ind]]].push_back(ind);
         data.push_back(data[sfx[ind]]);
     }
-    
+
     rsfx[sfx[ind]].push_back(ind);
 }
 
-vector<float> vmo::cumsum(vector<float> cw){
+vector<float> vmo::cumsum(vector<float> &cw){
     vector<float> out;
     float sum = 0;
     for(int i = 0; i < cw.size(); i++){
@@ -271,7 +271,7 @@ float vmo::getIR(){
     vector<float> cw1 (nStates-1, 0.0);
     vector<float> block (nStates-1, 0.0);
     vector<float> ir (nStates-1, 0.0);
-    
+
     int j = 0;
     for (int i = 0; i<code.size(); i++) {
         if (code[i][0] == 0) {
@@ -286,10 +286,10 @@ float vmo::getIR(){
             j+=len;
         }
     }
-    
+
     vector<float> h0 = cumsum(cw0);
     vector<float> h1 = cumsum(cw1);
-    
+
     float irSum = 0.0;
     for (int i = 0; i < nStates-1; i++) {
         h0[i] = log2f(h0[i]+FLT_MIN);
@@ -303,14 +303,14 @@ float vmo::getIR(){
 }
 
 void vmo::print(string attr){
-    
+
 }
 
-float vmo::findThreshold(vector<vector<float> > &obs, int dim = 1, int num = 1,float start = 0.0, float step = 0.01, float end = 2.0){
+float vmo::findThreshold(vector<vector<float> > &obs, int numElement = 4, float start = 0.0, float step = 0.01, float end = 2.0){
     float t = start;
     float ir = 0.0;
     while (start <= end) {
-        vmo tmpVmo = buildOracle(obs, dim, num, start);
+        vmo tmpVmo = buildOracle(obs, numElement, start);
         float tmpIr = tmpVmo.getIR();
         if (tmpIr >= ir) {
             ir = tmpIr;
@@ -321,10 +321,10 @@ float vmo::findThreshold(vector<vector<float> > &obs, int dim = 1, int num = 1,f
     return t;
 }
 
-vmo vmo::buildOracle(vector<vector<float> > &obs, int dim = 1, int num = 1, float threshold = 0.0){
+vmo vmo::buildOracle(vector<vector<float> > &obs, int numElement = 4, float threshold = 0.0){
     vmo oracle = vmo();
-    oracle.setup(dim, num, threshold);
-    
+    oracle.setup(numElement, threshold);
+
     for (int i = 0; i<obs.size(); i++) {
         oracle.addState(obs[i]);
     }
@@ -334,12 +334,12 @@ vmo vmo::buildOracle(vector<vector<float> > &obs, int dim = 1, int num = 1, floa
 vmo::pttr vmo::findPttr(const vmo& oracle, int minLen = 0){
     vmo::pttr pttrList = vmo::pttr();
     int preSfx = -1;
-    
+
     for (int i = oracle.nStates-1; i > minLen; i--) {
         int s = oracle.sfx[i];
         vector1D r = oracle.rsfx[i];
         bool pttrFound = false;
-        
+
         if (
             (s != 0) &&
             ((i - oracle.lrs[i]+1) > s) &&
@@ -388,7 +388,7 @@ vmo::pttr vmo::findPttr(const vmo& oracle, int minLen = 0){
                 pttrList.size = pttrList.sfxLen.size();
             }
             preSfx = s;
-            
+
         }else{
             preSfx = -1;
         }
@@ -396,165 +396,177 @@ vmo::pttr vmo::findPttr(const vmo& oracle, int minLen = 0){
     return pttrList;
 }
 
-//vector<vector<ofPolyline> > vmo::processPttr(vmo& oracle, const vmo::pttr& pttrList){
-//
-//	vector<vector<ofPolyline> > pattern(pttrList.size,
-//										vector<ofPolyline>(oracle.numFeature,
-//														   vector<ofPoint>(0)));
-//	vector1D pts(0);
-//	int len = 0;
-//	for (int i = 0; i < pttrList.size; i++) {
-//		pts = pttrList.sfxPts[i];
-//		len = pttrList.sfxLen[i];
-//		vector<ofPolyline> ges(oracle.numFeature, vector<ofPoint>(len, ofPoint(0.0,0.0)));
-//		pattern[i] = ges;
-//		for (int j = 0; j<pts.size(); j++) {
-//			int offset = pts[j]-len+1;
-//			for (int k = 0; k < len; k++) {
-//				oracle.pttrCat[offset+k].push_back(i);
-//				oracle.pttrInd[offset+k].push_back(k+1);
-//
-//				for (int d = 0; d < oracle.numFeature; d++) {
-//					pattern[i][d][k].x = (pattern[i][d][k].x*float(j)/float(j+1))
-//                                    + oracle.obs[offset+k][d*oracle.dimFeature]/float(j+1);
-//					pattern[i][d][k].y = (pattern[i][d][k].y*float(j)/float(j+1))
-//                                    + oracle.obs[offset+k][d*oracle.dimFeature+1]/float(j+1);
-//				}
-//			}
-//		}
-//	}
-//	return pattern;
-//}
-
-
 vmo::belief &vmo::tracking_init(vmo &oracle, vmo::belief &bf,
-                                const vmo::pttr &pttrList, vector<float> &firstObs){
-    
-    bf.K = oracle.latent.size();
-    bf.path.assign(bf.K, 0);
-    bf.cost.assign(bf.K, 0.0);
-    
-    int firstIdx = -1;
-    float firstCost = FLT_MAX;
-    for (int k = 0; k < bf.K; k++) {
-        float minD = FLT_MAX;
-        int ind = -1;
-        //		float d = 0.0;
-        //		d = getDistance(firstObs, oracle.obs[oracle.rsfx[0][k]]);
-        //		ind = oracle.rsfx[0][k];
-        //		bf.path[k] = ind;
-        //		bf.cost[k] = d;
-        //		if (d < firstCost) {
-        //			firstIdx = ind;
-        //			firstCost = d;
-        //		}
-        for (int i = 0; i < oracle.latent[k].size(); i++) {
-            int idx = oracle.latent[k][i];
+								const vmo::pttr &pttrList, vector<float> &firstObs){
+
+	bf.K = oracle.latent.size();
+	bf.path.assign(oracle.latent.size(), 0);
+	bf.cost.assign(oracle.latent.size(), 0.0);
+
+	int firstIdx = -1;
+	float firstCost = FLT_MAX;
+	for (int k = 0; k < bf.K; k++) {
+		float minD = FLT_MAX;
+		int ind = -1;
+//		float d = 0.0;
+//		d = getDistance(firstObs, oracle.obs[oracle.rsfx[0][k]]);
+//		ind = oracle.rsfx[0][k];
+//		bf.path[k] = ind;
+//		bf.cost[k] = d;
+//		if (d < firstCost) {
+//			firstIdx = ind;
+//			firstCost = d;
+//		}
+		int idx = -1;
+		for (int i = 0; i < oracle.latent[k].size(); i++) {
+			idx = oracle.latent[k][i];
             float d = getDistance(firstObs, oracle.obs[idx]);
-            if (d < minD) {
-                minD = d;
-                ind = idx;
-                bf.path[k] = ind;
-                bf.cost[k] = minD;
-            }
-        }
-        if (minD < firstCost) {
-            firstIdx = ind;
-            firstCost = minD;
-        }
-    }
-    bf.currentIdx = firstIdx;
-    return bf;
+			if (d < minD) {
+				minD = d;
+				ind = idx;
+				bf.path[k] = ind;
+				bf.cost[k] = minD;
+			}
+		}
+		if (minD < firstCost) {
+			firstIdx = ind;
+			firstCost = minD;
+		}
+	}
+	bf.currentIdx = firstIdx;
+	return bf;
 }
 
-vmo::belief &vmo::tracking(vmo &oracle,
-                           const vmo::pttr &pttrList,
-                           vmo::belief &prevBf, vector<float> &obs, float decay){
-    /*
-     Real-time tracking function for VMO, not optimized yet.
-     */
-    //	vector1D stateCache;
-    //	vector<float> distCache;
-    
-    int tempIdx = -1;
-    float tempCost = FLT_MAX;
-    for (int k = 0; k < prevBf.K; k++) {
-        float minD = FLT_MAX;
-        float tmpCostK = 0.0;
-        int ind = -1;
-        
-        // Self-transition
-        //		int selfTrn = oracle.data[prevBf.path[k]];
-        //		for (int i = 0; i < oracle.latent[selfTrn].size(); i++) {
-        //			float d = getDistance(obs, oracle.obs[oracle.latent[selfTrn][i]]);
-        //			if (d < minD) {
-        //				minD = d;
-        //				ind = oracle.latent[selfTrn][i];
-        //				prevBf.path[k] = ind;
-        //				prevBf.cost[k] = minD;
-        //			}
-        //		}
-        
-        // Possible states from forward links
-        int sym = -1;
-        int prevPath = prevBf.path[k];
-        for (int j = 0; j < oracle.trn[prevPath].size(); j++) {
-            sym = oracle.data[oracle.trn[prevPath][j]];
-            float d = 0.0;
-            for (int i = 0; i < oracle.latent[sym].size(); i++) {
-                d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
-                if (d < minD) {
-                    minD = d;
-                    ind = oracle.latent[sym][i];
-                    prevBf.path[k] = ind;
-                    tmpCostK = minD;
-                }
-            }
-        }
-        
-        // Possible states from one suffix back
-        sym = -1;
-        int prevSfx = oracle.sfx[prevBf.path[k]];
-        for (int j = 0; j < oracle.trn[prevSfx].size(); j++) {
-            sym = oracle.data[oracle.trn[prevSfx][j]];
-            float d = 0.0;
-            for (int i = 0; i < oracle.latent[sym].size(); i++) {
-                d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
-                if (d < minD) {
-                    minD = d;
-                    ind = oracle.latent[sym][i];
-                    prevBf.path[k] = ind;
-                    tmpCostK = minD;
-                }
-            }
-        }
-        
-        // Possible states from one reverse suffix forward
-        sym = -1;
-        int prevRsfx = oracle.rsfx[prevBf.path[k]][0]; // Just the first one
-        for (int j = 0; j < oracle.trn[prevPath].size(); j++) {
-            sym = oracle.data[oracle.trn[prevPath][j]];
-            float d = 0.0;
-            for (int i = 0; i < oracle.latent[sym].size(); i++) {
-                d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
-                if (d < minD) {
-                    minD = d;
-                    ind = oracle.latent[sym][i];
-                    prevBf.path[k] = ind;
-                    tmpCostK = minD;
-                }
-            }
-        }
-        
-        prevBf.cost[k] = prevBf.cost[k]*decay + tmpCostK;
-        float accumCostK = prevBf.cost[k];
-        if (accumCostK < tempCost) {
-            tempCost = accumCostK;
-            tempIdx = ind;
-        }
-    }
-    prevBf.currentIdx = tempIdx;
-    return prevBf;
+vmo::belief &vmo::tracking(vmo &oracle, vmo::belief &prevBf,
+						   const vmo::pttr &pttrList,
+						   vector<float> &obs, float decay){
+	/*
+	 Real-time tracking function for VMO, not optimized yet.
+	 */
+//	vector1D stateCache;
+//	vector<float> distCache;
+
+	int tempIdx = -1;
+	float tempCost = FLT_MAX;
+	for (int k = 0; k < prevBf.K; k++) {
+		float minD = FLT_MAX;
+		float tmpCostK = 0.0;
+		int ind = -1;
+
+		// Self-transition
+//		int selfTrn = oracle.data[prevBf.path[k]];
+//		for (int i = 0; i < oracle.latent[selfTrn].size(); i++) {
+//			float d = getDistance(obs, oracle.obs[oracle.latent[selfTrn][i]]);
+//			if (d < minD) {
+//				minD = d;
+//				ind = oracle.latent[selfTrn][i];
+//				prevBf.path[k] = ind;
+//				prevBf.cost[k] = minD;
+//			}
+//		}
+
+		// Possible states from forward links
+		int sym = -1;
+		float d = 0.0;
+		int prevPath = prevBf.path[k];
+		for (int j = 0; j < oracle.trn[prevPath].size(); j++) {
+			sym = oracle.data[oracle.trn[prevPath][j]];
+			for (int i = 0; i < oracle.latent[sym].size(); i++) {
+				d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
+				if (d < minD) {
+					minD = d;
+					ind = oracle.latent[sym][i];
+					prevBf.path[k] = ind;
+					tmpCostK = minD;
+				}
+			}
+		}
+
+		// Possible states from one suffix back
+		int prevSfx = oracle.sfx[prevPath];
+		for (int j = 0; j < oracle.trn[prevSfx].size(); j++) {
+			sym = oracle.data[oracle.trn[prevSfx][j]];
+			for (int i = 0; i < oracle.latent[sym].size(); i++) {
+				d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
+				if (d < minD) {
+					minD = d;
+					ind = oracle.latent[sym][i];
+					prevBf.path[k] = ind;
+					tmpCostK = minD;
+				}
+			}
+		}
+
+		// Possible states from one reverse suffix forward
+		int prevRsfx = oracle.rsfx[prevPath][0]; // Just the first one
+		for (int j = 0; j < oracle.trn[prevRsfx].size(); j++) {
+			sym = oracle.data[oracle.trn[prevRsfx][j]];
+			for (int i = 0; i < oracle.latent[sym].size(); i++) {
+				d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
+				if (d < minD) {
+					minD = d;
+					ind = oracle.latent[sym][i];
+					prevBf.path[k] = ind;
+					tmpCostK = minD;
+				}
+			}
+		}
+
+		// If next symbol is the same as current one, try advance for one step.
+		if (prevPath<oracle.nStates-1 && oracle.data[prevPath] == oracle.data[prevPath+1]) {
+			int nextPath = prevPath + 1;
+			for (int j = 0; j < oracle.trn[nextPath].size(); j++) {
+				sym = oracle.data[oracle.trn[nextPath][j]];
+				for (int i = 0; i < oracle.latent[sym].size(); i++) {
+					d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
+					if (d < minD) {
+						minD = d;
+						ind = oracle.latent[sym][i];
+						prevBf.path[k] = ind;
+						tmpCostK = minD;
+					}
+				}
+			}
+
+			// Possible states from one suffix back
+			int prevSfx = oracle.sfx[nextPath];
+			for (int j = 0; j < oracle.trn[prevSfx].size(); j++) {
+				sym = oracle.data[oracle.trn[prevSfx][j]];
+				for (int i = 0; i < oracle.latent[sym].size(); i++) {
+					d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
+					if (d < minD) {
+						minD = d;
+						ind = oracle.latent[sym][i];
+						prevBf.path[k] = ind;
+						tmpCostK = minD;
+					}
+				}
+			}
+
+			// Possible states from one reverse suffix forward
+			int prevRsfx = oracle.rsfx[nextPath][0]; // Just the first one
+			for (int j = 0; j < oracle.trn[prevRsfx].size(); j++) {
+				sym = oracle.data[oracle.trn[prevRsfx][j]];
+				for (int i = 0; i < oracle.latent[sym].size(); i++) {
+					d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
+					if (d < minD) {
+						minD = d;
+						ind = oracle.latent[sym][i];
+						prevBf.path[k] = ind;
+						tmpCostK = minD;
+					}
+				}
+			}
+		}
+
+		prevBf.cost[k] = (1.0-decay)*prevBf.cost[k] + decay*tmpCostK;
+		if (prevBf.cost[k] < tempCost) {
+			tempCost = prevBf.cost[k];
+			tempIdx = ind;
+		}
+	}
+	prevBf.currentIdx = tempIdx;
+	return prevBf;
 }
 
 map<int, float> vmo::getGestureUpdate(int ind, vmo::pttr& pttrList){
