@@ -7,9 +7,10 @@ using namespace cv;
 void ofApp::setup(){
 
 //    ofSetFrameRate(30);
-	// Number of IR markers
+
+    // Number of IR markers
     maxMarkers = 1;
-	
+
     // Using a live kinect?
     #ifdef KINECT_CONNECTED
         // OPEN KINECT
@@ -100,18 +101,21 @@ void ofApp::setup(){
 
     // GRID PARTICLES
     gridParticles = new ParticleSystem();
-    gridParticles->radius = 2;
-    gridParticles->bounce = true;
     gridParticles->setup(GRID, MARKERS, kinect.width, kinect.height);
 
     // BOIDS PARTICLES
     boidsParticles = new ParticleSystem();
     boidsParticles->setup(BOIDS, MARKERS, kinect.width, kinect.height);
 
+    // ANIMATIONS PARTICLES
+    animationsParticles = new ParticleSystem();
+    animationsParticles->setup(ANIMATIONS, MARKERS, kinect.width, kinect.height);
+
     // VECTOR OF PARTICLE SYSTEMS
     particleSystems.push_back(emitterParticles);
     particleSystems.push_back(gridParticles);
     particleSystems.push_back(boidsParticles);
+    particleSystems.push_back(animationsParticles);
     currentParticleSystem = 0;
 
     // DEPTH CONTOUR
@@ -212,7 +216,7 @@ void ofApp::setup(){
 	}
     pastObs.assign(maxMarkers*dimensions, 0.0);
 //    pastFeatures.assign(numElements, 0.0);
-    currentFeatures.assign(numElements,0.0);
+    currentFeatures.assign(numElements, 0.0);
 
     currentBf = vmo::vmo::belief();
 //    prevBf = vmo::vmo::belief();
@@ -254,7 +258,7 @@ void ofApp::setup(){
     setupGUI8Emitter();
     setupGUI8Grid();
     setupGUI8Boids();
-//    setupgui8(MARKER_PARTICLES);
+    setupGUI8Animations();
 
     interpolatingWidgets = false;
     loadGUISettings("settings/lastSettings.xml", false, false);
@@ -378,18 +382,15 @@ void ofApp::update(){
     // Update contour
     contour.update(contourFinder);
 
-    // Update emitter particles
+    // Update particles
     emitterParticles->update(dt, tempMarkers, contour);
-
-    // Update grid particles
     gridParticles->update(dt, tempMarkers, contour);
-
-    // Update boids particles
     boidsParticles->update(dt, tempMarkers, contour);
+    animationsParticles->update(dt, tempMarkers, contour);
 
     #ifdef KINECT_SEQUENCE
 
-        if (isTracking){
+        if(isTracking){
             vector<float> obs(maxMarkers*dimensions, 0.0); // Temporary code
             for(unsigned int i = 0; i < kinectSequence.maxMarkers; i++){
                 ofPoint currentPoint = kinectSequence.getCurrentPoint(i);
@@ -519,8 +520,6 @@ void ofApp::draw(){
     fbo.begin();
 
     // Draw semi-transparent white rectangle to slightly clear buffer (depends on the history value)
-//    ofEnableAlphaBlending(); // Enable transparency
-
     float alpha = (1-history) * 255;
     ofSetColor(red, green, blue, alpha);
     ofFill();
@@ -529,16 +528,20 @@ void ofApp::draw(){
     // Graphics
     ofSetColor(255);
     contour.draw();
-    gridParticles->draw();
-    emitterParticles->draw();
-    boidsParticles->draw();
+//    gridParticles->draw();
+//    emitterParticles->draw();
+//    boidsParticles->draw();
 
     fbo.end();
 
     // Draw buffer (graphics) on the screen
-//    ofEnableAlphaBlending(); // Enable transparency
     fbo.draw(0, 0);
-//    ofDisableAlphaBlending();
+
+    // Draw Particles
+    gridParticles->draw();
+    emitterParticles->draw();
+    boidsParticles->draw();
+    animationsParticles->draw();
 
     if(drawMarkers){
         irMarkerFinder.draw();
@@ -554,11 +557,8 @@ void ofApp::draw(){
     #endif // KINECT_SEQUENCE
 
     if(drawSequence) sequence.draw();
-
-    #ifdef KINECT_SEQUENCE
-//        if(isTracking) sequence.drawPatternsInSequence(gestureUpdate);
-    #endif // KINECT_SEQUENCE
-
+    if(drawPatternsInSequence) sequence.drawPatternsInSequence(gestureUpdate);
+    if(drawSequenceSegments) sequence.drawSequenceSegments();
     if(isTracking) sequence.drawSequenceTracking(currentPercent);
 
     ofPopMatrix();
@@ -865,7 +865,6 @@ void ofApp::setupGUI7(){
     gui7->addToggle("Contour Line", &contour.drawContourLine);
     gui7->addSlider("Smoothing Size", 0.0, 40.0, &contour.smoothingSize);
 
-
     gui7->autoSizeToFitWidgets();
     gui7->setVisible(false);
     ofAddListener(gui7->newGUIEvent, this, &ofApp::guiEvent);
@@ -922,10 +921,10 @@ void ofApp::setupGUI8Emitter(){
     gui8Emitter->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui8Emitter->setWidgetSpacing(10);
     gui8Emitter->addToggle("Empty", &emitterParticles->isEmpty);
-    gui8Emitter->addToggle("Draw Line", &emitterParticles->drawLine);
+    gui8Emitter->addToggle("Line", &emitterParticles->drawLine);
     gui8Emitter->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui8Emitter->setWidgetSpacing(3);
-    gui8Emitter->addSlider("Lifetime", 0.0, 20.0, &emitterParticles->lifetime);
+    gui8Emitter->addSlider("Lifetime", 0.1, 20.0, &emitterParticles->lifetime);
     gui8Emitter->addSlider("Life Random[%]", 0.0, 100.0, &emitterParticles->lifetimeRnd);
     gui8Emitter->addSlider("Radius", 0.1, 25.0, &emitterParticles->radius);
     gui8Emitter->addSlider("Radius Random[%]", 0.0, 100.0, &emitterParticles->radiusRnd);
@@ -1004,6 +1003,7 @@ void ofApp::setupGUI8Grid(){
     gui8Grid->addSlider("Radius", 0.1, 25.0, &gridParticles->radius);
     gui8Grid->addIntSlider("Resolution", 1, 20, &gridParticles->gridRes)->setStickyValue(1.0);
 
+    // TODO: addParticlePhysics(), addParticleProperties()... and general methods for particle GUIs
     gui8Grid->addSpacer();
     gui8Grid->addLabel("Physics");
     gui8Grid->addSlider("Friction", 0, 100, &gridParticles->friction);
@@ -1056,7 +1056,6 @@ void ofApp::setupGUI8Boids(){
     gui8Boids->addToggle("Contour", &boidsParticles->contourInput);
     gui8Boids->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui8Boids->setWidgetSpacing(3);
-    gui8Boids->addSpacer();
 
     gui8Boids->addSpacer();
     gui8Boids->addLabel("BOIDS", OFX_UI_FONT_LARGE);
@@ -1095,6 +1094,82 @@ void ofApp::setupGUI8Boids(){
     ofAddListener(gui8Boids->newGUIEvent, this, &ofApp::guiEvent);
     guis.push_back(gui8Boids);
     particleGuis.push_back(gui8Boids);
+}
+
+//--------------------------------------------------------------
+void ofApp::setupGUI8Animations(){
+    gui8Animations = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
+    gui8Animations->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
+
+    gui8Animations->addSpacer();
+    gui8Animations->addLabel("Press '8' to toggle panel", OFX_UI_FONT_SMALL);
+
+    gui8Animations->addSpacer();
+    gui8Animations->addFPS(OFX_UI_FONT_SMALL);
+
+    gui8Animations->addSpacer();
+    gui8Animations->addImageToggle("Particles Active", "icons/show.png", &animationsParticles->isActive, dim, dim);
+    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+
+    ofxUIImageButton *previous;
+    previous = gui8Animations->addImageButton("Previous Particle System", "icons/previous.png", false, dim, dim);
+    previous->setColorBack(ofColor(150, 255));
+
+    ofxUIImageButton *next;
+    next = gui8Animations->addImageButton("Next Particle System", "icons/play.png", false, dim, dim);
+    next->setColorBack(ofColor(150, 255));
+
+    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8Animations->addSpacer();
+    gui8Animations->addToggle("Marker", &animationsParticles->markersInput);
+    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8Animations->setWidgetSpacing(15);
+    gui8Animations->addToggle("Contour", &animationsParticles->contourInput);
+    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8Animations->setWidgetSpacing(3);
+
+    gui8Animations->addSpacer();
+    gui8Animations->addLabel("ANIMATIONS", OFX_UI_FONT_LARGE);
+    gui8Animations->addSpacer();
+
+    gui8Animations->addToggle("Rain", false);
+    gui8Animations->addToggle("Snow", false);
+    gui8Animations->addToggle("Wind", false);
+    gui8Animations->addToggle("Explosion", false);
+
+    gui8Animations->addSpacer();
+    gui8Animations->addLabel("Particle");
+    gui8Animations->addToggle("Immortal", &animationsParticles->immortal);
+    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8Animations->setWidgetSpacing(10);
+    gui8Animations->addToggle("Empty", &animationsParticles->isEmpty);
+    gui8Animations->addToggle("Line", &animationsParticles->drawLine);
+    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8Animations->setWidgetSpacing(3);
+    gui8Animations->addSlider("Lifetime", 0.1, 20.0, &animationsParticles->lifetime);
+    gui8Animations->addSlider("Life Random[%]", 0.0, 100.0, &animationsParticles->lifetimeRnd);
+    gui8Animations->addSlider("Radius", 0.1, 25.0, &animationsParticles->radius);
+    gui8Animations->addSlider("Radius Random[%]", 0.0, 100.0, &animationsParticles->radiusRnd);
+
+    gui8Animations->addSpacer();
+    gui8Animations->addLabel("Physics");
+    gui8Animations->addSlider("Friction", 0, 100, &animationsParticles->friction);
+    gui8Animations->addSlider("Gravity", 0.0, 15.0, &animationsParticles->gravity);
+    gui8Animations->addSlider("Turbulence", 0.0, 20.0, &animationsParticles->turbulence);
+    gui8Animations->addToggle("Bounces", &animationsParticles->bounce);
+    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8Animations->setWidgetSpacing(10);
+    gui8Animations->addToggle("Repulse", &animationsParticles->repulse);
+    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8Animations->setWidgetSpacing(3);
+
+    gui8Animations->addSpacer();
+
+    gui8Animations->autoSizeToFitWidgets();
+    gui8Animations->setVisible(false);
+    ofAddListener(gui8Animations->newGUIEvent, this, &ofApp::guiEvent);
+    guis.push_back(gui8Animations);
+    particleGuis.push_back(gui8Animations);
 }
 
 //--------------------------------------------------------------
@@ -1631,6 +1706,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
         if(toggle->getValue() == true) particleSystems[currentParticleSystem]->bornParticles();
         else particleSystems[currentParticleSystem]->killParticles();
+        cout << "Current PS: " << currentParticleSystem << endl;
     }
 
     if(e.getName() == "Lower Threshold" || e.getName() == "Higher Threshold"){
@@ -1651,6 +1727,23 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         }
         sequence.drawCueSegments(sequencePcts);
     }
+
+    if(e.getName() == "Show sequence segmentation"){
+        ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
+        if(toggle->getValue() == true){
+            vector< pair<float, float> > sequencePcts;
+            for (int i = 0; i < cueSliders.size(); i++){
+                pair<float, float> pcts;
+                pcts.first = cueSliders.at(i).second->getValueLow();
+                pcts.second = cueSliders.at(i).second->getValueHigh();
+                if((i < cueSliders.size()-1) && (pcts.second > cueSliders.at(i+1).second->getValueLow())){
+                    cueSliders.at(i).second->setValueHigh(cueSliders.at(i+1).second->getValueLow());
+                }
+                sequencePcts.push_back(pcts);
+            }
+            sequence.updateSequenceSegments(sequencePcts);
+        }
+    }
 }
 
 //--------------------------------------------------------------
@@ -1664,6 +1757,7 @@ void ofApp::exit(){
     delete emitterParticles;
     delete gridParticles;
     delete boidsParticles;
+    delete animationsParticles;
     particleSystems.clear();
 
 //    for (int i=0; i<particleSystems.size(); i++) {
@@ -1699,6 +1793,7 @@ void ofApp::exit(){
     delete gui8Emitter;
     delete gui8Grid;
     delete gui8Boids;
+    delete gui8Animations;
     guis.clear();
 }
 

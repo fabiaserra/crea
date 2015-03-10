@@ -63,8 +63,6 @@ void Sequence::draw(){
             line[idx] = currentPoint;
         }
 
-//        cout << "drawPoint: " << currentPoint << endl;
-
         ofColor c;
         if(markerIdx == 0) c.set(255, 0, 0);
         else if(markerIdx == 1) c.set(0, 0, 255);
@@ -231,7 +229,6 @@ void Sequence::drawPatternsInSequence(map<int, float>& currentPatterns){
                 ofSetLineWidth(2);
                 line.draw();
 
-
                 // Pattern current processing point
                 c.setBrightness(150);
                 ofSetColor(c, 255);
@@ -249,7 +246,7 @@ void Sequence::drawPattern(const int patternPosition, const int patternIdx, floa
     float height = 480.0;
     float scale = 5.5;
     float margin = 40.0;
-    float guiHeight = 850;
+    float guiHeight = 900;
 
     ofPushMatrix();
     ofPushStyle();
@@ -370,9 +367,11 @@ vector<ofPolyline> Sequence::getCueSegment(const pair<float, float>& sequenceSeg
     float highPct = sequenceSegmentPct.second/100.0;
 
     vector<ofPolyline> segment;
+//    float increment = 0.0005; // TODO: change it depending on how many frames has the sequence
+    float increment = ofMap(numFrames, 0, 3000, 0.005, 0.0001);
     for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
         ofPolyline markerSegment;
-        for(float pct = lowPct; pct < highPct; pct += 0.005){
+        for(float pct = lowPct; pct < highPct; pct += increment){
             ofPoint p = markersPosition[markerIdx].getPointAtPercent(pct);
             markerSegment.addVertex(p);
         }

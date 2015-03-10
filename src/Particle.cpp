@@ -2,18 +2,25 @@
 
 Particle::Particle(){
     isAlive         = true;
+
     isTouched		= false;
+
     immortal        = false;
+
     bounces         = false;
     steers          = false;
+
     sizeAge         = false;
     opacityAge      = false;
     colorAge        = false;
     flickersAge     = false;
     isEmpty         = false;
     drawLine        = false;
+
     limitSpeed      = false;
+
     age             = 0;
+
     width           = ofGetWidth();
     height          = ofGetHeight();
 }
@@ -60,8 +67,18 @@ void Particle::update(float dt){
 
         // Change particle color with age
         if (colorAge){
-            float saturation = ofMap(age, 0, lifetime, 255, 128);
-            float hue = ofMap(age, 0, lifetime, originalHue, originalHue-100);
+            float saturation;
+            float hue;
+
+            if(!immortal){
+                saturation = ofMap(age, 0, lifetime, 255, 128);
+                hue = ofMap(age, 0, lifetime, originalHue, originalHue-100);
+            }
+            else{
+//                saturation = 255%(int)ofGetElapsedTimef();
+                hue = 255%(int)ofGetElapsedTimef();
+            }
+
             color.setSaturation(saturation);
             color.setHue(hue);
         }
