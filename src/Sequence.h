@@ -17,7 +17,7 @@ class Sequence{
         void draw();
         void drawPatterns(map<int, float>& currentPatterns);
         void drawPatternsInSequence(map<int, float>& currentPatterns);
-        void drawSequenceTracking(float percent);
+        void drawSequenceTracking(int currentIdx);
         void drawSequenceSegments();
 
         void updateSequenceSegments(const vector< pair<float, float> >& sequencePcts);

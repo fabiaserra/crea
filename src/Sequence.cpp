@@ -55,10 +55,10 @@ void Sequence::draw(){
 
         ofPoint currentPoint;
         ofPolyline line;
-        size_t processedFrames = calcCurrentFrameIndex();
-        line.resize(processedFrames + 1);
+        int currentIdx = calcCurrentFrameIndex();
+        line.resize(currentIdx + 1);
 
-        for(size_t idx = 0; idx <= processedFrames; idx++){
+        for(size_t idx = 0; idx <= currentIdx; idx++){
             currentPoint = markersPosition[markerIdx].getPointAtIndexInterpolated(idx);
             line[idx] = currentPoint;
         }
@@ -312,7 +312,7 @@ void Sequence::drawPattern(const int patternPosition, const int patternIdx, floa
 }
 
 // Draw current point in the tracking of the sequence
-void Sequence::drawSequenceTracking(float percent){
+void Sequence::drawSequenceTracking(int currentIdx){
     ofPushStyle();
     for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
         ofColor c(0,255,0);
@@ -320,27 +320,28 @@ void Sequence::drawSequenceTracking(float percent){
 //        else if(markerIdx == 1) c.set(0, 0, 255);
 //        else if(markerIdx == 2) c.set(0, 255, 0);
 
-//        ofSetColor(c, 50);
-//        ofSetLineWidth(1.5);
-//        markersPosition[markerIdx].draw();
-
-//        // Draw all past points
+//        // Draw all past points       
 //        ofPoint currentPoint;
 //        ofPolyline line;
-//        for(float p = 0.0; p <= percent; p += 0.001){
-//            currentPoint = markersPosition[markerIdx].getPointAtPercent(p);
-//            line.addVertex(currentPoint);
+//        line.resize(currentIdx + 1);
+//        
+//        for(size_t idx = 0; idx < currentIdx; idx++){
+//            currentPoint = markersPosition[markerIdx].getPointAtIndexInterpolated(idx);
+//            line[idx] = currentPoint;
 //        }
-//        ofSetColor(c, 255);
-//        line.draw();
 
         // Current point
-        ofPoint currentPoint = markersPosition[markerIdx].getPointAtPercent(percent);
-
+        currentPoint = markersPosition[markerIdx][currentIdx];
+        
+        ofSetColor(c, 160);
+        ofSetLineWidth(2.5);
+        line.draw();
+        
         ofFill();
         c.setBrightness(150);
-        ofSetColor(c, 255);
+        ofSetColor(c);
         ofCircle(currentPoint, 3);
+
     }
     ofPopStyle();
 }

@@ -569,7 +569,7 @@ void ofApp::draw(){
     if(drawSequence) sequence.draw();
     if(drawPatternsInSequence) sequence.drawPatternsInSequence(gestureUpdate);
     if(drawSequenceSegments) sequence.drawSequenceSegments();
-    if(isTracking) sequence.drawSequenceTracking(currentPercent);
+    if(isTracking) sequence.drawSequenceTracking(currentBf.currentIdx);
 
     ofPopMatrix();
 
