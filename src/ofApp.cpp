@@ -173,8 +173,7 @@ void ofApp::setup(){
         drawPatternsInSequence = false;
 		cout << sequence.patterns.size() << endl;
 
-	}
-	else{
+	}else{
 		numElements = maxMarkers*dimensions;
 		savedObs.assign(sequence.numFrames, vector<float>(numElements));
 		for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
@@ -569,7 +568,8 @@ void ofApp::draw(){
     if(drawSequence) sequence.draw();
     if(drawPatternsInSequence) sequence.drawPatternsInSequence(gestureUpdate);
     if(drawSequenceSegments) sequence.drawSequenceSegments();
-    if(isTracking) sequence.drawSequenceTracking(currentPercent);
+//    if(isTracking) sequence.drawSequenceTracking(currentPercent);
+	if(isTracking) sequence.drawSequenceTracking2(currentBf.currentIdx);
 
     ofPopMatrix();
 
