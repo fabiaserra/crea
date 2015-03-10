@@ -1184,6 +1184,22 @@ void ofApp::setupGUI8Animations(){
     particleGuis.push_back(gui8Animations);
 }
 
+////--------------------------------------------------------------
+//void ofApp::addParticleProperties(ofxUISuperCanvas gui, ParticleSystem ps){
+//    gui->addLabel("Particle");
+//    gui->addToggle("Immortal", &ps->immortal);
+//    gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+//    gui->setWidgetSpacing(10);
+//    gui->addToggle("Empty", &ps->isEmpty);
+//    gui->addToggle("Line", &ps->drawLine);
+//    gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+//    gui->setWidgetSpacing(3);
+//    gui->addSlider("Lifetime", 0.1, 20.0, &ps->lifetime);
+//    gui->addSlider("Life Random[%]", 0.0, 100.0, &ps->lifetimeRnd);
+//    gui->addSlider("Radius", 0.1, 25.0, &ps->radius);
+//    gui->addSlider("Radius Random[%]", 0.0, 100.0, &ps->radiusRnd);
+//}
+
 //--------------------------------------------------------------
 void ofApp::saveGUISettings(const string path, const bool isACue){
 

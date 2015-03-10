@@ -58,6 +58,7 @@ ParticleSystem::ParticleSystem(){
     interact            = false;        // Can we interact with the particles?
     flock               = false;        // Particles have flocking behavior?
     repulseInteraction  = false;        // Repulse particles from input?
+    attractInteraction  = false;        // Attract particles to input?
     gravityInteraction  = false;        // Apply gravity force to particles touched with input?
     returnToOrigin      = false;        // Make particles return to their born position?
 
@@ -97,6 +98,7 @@ void ParticleSystem::setup(ParticleMode particleMode, InputSource inputSource, i
         returnToOrigin = true;
         repulseInteraction = true;
         immortal = true;
+        friction = 30;
         createParticleGrid(width, height);
     }
 
@@ -145,6 +147,7 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
 
                     if(closestMarker != ofPoint(-1, -1)){
                         if(repulseInteraction) particles[i]->addRepulsionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, 5.0);
+                        if(attractInteraction) particles[i]->addAttractionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, 5.0);
                         if(gravityInteraction) particles[i]->addForce(ofPoint(0, gravity*particles[i]->mass));
                         particles[i]->isTouched = true;
                     }
@@ -320,19 +323,12 @@ void ParticleSystem::bornParticles(){
         particles[i]->isAlive = false;
     }
 
-    if(particleMode == RANDOM){
-        immortal = true;
-        nParticles = 1500;
-        addParticles(nParticles);
-    }
-    else if(particleMode == BOIDS){
-        nParticles = 1000;
-        immortal = true;
-        addParticles(nParticles);
-    }
-    else if(particleMode == GRID){
-        immortal = true;
+    if(particleMode == GRID){
         createParticleGrid(width, height);
+    }
+
+    else if(particleMode == RANDOM || particleMode == BOIDS){
+        addParticles(nParticles);
     }
 }
 

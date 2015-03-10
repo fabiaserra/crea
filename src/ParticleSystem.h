@@ -95,6 +95,7 @@ class ParticleSystem
         bool emit;                  // Born new particles in each frame?
         bool flock;                 // Particles have flocking behavior?
         bool repulseInteraction;    // Repulse particles from input?
+        bool attractInteraction;    // Attract particles to input?
         bool gravityInteraction;    // Apply gravity force to particles touched with input?
         bool returnToOrigin;        // Make particles return to their born position?
         //--------------------------------------------------------------

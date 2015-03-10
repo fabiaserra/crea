@@ -25,6 +25,10 @@ class Particle
         void pullToCenter();
         void limitVelocity();
 
+        void bounceParticle();
+        void steerParticle();
+        void marginsWrap();
+
         void kill();
 //--------------------------------------------------------------
         ofPoint pos;            // Position
@@ -51,15 +55,19 @@ class Particle
         bool immortal;          // Can the particle die?
         bool isAlive;           // Is the particle alive?
         bool isTouched;         // Particle has been activated through some event
-        bool bounces;           // Particle bounces with the window margins?
-        bool steers;            // Particle steers direction before touching the walls?
+
         bool sizeAge;           // Particle changes size with age?
         bool opacityAge;        // Particle changes opacity with age?
         bool flickersAge;       // Particle flickers opacity when about to die?
         bool colorAge;          // Particle changes color with age?
         bool isEmpty;           // Draw only contour of the particle?
         bool drawLine;          // Draw particle as a line from prevPos to pos?
+
         bool limitSpeed;        // Limit the speed of the particle?
+
+        bool bounces;           // Particle bounces with the window margins?
+        bool steers;            // Particle steers direction before touching the walls?
+        bool infinitWalls;      // Particle goes back to the opposite wall?
 // --------------------------------------------------------------
         float flockingRadiusSqrd;
         float lowThresh;        // separate
