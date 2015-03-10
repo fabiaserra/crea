@@ -79,10 +79,6 @@ void Sequence::draw(){
     ofPopStyle();
 }
 
-ofPoint Sequence::getCurrentPoint(int markerIdx){
-    return markersPosition[markerIdx].getPointAtIndexInterpolated(calcCurrentFrameIndex());
-}
-
 void Sequence::load(const string path){
 
     if(!xml.load(path)) return;
@@ -321,14 +317,24 @@ void Sequence::drawSequenceTracking(int currentIdx){
         ofPoint currentPoint;
 //        ofPolyline line;
 //        line.resize(currentIdx + 1);
-//        
+//
 //        for(size_t idx = 0; idx < currentIdx; idx++){
 //            currentPoint = markersPosition[markerIdx].getPointAtIndexInterpolated(idx);
 //            line[idx] = currentPoint;
 //        }
+        float realPercent = markersPosition[markerIdx].getLengthAtIndexInterpolated(currentIdx) / markersPosition[markerIdx].getPerimeter();
+        float currPercent = ofMap(currentIdx, 0, numFrames, 0.0, 1.0, true);
+        
+        cout << "currIdxPct: " << markersPosition[markerIdx].getIndexAtPercent(currPercent) << endl;
+        cout << "realIdxPct: " << markersPosition[markerIdx].getIndexAtPercent(realPercent) << endl;
+
+        cout << "curr Percent: " << currPercent << endl;
+        cout << "real Percent: " << realPercent << endl;
+        
 //        ofSetColor(c, 160);
 //        ofSetLineWidth(2.5);
 //        line.draw();
+        
 
         // Current point
         currentPoint = markersPosition[markerIdx][currentIdx];
@@ -384,10 +390,11 @@ vector<ofPolyline> Sequence::getSequenceSegment(const pair<float, float>& sequen
     float highPct = sequenceSegmentPct.second/100.0;
 
     vector<ofPolyline> segment;
-//    float increment = 0.0005; // TODO: change it depending on how many frames has the sequence
-    float increment = ofMap(numFrames, 0, 3000, 0.005, 0.0001);
+    float increment = 0.0001; // TODO: change it depending on how many frames has the sequence?
+//    float increment = ofMap(numFrames, 0, 3000,);
     for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
         ofPolyline markerSegment;
+//        float increment = ofMap(markersPosition[markerIdx].getPerimeter(), 0, 15000, 0.005, 0.0001, true);
         for(float pct = lowPct; pct < highPct; pct += increment){
             ofPoint p = markersPosition[markerIdx].getPointAtPercent(pct);
             markerSegment.addVertex(p);
@@ -460,3 +467,10 @@ size_t Sequence::calcCurrentFrameIndex()
     return frameIdx;
 }
 
+float Sequence::getCurrentSequencePercent(int currentIdx){
+    return markersPosition[0].getLengthAtIndexInterpolated(currentIdx) / markersPosition[0].getPerimeter();
+}
+
+ofPoint Sequence::getCurrentSequencePoint(int markerIdx){
+    return markersPosition[markerIdx].getPointAtIndexInterpolated(calcCurrentFrameIndex());
+}

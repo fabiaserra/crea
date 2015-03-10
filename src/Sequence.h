@@ -28,7 +28,8 @@ class Sequence{
         void startRecording();
         void clearPlayback();
 
-        ofPoint getCurrentPoint(int markerIdx);
+        ofPoint getCurrentSequencePoint(int markerIdx);
+        float getCurrentSequencePercent(int currentIdx);
 
         //--------------------------------------------------------------
         ofxXmlSettings xml;

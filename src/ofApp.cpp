@@ -22,7 +22,7 @@ void ofApp::setup(){
         // Use xml sequence marker file
         #ifdef KINECT_SEQUENCE
             kinectSequence.setup(maxMarkers);
-            kinectSequence.load("sequences/sequence1marker2.xml");
+            kinectSequence.load("sequences/simple5.xml");
         #endif // KINECT_SEQUENCE
 
         // Load png files from file
@@ -124,7 +124,7 @@ void ofApp::setup(){
 
     // SEQUENCE
     sequence.setup(maxMarkers);
-    sequence.load("sequences/sequence1marker2.xml");
+    sequence.load("sequences/simple5.xml");
     drawSequence = false;
     drawSequenceSegments = false;
 
@@ -196,18 +196,18 @@ void ofApp::setup(){
 		//	int minLen = 2; // sequence.xml
 		//	float t = 12.3; // for sequence.xml
 
-		//	int minLen = 7; // sequence3.xml
-		// 	float t = 18.6; // for sequence2.xml
+//        int minLen = 7; // sequence3.xml
+//        float t = 18.6; // for sequence2.xml
 		//	float t = 16.8; // for sequence3.xml
 		//
 		//	int minLen = 7;
 		//	float t = 4.5; // for sequence1marker1.xml
 		//	int minLen = 10;
-		float t = 5.7; // for sequence1marker2.xml
-		int minLen = 10;
+//		float t = 5.7; // for sequence1marker2.xml
+//		int minLen = 10;
 		//	float t = 6.0; // for sequence1marker3.xml
-		//	int minLen = 2;
-		//	float t = 3.6; // for simple5.xml
+			int minLen = 2;
+			float t = 3.6; // for simple5.xml
 
 		cout << t << endl;
 		seqVmo = vmo::buildOracle(savedObs, numElements, t);
@@ -397,7 +397,7 @@ void ofApp::update(){
         if(isTracking){
             vector<float> obs(maxMarkers*dimensions, 0.0); // Temporary code
             for(unsigned int i = 0; i < kinectSequence.maxMarkers; i++){
-                ofPoint currentPoint = kinectSequence.getCurrentPoint(i);
+                ofPoint currentPoint = kinectSequence.getCurrentSequencePoint(i);
 				// Use the lowpass here??
 				obs[i] = lowpass(currentPoint.x, pastObs[i], slide);
 				obs[i+1] = lowpass(currentPoint.y, pastObs[i+1], slide);
@@ -421,8 +421,9 @@ void ofApp::update(){
 //				prevBf = currentBf;
 				currentBf = vmo::tracking(seqVmo, currentBf, pttrList, currentFeatures, decay);
                 cout << "current index: " << currentBf.currentIdx << endl;
-                currentPercent = ofMap(currentBf.currentIdx, 0, sequence.numFrames, 0.0, 1.0, true);
-                cout << currentPercent << endl;
+                currentPercent = sequence.getCurrentSequencePercent(currentBf.currentIdx);
+//                cout << "current percent: " << currentPercent << endl;
+
                 if(cues.size() != 0) {
                     int cueSegment = currentCueIndex;
                     for(int i = 0; i < cueSliders.size(); i++){
@@ -474,8 +475,8 @@ void ofApp::update(){
                     currentBf = vmo::tracking(seqVmo, prevBf, pttrList, obs, decay);
                     cout << "current index: " << currentBf.currentIdx << endl;
                     // We need the min/max of currentIdx
-                    currentPercent = ofMap(currentBf.currentIdx, 0, sequence.numFrames, 0.0, 1.0, true);
-                    cout << "current percent: " << currentPercent << endl;
+                    currentPercent = sequence.getCurrentSequencePercent(currentBf.currentIdx);
+//                    cout << "current percent: " << currentPercent << endl;
                     if(cues.size() != 0) {
                         int cueSegment = currentCueIndex;
                         for(int i = 0; i < cueSliders.size(); i++){
