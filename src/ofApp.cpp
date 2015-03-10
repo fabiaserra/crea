@@ -1142,10 +1142,12 @@ void ofApp::setupGUI8Animations(){
     gui8Animations->addLabel("ANIMATIONS", OFX_UI_FONT_LARGE);
     gui8Animations->addSpacer();
 
-    gui8Animations->addToggle("Rain", false);
-    gui8Animations->addToggle("Snow", false);
-    gui8Animations->addToggle("Wind", false);
-    gui8Animations->addToggle("Explosion", false);
+    vector<string> animations;
+	animations.push_back("Rain");
+	animations.push_back("Snow");
+	animations.push_back("Wind");
+	animations.push_back("Explosion");
+	gui8Animations->addRadio("Animations", animations, OFX_UI_ORIENTATION_HORIZONTAL);
 
     gui8Animations->addSpacer();
     gui8Animations->addLabel("Particle");
@@ -1429,17 +1431,10 @@ void ofApp::interpolateWidgetValues(){
 
 //--------------------------------------------------------------
 void ofApp::guiEvent(ofxUIEventArgs &e){
-    if(e.getName() == "Reset Kinect"){
-        if(resetKinect){
-            kinect.close();
-            kinect.clear();
-        }
-        else{
-            kinect.init(true); // shows infrared instead of RGB video Image
-            kinect.open();
-        }
-    }
 
+    //-------------------------------------------------------------
+    // 1. BASICS
+    //-------------------------------------------------------------
     if(e.getName() == "Save Settings"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if(button->getValue() == true){
@@ -1460,6 +1455,41 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         }
     }
 
+    //-------------------------------------------------------------
+    // 2. KINECT
+    //-------------------------------------------------------------
+    if(e.getName() == "Reset Kinect"){
+        if(resetKinect){
+            kinect.close();
+            kinect.clear();
+        }
+        else{
+            kinect.init(true); // shows infrared instead of RGB video Image
+            kinect.open();
+        }
+    }
+
+    if(e.getName() == "Size range"){
+        contourFinder.setMinAreaRadius(minContourSize);
+        contourFinder.setMaxAreaRadius(maxContourSize);
+    }
+
+    if(e.getName() == "Markers size"){
+        irMarkerFinder.setMinAreaRadius(minMarkerSize);
+        irMarkerFinder.setMaxAreaRadius(maxMarkerSize);
+    }
+
+    if(e.getName() == "Tracker persistence"){
+        tracker.setPersistence(trackerPersistence); // wait for 'trackerPersistence' frames before forgetting something
+    }
+
+    if(e.getName() == "Tracker max distance"){
+        tracker.setMaximumDistance(trackerMaxDistance); // an object can move up to 'trackerMaxDistance' pixels per frame
+    }
+
+    //-------------------------------------------------------------
+    // 3. GESTURE SEQUENCE
+    //-------------------------------------------------------------
     if(e.getName() == "Record Sequence"){
         if(recordingSequence->getValue() == true){
             drawSequence = false;
@@ -1506,6 +1536,40 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         }
     }
 
+    if(e.getName() == "Sequence percent"){
+        vector< pair<float, float> > sequencePcts;
+        for (int i = 0; i < cueSliders.size(); i++){
+            pair<float, float> pcts;
+            pcts.first = cueSliders.at(i).second->getValueLow();
+            pcts.second = cueSliders.at(i).second->getValueHigh();
+            if((i < cueSliders.size()-1) && (pcts.second > cueSliders.at(i+1).second->getValueLow())){
+                cueSliders.at(i).second->setValueHigh(cueSliders.at(i+1).second->getValueLow());
+            }
+            sequencePcts.push_back(pcts);
+        }
+        sequence.updateSequenceSegments(sequencePcts);
+    }
+
+    if(e.getName() == "Show sequence segmentation"){
+        ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
+        if(toggle->getValue() == true){
+            vector< pair<float, float> > sequencePcts;
+            for (int i = 0; i < cueSliders.size(); i++){
+                pair<float, float> pcts;
+                pcts.first = cueSliders.at(i).second->getValueLow();
+                pcts.second = cueSliders.at(i).second->getValueHigh();
+                if((i < cueSliders.size()-1) && (pcts.second > cueSliders.at(i+1).second->getValueLow())){
+                    cueSliders.at(i).second->setValueHigh(cueSliders.at(i+1).second->getValueLow());
+                }
+                sequencePcts.push_back(pcts);
+            }
+            sequence.updateSequenceSegments(sequencePcts);
+        }
+    }
+
+    //-------------------------------------------------------------
+    // 4. GESTURE TRACKER
+    //-------------------------------------------------------------
     if(e.getName() == "Start vmo"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if(button->getValue() == true){
@@ -1521,6 +1585,9 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         }
     }
 
+    //-------------------------------------------------------------
+    // 5. CUE LIST
+    //-------------------------------------------------------------
     if(e.getName() == "Cue Name"){
         ofxUITextInput *ti = (ofxUITextInput *) e.widget;
         if(ti->getInputTriggerType() == OFX_UI_TEXTINPUT_ON_UNFOCUS || ti->getInputTriggerType() == OFX_UI_TEXTINPUT_ON_ENTER){
@@ -1676,32 +1743,17 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             string cueFileName = ofFilePath::getBaseName(cues[currentCueIndex]);
             cueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
             cueName->setTextString(cueFileName);
-//            button->setValue(false);
         }
     }
 
-    if(e.getName() == "Size range"){
-        contourFinder.setMinAreaRadius(minContourSize);
-        contourFinder.setMaxAreaRadius(maxContourSize);
+    //-------------------------------------------------------------
+    // 8. PARTICLES
+    //-------------------------------------------------------------
+    if(e.getName() == "Particles Active"){
+        ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
+        if(toggle->getValue() == true) particleSystems[currentParticleSystem]->bornParticles();
+        else particleSystems[currentParticleSystem]->killParticles();
     }
-
-    if(e.getName() == "Markers size"){
-        irMarkerFinder.setMinAreaRadius(minMarkerSize);
-        irMarkerFinder.setMaxAreaRadius(maxMarkerSize);
-    }
-
-    if(e.getName() == "Tracker persistence"){
-        tracker.setPersistence(trackerPersistence); // wait for 'trackerPersistence' frames before forgetting something
-    }
-
-    if(e.getName() == "Tracker max distance"){
-        tracker.setMaximumDistance(trackerMaxDistance); // an object can move up to 'trackerMaxDistance' pixels per frame
-    }
-
-    // if(e.getName() == "Emitter type"){
-    //  ofxUIRadio *radio = (ofxUIRadio *) e.widget;
-    //  cout << radio->getName() << " value: " << radio->getValue() << " active name: " << radio->getActiveName() << endl;
-    // }
 
     if(e.getName() == "Previous Particle System"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
@@ -1723,48 +1775,18 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         }
     }
 
-    if(e.getName() == "Particles Active"){
-        ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
-        if(toggle->getValue() == true) particleSystems[currentParticleSystem]->bornParticles();
-        else particleSystems[currentParticleSystem]->killParticles();
-        cout << "Current PS: " << currentParticleSystem << endl;
-    }
-
     if(e.getName() == "Lower Threshold" || e.getName() == "Higher Threshold"){
         if(lowThresh->getValue() > highThresh->getValue()){
             highThresh->setValue(lowThresh->getValue());
         }
     }
 
-    if(e.getName() == "Sequence percent"){
-        vector< pair<float, float> > sequencePcts;
-        for (int i = 0; i < cueSliders.size(); i++){
-            pair<float, float> pcts;
-            pcts.first = cueSliders.at(i).second->getValueLow();
-            pcts.second = cueSliders.at(i).second->getValueHigh();
-            if((i < cueSliders.size()-1) && (pcts.second > cueSliders.at(i+1).second->getValueLow())){
-                cueSliders.at(i).second->setValueHigh(cueSliders.at(i+1).second->getValueLow());
-            }
-            sequencePcts.push_back(pcts);
-        }
-        sequence.updateSequenceSegments(sequencePcts);
-    }
-
-    if(e.getName() == "Show sequence segmentation"){
-        ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
-        if(toggle->getValue() == true){
-            vector< pair<float, float> > sequencePcts;
-            for (int i = 0; i < cueSliders.size(); i++){
-                pair<float, float> pcts;
-                pcts.first = cueSliders.at(i).second->getValueLow();
-                pcts.second = cueSliders.at(i).second->getValueHigh();
-                if((i < cueSliders.size()-1) && (pcts.second > cueSliders.at(i+1).second->getValueLow())){
-                    cueSliders.at(i).second->setValueHigh(cueSliders.at(i+1).second->getValueLow());
-                }
-                sequencePcts.push_back(pcts);
-            }
-            sequence.updateSequenceSegments(sequencePcts);
-        }
+    if(e.getName() == "Animations"){
+        ofxUIRadio *radio = (ofxUIRadio *) e.widget;
+//        if(radio->getName() == "Wind"){
+//
+//        }
+        cout << radio->getName() << " value: " << radio->getValue() << " active name: " << radio->getActiveName() << endl;
     }
 }
 
