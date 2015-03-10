@@ -5,36 +5,70 @@ bool comparisonFunction(Particle * a, Particle * b) {
 }
 
 ParticleSystem::ParticleSystem(){
-    isActive        = true;         // Particle system is active?
+    isActive            = false;        // Particle system is active?
 
-    bornRate        = 0.0;          // Number of particles born per frame
-    velocity        = 0.0;          // Initial velocity magnitude of newborn particles
-    velocityRnd     = 0.0;          // Magnitude randomness % of the initial velocity
-    velocityMotion  = 0.0;          // Marker motion contribution to the initial velocity
-    emitterSize     = 1.0;          // Size of the emitter area
-    lifetime        = 5.0;          // Lifetime of particles
-    lifetimeRnd     = 0.0;          // Randomness of lifetime
-    color           = ofColor(255); // Color of the particles
-    radius          = 3.0;          // Radius of the particles
-    radiusRnd       = 0.0;          // Randomness of radius
+    // General properties
+    immortal            = false;        // Can particles die?
+    velocity            = 0.0;          // Initial velocity magnitude of newborn particles
+    radius              = 3.0;          // Radius of the particles
+    color               = ofColor(255); // Color of the particles
+    lifetime            = 5.0;          // Lifetime of particles
 
-    immortal        = false;        // Can particles die?
-    sizeAge         = false;        // Decrease size when particles get older?
-    opacityAge      = false;        // Decrease opacity when particles get older?
-    flickersAge     = false;        // Particle flickers opacity when about to die?
-    colorAge        = false;        // Change color when particles get older?
-    isEmpty         = false;        // Draw only contours of the particles?
-    drawLine        = false;        // Draw a line instead of a circle for the particle?
-    bounce          = false;        // Bounce particles with the walls of the window?
-    steer           = false;        // Steers direction before touching the walls of the window?
-    repulse         = false;        // Repulse particles between each other?
+    // Specific properties
+    nParticles          = 1000;         // Number of particles born in the beginning
+    bornRate            = 5.0;          // Number of particles born per frame
 
-    friction        = 20.0;         // Friction to velocity 0~100
-    gravity         = 0.0f;         // Makes particles fall down in a natural way
-    turbulence      = 0.5f;         // Add some perlin noise
+    // Emitter
+    emitterSize         = 3.0;          // Size of the emitter area
+    velocityRnd         = 20.0;         // Magnitude randomness % of the initial velocity
+    velocityMotion      = 50.0;         // Marker motion contribution to the initial velocity
+    lifetimeRnd         = 20.0;         // Randomness of lifetime
+    radiusRnd           = 50.0;         // Randomness of radius
+
+    // Grid
+    gridRes             = 10;           // Resolution of the grid
+
+    // Flocking
+    lowThresh           = 0.1333;       // If dist. ratio lower than lowThresh separate
+    highThresh          = 0.6867;       // Else if dist. ratio higher than highThresh attract. Else just align
+    separationStrength  = 0.01f;        // Separation force
+    attractionStrength  = 0.004f;       // Attraction force
+    alignmentStrength   = 0.01f;        // Alignment force
+    maxSpeed            = 50.0;         // Max speed particles
+    flockingRadius      = 60.0;         // Radius of flocking
+
+    // Graphic output
+    sizeAge             = true;         // Decrease size when particles get older?
+    opacityAge          = true;         // Decrease opacity when particles get older?
+    colorAge            = true;        // Change color when particles get older?
+    flickersAge         = false;        // Particle flickers opacity when about to die?
+    isEmpty             = false;        // Draw only contours of the particles?
+    drawLine            = false;        // Draw a line instead of a circle for the particle?
+
+    // Physics
+    friction            = 5.0;          // Friction to velocity 0~100
+    gravity             = 0.0f;         // Makes particles fall down in a natural way
+    turbulence          = 0.2f;         // Turbulence perlin noise
+    repulse             = false;        // Repulse particles between each other?
+    bounce              = false;        // Bounce particles with the walls of the window?
+    steer               = false;        // Steers direction before touching the walls of the window?
+
+    // Behavior
+    emit                = false;        // Born new particles in each frame?
+    interact            = false;        // Can we interact with the particles?
+    flock               = false;        // Particles have flocking behavior?
+    repulseInteraction  = false;        // Repulse particles from input?
+    gravityInteraction  = false;        // Apply gravity force to particles touched with input?
+    returnToOrigin      = false;        // Make particles return to their born position?
+
+    // Input
+    markersInput        = false;        // Input are the IR markers?
+    contourInput        = false;        // Input is the depth contour?
+    markerRadius        = 50.0;         // Radius of interaction of the markers
 }
 
 ParticleSystem::~ParticleSystem(){
+    // Delete all the particles
     for (int i = 0; i < particles.size(); i++) {
         delete particles.at(i);
         particles.at(i) = NULL;
@@ -46,50 +80,36 @@ ParticleSystem::~ParticleSystem(){
 void ParticleSystem::setup(ParticleMode particleMode, InputSource inputSource, int width , int height){
 
     this->particleMode = particleMode;
+
     this->width = width;
     this->height = height;
-    
-    if(inputSource == MARKERS){
-        markersInput = true;
-        contourInput = false;
-    }
-    else if(inputSource == CONTOUR){
-        contourInput = true;
-        markersInput = false;
-    }
+
+    if(inputSource == MARKERS) markersInput = true;
+    else if(inputSource == CONTOUR) contourInput = true;
 
     if(particleMode == EMITTER){
-        bornRate = 3.0;
+        emit = true;
+        velocity = 20;
     }
 
     else if(particleMode == GRID){
+        interact = true;
+        returnToOrigin = true;
+        repulseInteraction = true;
         immortal = true;
-        gridRes = 10;
         createParticleGrid(width, height);
     }
 
     else if(particleMode == RANDOM){
+        interact = true;
         immortal = true;
-        nParticles = 1500;
         addParticles(nParticles);
     }
 
     else if(particleMode == BOIDS){ // TODO: BOIDS == RANDOM?
+        flock = true;
         immortal = true;
         steer = true;
-        nParticles = 1000;
-
-        lowThresh = 0.1333;
-        highThresh = 0.6867;
-
-        separationStrength = 0.01f;
-        attractionStrength = 0.004f;
-        alignmentStrength = 0.01f;
-
-        flockingRadius = 60;
-        flockingRadiusSqrd = flockingRadius*flockingRadius;
-        maxSpeed = 50;
-
         addParticles(nParticles);
     }
 }
@@ -112,63 +132,41 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
             }
         }
 
-        // TODO: not do the calculations depending on particle creation mode but on which interactions we want
-        // being able to combine flocking with emitter?
-
         // ---------- (2) Calculate specific particle system behavior
-        if(particleMode == GRID){
-            float scale = 5;
-            for(int i = 0; i < particles.size(); i++){
+        for(int i = 0; i < particles.size(); i++){
+            if(interact){ // Interact particles with input
                 if(markersInput){
-                    float markerRadius = 50;
-
                     // Get closest marker to particle
                     ofPoint closestMarker = getClosestMarker(*particles[i], markers, markerRadius);
 
                     // Get direction vector to closest marker
-//                    dir = closestMarker - particles[i]->pos;
-//                    dir.normalize();
+                    // dir = closestMarker - particles[i]->pos;
+                    // dir.normalize();
 
                     if(closestMarker != ofPoint(-1, -1)){
-                        particles[i]->addRepulsionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, scale);
-//                      ofPoint gravityForce(0, gravity*particles[i]->mass);
-//                      particles[i]->addForce(gravityForce);
-//                      particles[i]->isTouched = true;
+                        if(repulseInteraction) particles[i]->addRepulsionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, 5.0);
+                        if(gravityInteraction) particles[i]->addForce(ofPoint(0, gravity*particles[i]->mass));
+                        particles[i]->isTouched = true;
                     }
                 }
-                particles[i]->xenoToOrigin(0.03);
             }
-        }
 
-        else if(particleMode == BOIDS){
-            float scale = 5;
-            float markerRadius = 50;
-            for(int i = 0; i < particles.size(); i++){
+            if(flock){ // Flocking behavior
                 particles[i]->flockingRadiusSqrd    =   flockingRadius * flockingRadius;
 
                 particles[i]->separationStrength    =   separationStrength;
                 particles[i]->alignmentStrength     =   alignmentStrength;
                 particles[i]->attractionStrength    =   attractionStrength;
 
-                particles[i]->lowThresh     =   lowThresh;
-                particles[i]->highThresh    =   highThresh;
-                particles[i]->maxSpeed      =   maxSpeed;
-
-//                particles[i]->pullToCenter();
-
-//                // Get closest marker to particle
-                ofPoint closestMarker = getClosestMarker(*particles[i], markers, markerRadius);
-                if(closestMarker != ofPoint(-1, -1)){
-                    particles[i]->addRepulsionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, scale);
-//                    particles[i]->seek(closestMarker, markerRadius*markerRadius);
-                }
+                particles[i]->lowThresh             =   lowThresh;
+                particles[i]->highThresh            =   highThresh;
+                particles[i]->maxSpeed              =   maxSpeed;
             }
 
-            flockParticles();
+            if(returnToOrigin) particles[i]->xenoToOrigin(0.03);
         }
 
-        else if(particleMode == EMITTER){
-            // Born new particles
+        if(emit){ // Born new particles
             if(markersInput){
                 for(unsigned int i = 0; i < markers.size(); i++){
                     if (markers[i].hasDisappeared) markers[i].bornRate -= 0.5;
@@ -183,18 +181,19 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
             }
         }
 
+        if(flock) flockParticles();
         if(repulse) repulseParticles();
 
-        // Update the particles
+        // ---------- (3) Add some general behavior and update the particles
         for(int i = 0; i < particles.size(); i++){
             ofPoint gravityForce(0, gravity*particles[i]->mass/10);
             particles[i]->addForce(gravityForce);
 
+//            ofPoint windForce(ofRandom(-0.1, 0.1), ofRandom(-0.08, 0.06));
+//            particles[i]->addForce(windForce*particles[i]->mass);
+
             particles[i]->addNoise(15.0, turbulence, dt);
 
-//            ofPoint windForce(0.05, -0.02); // TODO: add some turbulence
-//            ofPoint windForce(ofRandom(-0.1, 0.1), ofRandom(-0.08, 0.06)); // TODO: add some turbulence
-//            particles[i]->addForce(windForce*particles[i]->mass);
             particles[i]->immortal = immortal;
             particles[i]->friction = 1-friction/1000;
             particles[i]->bounces = bounce;
@@ -350,7 +349,7 @@ void ParticleSystem::repulseParticles(){
 void ParticleSystem::flockParticles(){
     for(int i = 0; i < particles.size(); i++){
         for(int j = i-1; j >= 0; j--){
-            if (fabs(particles[j]->pos.x - particles[i]->pos.x) > flockingRadius) break;
+//            if (fabs(particles[j]->pos.x - particles[i]->pos.x) > flockingRadius) break;
             particles[i]->addFlockingForces(*particles[j]);
         }
     }

@@ -101,18 +101,21 @@ void ofApp::setup(){
 
     // GRID PARTICLES
     gridParticles = new ParticleSystem();
-    gridParticles->radius = 2;
-    gridParticles->bounce = true;
     gridParticles->setup(GRID, MARKERS, kinect.width, kinect.height);
 
     // BOIDS PARTICLES
     boidsParticles = new ParticleSystem();
     boidsParticles->setup(BOIDS, MARKERS, kinect.width, kinect.height);
 
+    // ANIMATIONS PARTICLES
+    animationsParticles = new ParticleSystem();
+    animationsParticles->setup(ANIMATIONS, MARKERS, kinect.width, kinect.height);
+
     // VECTOR OF PARTICLE SYSTEMS
     particleSystems.push_back(emitterParticles);
     particleSystems.push_back(gridParticles);
     particleSystems.push_back(boidsParticles);
+    particleSystems.push_back(animationsParticles);
     currentParticleSystem = 0;
 
     // DEPTH CONTOUR
@@ -259,6 +262,7 @@ void ofApp::setup(){
     setupGUI8Emitter();
     setupGUI8Grid();
     setupGUI8Boids();
+    setupGUI8Animations();
 
     interpolatingWidgets = false;
     loadGUISettings("settings/lastSettings.xml", false, false);
@@ -382,14 +386,11 @@ void ofApp::update(){
     // Update contour
     contour.update(contourFinder);
 
-    // Update emitter particles
+    // Update particles
     emitterParticles->update(dt, tempMarkers, contour);
-
-    // Update grid particles
     gridParticles->update(dt, tempMarkers, contour);
-
-    // Update boids particles
     boidsParticles->update(dt, tempMarkers, contour);
+    animationsParticles->update(dt, tempMarkers, contour);
 
     #ifdef KINECT_SEQUENCE
 
@@ -550,6 +551,7 @@ void ofApp::draw(){
     gridParticles->draw();
     emitterParticles->draw();
     boidsParticles->draw();
+    animationsParticles->draw();
 
     if(drawMarkers){
         irMarkerFinder.draw();
@@ -873,7 +875,6 @@ void ofApp::setupGUI7(){
     gui7->addToggle("Contour Line", &contour.drawContourLine);
     gui7->addSlider("Smoothing Size", 0.0, 40.0, &contour.smoothingSize);
 
-
     gui7->autoSizeToFitWidgets();
     gui7->setVisible(false);
     ofAddListener(gui7->newGUIEvent, this, &ofApp::guiEvent);
@@ -930,10 +931,10 @@ void ofApp::setupGUI8Emitter(){
     gui8Emitter->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui8Emitter->setWidgetSpacing(10);
     gui8Emitter->addToggle("Empty", &emitterParticles->isEmpty);
-    gui8Emitter->addToggle("Draw Line", &emitterParticles->drawLine);
+    gui8Emitter->addToggle("Line", &emitterParticles->drawLine);
     gui8Emitter->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui8Emitter->setWidgetSpacing(3);
-    gui8Emitter->addSlider("Lifetime", 0.0, 20.0, &emitterParticles->lifetime);
+    gui8Emitter->addSlider("Lifetime", 0.1, 20.0, &emitterParticles->lifetime);
     gui8Emitter->addSlider("Life Random[%]", 0.0, 100.0, &emitterParticles->lifetimeRnd);
     gui8Emitter->addSlider("Radius", 0.1, 25.0, &emitterParticles->radius);
     gui8Emitter->addSlider("Radius Random[%]", 0.0, 100.0, &emitterParticles->radiusRnd);
@@ -1012,6 +1013,7 @@ void ofApp::setupGUI8Grid(){
     gui8Grid->addSlider("Radius", 0.1, 25.0, &gridParticles->radius);
     gui8Grid->addIntSlider("Resolution", 1, 20, &gridParticles->gridRes)->setStickyValue(1.0);
 
+    // TODO: addParticlePhysics(), addParticleProperties()... and general methods for particle GUIs
     gui8Grid->addSpacer();
     gui8Grid->addLabel("Physics");
     gui8Grid->addSlider("Friction", 0, 100, &gridParticles->friction);
@@ -1140,12 +1142,24 @@ void ofApp::setupGUI8Animations(){
     gui8Animations->addLabel("ANIMATIONS", OFX_UI_FONT_LARGE);
     gui8Animations->addSpacer();
 
-    gui8Animations->addSlider("Particles radius", 0.1, 25.0, &animationsParticles->radius);
-
     gui8Animations->addToggle("Rain", false);
     gui8Animations->addToggle("Snow", false);
     gui8Animations->addToggle("Wind", false);
     gui8Animations->addToggle("Explosion", false);
+
+    gui8Animations->addSpacer();
+    gui8Animations->addLabel("Particle");
+    gui8Animations->addToggle("Immortal", &animationsParticles->immortal);
+    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8Animations->setWidgetSpacing(10);
+    gui8Animations->addToggle("Empty", &animationsParticles->isEmpty);
+    gui8Animations->addToggle("Line", &animationsParticles->drawLine);
+    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8Animations->setWidgetSpacing(3);
+    gui8Animations->addSlider("Lifetime", 0.1, 20.0, &animationsParticles->lifetime);
+    gui8Animations->addSlider("Life Random[%]", 0.0, 100.0, &animationsParticles->lifetimeRnd);
+    gui8Animations->addSlider("Radius", 0.1, 25.0, &animationsParticles->radius);
+    gui8Animations->addSlider("Radius Random[%]", 0.0, 100.0, &animationsParticles->radiusRnd);
 
     gui8Animations->addSpacer();
     gui8Animations->addLabel("Physics");
@@ -1713,6 +1727,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
         if(toggle->getValue() == true) particleSystems[currentParticleSystem]->bornParticles();
         else particleSystems[currentParticleSystem]->killParticles();
+        cout << "Current PS: " << currentParticleSystem << endl;
     }
 
     if(e.getName() == "Lower Threshold" || e.getName() == "Higher Threshold"){
