@@ -126,6 +126,7 @@ void ofApp::setup(){
     sequence.setup(maxMarkers);
     sequence.load("sequences/sequence1marker2.xml");
     drawSequence = false;
+    drawSequenceSegments = false;
 
     // MARKERS
 //    markers.resize(maxMarkers);
@@ -133,14 +134,14 @@ void ofApp::setup(){
 
     // VMO SETUP
     dimensions = 2;
-	slide = 1.0;
-	decay = 0.75;
-	
-	initStatus = true;
-	isTracking = false;
-	isConv = false; //Don`t try this, too slow.
-	
-	if (isConv){
+    slide = 1.0;
+    decay = 0.75;
+
+    initStatus = true;
+    isTracking = false;
+    isConv = false; //Don`t try this, too slow.
+
+    if (isConv){
 		numElements = (maxMarkers*dimensions+1)*(maxMarkers*dimensions)/2;
 		savedObs.assign(sequence.numFrames, vector<float>(maxMarkers*dimensions));
 		vmoObs.assign(sequence.numFrames, vector<float>(numElements));
@@ -150,15 +151,16 @@ void ofApp::setup(){
 				savedObs[frameIndex][markerIndex*dimensions+1] = sequence.markersPosition[markerIndex][frameIndex].y;
 			}
 		}
+
 		vmoObs = covarianceMat(savedObs, maxMarkers, dimensions);
-		
+
 		// 2. Processing
 		// 2.1 Load file into VMO
 		//    int minLen = 1; // Temporary setting
 		//    float start = 0.0, step = 0.05, stop = 10.0;
-		
+
 		float start = 0.0, step = 0.05, stop = 5.0;
-		
+
 		float t = vmo::findThreshold(vmoObs, numElements, start, step, stop); // Temporary threshold range and step
 		int minLen = 10;
 
@@ -186,13 +188,14 @@ void ofApp::setup(){
 		// 2.1 Load file into VMO
 		//    int minLen = 1; // Temporary setting
 		//    float start = 0.0, step = 0.05, stop = 10.0;
-		
+
 		float start = 10.0, step = 0.01, stop = 20.0;
-		
+
 		//    float t = vmo::findThreshold(obs, numElements, start, step, stop); // Temporary threshold range and step
 		//    float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
 		//	int minLen = 2; // sequence.xml
 		//	float t = 12.3; // for sequence.xml
+
 		//	int minLen = 7; // sequence3.xml
 		// 	float t = 18.6; // for sequence2.xml
 		//	float t = 16.8; // for sequence3.xml
@@ -205,6 +208,7 @@ void ofApp::setup(){
 		//	float t = 6.0; // for sequence1marker3.xml
 		//	int minLen = 2;
 		//	float t = 3.6; // for simple5.xml
+
 		cout << t << endl;
 		seqVmo = vmo::buildOracle(savedObs, numElements, t);
 		// 2.2 Output pattern list
@@ -399,15 +403,14 @@ void ofApp::update(){
 				obs[i+1] = lowpass(currentPoint.y, pastObs[i+1], slide);
 				pastObs[i] = obs[i];
 				pastObs[i+1] = obs[i+1];
-				
+
                 //obs[i] = currentPoint.x;
                 //obs[i+1] = currentPoint.y;
             }
-			if (isConv) {
-				currentFeatures = cov_cal(pastObs, obs, numElements);
-			}else{
-				currentFeatures = obs;
-			}
+
+			if (isConv) currentFeatures = cov_cal(pastObs, obs, numElements);
+			else currentFeatures = obs;
+
             if(initStatus){
 				pastObs = obs;
 //				pastFeatures.assign(numElements, 0.0);
@@ -453,6 +456,7 @@ void ofApp::update(){
         }
 
     #else
+
         // Gesture Tracking with VMO here?
         if (tempMarkers.size()>1){
             if (isTracking){
@@ -494,6 +498,12 @@ void ofApp::update(){
                     }
                 }
                 gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
+//                for (int i = 0; i < sequence.patterns.size(); i++) {
+//                    if(gestureUpdate.find(i) != gestureUpdate.end()) {
+//                        cout << "key: "<< i << endl;
+//                        cout << "percent:"<< gestureUpdate[i] << endl;
+//                    }
+//                }
             }
         }
 
@@ -726,7 +736,7 @@ void ofApp::setupGUI3(){
 
     gui3->addSpacer();
     gui3->addLabel("SEQUENCE SEGMENTATION");
-//    gui3->addToggle("Show sequence segmentation", &drawSequenceSegments);
+    gui3->addToggle("Show sequence segmentation", &drawSequenceSegments);
     gui3->addSpacer();
 
     gui3->addSpacer();
@@ -1330,10 +1340,20 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
                 float high = ((float)i+1.0)/n*100;
                 ofxUIRangeSlider *slider;
                 slider = gui3->addRangeSlider(cueName, 0, 100, low, high);
+//                slider->setTriggerType(OFX_UI_TRIGGER_END);
                 pair<ofxUILabel *, ofxUIRangeSlider*> cue(label, slider);
                 cueSliders.push_back(cue);
             }
             gui3->autoSizeToFitWidgets();
+
+            vector< pair<float, float> > sequencePcts;
+            for (int i = 0; i < cueSliders.size(); i++){
+                pair<float, float> pcts;
+                pcts.first = cueSliders.at(i).second->getValueLow();
+                pcts.second = cueSliders.at(i).second->getValueHigh();
+                sequencePcts.push_back(pcts);
+            }
+            sequence.updateSequenceSegments(sequencePcts);
 
         }
         else currentCueIndex = -1;
@@ -1532,6 +1552,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             string cueName = "Sequence percent";
             ofxUIRangeSlider *slider;
             slider = gui3->addRangeSlider(cueName, 0, 100, 0, 100);
+//            slider->setTriggerType(OFX_UI_TRIGGER_END);
             pair<ofxUILabel *, ofxUIRangeSlider*> cue(label, slider);
             cueSliders.push_back(cue);
 
@@ -1714,6 +1735,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             highThresh->setValue(lowThresh->getValue());
         }
     }
+
     if(e.getName() == "Sequence percent"){
         vector< pair<float, float> > sequencePcts;
         for (int i = 0; i < cueSliders.size(); i++){
@@ -1725,7 +1747,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             }
             sequencePcts.push_back(pcts);
         }
-        sequence.drawCueSegments(sequencePcts);
+        sequence.updateSequenceSegments(sequencePcts);
     }
 
     if(e.getName() == "Show sequence segmentation"){
