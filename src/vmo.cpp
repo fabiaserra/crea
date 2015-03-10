@@ -56,7 +56,6 @@ vmo::vmo(){
 }
 
 void vmo::setup(int numElement, float threshold = 0.0){
-
     nStates = 1;
     this->nElement = numElement;
 //    this->numFeature = num;
@@ -324,7 +323,6 @@ float vmo::findThreshold(vector<vector<float> > &obs, int numElement = 4, float 
 vmo vmo::buildOracle(vector<vector<float> > &obs, int numElement = 4, float threshold = 0.0){
     vmo oracle = vmo();
     oracle.setup(numElement, threshold);
-
     for (int i = 0; i<obs.size(); i++) {
         oracle.addState(obs[i]);
     }
@@ -452,7 +450,6 @@ vmo::belief &vmo::tracking(vmo &oracle, vmo::belief &prevBf,
 		float minD = FLT_MAX;
 		float tmpCostK = 0.0;
 		int ind = -1;
-
 		// Self-transition
 //		int selfTrn = oracle.data[prevBf.path[k]];
 //		for (int i = 0; i < oracle.latent[selfTrn].size(); i++) {
@@ -511,7 +508,6 @@ vmo::belief &vmo::tracking(vmo &oracle, vmo::belief &prevBf,
 				}
 			}
 		}
-
 		// If next symbol is the same as current one, try advance for one step.
 		if (prevPath<oracle.nStates-1 && oracle.data[prevPath] == oracle.data[prevPath+1]) {
 			int nextPath = prevPath + 1;
@@ -527,7 +523,6 @@ vmo::belief &vmo::tracking(vmo &oracle, vmo::belief &prevBf,
 					}
 				}
 			}
-
 			// Possible states from one suffix back
 			int prevSfx = oracle.sfx[nextPath];
 			for (int j = 0; j < oracle.trn[prevSfx].size(); j++) {
@@ -542,7 +537,6 @@ vmo::belief &vmo::tracking(vmo &oracle, vmo::belief &prevBf,
 					}
 				}
 			}
-
 			// Possible states from one reverse suffix forward
 			int prevRsfx = oracle.rsfx[nextPath][0]; // Just the first one
 			for (int j = 0; j < oracle.trn[prevRsfx].size(); j++) {

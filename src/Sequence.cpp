@@ -345,6 +345,40 @@ void Sequence::drawSequenceTracking(float percent){
     ofPopStyle();
 }
 
+void Sequence::drawSequenceTracking2(int currentIdx){
+	ofPushStyle();
+	for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
+		ofColor c(0,255,0);
+		//        if(markerIdx == 0) c.set(255, 0, 0);
+		//        else if(markerIdx == 1) c.set(0, 0, 255);
+		//        else if(markerIdx == 2) c.set(0, 255, 0);
+		
+		//        ofSetColor(c, 50);
+		//        ofSetLineWidth(1.5);
+		//        markersPosition[markerIdx].draw();
+		
+		//        // Draw all past points
+		//        ofPoint currentPoint;
+		//        ofPolyline line;
+		//        for(float p = 0.0; p <= percent; p += 0.001){
+		//            currentPoint = markersPosition[markerIdx].getPointAtPercent(p);
+		//            line.addVertex(currentPoint);
+		//        }
+		//        ofSetColor(c, 255);
+		//        line.draw();
+		
+		// Current point
+		ofPoint currentPoint = markersPosition[markerIdx][currentIdx];
+		
+		ofFill();
+		c.setBrightness(150);
+		ofSetColor(c, 255);
+		ofCircle(currentPoint, 3);
+	}
+	ofPopStyle();
+}
+
+
 // Draw the segment of the sequence that belongs to the different cues
 void Sequence::drawSequenceSegments(){
     ofPushStyle();
