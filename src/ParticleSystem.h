@@ -89,12 +89,14 @@ class ParticleSystem
 		bool repulse;               // Repulse particles between each other?;
 		bool bounce;                // Particles bounce with the window margins?
 		bool steer;                 // Particles steer direction with the window margins?
+		bool infiniteWalls;         // Infinite walls?
         //--------------------------------------------------------------
         // Behavior
         bool interact;              // Can we interact with the particles?
         bool emit;                  // Born new particles in each frame?
         bool flock;                 // Particles have flocking behavior?
         bool repulseInteraction;    // Repulse particles from input?
+        bool attractInteraction;    // Attract particles to input?
         bool gravityInteraction;    // Apply gravity force to particles touched with input?
         bool returnToOrigin;        // Make particles return to their born position?
         //--------------------------------------------------------------

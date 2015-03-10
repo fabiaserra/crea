@@ -9,6 +9,7 @@ Particle::Particle(){
 
     bounces         = false;
     steers          = false;
+    infiniteWalls   = false;
 
     sizeAge         = false;
     opacityAge      = false;
@@ -85,53 +86,15 @@ void Particle::update(float dt){
 
         // Bounce particle with the window margins
         if(bounces){
-        	bool isBouncing = false;
-
-            if(pos.x > width-radius){
-                pos.x = width-radius;
-                vel.x *= -1.0;
-            }
-            else if(pos.x < radius){
-                pos.x = radius;
-                vel.x *= -1.0;
-            }
-
-            if(pos.y > height-radius){
-                pos.y = height-radius;
-                vel.y *= -1.0;
-                isBouncing = true;
-            }
-            else if(pos.y < radius){
-                pos.y = radius;
-                vel.y *= -1.0;
-                isBouncing = true;
-            }
-
-            if (isBouncing){
-	            vel *= 0.9;
-//	            vel.y *= -0.5;
-            }
+        	bounceParticle();
         }
 
         else if(steers){
-            float margin = radius*10;
-            bool isInside = false;
-            ofPoint desired;
+            steerParticle();
+        }
 
-            if(pos.x > width-margin){
-                vel.x -= ofMap(pos.x, width-margin, width, maxSpeed/1000.0, maxSpeed/10.0);
-            }
-            else if(pos.x < margin){
-                vel.x += ofMap(pos.x, 0, margin, maxSpeed/1000.0, maxSpeed/10.0);
-            }
-
-            if(pos.y > height-margin){
-                vel.y -= ofMap(pos.y, height-margin, height, maxSpeed/1000.0, maxSpeed/10.0);
-            }
-            else if(pos.y < margin){
-                vel.y += ofMap(pos.y, 0, margin, maxSpeed/1000.0, maxSpeed/10.0);
-            }
-
+        else if(infiniteWalls){
+            marginsWrap();
         }
     }
 }
@@ -386,6 +349,69 @@ void Particle::seek(ofPoint target, float radiusSqrd){
     }
     ofPoint steer = dirToTarget - vel;
     frc += steer;
+}
+
+void Particle::bounceParticle(){
+    bool isBouncing = false;
+
+    if(pos.x > width-radius){
+        pos.x = width-radius;
+        vel.x *= -1.0;
+    }
+    else if(pos.x < radius){
+        pos.x = radius;
+        vel.x *= -1.0;
+    }
+
+    if(pos.y > height-radius){
+        pos.y = height-radius;
+        vel.y *= -1.0;
+        isBouncing = true;
+    }
+    else if(pos.y < radius){
+        pos.y = radius;
+        vel.y *= -1.0;
+        isBouncing = true;
+    }
+
+    if (isBouncing){
+        vel *= 0.9;
+        // vel.y *= -0.5;
+    }
+}
+
+void Particle::steerParticle(){
+    float margin = radius*10;
+
+    if(pos.x > width-margin){
+        vel.x -= ofMap(pos.x, width-margin, width, maxSpeed/1000.0, maxSpeed/10.0);
+    }
+    else if(pos.x < margin){
+        vel.x += ofMap(pos.x, 0, margin, maxSpeed/1000.0, maxSpeed/10.0);
+    }
+
+    if(pos.y > height-margin){
+        vel.y -= ofMap(pos.y, height-margin, height, maxSpeed/1000.0, maxSpeed/10.0);
+    }
+    else if(pos.y < margin){
+        vel.y += ofMap(pos.y, 0, margin, maxSpeed/1000.0, maxSpeed/10.0);
+    }
+}
+
+void Particle::marginsWrap(){
+    if(pos.x-radius > (float)width){
+        pos.x = -radius;
+    }
+    else if(pos.x+radius < 0.0){
+        pos.x = width;
+    }
+
+    if(pos.y-radius > (float)height){
+        pos.y = -radius;
+    }
+    else if(pos.y+radius < 0.0){
+        pos.y = height;
+    }
 }
 
 void Particle::kill(){

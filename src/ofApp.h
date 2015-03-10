@@ -61,6 +61,9 @@ class ofApp : public ofBaseApp{
         void dragEvent(ofDragInfo dragInfo);
         void gotMessage(ofMessage msg);
 
+        void addParticleBasicsGUI(ofxUISuperCanvas* gui, ParticleSystem* ps);
+        void addParticlePhysicsGUI(ofxUISuperCanvas* gui, ParticleSystem* ps);
+
         //--------------------------------------------------------------
         float time0;            // Time value for computing dt
         //--------------------------------------------------------------
