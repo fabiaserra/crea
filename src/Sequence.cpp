@@ -316,12 +316,9 @@ void Sequence::drawSequenceTracking(int currentIdx){
     ofPushStyle();
     for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
         ofColor c(0,255,0);
-//        if(markerIdx == 0) c.set(255, 0, 0);
-//        else if(markerIdx == 1) c.set(0, 0, 255);
-//        else if(markerIdx == 2) c.set(0, 255, 0);
 
 //        // Draw all past points       
-//        ofPoint currentPoint;
+        ofPoint currentPoint;
 //        ofPolyline line;
 //        line.resize(currentIdx + 1);
 //        
@@ -329,13 +326,12 @@ void Sequence::drawSequenceTracking(int currentIdx){
 //            currentPoint = markersPosition[markerIdx].getPointAtIndexInterpolated(idx);
 //            line[idx] = currentPoint;
 //        }
+//        ofSetColor(c, 160);
+//        ofSetLineWidth(2.5);
+//        line.draw();
 
         // Current point
         currentPoint = markersPosition[markerIdx][currentIdx];
-        
-        ofSetColor(c, 160);
-        ofSetLineWidth(2.5);
-        line.draw();
         
         ofFill();
         c.setBrightness(150);
