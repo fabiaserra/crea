@@ -22,7 +22,7 @@ void ofApp::setup(){
         // Use xml sequence marker file
         #ifdef KINECT_SEQUENCE
             kinectSequence.setup(maxMarkers);
-            kinectSequence.load("sequences/sequence1marker2.xml");
+            kinectSequence.load("sequences/sequenceT2.xml");
         #endif // KINECT_SEQUENCE
 
         // Load png files from file
@@ -124,7 +124,7 @@ void ofApp::setup(){
 
     // SEQUENCE
     sequence.setup(maxMarkers);
-    sequence.load("sequences/sequence1marker2.xml");
+    sequence.load("sequences/sequenceT2.xml");
     drawSequence = false;
     drawSequenceSegments = false;
 
@@ -134,8 +134,8 @@ void ofApp::setup(){
 
     // VMO SETUP
     dimensions = 2;
-    slide = 1.0;
-    decay = 0.75;
+    slide = 5.07767;
+    decay = 0.25;
 
     initStatus = true;
     isTracking = false;
@@ -188,9 +188,9 @@ void ofApp::setup(){
 		//    int minLen = 1; // Temporary setting
 		//    float start = 0.0, step = 0.05, stop = 10.0;
 
-		float start = 10.0, step = 0.01, stop = 20.0;
+		float start = 0.0, step = 0.01, stop = 10.0;
 
-		//    float t = vmo::findThreshold(obs, numElements, start, step, stop); // Temporary threshold range and step
+//		    float t = vmo::findThreshold(savedObs, numElements, start, step, stop); // Temporary threshold range and step
 		//    float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
 		//	int minLen = 2; // sequence.xml
 		//	float t = 12.3; // for sequence.xml
@@ -202,12 +202,15 @@ void ofApp::setup(){
 		//	int minLen = 7;
 		//	float t = 4.5; // for sequence1marker1.xml
 		//	int minLen = 10;
-		float t = 5.7; // for sequence1marker2.xml
-		int minLen = 10;
+//		float t = 5.7; // for sequence1marker2.xml
+//		int minLen = 10;
 		//	float t = 6.0; // for sequence1marker3.xml
-		//	int minLen = 2;
-		//	float t = 3.6; // for simple5.xml
+//			int minLen = 2;
+//			float t = 3.6; // for simple5.xml
+        int minLen = 2;
+        float t = 4.8; // for simple5.xml
 
+        
 		cout << t << endl;
 		seqVmo = vmo::buildOracle(savedObs, numElements, t);
 		// 2.2 Output pattern list
@@ -457,29 +460,43 @@ void ofApp::update(){
     #else
 
         // Gesture Tracking with VMO here?
-        if (tempMarkers.size()>1){
+        if (tempMarkers.size()>=1){
             if (isTracking){
-                vector<float> obs; // Temporary code
-                for(unsigned int i = 0; i < sequence.maxMarkers; i++){
-                    obs.push_back(tempMarkers[i].smoothPos.x);
-                    obs.push_back(tempMarkers[i].smoothPos.y);
+                vector<float> obs(maxMarkers*dimensions, 0.0); // Temporary code
+                for(unsigned int i = 0; i < maxMarkers; i++){
+                    ofPoint currentPoint = tempMarkers[i].smoothPos;
+                    // Use the lowpass here??
+                    obs[i] = lowpass(currentPoint.x, pastObs[i], slide);
+                    obs[i+1] = lowpass(currentPoint.y, pastObs[i+1], slide);
+                    pastObs[i] = obs[i];
+                    pastObs[i+1] = obs[i+1];
+                    
+                    //obs[i] = currentPoint.x;
+                    //obs[i+1] = currentPoint.y;
                 }
+                
+                if (isConv) currentFeatures = cov_cal(pastObs, obs, numElements);
+                else currentFeatures = obs;
+                
                 if(initStatus){
-                    currentBf = vmo::tracking_init(seqVmo, currentBf, pttrList, obs);
+                    pastObs = obs;
+                    //				pastFeatures.assign(numElements, 0.0);
+                    currentBf = vmo::tracking_init(seqVmo, currentBf, pttrList, currentFeatures);
                     initStatus = false;
                 }
                 else{
-                    prevBf = currentBf;
-                    currentBf = vmo::tracking(seqVmo, prevBf, pttrList, obs, decay);
+                    //				prevBf = currentBf;
+                    currentBf = vmo::tracking(seqVmo, currentBf, pttrList, currentFeatures, decay);
                     cout << "current index: " << currentBf.currentIdx << endl;
-                    // We need the min/max of currentIdx
                     currentPercent = ofMap(currentBf.currentIdx, 0, sequence.numFrames, 0.0, 1.0, true);
-                    cout << "current percent: " << currentPercent << endl;
+                    cout << currentPercent << endl;
                     if(cues.size() != 0) {
                         int cueSegment = currentCueIndex;
                         for(int i = 0; i < cueSliders.size(); i++){
-                            float low = cueSliders.at(currentCueIndex).second->getValueHigh()/100.0;
-                            float high = cueSliders.at(currentCueIndex).second->getValueHigh()/100.0;
+                            float low = cueSliders.at(i).second->getValueLow()/100.0;
+                            float high = cueSliders.at(i).second->getValueHigh()/100.0;
+                            //                        cout << "Low: " << low << endl;
+                            //                        cout << "High: " << high << endl;
                             if (low <= currentPercent && currentPercent <= high){
                                 cueSegment = i;
                                 break;
@@ -523,7 +540,7 @@ void ofApp::draw(){
     ofSetColor(255);
 
 //    // Kinect images
-//    irImage.draw(0, 0);
+    irImage.draw(0, 0);
 //    depthImage.draw(0, 0);
 
     fbo.begin();
@@ -765,6 +782,9 @@ void ofApp::setupGUI4(){
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui4->addToggle("Show patterns in the side", &drawPatterns);
     gui4->addToggle("Show patterns inside sequence", &drawPatternsInSequence);
+    gui4->addSlider("Decay", 0.01, 1.0, &decay)->setLabelPrecision(3);
+    gui4->addSlider("Slide", 1.0, 30.0, &slide);
+
 
     gui4->addSpacer();
 

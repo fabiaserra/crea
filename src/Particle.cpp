@@ -77,7 +77,7 @@ void Particle::update(float dt){
             }
             else{
 //                saturation = 255%(int)ofGetElapsedTimef();
-                hue = 255%(int)ofGetElapsedTimef();
+//                hue = 255%(int)ofGetElapsedTimef();
             }
 
             color.setSaturation(saturation);

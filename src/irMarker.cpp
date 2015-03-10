@@ -34,19 +34,23 @@ void irMarker::updateLabels(vector<unsigned int> deadLabels, vector<unsigned int
 }
 
 void irMarker::draw(){
+//    ofPushStyle();
+//    float size = 16;
+//    ofSetColor(255);
+//    if(startedDying){
+//        ofSetColor(ofColor::red);
+//        size = ofMap(ofGetElapsedTimef() - startedDying, 0, dyingTime, size, 0, true);
+//    }
+//    ofNoFill();
+//    ofCircle(currentPos, size);
+//    ofSetColor(color);
+//    all.draw();
+//    ofSetColor(255);
+//    ofDrawBitmapString(ofToString(label), currentPos);
+//    ofPopStyle();
     ofPushStyle();
-    float size = 16;
-    ofSetColor(255);
-    if(startedDying){
-        ofSetColor(ofColor::red);
-        size = ofMap(ofGetElapsedTimef() - startedDying, 0, dyingTime, size, 0, true);
-    }
-    ofNoFill();
-    ofCircle(currentPos, size);
     ofSetColor(color);
-    all.draw();
-    ofSetColor(255);
-    ofDrawBitmapString(ofToString(label), currentPos);
+    ofCircle(currentPos, 10);
     ofPopStyle();
 }
 
