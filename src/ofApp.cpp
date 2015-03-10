@@ -1085,11 +1085,11 @@ void ofApp::addParticlePhysicsGUI(ofxUISuperCanvas* gui, ParticleSystem* ps){
     gui->addToggle("Bounces", &ps->bounce);
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui->setWidgetSpacing(10);
-    gui->addToggle("Steers", ps->steer);
-    gui->addToggle("Infinite", ps->infiniteWalls);
+    gui->addToggle("Steers", &ps->steer);
+    gui->addToggle("Infinite", &ps->infiniteWalls);
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui->setWidgetSpacing(3);
-    gui->addToggle("Repulse", ps->repulse);
+    gui->addToggle("Repulse", &ps->repulse);
     gui->addSpacer();
 }
 

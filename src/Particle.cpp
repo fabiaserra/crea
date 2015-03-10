@@ -399,18 +399,17 @@ void Particle::steerParticle(){
 }
 
 void Particle::marginsWrap(){
-
-    if(pos.x-radius > width){
+    if(pos.x-radius > (float)width){
         pos.x = -radius;
     }
-    else if(pos.x+radius < 0){
+    else if(pos.x+radius < 0.0){
         pos.x = width;
     }
 
-    if(pos.y-radius > height){
+    if(pos.y-radius > (float)height){
         pos.y = -radius;
     }
-    else if(pos.y+radius < 0){
+    else if(pos.y+radius < 0.0){
         pos.y = height;
     }
 }
