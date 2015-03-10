@@ -9,7 +9,7 @@ Particle::Particle(){
 
     bounces         = false;
     steers          = false;
-    infinitWalls    = false;
+    infiniteWalls   = false;
 
     sizeAge         = false;
     opacityAge      = false;
@@ -93,8 +93,8 @@ void Particle::update(float dt){
             steerParticle();
         }
 
-        else if(infinitWalls){
-            skipParticle();
+        else if(infiniteWalls){
+            marginsWrap();
         }
     }
 }

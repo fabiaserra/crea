@@ -52,6 +52,7 @@ ParticleSystem::ParticleSystem(){
     repulse             = false;        // Repulse particles between each other?
     bounce              = false;        // Bounce particles with the walls of the window?
     steer               = false;        // Steers direction before touching the walls of the window?
+    infiniteWalls       = false;        // Infinite walls?
 
     // Behavior
     emit                = false;        // Born new particles in each frame?
@@ -110,8 +111,8 @@ void ParticleSystem::setup(ParticleMode particleMode, InputSource inputSource, i
 
     else if(particleMode == BOIDS){ // TODO: BOIDS == RANDOM?
         flock = true;
-        immortal = true;
         steer = true;
+        immortal = true;
         addParticles(nParticles);
     }
 }
@@ -201,6 +202,7 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
             particles[i]->friction = 1-friction/1000;
             particles[i]->bounces = bounce;
             particles[i]->steers = steer;
+            particles[i]->infiniteWalls = infiniteWalls;
 
             particles[i]->update(dt);
         }

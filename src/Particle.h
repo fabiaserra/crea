@@ -67,7 +67,7 @@ class Particle
 
         bool bounces;           // Particle bounces with the window margins?
         bool steers;            // Particle steers direction before touching the walls?
-        bool infinitWalls;      // Particle goes back to the opposite wall?
+        bool infiniteWalls;     // Particle goes back to the opposite wall?
 // --------------------------------------------------------------
         float flockingRadiusSqrd;
         float lowThresh;        // separate

@@ -886,34 +886,7 @@ void ofApp::setupGUI8Emitter(){
     gui8Emitter = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
     gui8Emitter->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
-    gui8Emitter->addSpacer();
-    gui8Emitter->addLabel("Press '8' to toggle panel", OFX_UI_FONT_SMALL);
-
-    gui8Emitter->addSpacer();
-    gui8Emitter->addFPS(OFX_UI_FONT_SMALL);
-
-    gui8Emitter->addSpacer();
-    gui8Emitter->addImageToggle("Particles Active", "icons/show.png", &emitterParticles->isActive, dim, dim);
-    gui8Emitter->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-
-    ofxUIImageButton *previous;
-    previous = gui8Emitter->addImageButton("Previous Particle System", "icons/previous.png", false, dim, dim);
-    previous->setColorBack(ofColor(150, 255));
-
-    ofxUIImageButton *next;
-    next = gui8Emitter->addImageButton("Next Particle System", "icons/play.png", false, dim, dim);
-    next->setColorBack(ofColor(150, 255));
-
-    gui8Emitter->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-
-    gui8Emitter->addSpacer();
-    gui8Emitter->addToggle("Marker", &emitterParticles->markersInput);
-    gui8Emitter->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui8Emitter->setWidgetSpacing(15);
-    gui8Emitter->addToggle("Contour", &emitterParticles->contourInput);
-    gui8Emitter->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui8Emitter->setWidgetSpacing(3);
-    gui8Emitter->addSpacer();
+    addParticleBasicsGUI(gui8Emitter, emitterParticles);
 
     gui8Emitter->addLabel("EMITTER", OFX_UI_FONT_LARGE);
 
@@ -950,19 +923,7 @@ void ofApp::setupGUI8Emitter(){
     gui8Emitter->setWidgetSpacing(3);
     gui8Emitter->addToggle("Color", &emitterParticles->colorAge);
 
-    gui8Emitter->addSpacer();
-    gui8Emitter->addLabel("Physics");
-    gui8Emitter->addSlider("Friction", 0, 100, &emitterParticles->friction);
-    gui8Emitter->addSlider("Gravity", 0.0, 15.0, &emitterParticles->gravity);
-    gui8Emitter->addSlider("Turbulence", 0.0, 20.0, &emitterParticles->turbulence);
-    gui8Emitter->addToggle("Bounces", &emitterParticles->bounce);
-    gui8Emitter->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui8Emitter->setWidgetSpacing(10);
-    gui8Emitter->addToggle("Repulse", &emitterParticles->repulse);
-    gui8Emitter->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui8Emitter->setWidgetSpacing(3);
-
-    gui8Emitter->addSpacer();
+    addParticlePhysicsGUI(gui8Emitter, emitterParticles);
 
     gui8Emitter->autoSizeToFitWidgets();
     gui8Emitter->setVisible(false);
@@ -976,36 +937,7 @@ void ofApp::setupGUI8Grid(){
     gui8Grid = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
     gui8Grid->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
-    gui8Grid->addSpacer();
-    gui8Grid->addLabel("Press '8' to toggle panel", OFX_UI_FONT_SMALL);
-
-    gui8Grid->addSpacer();
-    gui8Grid->addFPS(OFX_UI_FONT_SMALL);
-
-    gui8Grid->addSpacer();
-    gui8Grid->addImageToggle("Particles Active", "icons/show.png", &gridParticles->isActive, dim, dim);
-    gui8Grid->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-
-    ofxUIImageButton *previous;
-    previous = gui8Grid->addImageButton("Previous Particle System", "icons/previous.png", false, dim, dim);
-//    previous->bindToKey(OF_KEY_LEFT);
-//    previous->setTriggerType(OFX_UI_TRIGGER_BEGIN);
-    previous->setColorBack(ofColor(150, 255));
-
-    ofxUIImageButton *next;
-    next = gui8Grid->addImageButton("Next Particle System", "icons/play.png", false, dim, dim);
-    next->setColorBack(ofColor(150, 255));
-
-    gui8Grid->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-
-    gui8Grid->addSpacer();
-    gui8Grid->addToggle("Marker", &gridParticles->markersInput);
-    gui8Grid->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui8Grid->setWidgetSpacing(15);
-    gui8Grid->addToggle("Contour", &gridParticles->contourInput);
-    gui8Grid->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui8Grid->setWidgetSpacing(3);
-    gui8Grid->addSpacer();
+    addParticleBasicsGUI(gui8Grid, gridParticles);
 
     gui8Grid->addLabel("GRID", OFX_UI_FONT_LARGE);
     gui8Grid->addSpacer();
@@ -1013,20 +945,7 @@ void ofApp::setupGUI8Grid(){
     gui8Grid->addSlider("Radius", 0.1, 25.0, &gridParticles->radius);
     gui8Grid->addIntSlider("Resolution", 1, 20, &gridParticles->gridRes)->setStickyValue(1.0);
 
-    // TODO: addParticlePhysics(), addParticleProperties()... and general methods for particle GUIs
-    gui8Grid->addSpacer();
-    gui8Grid->addLabel("Physics");
-    gui8Grid->addSlider("Friction", 0, 100, &gridParticles->friction);
-    gui8Grid->addSlider("Gravity", 0.0, 15.0, &gridParticles->gravity);
-    gui8Grid->addSlider("Turbulence", 0.0, 20.0, &gridParticles->turbulence);
-    gui8Grid->addToggle("Bounces", &gridParticles->bounce);
-    gui8Grid->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui8Grid->setWidgetSpacing(10);
-    gui8Grid->addToggle("Repulse", &gridParticles->repulse);
-    gui8Grid->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui8Grid->setWidgetSpacing(3);
-
-    gui8Grid->addSpacer();
+    addParticlePhysicsGUI(gui8Grid, gridParticles);
 
     gui8Grid->autoSizeToFitWidgets();
     gui8Grid->setVisible(false);
@@ -1040,32 +959,7 @@ void ofApp::setupGUI8Boids(){
     gui8Boids = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
     gui8Boids->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
-    gui8Boids->addSpacer();
-    gui8Boids->addLabel("Press '8' to toggle panel", OFX_UI_FONT_SMALL);
-
-    gui8Boids->addSpacer();
-    gui8Boids->addFPS(OFX_UI_FONT_SMALL);
-
-    gui8Boids->addSpacer();
-    gui8Boids->addImageToggle("Particles Active", "icons/show.png", &boidsParticles->isActive, dim, dim);
-    gui8Boids->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-
-    ofxUIImageButton *previous;
-    previous = gui8Boids->addImageButton("Previous Particle System", "icons/previous.png", false, dim, dim);
-    previous->setColorBack(ofColor(150, 255));
-
-    ofxUIImageButton *next;
-    next = gui8Boids->addImageButton("Next Particle System", "icons/play.png", false, dim, dim);
-    next->setColorBack(ofColor(150, 255));
-
-    gui8Boids->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui8Boids->addSpacer();
-    gui8Boids->addToggle("Marker", &boidsParticles->markersInput);
-    gui8Boids->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui8Boids->setWidgetSpacing(15);
-    gui8Boids->addToggle("Contour", &boidsParticles->contourInput);
-    gui8Boids->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui8Boids->setWidgetSpacing(3);
+    addParticleBasicsGUI(gui8Boids, boidsParticles);
 
     gui8Boids->addSpacer();
     gui8Boids->addLabel("BOIDS", OFX_UI_FONT_LARGE);
@@ -1085,19 +979,7 @@ void ofApp::setupGUI8Boids(){
     gui8Boids->addSlider("Attraction Strength", 0.001, 0.1, &boidsParticles->attractionStrength)->setLabelPrecision(3);
     gui8Boids->addSlider("Alignment Strength", 0.001, 0.1, &boidsParticles->alignmentStrength)->setLabelPrecision(3);
 
-    gui8Boids->addSpacer();
-    gui8Boids->addLabel("Physics");
-    gui8Boids->addSlider("Friction", 0, 100, &boidsParticles->friction);
-    gui8Boids->addSlider("Gravity", 0.0, 15.0, &boidsParticles->gravity);
-    gui8Boids->addSlider("Turbulence", 0.0, 20.0, &boidsParticles->turbulence);
-    gui8Boids->addToggle("Bounces", &boidsParticles->bounce);
-    gui8Boids->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui8Boids->setWidgetSpacing(10);
-    gui8Boids->addToggle("Repulse", &boidsParticles->repulse);
-    gui8Boids->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui8Boids->setWidgetSpacing(3);
-
-    gui8Boids->addSpacer();
+    addParticlePhysicsGUI(gui8Boids, boidsParticles);
 
     gui8Boids->autoSizeToFitWidgets();
     gui8Boids->setVisible(false);
@@ -1111,32 +993,7 @@ void ofApp::setupGUI8Animations(){
     gui8Animations = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
     gui8Animations->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
-    gui8Animations->addSpacer();
-    gui8Animations->addLabel("Press '8' to toggle panel", OFX_UI_FONT_SMALL);
-
-    gui8Animations->addSpacer();
-    gui8Animations->addFPS(OFX_UI_FONT_SMALL);
-
-    gui8Animations->addSpacer();
-    gui8Animations->addImageToggle("Particles Active", "icons/show.png", &animationsParticles->isActive, dim, dim);
-    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-
-    ofxUIImageButton *previous;
-    previous = gui8Animations->addImageButton("Previous Particle System", "icons/previous.png", false, dim, dim);
-    previous->setColorBack(ofColor(150, 255));
-
-    ofxUIImageButton *next;
-    next = gui8Animations->addImageButton("Next Particle System", "icons/play.png", false, dim, dim);
-    next->setColorBack(ofColor(150, 255));
-
-    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui8Animations->addSpacer();
-    gui8Animations->addToggle("Marker", &animationsParticles->markersInput);
-    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui8Animations->setWidgetSpacing(15);
-    gui8Animations->addToggle("Contour", &animationsParticles->contourInput);
-    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui8Animations->setWidgetSpacing(3);
+    addParticleBasicsGUI(gui8Animations, animationsParticles);
 
     gui8Animations->addSpacer();
     gui8Animations->addLabel("ANIMATIONS", OFX_UI_FONT_LARGE);
@@ -1163,19 +1020,7 @@ void ofApp::setupGUI8Animations(){
     gui8Animations->addSlider("Radius", 0.1, 25.0, &animationsParticles->radius);
     gui8Animations->addSlider("Radius Random[%]", 0.0, 100.0, &animationsParticles->radiusRnd);
 
-    gui8Animations->addSpacer();
-    gui8Animations->addLabel("Physics");
-    gui8Animations->addSlider("Friction", 0, 100, &animationsParticles->friction);
-    gui8Animations->addSlider("Gravity", 0.0, 15.0, &animationsParticles->gravity);
-    gui8Animations->addSlider("Turbulence", 0.0, 20.0, &animationsParticles->turbulence);
-    gui8Animations->addToggle("Bounces", &animationsParticles->bounce);
-    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui8Animations->setWidgetSpacing(10);
-    gui8Animations->addToggle("Repulse", &animationsParticles->repulse);
-    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui8Animations->setWidgetSpacing(3);
-
-    gui8Animations->addSpacer();
+    addParticlePhysicsGUI(gui8Animations, animationsParticles);
 
     gui8Animations->autoSizeToFitWidgets();
     gui8Animations->setVisible(false);
@@ -1184,8 +1029,37 @@ void ofApp::setupGUI8Animations(){
     particleGuis.push_back(gui8Animations);
 }
 
+void ofApp::addParticleBasicsGUI(ofxUISuperCanvas* gui, ParticleSystem* ps){
+    gui->addSpacer();
+    gui->addLabel("Press '8' to toggle panel", OFX_UI_FONT_SMALL);
+
+    gui->addSpacer();
+    gui->addFPS(OFX_UI_FONT_SMALL);
+
+    gui->addSpacer();
+    gui->addImageToggle("Particles Active", "icons/show.png", &ps->isActive, dim, dim);
+    gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+
+    ofxUIImageButton *previous;
+    previous = gui->addImageButton("Previous Particle System", "icons/previous.png", false, dim, dim);
+    previous->setColorBack(ofColor(150, 255));
+
+    ofxUIImageButton *next;
+    next = gui->addImageButton("Next Particle System", "icons/play.png", false, dim, dim);
+    next->setColorBack(ofColor(150, 255));
+
+    gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui->addSpacer();
+    gui->addToggle("Marker", &ps->markersInput);
+    gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui->setWidgetSpacing(15);
+    gui->addToggle("Contour", &ps->contourInput);
+    gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui->setWidgetSpacing(3);
+}
+
 ////--------------------------------------------------------------
-//void ofApp::addParticleProperties(ofxUISuperCanvas gui, ParticleSystem ps){
+//void ofApp::addParticlePropertiesGUI(ofxUISuperCanvas* gui, ParticleSystem* ps){
 //    gui->addLabel("Particle");
 //    gui->addToggle("Immortal", &ps->immortal);
 //    gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
@@ -1199,6 +1073,25 @@ void ofApp::setupGUI8Animations(){
 //    gui->addSlider("Radius", 0.1, 25.0, &ps->radius);
 //    gui->addSlider("Radius Random[%]", 0.0, 100.0, &ps->radiusRnd);
 //}
+
+//--------------------------------------------------------------
+void ofApp::addParticlePhysicsGUI(ofxUISuperCanvas* gui, ParticleSystem* ps){
+    gui->addSpacer();
+    gui->addLabel("Physics");
+    gui->addSlider("Friction", 0, 100, &ps->friction);
+    gui->addSlider("Gravity", 0.0, 15.0, &ps->gravity);
+    gui->addSlider("Turbulence", 0.0, 20.0, &ps->turbulence);
+    gui->addSpacer();
+    gui->addToggle("Bounces", &ps->bounce);
+    gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui->setWidgetSpacing(10);
+    gui->addToggle("Steers", ps->steer);
+    gui->addToggle("Infinite", ps->infiniteWalls);
+    gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui->setWidgetSpacing(3);
+    gui->addToggle("Repulse", ps->repulse);
+    gui->addSpacer();
+}
 
 //--------------------------------------------------------------
 void ofApp::saveGUISettings(const string path, const bool isACue){
