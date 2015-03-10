@@ -55,10 +55,10 @@ void Sequence::draw(){
 
         ofPoint currentPoint;
         ofPolyline line;
-        size_t processedFrames = calcCurrentFrameIndex();
-        line.resize(processedFrames + 1);
+        int currentIdx = calcCurrentFrameIndex();
+        line.resize(currentIdx + 1);
 
-        for(size_t idx = 0; idx <= processedFrames; idx++){
+        for(size_t idx = 0; idx <= currentIdx; idx++){
             currentPoint = markersPosition[markerIdx].getPointAtIndexInterpolated(idx);
             line[idx] = currentPoint;
         }
@@ -77,10 +77,6 @@ void Sequence::draw(){
         ofCircle(currentPoint, 3);
     }
     ofPopStyle();
-}
-
-ofPoint Sequence::getCurrentPoint(int markerIdx){
-    return markersPosition[markerIdx].getPointAtIndexInterpolated(calcCurrentFrameIndex());
 }
 
 void Sequence::load(const string path){
@@ -312,35 +308,42 @@ void Sequence::drawPattern(const int patternPosition, const int patternIdx, floa
 }
 
 // Draw current point in the tracking of the sequence
-void Sequence::drawSequenceTracking(float percent){
+void Sequence::drawSequenceTracking(int currentIdx){
     ofPushStyle();
     for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
         ofColor c(0,255,0);
-//        if(markerIdx == 0) c.set(255, 0, 0);
-//        else if(markerIdx == 1) c.set(0, 0, 255);
-//        else if(markerIdx == 2) c.set(0, 255, 0);
 
-//        ofSetColor(c, 50);
-//        ofSetLineWidth(1.5);
-//        markersPosition[markerIdx].draw();
-
-//        // Draw all past points
-//        ofPoint currentPoint;
+//        // Draw all past points       
+        ofPoint currentPoint;
 //        ofPolyline line;
-//        for(float p = 0.0; p <= percent; p += 0.001){
-//            currentPoint = markersPosition[markerIdx].getPointAtPercent(p);
-//            line.addVertex(currentPoint);
+//        line.resize(currentIdx + 1);
+//
+//        for(size_t idx = 0; idx < currentIdx; idx++){
+//            currentPoint = markersPosition[markerIdx].getPointAtIndexInterpolated(idx);
+//            line[idx] = currentPoint;
 //        }
-//        ofSetColor(c, 255);
+        float realPercent = markersPosition[markerIdx].getLengthAtIndexInterpolated(currentIdx) / markersPosition[markerIdx].getPerimeter();
+        float currPercent = ofMap(currentIdx, 0, numFrames, 0.0, 1.0, true);
+        
+        cout << "currIdxPct: " << markersPosition[markerIdx].getIndexAtPercent(currPercent) << endl;
+        cout << "realIdxPct: " << markersPosition[markerIdx].getIndexAtPercent(realPercent) << endl;
+
+        cout << "curr Percent: " << currPercent << endl;
+        cout << "real Percent: " << realPercent << endl;
+        
+//        ofSetColor(c, 160);
+//        ofSetLineWidth(2.5);
 //        line.draw();
+        
 
         // Current point
-        ofPoint currentPoint = markersPosition[markerIdx].getPointAtPercent(percent);
-
+        currentPoint = markersPosition[markerIdx][currentIdx];
+        
         ofFill();
         c.setBrightness(150);
-        ofSetColor(c, 255);
+        ofSetColor(c);
         ofCircle(currentPoint, 3);
+
     }
     ofPopStyle();
 }
@@ -421,10 +424,11 @@ vector<ofPolyline> Sequence::getSequenceSegment(const pair<float, float>& sequen
     float highPct = sequenceSegmentPct.second/100.0;
 
     vector<ofPolyline> segment;
-//    float increment = 0.0005; // TODO: change it depending on how many frames has the sequence
-    float increment = ofMap(numFrames, 0, 3000, 0.005, 0.0001);
+    float increment = 0.0001; // TODO: change it depending on how many frames has the sequence?
+//    float increment = ofMap(numFrames, 0, 3000,);
     for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
         ofPolyline markerSegment;
+//        float increment = ofMap(markersPosition[markerIdx].getPerimeter(), 0, 15000, 0.005, 0.0001, true);
         for(float pct = lowPct; pct < highPct; pct += increment){
             ofPoint p = markersPosition[markerIdx].getPointAtPercent(pct);
             markerSegment.addVertex(p);
@@ -497,3 +501,10 @@ size_t Sequence::calcCurrentFrameIndex()
     return frameIdx;
 }
 
+float Sequence::getCurrentSequencePercent(int currentIdx){
+    return markersPosition[0].getLengthAtIndexInterpolated(currentIdx) / markersPosition[0].getPerimeter();
+}
+
+ofPoint Sequence::getCurrentSequencePoint(int markerIdx){
+    return markersPosition[markerIdx].getPointAtIndexInterpolated(calcCurrentFrameIndex());
+}

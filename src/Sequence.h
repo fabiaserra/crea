@@ -17,8 +17,7 @@ class Sequence{
         void draw();
         void drawPatterns(map<int, float>& currentPatterns);
         void drawPatternsInSequence(map<int, float>& currentPatterns);
-        void drawSequenceTracking(float percent);
-		void drawSequenceTracking2(int currentIdx);
+        void drawSequenceTracking(int currentIdx);
         void drawSequenceSegments();
 
         void updateSequenceSegments(const vector< pair<float, float> >& sequencePcts);
@@ -29,7 +28,8 @@ class Sequence{
         void startRecording();
         void clearPlayback();
 
-        ofPoint getCurrentPoint(int markerIdx);
+        ofPoint getCurrentSequencePoint(int markerIdx);
+        float getCurrentSequencePercent(int currentIdx);
 
         //--------------------------------------------------------------
         ofxXmlSettings xml;

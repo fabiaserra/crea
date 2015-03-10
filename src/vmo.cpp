@@ -461,7 +461,6 @@ vmo::belief &vmo::tracking(vmo &oracle, vmo::belief &prevBf,
 //				prevBf.cost[k] = minD;
 //			}
 //		}
-
 		// Possible states from forward links
 		int sym = -1;
 		float d = 0.0;

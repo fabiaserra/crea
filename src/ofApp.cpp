@@ -195,8 +195,8 @@ void ofApp::setup(){
 		//	int minLen = 2; // sequence.xml
 		//	float t = 12.3; // for sequence.xml
 
-		//	int minLen = 7; // sequence3.xml
-		// 	float t = 18.6; // for sequence2.xml
+//        int minLen = 7; // sequence3.xml
+//        float t = 18.6; // for sequence2.xml
 		//	float t = 16.8; // for sequence3.xml
 		//
 		//	int minLen = 7;
@@ -208,7 +208,7 @@ void ofApp::setup(){
 //			int minLen = 2;
 //			float t = 3.6; // for simple5.xml
         int minLen = 2;
-        float t = 4.8; // for simple5.xml
+        float t = 4.8; // for tammuzT2.xml
 
         
 		cout << t << endl;
@@ -399,7 +399,7 @@ void ofApp::update(){
         if(isTracking){
             vector<float> obs(maxMarkers*dimensions, 0.0); // Temporary code
             for(unsigned int i = 0; i < kinectSequence.maxMarkers; i++){
-                ofPoint currentPoint = kinectSequence.getCurrentPoint(i);
+                ofPoint currentPoint = kinectSequence.getCurrentSequencePoint(i);
 				// Use the lowpass here??
 				obs[i] = lowpass(currentPoint.x, pastObs[i], slide);
 				obs[i+1] = lowpass(currentPoint.y, pastObs[i+1], slide);
@@ -423,8 +423,9 @@ void ofApp::update(){
 //				prevBf = currentBf;
 				currentBf = vmo::tracking(seqVmo, currentBf, pttrList, currentFeatures, decay);
                 cout << "current index: " << currentBf.currentIdx << endl;
-                currentPercent = ofMap(currentBf.currentIdx, 0, sequence.numFrames, 0.0, 1.0, true);
-                cout << currentPercent << endl;
+                currentPercent = sequence.getCurrentSequencePercent(currentBf.currentIdx);
+//                cout << "current percent: " << currentPercent << endl;
+
                 if(cues.size() != 0) {
                     int cueSegment = currentCueIndex;
                     for(int i = 0; i < cueSliders.size(); i++){
@@ -488,8 +489,9 @@ void ofApp::update(){
                     //				prevBf = currentBf;
                     currentBf = vmo::tracking(seqVmo, currentBf, pttrList, currentFeatures, decay);
                     cout << "current index: " << currentBf.currentIdx << endl;
-                    currentPercent = ofMap(currentBf.currentIdx, 0, sequence.numFrames, 0.0, 1.0, true);
-                    cout << currentPercent << endl;
+                    // We need the min/max of currentIdx
+                    currentPercent = sequence.getCurrentSequencePercent(currentBf.currentIdx);
+//                    cout << "current percent: " << currentPercent << endl;
                     if(cues.size() != 0) {
                         int cueSegment = currentCueIndex;
                         for(int i = 0; i < cueSliders.size(); i++){
@@ -585,8 +587,7 @@ void ofApp::draw(){
     if(drawSequence) sequence.draw();
     if(drawPatternsInSequence) sequence.drawPatternsInSequence(gestureUpdate);
     if(drawSequenceSegments) sequence.drawSequenceSegments();
-//    if(isTracking) sequence.drawSequenceTracking(currentPercent);
-	if(isTracking) sequence.drawSequenceTracking2(currentBf.currentIdx);
+    if(isTracking) sequence.drawSequenceTracking(currentBf.currentIdx);
 
     ofPopMatrix();
 
