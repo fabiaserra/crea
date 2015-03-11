@@ -6,7 +6,7 @@ Sequence::Sequence(){
     numFrames = 0;
     playhead = 0;
     elapsedTime = 0;
-    maxPatternsWindow = 16;
+    maxPatternsWindow = 10;
 }
 
 void Sequence::setup(const int maxMarkers){
@@ -242,7 +242,7 @@ void Sequence::drawPattern(const int patternPosition, const int patternIdx, floa
     float height = 480.0;
     float scale = 5.5;
     float margin = 40.0;
-    float guiHeight = 1200;
+    float guiHeight = 1550;
 
     ofPushMatrix();
     ofPushStyle();
@@ -364,18 +364,20 @@ void Sequence::drawSegments(){
 
 // Update the segments of the sequence that belong to the different cues
 void Sequence::updateSegments(const vector< pair<float, float> >& segmentsPcts){
-    // Clear sequence segments polylines
-    for(int segmentIdx = 0; segmentIdx < segments.size(); segmentIdx++){
-        for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
-            segments[segmentIdx][markerIdx].clear();
+    if(markersPosition.size() > 0){
+        // Clear sequence segments polylines
+        for(int segmentIdx = 0; segmentIdx < segments.size(); segmentIdx++){
+            for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
+                segments[segmentIdx][markerIdx].clear();
+            }
+            segments[segmentIdx].clear();
         }
-        segments[segmentIdx].clear();
-    }
-    segments.clear();
-
-    for(int segmentIdx = 0; segmentIdx < segmentsPcts.size(); segmentIdx++){
-        vector<ofPolyline> segment = getSegment(segmentsPcts[segmentIdx]);
-        segments.push_back(segment);
+        segments.clear();
+        
+        for(int segmentIdx = 0; segmentIdx < segmentsPcts.size(); segmentIdx++){
+            vector<ofPolyline> segment = getSegment(segmentsPcts[segmentIdx]);
+            segments.push_back(segment);
+        }
     }
 }
 

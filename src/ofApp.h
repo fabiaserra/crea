@@ -9,7 +9,7 @@
 //#define KINECT_CONNECTED
 
 // Uncomment this to use an xml sequence file for the tracking
-#define KINECT_SEQUENCE
+//#define KINECT_SEQUENCE
 
 #include "ParticleSystem.h"
 #include "irMarker.h"
@@ -62,6 +62,7 @@ class ofApp : public ofBaseApp{
         void gotMessage(ofMessage msg);
 
         void addParticleBasicsGUI(ofxUISuperCanvas* gui, ParticleSystem* ps);
+        void addParticlePropertiesGUI(ofxUISuperCanvas* gui, ParticleSystem* ps);
         void addParticlePhysicsGUI(ofxUISuperCanvas* gui, ParticleSystem* ps);
 
         //--------------------------------------------------------------
@@ -111,7 +112,10 @@ class ofApp : public ofBaseApp{
         //--------------------------------------------------------------
         vector<string> cues;
         int currentCueIndex;
+        //--------------------------------------------------------------
         bool interpolatingWidgets;
+        int maxTransitionFrames;
+        int interpolatedFrames;
         map<ofxUIWidget *, vector<float> > widgetsToUpdate;
         //--------------------------------------------------------------
         ofxUISuperCanvas *gui0;
