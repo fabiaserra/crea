@@ -309,34 +309,36 @@ void Sequence::drawPattern(const int patternPosition, const int patternIdx, floa
 
 // Draw current point in the tracking of the sequence
 void Sequence::drawSequenceTracking(int currentIdx){
-    ofPushStyle();
-    for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
-        ofColor c(0,255,0);
+    if(currentIdx >= 0){
+        ofPushStyle();
+        for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
+            ofColor c(0,255,0);
 
-//        // Draw all past points
-        ofPoint currentPoint;
-        ofPolyline line;
-        line.resize(currentIdx + 1);
+            // Draw all past points
+            ofPolyline line;
+            line.resize(currentIdx + 1);
 
-        for(size_t idx = 0; idx < currentIdx; idx++){
-            currentPoint = markersPosition[markerIdx].getPointAtIndexInterpolated(idx);
-            line[idx] = currentPoint;
+            for(size_t idx = 0; idx <= currentIdx; idx++){
+                ofPoint point = markersPosition[markerIdx].getPointAtIndexInterpolated(idx);
+                line[idx] = point;
+            }
+
+            ofSetColor(c);
+            ofSetLineWidth(2.5);
+            line.draw();
+
+            // Current point
+            ofPoint currentPoint;
+            currentPoint = markersPosition[markerIdx][currentIdx];
+
+            ofFill();
+//            c.setBrightness(255);
+            ofSetColor(c);
+            ofCircle(currentPoint, 5);
+
         }
-
-        ofSetColor(c, 160);
-        ofSetLineWidth(2.5);
-        line.draw();
-
-        // Current point
-        currentPoint = markersPosition[markerIdx][currentIdx];
-
-        ofFill();
-//        c.setBrightness(255);
-        ofSetColor(c);
-        ofCircle(currentPoint, 6);
-
+        ofPopStyle();
     }
-    ofPopStyle();
 }
 
 // Draw the segment of the sequence that belongs to the different cues

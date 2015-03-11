@@ -462,21 +462,26 @@ void ofApp::update(){
     #else
 
         // Gesture Tracking with VMO here?
-        if(tempMarkers.size()>0){
+//        if(tempMarkers.size()>0){
             if(isTracking){
                 vector<float> obs(maxMarkers*dimensions, 0.0); // Temporary code
+                int numObs = 0;
                 for(unsigned int i = 0; i < tempMarkers.size(); i++){
                     // If we have already filled maxMarkers observations jump to tracking
-                    if(obs.size() == maxMarkers*2) break;
+                    if(numObs == maxMarkers*dimensions) break;
                     // If marker has disappeared but we have more markers to fill maxMarkers jump to the next marker
-                    if(markers[i].hasDisappeared && (tempMarkers.size() - i) > maxMarkers) continue;
+                    if(tempMarkers[i].hasDisappeared && (tempMarkers.size() - i) > maxMarkers) continue;
 
                     ofPoint currentPoint = tempMarkers[i].smoothPos;
+                    cout << currentPoint << endl;
+
                     // Use the lowpass here??
                     obs[i] = lowpass(currentPoint.x, pastObs[i], slide);
                     obs[i+1] = lowpass(currentPoint.y, pastObs[i+1], slide);
                     pastObs[i] = obs[i];
                     pastObs[i+1] = obs[i+1];
+
+                    numObs += dimensions;
 
                     //obs[i] = currentPoint.x;
                     //obs[i+1] = currentPoint.y;
@@ -494,9 +499,9 @@ void ofApp::update(){
                 else{
     //				prevBf = currentBf;
                     currentBf = vmo::tracking(seqVmo, currentBf, pttrList, currentFeatures, decay);
-                    cout << "current index: " << currentBf.currentIdx << endl;
+//                    cout << "current index: " << currentBf.currentIdx << endl;
                     currentPercent = sequence.getCurrentSequencePercent(currentBf.currentIdx);
-                    cout << "current percent: " << currentPercent << endl;
+//                    cout << "current percent: " << currentPercent << endl;
 
                     if(cues.size() != 0) {
                         int cueSegment = currentCueIndex;
@@ -520,14 +525,14 @@ void ofApp::update(){
                     }
                 }
                 gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
-                for (int i = 0; i < sequence.patterns.size(); i++) {
-                    if(gestureUpdate.find(i) != gestureUpdate.end()) {
-                        cout << "key: "<< i << endl;
-                        cout << "percent:"<< gestureUpdate[i] << endl;
-                    }
-                }
+//                for (int i = 0; i < sequence.patterns.size(); i++) {
+//                    if(gestureUpdate.find(i) != gestureUpdate.end()) {
+//                        cout << "key: "<< i << endl;
+//                        cout << "percent:"<< gestureUpdate[i] << endl;
+//                    }
+//                }
             }
-        }
+//        }
 
     #endif // KINECT_SEQUENCE
 }
@@ -759,7 +764,7 @@ void ofApp::setupGUI3(){
     sequenceNumFrames = gui3->addLabel("Number of frames: "+ofToString(sequence.numFrames), OFX_UI_FONT_SMALL);
 
     gui3->addSpacer();
-    gui3->addLabel("SEQUENCE SEGMENTATION");
+    gui3->addLabel("CUE MAPPING");
     gui3->addToggle("Show sequence segmentation", &drawSequenceSegments);
     gui3->addSpacer();
 
@@ -786,14 +791,16 @@ void ofApp::setupGUI4(){
     gui4->addImageButton("Start vmo", "icons/play.png", false, dim, dim)->setColorBack(ofColor(150, 255));
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui4->addImageButton("Stop vmo", "icons/delete.png", false, dim, dim)->setColorBack(ofColor(150, 255));
-    gui4->setWidgetSpacing(30);
-    trackingInfoLabel = gui4->addLabel("", OFX_UI_FONT_SMALL);
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui4->setWidgetSpacing(5);
-    gui4->addToggle("Show patterns in the side", &drawPatterns);
-    gui4->addToggle("Show patterns inside sequence", &drawPatternsInSequence);
+    gui4->addLabel("File: " + sequence.filename, OFX_UI_FONT_SMALL);
+    trackingInfoLabel = gui4->addLabel(" ", OFX_UI_FONT_SMALL);
+    gui4->addSpacer();
     gui4->addSlider("Decay", 0.01, 1.0, &decay)->setLabelPrecision(3);
     gui4->addSlider("Slide", 1.0, 30.0, &slide);
+    gui4->addSpacer();
+    gui4->addToggle("Show patterns in the side", &drawPatterns);
+    gui4->addToggle("Show patterns inside sequence", &drawPatternsInSequence);
+
 
     gui4->addSpacer();
 
@@ -1513,7 +1520,8 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         if(button->getValue() == true){
             initStatus = true;
             isTracking = true;
-            trackingInfoLabel->setLabel("Tracking " + sequence.filename);
+//            trackingInfoLabel->setLabel("Tracking " + sequence.filename);
+            trackingInfoLabel->setLabel("tracking...");
         }
     }
 
