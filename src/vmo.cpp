@@ -550,7 +550,7 @@ vmo::belief &vmo::tracking(vmo &oracle, vmo::belief &prevBf,
 //					}
 //				}
 //			}
-//		}
+		}
 
 		prevBf.cost[k] = (1.0-decay)*prevBf.cost[k] + decay*tmpCostK;
 		if (prevBf.cost[k] < tempCost) {
