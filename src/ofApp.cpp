@@ -272,13 +272,13 @@ void ofApp::setup(){
     interpolatingWidgets = false;
     loadGUISettings("settings/lastSettings.xml", false, false);
 
-    // ALLOCATE FBO AND FILL WITH BG COLOR
-    fbo.allocate(kinect.width, kinect.height, GL_RGB32F_ARB);
-    fbo.begin();
-    ofClear(red, green, blue);
-    fbo.end();
-
-    history = 0.8;
+//    // ALLOCATE FBO AND FILL WITH BG COLOR
+//    fbo.allocate(kinect.width, kinect.height, GL_RGB32F_ARB);
+//    fbo.begin();
+//    ofClear(red, green, blue);
+//    fbo.end();
+//
+//    history = 0.8;
 
     // CREATE DIRECTORIES IN /DATA IF THEY DONT EXIST
     string directory[3] = {"sequences", "settings", "cues"};
@@ -361,6 +361,9 @@ void ofApp::update(){
     threshold(grayThreshNear, nearThreshold, true);
     threshold(grayThreshFar, farThreshold);
     bitwise_and(grayThreshNear, grayThreshFar, depthImage);
+    dilate(depthImage);
+    dilate(depthImage);
+    dilate(depthImage);
     blur(depthImage, 21);
 
     // Update images
@@ -461,7 +464,7 @@ void ofApp::update(){
 
     #else
 
-//        if(tempMarkers.size()>0){
+        if(tempMarkers.size()>0){
             if(isTracking){
                 vector<float> obs(maxMarkers*dimensions, 0.0); // Temporary code
                 int numObs = 0;
@@ -530,7 +533,7 @@ void ofApp::update(){
                     }
                 }
             }
-//        }
+        }
 
     #endif // KINECT_SEQUENCE
 }
@@ -552,27 +555,28 @@ void ofApp::draw(){
 //    irImage.draw(0, 0);
 //    depthImage.draw(0, 0);
 
-    fbo.begin();
-
-    // Draw semi-transparent white rectangle to slightly clear buffer (depends on the history value)
-    float alpha = (1-history) * 255;
-    ofSetColor(red, green, blue, alpha);
-    ofFill();
-    ofRect(0, 0, kinect.width, kinect.height);
-
-    // Graphics
-    ofSetColor(255);
-    contour.draw();
+//    fbo.begin();
+//
+//    // Draw semi-transparent white rectangle to slightly clear buffer (depends on the history value)
+//    float alpha = (1-history) * 255;
+//    ofSetColor(red, green, blue, alpha);
+//    ofFill();
+//    ofRect(0, 0, kinect.width, kinect.height);
+//
+//    // Graphics
+//    ofSetColor(255);
+//    contour.draw();
 //    gridParticles->draw();
 //    emitterParticles->draw();
 //    boidsParticles->draw();
+//
+//    fbo.end();
+//
+//    // Draw buffer (graphics) on the screen
+//    fbo.draw(0, 0);
 
-    fbo.end();
-
-    // Draw buffer (graphics) on the screen
-    fbo.draw(0, 0);
-
-    // Draw Particles
+    // Draw Graphics
+    contour.draw();
     gridParticles->draw();
     emitterParticles->draw();
     boidsParticles->draw();
