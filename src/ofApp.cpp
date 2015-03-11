@@ -170,8 +170,8 @@ void ofApp::setup(){
 		// 2.2 Output pattern list
 		pttrList = vmo::findPttr(seqVmo, minLen);
 		sequence.loadPatterns(processPttr(seqVmo, savedObs, pttrList, maxMarkers, dimensions));
-		drawPatterns = false;
-        drawPatternsInSequence = false;
+		drawSequencePatterns = false;
+        drawSequencePatternsSeparate = false;
 		cout << sequence.patterns.size() << endl;
 	}
 	else{
@@ -220,8 +220,8 @@ void ofApp::setup(){
 		// 2.2 Output pattern list
 		pttrList = vmo::findPttr(seqVmo, minLen);
 		sequence.loadPatterns(processPttr(seqVmo, savedObs, pttrList, maxMarkers, dimensions));
-		drawPatterns = false;
-        drawPatternsInSequence = false;
+		drawSequencePatterns = false;
+        drawSequencePatternsSeparate = false;
 		cout << sequence.patterns.size() << endl;
 	}
     pastObs.assign(maxMarkers*dimensions, 0.0);
@@ -273,13 +273,13 @@ void ofApp::setup(){
     interpolatingWidgets = false;
     loadGUISettings("settings/lastSettings.xml", false, false);
 
-    // ALLOCATE FBO AND FILL WITH BG COLOR
-    fbo.allocate(kinect.width, kinect.height, GL_RGB32F_ARB);
-    fbo.begin();
-    ofClear(red, green, blue);
-    fbo.end();
-
-    history = 0.8;
+//    // ALLOCATE FBO AND FILL WITH BG COLOR
+//    fbo.allocate(kinect.width, kinect.height, GL_RGB32F_ARB);
+//    fbo.begin();
+//    ofClear(red, green, blue);
+//    fbo.end();
+//
+//    history = 0.8;
 
     // CREATE DIRECTORIES IN /DATA IF THEY DONT EXIST
     string directory[3] = {"sequences", "settings", "cues"};
@@ -362,6 +362,9 @@ void ofApp::update(){
     threshold(grayThreshNear, nearThreshold, true);
     threshold(grayThreshFar, farThreshold);
     bitwise_and(grayThreshNear, grayThreshFar, depthImage);
+    dilate(depthImage);
+    dilate(depthImage);
+    dilate(depthImage);
     blur(depthImage, 21);
 
     // Update images
@@ -403,7 +406,7 @@ void ofApp::update(){
         if(isTracking){
             vector<float> obs(maxMarkers*dimensions, 0.0); // Temporary code
             for(unsigned int i = 0; i < kinectSequence.maxMarkers; i++){
-                ofPoint currentPoint = kinectSequence.getCurrentSequencePoint(i);
+                ofPoint currentPoint = kinectSequence.getCurrentPoint(i);
 				// Use the lowpass here??
 				obs[i] = lowpass(currentPoint.x, pastObs[i], slide);
 				obs[i+1] = lowpass(currentPoint.y, pastObs[i+1], slide);
@@ -427,7 +430,7 @@ void ofApp::update(){
 //				prevBf = currentBf;
 				currentBf = vmo::tracking(seqVmo, currentBf, pttrList, currentFeatures, decay);
                 cout << "current index: " << currentBf.currentIdx << endl;
-                currentPercent = sequence.getCurrentSequencePercent(currentBf.currentIdx);
+                currentPercent = sequence.getCurrentPercent(currentBf.currentIdx);
                 cout << "current percent: " << currentPercent << endl;
 
                 if(cues.size() != 0) {
@@ -451,8 +454,7 @@ void ofApp::update(){
                     }
                 }
             }
-			gestureUpdate = getGestureUpdate(currentBf.currentIdx, seqVmo, pttrList, sequence);
-//            gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
+            gestureUpdate = getGestureUpdate(currentBf.currentIdx, seqVmo, pttrList, sequence);
             for (int i = 0; i < sequence.patterns.size(); i++) {
                 if(gestureUpdate.find(i) != gestureUpdate.end()) {
                     cout << "key: "<< i << endl;
@@ -463,7 +465,7 @@ void ofApp::update(){
 
     #else
 
-//        if(tempMarkers.size()>0){
+        if(tempMarkers.size()>0){
             if(isTracking){
                 vector<float> obs(maxMarkers*dimensions, 0.0); // Temporary code
                 int numObs = 0;
@@ -499,9 +501,9 @@ void ofApp::update(){
                 else{
     //				prevBf = currentBf;
                     currentBf = vmo::tracking(seqVmo, currentBf, pttrList, currentFeatures, decay);
-//                    cout << "current index: " << currentBf.currentIdx << endl;
-                    currentPercent = sequence.getCurrentSequencePercent(currentBf.currentIdx);
-//                    cout << "current percent: " << currentPercent << endl;
+                    cout << "current index: " << currentBf.currentIdx << endl;
+                    currentPercent = sequence.getCurrentPercent(currentBf.currentIdx);
+                    cout << "current percent: " << currentPercent << endl;
 
                     if(cues.size() != 0) {
                         int cueSegment = currentCueIndex;
@@ -525,15 +527,14 @@ void ofApp::update(){
                     }
                 }
                 gestureUpdate = getGestureUpdate(currentBf.currentIdx, seqVmo, pttrList, sequence);
-//                gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
-//                for (int i = 0; i < sequence.patterns.size(); i++) {
-//                    if(gestureUpdate.find(i) != gestureUpdate.end()) {
-//                        cout << "key: "<< i << endl;
-//                        cout << "percent:"<< gestureUpdate[i] << endl;
-//                    }
-//                }
+                for (int i = 0; i < sequence.patterns.size(); i++) {
+                    if(gestureUpdate.find(i) != gestureUpdate.end()) {
+                        cout << "key: "<< i << endl;
+                        cout << "percent:"<< gestureUpdate[i] << endl;
+                    }
+                }
             }
-//        }
+        }
 
     #endif // KINECT_SEQUENCE
 }
@@ -555,27 +556,28 @@ void ofApp::draw(){
     irImage.draw(0, 0);
 //    depthImage.draw(0, 0);
 
-    fbo.begin();
-
-    // Draw semi-transparent white rectangle to slightly clear buffer (depends on the history value)
-    float alpha = (1-history) * 255;
-    ofSetColor(red, green, blue, alpha);
-    ofFill();
-    ofRect(0, 0, kinect.width, kinect.height);
-
-    // Graphics
-    ofSetColor(255);
-    contour.draw();
+//    fbo.begin();
+//
+//    // Draw semi-transparent white rectangle to slightly clear buffer (depends on the history value)
+//    float alpha = (1-history) * 255;
+//    ofSetColor(red, green, blue, alpha);
+//    ofFill();
+//    ofRect(0, 0, kinect.width, kinect.height);
+//
+//    // Graphics
+//    ofSetColor(255);
+//    contour.draw();
 //    gridParticles->draw();
 //    emitterParticles->draw();
 //    boidsParticles->draw();
+//
+//    fbo.end();
+//
+//    // Draw buffer (graphics) on the screen
+//    fbo.draw(0, 0);
 
-    fbo.end();
-
-    // Draw buffer (graphics) on the screen
-    fbo.draw(0, 0);
-
-    // Draw Particles
+    // Draw Graphics
+    contour.draw();
     gridParticles->draw();
     emitterParticles->draw();
     boidsParticles->draw();
@@ -596,17 +598,13 @@ void ofApp::draw(){
     #endif // KINECT_SEQUENCE
 
     if(drawSequence) sequence.draw();
-    if(drawPatternsInSequence) sequence.drawPatternsInSequence(gestureUpdate);
-    if(drawSequenceSegments) sequence.drawSequenceSegments();
-	if(isTracking){
-		if (currentBf.currentIdx != -1) {
-			sequence.drawSequenceTracking(currentBf.currentIdx);
-		}
-	}
+    if(drawSequenceSegments) sequence.drawSegments();
+    if(drawSequencePatterns) sequence.drawPatterns(gestureUpdate);
+    if(isTracking) sequence.drawTracking(currentBf.currentIdx);
 
     ofPopMatrix();
 
-    if(drawPatterns) sequence.drawPatterns(gestureUpdate);
+    if(drawSequencePatternsSeparate) sequence.drawPatternsSeparate(gestureUpdate);
 }
 
 //--------------------------------------------------------------
@@ -803,8 +801,8 @@ void ofApp::setupGUI4(){
     gui4->addSlider("Decay", 0.01, 1.0, &decay)->setLabelPrecision(2);
     gui4->addSlider("Slide", 1.0, 30.0, &slide);
     gui4->addSpacer();
-    gui4->addToggle("Show patterns in the side", &drawPatterns);
-    gui4->addToggle("Show patterns inside sequence", &drawPatternsInSequence);
+    gui4->addToggle("Show patterns inside sequence", &drawSequencePatterns);
+    gui4->addToggle("Show patterns in the side", &drawSequencePatternsSeparate);
 
     gui4->addSpacer();
 
@@ -1297,14 +1295,14 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
             }
             gui3->autoSizeToFitWidgets();
 
-            vector< pair<float, float> > sequencePcts;
+            vector< pair<float, float> > segmentsPcts;
             for (int i = 0; i < cueSliders.size(); i++){
                 pair<float, float> pcts;
                 pcts.first = cueSliders.at(i).second->getValueLow();
                 pcts.second = cueSliders.at(i).second->getValueHigh();
-                sequencePcts.push_back(pcts);
+                segmentsPcts.push_back(pcts);
             }
-            sequence.updateSequenceSegments(sequencePcts);
+            sequence.updateSegments(segmentsPcts);
 
         }
         else currentCueIndex = -1;
@@ -1486,7 +1484,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     }
 
     if(e.getName() == "Sequence percent"){
-        vector< pair<float, float> > sequencePcts;
+        vector< pair<float, float> > segmentsPcts;
         for (int i = 0; i < cueSliders.size(); i++){
             pair<float, float> pcts;
             pcts.first = cueSliders.at(i).second->getValueLow();
@@ -1494,15 +1492,15 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             if((i < cueSliders.size()-1) && (pcts.second > cueSliders.at(i+1).second->getValueLow())){
                 cueSliders.at(i).second->setValueHigh(cueSliders.at(i+1).second->getValueLow());
             }
-            sequencePcts.push_back(pcts);
+            segmentsPcts.push_back(pcts);
         }
-        sequence.updateSequenceSegments(sequencePcts);
+        sequence.updateSegments(segmentsPcts);
     }
 
     if(e.getName() == "Show sequence segmentation"){
         ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
         if(toggle->getValue() == true){
-            vector< pair<float, float> > sequencePcts;
+            vector< pair<float, float> > segmentsPcts;
             for (int i = 0; i < cueSliders.size(); i++){
                 pair<float, float> pcts;
                 pcts.first = cueSliders.at(i).second->getValueLow();
@@ -1510,9 +1508,9 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
                 if((i < cueSliders.size()-1) && (pcts.second > cueSliders.at(i+1).second->getValueLow())){
                     cueSliders.at(i).second->setValueHigh(cueSliders.at(i+1).second->getValueLow());
                 }
-                sequencePcts.push_back(pcts);
+                segmentsPcts.push_back(pcts);
             }
-            sequence.updateSequenceSegments(sequencePcts);
+            sequence.updateSegments(segmentsPcts);
         }
     }
 

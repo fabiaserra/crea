@@ -15,12 +15,12 @@ class Sequence{
         void load(const string path);
         void save(const string path);
         void draw();
+        void drawTracking(int currentIdx);
         void drawPatterns(map<int, float>& currentPatterns);
-        void drawPatternsInSequence(map<int, float>& currentPatterns);
-        void drawSequenceTracking(int currentIdx);
-        void drawSequenceSegments();
+        void drawPatternsSeparate(map<int, float>& currentPatterns);
+        void drawSegments();
 
-        void updateSequenceSegments(const vector< pair<float, float> >& sequencePcts);
+        void updateSegments(const vector< pair<float, float> >& segmentsPcts);
 
         void loadPatterns(vector< vector<ofPolyline> > patterns);
         void createPatterns(int nPatterns);
@@ -28,8 +28,8 @@ class Sequence{
         void startRecording();
         void clearPlayback();
 
-        ofPoint getCurrentSequencePoint(int markerIdx);
-        float getCurrentSequencePercent(int currentIdx);
+        ofPoint getCurrentPoint(int markerIdx);
+        float getCurrentPercent(int currentIdx);
 
         //--------------------------------------------------------------
         ofxXmlSettings xml;
@@ -42,7 +42,7 @@ class Sequence{
         //--------------------------------------------------------------
         vector< vector<ofPolyline> > patterns;              // Identified patterns from the sequence
         //--------------------------------------------------------------
-        vector< vector<ofPolyline> > sequenceSegments;      // Sequence segments belonging to the different cues
+        vector< vector<ofPolyline> > segments;              // Segments belonging to the different cues
         //--------------------------------------------------------------
         string filename;
         float duration;
@@ -55,7 +55,7 @@ class Sequence{
 
     protected:
         void drawPattern(const int patternPosition, const int patternIdx, float percent, const bool highlight);
-        vector<ofPolyline> getSequenceSegment(const pair<float, float>& sequenceSegmentPct);
+        vector<ofPolyline> getSegment(const pair<float, float>& segmentPctRange);
         void updatePlayhead();
         size_t calcCurrentFrameIndex();
 };
