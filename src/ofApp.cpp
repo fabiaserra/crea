@@ -451,7 +451,6 @@ void ofApp::update(){
                 }
             }
             gestureUpdate = getGestureUpdate(currentBf.currentIdx, seqVmo, pttrList, sequence);
-            gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
             for (int i = 0; i < sequence.patterns.size(); i++) {
                 if(gestureUpdate.find(i) != gestureUpdate.end()) {
                     cout << "key: "<< i << endl;
@@ -498,9 +497,9 @@ void ofApp::update(){
                 else{
     //				prevBf = currentBf;
                     currentBf = vmo::tracking(seqVmo, currentBf, pttrList, currentFeatures, decay);
-//                    cout << "current index: " << currentBf.currentIdx << endl;
+                    cout << "current index: " << currentBf.currentIdx << endl;
                     currentPercent = sequence.getCurrentSequencePercent(currentBf.currentIdx);
-//                    cout << "current percent: " << currentPercent << endl;
+                    cout << "current percent: " << currentPercent << endl;
 
                     if(cues.size() != 0) {
                         int cueSegment = currentCueIndex;
@@ -524,13 +523,12 @@ void ofApp::update(){
                     }
                 }
                 gestureUpdate = getGestureUpdate(currentBf.currentIdx, seqVmo, pttrList, sequence);
-//                gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
-//                for (int i = 0; i < sequence.patterns.size(); i++) {
-//                    if(gestureUpdate.find(i) != gestureUpdate.end()) {
-//                        cout << "key: "<< i << endl;
-//                        cout << "percent:"<< gestureUpdate[i] << endl;
-//                    }
-//                }
+                for (int i = 0; i < sequence.patterns.size(); i++) {
+                    if(gestureUpdate.find(i) != gestureUpdate.end()) {
+                        cout << "key: "<< i << endl;
+                        cout << "percent:"<< gestureUpdate[i] << endl;
+                    }
+                }
             }
 //        }
 
