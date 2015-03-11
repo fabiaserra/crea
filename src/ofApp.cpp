@@ -170,8 +170,8 @@ void ofApp::setup(){
 		// 2.2 Output pattern list
 		pttrList = vmo::findPttr(seqVmo, minLen);
 		sequence.loadPatterns(processPttr(seqVmo, savedObs, pttrList, maxMarkers, dimensions));
-		drawPatterns = false;
-        drawPatternsInSequence = false;
+		drawSequencePatterns = false;
+        drawSequencePatternsSeparate = false;
 		cout << sequence.patterns.size() << endl;
 	}
 	else{
@@ -219,8 +219,8 @@ void ofApp::setup(){
 		// 2.2 Output pattern list
 		pttrList = vmo::findPttr(seqVmo, minLen);
 		sequence.loadPatterns(processPttr(seqVmo, savedObs, pttrList, maxMarkers, dimensions));
-		drawPatterns = false;
-        drawPatternsInSequence = false;
+		drawSequencePatterns = false;
+        drawSequencePatternsSeparate = false;
 		cout << sequence.patterns.size() << endl;
 	}
     pastObs.assign(maxMarkers*dimensions, 0.0);
@@ -405,7 +405,7 @@ void ofApp::update(){
         if(isTracking){
             vector<float> obs(maxMarkers*dimensions, 0.0); // Temporary code
             for(unsigned int i = 0; i < kinectSequence.maxMarkers; i++){
-                ofPoint currentPoint = kinectSequence.getCurrentSequencePoint(i);
+                ofPoint currentPoint = kinectSequence.getCurrentPoint(i);
 				// Use the lowpass here??
 				obs[i] = lowpass(currentPoint.x, pastObs[i], slide);
 				obs[i+1] = lowpass(currentPoint.y, pastObs[i+1], slide);
@@ -429,7 +429,7 @@ void ofApp::update(){
 //				prevBf = currentBf;
 				currentBf = vmo::tracking(seqVmo, currentBf, pttrList, currentFeatures, decay);
                 cout << "current index: " << currentBf.currentIdx << endl;
-                currentPercent = sequence.getCurrentSequencePercent(currentBf.currentIdx);
+                currentPercent = sequence.getCurrentPercent(currentBf.currentIdx);
                 cout << "current percent: " << currentPercent << endl;
 
                 if(cues.size() != 0) {
@@ -501,7 +501,7 @@ void ofApp::update(){
     //				prevBf = currentBf;
                     currentBf = vmo::tracking(seqVmo, currentBf, pttrList, currentFeatures, decay);
                     cout << "current index: " << currentBf.currentIdx << endl;
-                    currentPercent = sequence.getCurrentSequencePercent(currentBf.currentIdx);
+                    currentPercent = sequence.getCurrentPercent(currentBf.currentIdx);
                     cout << "current percent: " << currentPercent << endl;
 
                     if(cues.size() != 0) {
@@ -597,13 +597,13 @@ void ofApp::draw(){
     #endif // KINECT_SEQUENCE
 
     if(drawSequence) sequence.draw();
-    if(drawPatternsInSequence) sequence.drawPatternsInSequence(gestureUpdate);
-    if(drawSequenceSegments) sequence.drawSequenceSegments();
-    if(isTracking) sequence.drawSequenceTracking(currentBf.currentIdx);
+    if(drawSequenceSegments) sequence.drawSegments();
+    if(drawSequencePatterns) sequence.drawPatterns(gestureUpdate);
+    if(isTracking) sequence.drawTracking(currentBf.currentIdx);
 
     ofPopMatrix();
 
-    if(drawPatterns) sequence.drawPatterns(gestureUpdate);
+    if(drawSequencePatternsSeparate) sequence.drawPatternsSeparate(gestureUpdate);
 }
 
 //--------------------------------------------------------------
@@ -800,9 +800,8 @@ void ofApp::setupGUI4(){
     gui4->addSlider("Decay", 0.01, 1.0, &decay)->setLabelPrecision(2);
     gui4->addSlider("Slide", 1.0, 30.0, &slide);
     gui4->addSpacer();
-    gui4->addToggle("Show patterns in the side", &drawPatterns);
-    gui4->addToggle("Show patterns inside sequence", &drawPatternsInSequence);
-
+    gui4->addToggle("Show patterns inside sequence", &drawSequencePatterns);
+    gui4->addToggle("Show patterns in the side", &drawSequencePatternsSeparate);
 
     gui4->addSpacer();
 
@@ -1295,14 +1294,14 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
             }
             gui3->autoSizeToFitWidgets();
 
-            vector< pair<float, float> > sequencePcts;
+            vector< pair<float, float> > segmentsPcts;
             for (int i = 0; i < cueSliders.size(); i++){
                 pair<float, float> pcts;
                 pcts.first = cueSliders.at(i).second->getValueLow();
                 pcts.second = cueSliders.at(i).second->getValueHigh();
-                sequencePcts.push_back(pcts);
+                segmentsPcts.push_back(pcts);
             }
-            sequence.updateSequenceSegments(sequencePcts);
+            sequence.updateSegments(segmentsPcts);
 
         }
         else currentCueIndex = -1;
@@ -1484,7 +1483,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     }
 
     if(e.getName() == "Sequence percent"){
-        vector< pair<float, float> > sequencePcts;
+        vector< pair<float, float> > segmentsPcts;
         for (int i = 0; i < cueSliders.size(); i++){
             pair<float, float> pcts;
             pcts.first = cueSliders.at(i).second->getValueLow();
@@ -1492,15 +1491,15 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             if((i < cueSliders.size()-1) && (pcts.second > cueSliders.at(i+1).second->getValueLow())){
                 cueSliders.at(i).second->setValueHigh(cueSliders.at(i+1).second->getValueLow());
             }
-            sequencePcts.push_back(pcts);
+            segmentsPcts.push_back(pcts);
         }
-        sequence.updateSequenceSegments(sequencePcts);
+        sequence.updateSegments(segmentsPcts);
     }
 
     if(e.getName() == "Show sequence segmentation"){
         ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
         if(toggle->getValue() == true){
-            vector< pair<float, float> > sequencePcts;
+            vector< pair<float, float> > segmentsPcts;
             for (int i = 0; i < cueSliders.size(); i++){
                 pair<float, float> pcts;
                 pcts.first = cueSliders.at(i).second->getValueLow();
@@ -1508,9 +1507,9 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
                 if((i < cueSliders.size()-1) && (pcts.second > cueSliders.at(i+1).second->getValueLow())){
                     cueSliders.at(i).second->setValueHigh(cueSliders.at(i+1).second->getValueLow());
                 }
-                sequencePcts.push_back(pcts);
+                segmentsPcts.push_back(pcts);
             }
-            sequence.updateSequenceSegments(sequencePcts);
+            sequence.updateSegments(segmentsPcts);
         }
     }
 

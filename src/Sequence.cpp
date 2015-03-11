@@ -6,7 +6,7 @@ Sequence::Sequence(){
     numFrames = 0;
     playhead = 0;
     elapsedTime = 0;
-    maxPatternsWindow = 12;
+    maxPatternsWindow = 16;
 }
 
 void Sequence::setup(const int maxMarkers){
@@ -165,29 +165,8 @@ void Sequence::load(const string path){
     duration = timestampLastFrame - timestampFirstFrame;
 }
 
-// Draw patterns separate in a side of the screen
-void Sequence::drawPatterns(map<int, float>& currentPatterns){
-    // If there are more patterns than maximum able to show in the window
-    int nPatterns = MIN(maxPatternsWindow, patterns.size());
-
-    // TODO: show most important patterns if there are more than maxPatternsToShow
-
-    // Draw gesture patterns
-    for(int patternIdx = 0; patternIdx < nPatterns; patternIdx++){
-        int patternPosition = patternIdx + 1;
-        bool highlight = false;
-        float percent = 0;
-        // If the pattern is is inside the map
-        if(currentPatterns.find(patternIdx) != currentPatterns.end()){
-            highlight = true;
-            percent = currentPatterns[patternIdx];
-        }
-        drawPattern(patternPosition, patternIdx, percent, highlight);
-    }
-}
-
 // Draw patterns inside the long sequence
-void Sequence::drawPatternsInSequence(map<int, float>& currentPatterns){
+void Sequence::drawPatterns(map<int, float>& currentPatterns){
     ofPushStyle();
     // Draw gesture patterns
     int nPatterns = patterns.size();
@@ -204,12 +183,12 @@ void Sequence::drawPatternsInSequence(map<int, float>& currentPatterns){
         c.setHue(ofMap(patternIdx, 0, nPatterns-1, 0, 255));
 
         for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
-            int opacity = 60;
-            if(highlight) opacity = 150;
+            int opacity = 100;
+            if(highlight) opacity = 170;
 
             c.setBrightness(255);
             ofSetColor(c, opacity);
-            ofSetLineWidth(1.8);
+            ofSetLineWidth(2.5);
             patterns[patternIdx][markerIdx].draw();
 
             if(highlight){
@@ -235,6 +214,27 @@ void Sequence::drawPatternsInSequence(map<int, float>& currentPatterns){
     ofPopStyle();
 }
 
+// Draw patterns separate in a side of the screen
+void Sequence::drawPatternsSeparate(map<int, float>& currentPatterns){
+    // If there are more patterns than maximum able to show in the window
+    int nPatterns = MIN(maxPatternsWindow, patterns.size());
+
+    // TODO: show most important patterns if there are more than maxPatternsToShow
+
+    // Draw gesture patterns
+    for(int patternIdx = 0; patternIdx < nPatterns; patternIdx++){
+        int patternPosition = patternIdx + 1;
+        bool highlight = false;
+        float percent = 0;
+        // If the pattern is is inside the map
+        if(currentPatterns.find(patternIdx) != currentPatterns.end()){
+            highlight = true;
+            percent = currentPatterns[patternIdx];
+        }
+        drawPattern(patternPosition, patternIdx, percent, highlight);
+    }
+}
+
 void Sequence::drawPattern(const int patternPosition, const int patternIdx, float percent, const bool highlight){
 
     // Drawing window parameters
@@ -242,7 +242,7 @@ void Sequence::drawPattern(const int patternPosition, const int patternIdx, floa
     float height = 480.0;
     float scale = 5.5;
     float margin = 40.0;
-    float guiHeight = 900;
+    float guiHeight = 1200;
 
     ofPushMatrix();
     ofPushStyle();
@@ -308,7 +308,7 @@ void Sequence::drawPattern(const int patternPosition, const int patternIdx, floa
 }
 
 // Draw current point in the tracking of the sequence
-void Sequence::drawSequenceTracking(int currentIdx){
+void Sequence::drawTracking(int currentIdx){
     if(currentIdx >= 0){
         ofPushStyle();
         for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
@@ -342,49 +342,49 @@ void Sequence::drawSequenceTracking(int currentIdx){
 }
 
 // Draw the segment of the sequence that belongs to the different cues
-void Sequence::drawSequenceSegments(){
+void Sequence::drawSegments(){
     ofPushStyle();
-    for(int segmentIdx = 0; segmentIdx < sequenceSegments.size(); segmentIdx++){
+    for(int segmentIdx = 0; segmentIdx < segments.size(); segmentIdx++){
 
-//        ofColor c = ofColor::fromHsb(0, 255, 255);
-//        c.setHue(ofMap(segmentIdx, 0, sequenceSegments.size(), 0, 255));
+        ofColor c = ofColor::fromHsb(0, 255, 255);
+        c.setHue(ofMap(segmentIdx, 0, segments.size(), 0, 255));
 
-        ofColor c(255);
-        if(segmentIdx == 0) c.set(0, 0, 255);
-        else if(segmentIdx == 1) c.set(0, 255, 0);
+//        ofColor c(255);
+//        if(segmentIdx == 0) c.set(0, 0, 255);
+//        else if(segmentIdx == 1) c.set(0, 255, 0);
 
-        ofSetLineWidth(3);
+        ofSetLineWidth(4);
         ofSetColor(c);
         for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
-            sequenceSegments[segmentIdx][markerIdx].draw();
+            segments[segmentIdx][markerIdx].draw();
         }
     }
     ofPopStyle();
 }
 
 // Update the segments of the sequence that belong to the different cues
-void Sequence::updateSequenceSegments(const vector< pair<float, float> >& sequencePcts){
-    for(int segmentIdx = 0; segmentIdx < sequenceSegments.size(); segmentIdx++){
+void Sequence::updateSegments(const vector< pair<float, float> >& segmentsPcts){
+    // Clear sequence segments polylines
+    for(int segmentIdx = 0; segmentIdx < segments.size(); segmentIdx++){
         for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
-            sequenceSegments[segmentIdx][markerIdx].clear();
+            segments[segmentIdx][markerIdx].clear();
         }
-        sequenceSegments[segmentIdx].clear();
+        segments[segmentIdx].clear();
     }
-    sequenceSegments.clear();
+    segments.clear();
 
-    for(int segmentIdx = 0; segmentIdx < sequencePcts.size(); segmentIdx++){
-        vector<ofPolyline> segment = getSequenceSegment(sequencePcts[segmentIdx]);
-        sequenceSegments.push_back(segment);
+    for(int segmentIdx = 0; segmentIdx < segmentsPcts.size(); segmentIdx++){
+        vector<ofPolyline> segment = getSegment(segmentsPcts[segmentIdx]);
+        segments.push_back(segment);
     }
 }
 
-vector<ofPolyline> Sequence::getSequenceSegment(const pair<float, float>& sequenceSegmentPct){
-    float lowPct = sequenceSegmentPct.first/100.0;
-    float highPct = sequenceSegmentPct.second/100.0;
+vector<ofPolyline> Sequence::getSegment(const pair<float, float>& segmentPctRange){
+    float lowPct = segmentPctRange.first/100.0;
+    float highPct = segmentPctRange.second/100.0;
 
     vector<ofPolyline> segment;
     float increment = 0.0001; // TODO: change it depending on how many frames has the sequence?
-//    float increment = ofMap(numFrames, 0, 3000,);
     for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
         ofPolyline markerSegment;
 //        float increment = ofMap(markersPosition[markerIdx].getPerimeter(), 0, 15000, 0.005, 0.0001, true);
@@ -460,10 +460,10 @@ size_t Sequence::calcCurrentFrameIndex()
     return frameIdx;
 }
 
-float Sequence::getCurrentSequencePercent(int currentIdx){
+float Sequence::getCurrentPercent(int currentIdx){
     return markersPosition[0].getLengthAtIndexInterpolated(currentIdx) / markersPosition[0].getPerimeter();
 }
 
-ofPoint Sequence::getCurrentSequencePoint(int markerIdx){
+ofPoint Sequence::getCurrentPoint(int markerIdx){
     return markersPosition[markerIdx].getPointAtIndexInterpolated(calcCurrentFrameIndex());
 }
