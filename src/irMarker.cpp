@@ -42,11 +42,19 @@ void irMarker::draw(){
         size = ofMap(ofGetElapsedTimef() - startedDying, 0, dyingTime, size, 0, true);
     }
     ofNoFill();
-    ofCircle(currentPos, size);
+    ofSetLineWidth(2);
     ofSetColor(color);
-    all.draw();
+    ofCircle(currentPos, size);
     ofSetColor(255);
     ofDrawBitmapString(ofToString(label), currentPos);
+    ofPopStyle();
+}
+
+void irMarker::drawPath(){
+    ofPushStyle();
+    ofSetColor(color);
+    ofSetLineWidth(1.5);
+    all.draw();
     ofPopStyle();
 }
 

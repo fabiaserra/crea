@@ -10,6 +10,7 @@ class irMarker : public ofxCv::RectFollower{
         void update(const cv::Rect& track);
         void updateLabels(vector<unsigned int> deadLabels, vector<unsigned int> currentLabels);
         void draw();
+        void drawPath();
         void kill();
         //--------------------------------------------------------------
         ofPoint currentPos;
