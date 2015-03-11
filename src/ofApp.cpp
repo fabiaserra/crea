@@ -173,8 +173,8 @@ void ofApp::setup(){
 		drawPatterns = false;
         drawPatternsInSequence = false;
 		cout << sequence.patterns.size() << endl;
-
-	}else{
+	}
+	else{
 		numElements = maxMarkers*dimensions;
 		savedObs.assign(sequence.numFrames, vector<float>(numElements));
 		for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
@@ -191,25 +191,27 @@ void ofApp::setup(){
 
 		float start = 0.0, step = 0.01, stop = 10.0;
 
-//		    float t = vmo::findThreshold(savedObs, numElements, start, step, stop); // Temporary threshold range and step
-		//    float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
-		//	int minLen = 2; // sequence.xml
-		//	float t = 12.3; // for sequence.xml
 
+//        float t = vmo::findThreshold(savedObs, numElements, start, step, stop); // Temporary threshold range and step
+//        float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
+//        int minLen = 2; // sequence.xml
+//        float t = 12.3; // for sequence.xml
+//
 //        int minLen = 7; // sequence3.xml
 //        float t = 18.6; // for sequence2.xml
-		//	float t = 16.8; // for sequence3.xml
-		//
-		//	int minLen = 7;
-		//	float t = 4.5; // for sequence1marker1.xml
-		//	int minLen = 10;
-//		float t = 5.7; // for sequence1marker2.xml
-//		int minLen = 10;
-		//	float t = 6.0; // for sequence1marker3.xml
-//			int minLen = 2;
-//			float t = 3.6; // for simple5.xml
+//        float t = 16.8; // for sequence3.xml
+//
+//        int minLen = 7;
+//        float t = 4.5; // for sequence1marker1.xml
+//        int minLen = 10;
+//        float t = 5.7; // for sequence1marker2.xml
+//        int minLen = 10;
+//        float t = 6.0; // for sequence1marker3.xml
+//        int minLen = 2;
+//        float t = 3.6; // for simple5.xml
         int minLen = 2;
         float t = 4.8; // for sequenceT2.xml
+
 
 		cout << t << endl;
 
@@ -791,13 +793,14 @@ void ofApp::setupGUI4(){
     gui4->addImageButton("Start vmo", "icons/play.png", false, dim, dim)->setColorBack(ofColor(150, 255));
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui4->addImageButton("Stop vmo", "icons/delete.png", false, dim, dim)->setColorBack(ofColor(150, 255));
+    gui4->setWidgetSpacing(30);
     trackingInfoLabel = gui4->addLabel("", OFX_UI_FONT_SMALL);
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui4->setWidgetSpacing(5);
     gui4->addToggle("Show patterns in the side", &drawPatterns);
     gui4->addToggle("Show patterns inside sequence", &drawPatternsInSequence);
     gui4->addSlider("Decay", 0.01, 1.0, &decay)->setLabelPrecision(2);
 //    gui4->addSlider("Slide", 1.0, 30.0, &slide);
-
 
     gui4->addSpacer();
 

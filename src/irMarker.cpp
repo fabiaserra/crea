@@ -52,11 +52,11 @@ void irMarker::draw(){
     float size = 16;
     ofSetColor(255);
     if(startedDying){
-        ofSetColor(ofColor::red);
+        ofSetColor(ofColor::white);
         size = ofMap(ofGetElapsedTimef() - startedDying, 0, dyingTime, size, 0, true);
     }
     ofNoFill();
-    ofSetLineWidth(2);
+    ofSetLineWidth(3);
     ofSetColor(color);
     ofCircle(currentPos, size);
     ofSetColor(255);
