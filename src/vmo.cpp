@@ -493,6 +493,7 @@ vmo::belief &vmo::tracking(vmo &oracle, vmo::belief &prevBf,
 		}
 		
 
+
 		// Possible states from one reverse suffix forward
 		if (oracle.rsfx[prevPath].size()>0) {
 			int prevRsfx = oracle.rsfx[prevPath][0]; // Just the first one
@@ -540,7 +541,7 @@ vmo::belief &vmo::tracking(vmo &oracle, vmo::belief &prevBf,
 					}
 				}
 			}
-			
+
 			// Possible states from one reverse suffix forward
 			if (oracle.rsfx[nextPath].size()>0) {
 				int prevRsfx = oracle.rsfx[nextPath][0]; // Just the first one
