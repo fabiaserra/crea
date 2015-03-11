@@ -131,6 +131,7 @@ void ofApp::setup(){
     // MARKERS
 //    markers.resize(maxMarkers);
     drawMarkers = false;
+    drawMarkersPath = false;
 
     // VMO SETUP
     dimensions = 2;
@@ -183,10 +184,10 @@ void ofApp::setup(){
 			}
 		}
 
-		// 2. Processing
-		// 2.1 Load file into VMO
-		//    int minLen = 1; // Temporary setting
-		//    float start = 0.0, step = 0.05, stop = 10.0;
+//        // 2. Processing
+//        // 2.1 Load file into VMO
+//        int minLen = 1; // Temporary setting
+//        float start = 0.0, step = 0.05, stop = 10.0;
 
 		float start = 0.0, step = 0.01, stop = 10.0;
 
@@ -210,9 +211,10 @@ void ofApp::setup(){
         int minLen = 2;
         float t = 4.8; // for sequenceT2.xml
 
-        
 		cout << t << endl;
+
 		seqVmo = vmo::buildOracle(savedObs, numElements, t);
+
 		// 2.2 Output pattern list
 		pttrList = vmo::findPttr(seqVmo, minLen);
 		sequence.loadPatterns(processPttr(seqVmo, savedObs, pttrList, maxMarkers, dimensions));
@@ -424,15 +426,13 @@ void ofApp::update(){
 				currentBf = vmo::tracking(seqVmo, currentBf, pttrList, currentFeatures, decay);
                 cout << "current index: " << currentBf.currentIdx << endl;
                 currentPercent = sequence.getCurrentSequencePercent(currentBf.currentIdx);
-//                cout << "current percent: " << currentPercent << endl;
+                cout << "current percent: " << currentPercent << endl;
 
                 if(cues.size() != 0) {
                     int cueSegment = currentCueIndex;
                     for(int i = 0; i < cueSliders.size(); i++){
                         float low = cueSliders.at(i).second->getValueLow()/100.0;
                         float high = cueSliders.at(i).second->getValueHigh()/100.0;
-//                        cout << "Low: " << low << endl;
-//                        cout << "High: " << high << endl;
                         if (low <= currentPercent && currentPercent <= high){
                             cueSegment = i;
                             break;
@@ -449,56 +449,60 @@ void ofApp::update(){
                     }
                 }
             }
-            gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
-//            for (int i = 0; i < sequence.patterns.size(); i++) {
-//                if(gestureUpdate.find(i) != gestureUpdate.end()) {
-//                    cout << "key: "<< i << endl;
-//                    cout << "percent:"<< gestureUpdate[i] << endl;
-//                }
-//            }
+			gestureUpdate = getGestureUpdate(currentBf.currentIdx, seqVmo, pttrList, sequence);
+//            gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
+            for (int i = 0; i < sequence.patterns.size(); i++) {
+                if(gestureUpdate.find(i) != gestureUpdate.end()) {
+                    cout << "key: "<< i << endl;
+                    cout << "percent:"<< gestureUpdate[i] << endl;
+                }
+            }
         }
 
     #else
 
         // Gesture Tracking with VMO here?
-        if (tempMarkers.size()>=1){
-            if (isTracking){
+        if(tempMarkers.size()>0){
+            if(isTracking){
                 vector<float> obs(maxMarkers*dimensions, 0.0); // Temporary code
-                for(unsigned int i = 0; i < maxMarkers; i++){
+                for(unsigned int i = 0; i < tempMarkers.size(); i++){
+                    // If we have already filled maxMarkers observations jump to tracking
+                    if(obs.size() == maxMarkers*2) break;
+                    // If marker has disappeared but we have more markers to fill maxMarkers jump to the next marker
+                    if(markers[i].hasDisappeared && (tempMarkers.size() - i) > maxMarkers) continue;
+
                     ofPoint currentPoint = tempMarkers[i].smoothPos;
                     // Use the lowpass here??
                     obs[i] = lowpass(currentPoint.x, pastObs[i], slide);
                     obs[i+1] = lowpass(currentPoint.y, pastObs[i+1], slide);
                     pastObs[i] = obs[i];
                     pastObs[i+1] = obs[i+1];
-                    
+
                     //obs[i] = currentPoint.x;
                     //obs[i+1] = currentPoint.y;
                 }
-                
+
                 if (isConv) currentFeatures = cov_cal(pastObs, obs, numElements);
                 else currentFeatures = obs;
-                
+
                 if(initStatus){
                     pastObs = obs;
-                    //				pastFeatures.assign(numElements, 0.0);
+    //				pastFeatures.assign(numElements, 0.0);
                     currentBf = vmo::tracking_init(seqVmo, currentBf, pttrList, currentFeatures);
                     initStatus = false;
                 }
                 else{
-                    //				prevBf = currentBf;
+    //				prevBf = currentBf;
                     currentBf = vmo::tracking(seqVmo, currentBf, pttrList, currentFeatures, decay);
                     cout << "current index: " << currentBf.currentIdx << endl;
-                    // We need the min/max of currentIdx
                     currentPercent = sequence.getCurrentSequencePercent(currentBf.currentIdx);
-//                    cout << "current percent: " << currentPercent << endl;
+                    cout << "current percent: " << currentPercent << endl;
+
                     if(cues.size() != 0) {
                         int cueSegment = currentCueIndex;
                         for(int i = 0; i < cueSliders.size(); i++){
                             float low = cueSliders.at(i).second->getValueLow()/100.0;
                             float high = cueSliders.at(i).second->getValueHigh()/100.0;
-                            //                        cout << "Low: " << low << endl;
-                            //                        cout << "High: " << high << endl;
                             if (low <= currentPercent && currentPercent <= high){
                                 cueSegment = i;
                                 break;
@@ -515,13 +519,14 @@ void ofApp::update(){
                         }
                     }
                 }
-                gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
-//                for (int i = 0; i < sequence.patterns.size(); i++) {
-//                    if(gestureUpdate.find(i) != gestureUpdate.end()) {
-//                        cout << "key: "<< i << endl;
-//                        cout << "percent:"<< gestureUpdate[i] << endl;
-//                    }
-//                }
+				gestureUpdate = getGestureUpdate(currentBf.currentIdx, seqVmo, pttrList, sequence);
+//                gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
+                for (int i = 0; i < sequence.patterns.size(); i++) {
+                    if(gestureUpdate.find(i) != gestureUpdate.end()) {
+                        cout << "key: "<< i << endl;
+                        cout << "percent:"<< gestureUpdate[i] << endl;
+                    }
+                }
             }
         }
 
@@ -571,12 +576,13 @@ void ofApp::draw(){
     boidsParticles->draw();
     animationsParticles->draw();
 
-    if(drawMarkers){
-        irMarkerFinder.draw();
+    if(drawMarkers || drawMarkersPath){
+//        irMarkerFinder.draw();
         vector<irMarker>& tempMarkers = tracker.getFollowers();
         // Draw identified IR markers
         for (int i = 0; i < tempMarkers.size(); i++){
-            tempMarkers[i].draw();
+            if(drawMarkers) tempMarkers[i].draw();
+            if(drawMarkersPath) tempMarkers[i].drawPath();
         }
     }
 
@@ -587,7 +593,11 @@ void ofApp::draw(){
     if(drawSequence) sequence.draw();
     if(drawPatternsInSequence) sequence.drawPatternsInSequence(gestureUpdate);
     if(drawSequenceSegments) sequence.drawSequenceSegments();
-    if(isTracking) sequence.drawSequenceTracking(currentBf.currentIdx);
+	if(isTracking){
+		if (currentBf.currentIdx != -1) {
+			sequence.drawSequenceTracking(currentBf.currentIdx);
+		}
+	}
 
     ofPopMatrix();
 
@@ -718,6 +728,7 @@ void ofApp::setupGUI2(){
 
     gui2->addSpacer();
     gui2->addToggle("Show Markers", &drawMarkers);
+    gui2->addToggle("Show Markers Path", &drawMarkersPath);
 
     gui2->addSpacer();
 
@@ -780,6 +791,7 @@ void ofApp::setupGUI4(){
     gui4->addImageButton("Start vmo", "icons/play.png", false, dim, dim)->setColorBack(ofColor(150, 255));
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui4->addImageButton("Stop vmo", "icons/delete.png", false, dim, dim)->setColorBack(ofColor(150, 255));
+    trackingInfoLabel = gui4->addLabel("", OFX_UI_FONT_SMALL);
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui4->addToggle("Show patterns in the side", &drawPatterns);
     gui4->addToggle("Show patterns inside sequence", &drawPatternsInSequence);
@@ -1505,6 +1517,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         if(button->getValue() == true){
             initStatus = true;
             isTracking = true;
+            trackingInfoLabel->setLabel("Tracking " + sequence.filename);
         }
     }
 
@@ -1512,6 +1525,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if(button->getValue() == true){
             isTracking = false;
+            trackingInfoLabel->setLabel("");
         }
     }
 

@@ -313,36 +313,27 @@ void Sequence::drawSequenceTracking(int currentIdx){
     for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
         ofColor c(0,255,0);
 
-//        // Draw all past points       
+//        // Draw all past points
         ofPoint currentPoint;
-//        ofPolyline line;
-//        line.resize(currentIdx + 1);
-//
-//        for(size_t idx = 0; idx < currentIdx; idx++){
-//            currentPoint = markersPosition[markerIdx].getPointAtIndexInterpolated(idx);
-//            line[idx] = currentPoint;
-//        }
-        float realPercent = markersPosition[markerIdx].getLengthAtIndexInterpolated(currentIdx) / markersPosition[markerIdx].getPerimeter();
-        float currPercent = ofMap(currentIdx, 0, numFrames, 0.0, 1.0, true);
-        
-        cout << "currIdxPct: " << markersPosition[markerIdx].getIndexAtPercent(currPercent) << endl;
-        cout << "realIdxPct: " << markersPosition[markerIdx].getIndexAtPercent(realPercent) << endl;
+        ofPolyline line;
+        line.resize(currentIdx + 1);
 
-        cout << "curr Percent: " << currPercent << endl;
-        cout << "real Percent: " << realPercent << endl;
-        
-//        ofSetColor(c, 160);
-//        ofSetLineWidth(2.5);
-//        line.draw();
-        
+        for(size_t idx = 0; idx < currentIdx; idx++){
+            currentPoint = markersPosition[markerIdx].getPointAtIndexInterpolated(idx);
+            line[idx] = currentPoint;
+        }
+
+        ofSetColor(c, 160);
+        ofSetLineWidth(2.5);
+        line.draw();
 
         // Current point
         currentPoint = markersPosition[markerIdx][currentIdx];
-        
+
         ofFill();
-        c.setBrightness(150);
+//        c.setBrightness(255);
         ofSetColor(c);
-        ofCircle(currentPoint, 3);
+        ofCircle(currentPoint, 6);
 
     }
     ofPopStyle();

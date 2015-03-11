@@ -13,13 +13,15 @@
 #include <stdio.h>
 #include "ofMain.h"
 #include "vmo.h"
-
+#include "Sequence.h"
 
 #endif /* defined(__zuzor__helper__) */
 
 float lowpass(float input, float past, float slide);
 
 vector< vector<ofPolyline> > processPttr(vmo& oracle, vector< vector< float> > &obs, const vmo::pttr& pttrList, int nFeature, int dim);
+
+map<int, float> getGestureUpdate(int ind, vmo& oracle, vmo::pttr& pttrList, Sequence& sequence);
 
 vector< vector< float> > covarianceMat(vector< vector< float> > &input, int numMarker, int dim);
 
