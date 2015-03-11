@@ -6,7 +6,7 @@ Sequence::Sequence(){
     numFrames = 0;
     playhead = 0;
     elapsedTime = 0;
-    maxPatternsWindow = 16;
+    maxPatternsWindow = 10;
 }
 
 void Sequence::setup(const int maxMarkers){
@@ -242,7 +242,7 @@ void Sequence::drawPattern(const int patternPosition, const int patternIdx, floa
     float height = 480.0;
     float scale = 5.5;
     float margin = 40.0;
-    float guiHeight = 1200;
+    float guiHeight = 1550;
 
     ofPushMatrix();
     ofPushStyle();

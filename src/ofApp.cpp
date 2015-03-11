@@ -270,6 +270,8 @@ void ofApp::setup(){
     setupGUI8Animations();
 
     interpolatingWidgets = false;
+    interpolatedFrames = 0;
+    maxTransitionFrames = 100;
     loadGUISettings("settings/lastSettings.xml", false, false);
 
 //    // ALLOCATE FBO AND FILL WITH BG COLOR
@@ -683,6 +685,10 @@ void ofApp::setupGUI1(){
     gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
 
     gui1->addSpacer();
+    gui1->addLabel("INTERPOLATION");
+    gui1->addIntSlider("Transition Frames", 0, 200, &maxTransitionFrames);
+
+    gui1->addSpacer();
 
     gui1->autoSizeToFitWidgets();
     gui1->setVisible(false);
@@ -795,6 +801,11 @@ void ofApp::setupGUI4(){
     gui4->addImageButton("Stop vmo", "icons/delete.png", false, dim, dim)->setColorBack(ofColor(150, 255));
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui4->addLabel("File: " + sequence.filename, OFX_UI_FONT_SMALL);
+    gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui4->setWidgetSpacing(20);
+    gui4->addLabel("Patterns: " + ofToString(sequence.patterns.size()), OFX_UI_FONT_SMALL);
+    gui4->setWidgetSpacing(3);
+    gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     trackingInfoLabel = gui4->addLabel(" ", OFX_UI_FONT_SMALL);
     gui4->addSpacer();
     gui4->addSlider("Decay", 0.01, 1.0, &decay)->setLabelPrecision(2);
@@ -903,7 +914,7 @@ void ofApp::setupGUI7(){
     gui7->addFPS(OFX_UI_FONT_SMALL);
 
     gui7->addSpacer();
-    gui7->addImageToggle("Show Contour", "icons/show.png", &contour.isActive, dim, dim);
+    gui7->addImageToggle("Activate Contour", "icons/show.png", &contour.isActive, dim, dim)->bindToKey(' ');
 
     gui7->addSpacer();
     gui7->addToggle("Bounding Rectangle", &contour.drawBoundingRect);
@@ -925,9 +936,10 @@ void ofApp::setupGUI8Emitter(){
 
     addParticleBasicsGUI(gui8Emitter, emitterParticles);
 
-    gui8Emitter->addLabel("EMITTER", OFX_UI_FONT_LARGE);
-
     gui8Emitter->addSpacer();
+    gui8Emitter->addLabel("EMITTER", OFX_UI_FONT_LARGE);
+    gui8Emitter->addSpacer();
+
     gui8Emitter->addLabel("Emitter");
     gui8Emitter->addSlider("Particles/sec", 0.0, 60.0, &emitterParticles->bornRate);
     gui8Emitter->addSlider("Velocity", 0.0, 100.0, &emitterParticles->velocity);
@@ -976,6 +988,7 @@ void ofApp::setupGUI8Grid(){
 
     addParticleBasicsGUI(gui8Grid, gridParticles);
 
+    gui8Grid->addSpacer();
     gui8Grid->addLabel("GRID", OFX_UI_FONT_LARGE);
     gui8Grid->addSpacer();
 
@@ -1043,19 +1056,19 @@ void ofApp::setupGUI8Animations(){
 	animations.push_back("Explosion");
 	gui8Animations->addRadio("Animations", animations, OFX_UI_ORIENTATION_HORIZONTAL);
 
-    gui8Animations->addSpacer();
-    gui8Animations->addLabel("Particle");
-    gui8Animations->addToggle("Immortal", &animationsParticles->immortal);
-    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui8Animations->setWidgetSpacing(10);
-    gui8Animations->addToggle("Empty", &animationsParticles->isEmpty);
-    gui8Animations->addToggle("Line", &animationsParticles->drawLine);
-    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui8Animations->setWidgetSpacing(3);
-    gui8Animations->addSlider("Lifetime", 0.1, 20.0, &animationsParticles->lifetime);
-    gui8Animations->addSlider("Life Random[%]", 0.0, 100.0, &animationsParticles->lifetimeRnd);
-    gui8Animations->addSlider("Radius", 0.1, 25.0, &animationsParticles->radius);
-    gui8Animations->addSlider("Radius Random[%]", 0.0, 100.0, &animationsParticles->radiusRnd);
+//    gui8Animations->addSpacer();
+//    gui8Animations->addLabel("Particle");
+//    gui8Animations->addToggle("Immortal", &animationsParticles->immortal);
+//    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+//    gui8Animations->setWidgetSpacing(10);
+//    gui8Animations->addToggle("Empty", &animationsParticles->isEmpty);
+//    gui8Animations->addToggle("Line", &animationsParticles->drawLine);
+//    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+//    gui8Animations->setWidgetSpacing(3);
+//    gui8Animations->addSlider("Lifetime", 0.1, 20.0, &animationsParticles->lifetime);
+//    gui8Animations->addSlider("Life Random[%]", 0.0, 100.0, &animationsParticles->lifetimeRnd);
+//    gui8Animations->addSlider("Radius", 0.1, 25.0, &animationsParticles->radius);
+//    gui8Animations->addSlider("Radius Random[%]", 0.0, 100.0, &animationsParticles->radiusRnd);
 
     addParticlePhysicsGUI(gui8Animations, animationsParticles);
 
@@ -1074,7 +1087,7 @@ void ofApp::addParticleBasicsGUI(ofxUISuperCanvas* gui, ParticleSystem* ps){
     gui->addFPS(OFX_UI_FONT_SMALL);
 
     gui->addSpacer();
-    gui->addImageToggle("Particles Active", "icons/show.png", &ps->isActive, dim, dim);
+    gui->addImageToggle("Activate Particles", "icons/show.png", &ps->isActive, dim, dim)->bindToKey(' ');
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
 
     ofxUIImageButton *previous;
@@ -1152,9 +1165,10 @@ void ofApp::saveGUISettings(const string path, const bool isACue){
         XML->pushTag("GUI", guiIndex);
         vector<ofxUIWidget*> widgets = g->getWidgets();
         for(int i = 0; i < widgets.size(); i++){
-            // kind number 20 is ofxUIImageToggle, for which we don't want to save the state
+            // Don't want to save transition frames for cues
+            if(isACue && widgets[i]->getName() == "Transition Frames") continue;
+            // kind number 20 is ofxUIImageToggle
             // kind number 12 is ofxUITextInput, for which we don't want to save the state
-//            if(widgets[i]->hasState() && widgets[i]->getKind() != 20 && widgets[i]->getKind() != 12){
             if(widgets[i]->hasState() && widgets[i]->getKind() != 12){
                 int index = XML->addTag("Widget");
                 if(XML->pushTag("Widget", index)){
@@ -1221,22 +1235,38 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
             if(widget != NULL && widget->hasState()){
                 if(interpolate){ // interpolate new values with previous ones
                     interpolatingWidgets = true;
+                    interpolatedFrames = 0;
                     vector<float> values;
                     if(widget->getKind() == 6){ // kind 6 is a range slider widget
-                        values.push_back(XML->getValue("HighValue", -1, 0));
-                        values.push_back(XML->getValue("LowValue", -1, 0));
+                        ofxUIRangeSlider *rangeSlider = (ofxUIRangeSlider *) widget;
+                        values.push_back(rangeSlider->getValueLow());
+                        values.push_back(rangeSlider->getValueHigh());
+                        values.push_back(XML->getValue("LowValue", -1.0, 0));
+                        values.push_back(XML->getValue("HighValue", -1.0, 0));
                         widgetsToUpdate[widget] = values;
                     }
                     else{
-                        values.push_back(XML->getValue("Value", -1, 0));
+                        ofxXmlSettings *tmpXML = new ofxXmlSettings();
+                        widget->saveState(tmpXML);
+                        float currentValue = tmpXML->getValue("Value", -1.0, 0);
+                        values.push_back(currentValue);
+                        values.push_back(XML->getValue("Value", -1.0, 0));
                         widgetsToUpdate[widget] = values;
+                        delete tmpXML;
                     }
                 }
                 else{
-                    interpolatingWidgets = false;
-                    widgetsToUpdate.clear();
                     widget->loadState(XML);
                     g->triggerEvent(widget);
+                    interpolatingWidgets = false;
+//                    interpolatedFrames = 0;
+//                    // Delete all widgets from the map
+//                    map<ofxUIWidget *, vector<float> >::iterator it = widgetsToUpdate.begin();
+//                    while(it != widgetsToUpdate.end()){
+//                        delete it->first;
+//                        widgetsToUpdate.erase(it);
+//                    }
+//                    widgetsToUpdate.clear();
                 }
             }
             XML->popTag();
@@ -1278,7 +1308,7 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
             cueName->setVisible(true);
             loadGUISettings(cues[currentCueIndex], false, true);
 
-            // Create map of the sliders so we can get the values outside
+            // Sequence segmentation range sliders
             float n = cues.size();
             for(int i = 0; i < cues.size(); i++){
                 ofxUILabel *label;
@@ -1294,6 +1324,7 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
             }
             gui3->autoSizeToFitWidgets();
 
+            // Update segments polylines in sequence
             vector< pair<float, float> > segmentsPcts;
             for (int i = 0; i < cueSliders.size(); i++){
                 pair<float, float> pcts;
@@ -1310,10 +1341,78 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
     delete XML;
 }
 
+////--------------------------------------------------------------
+//void ofApp::interpolateWidgetValues(){
+//    map<ofxUIWidget *, vector<float> >::iterator it = widgetsToUpdate.begin();
+//    while (it != widgetsToUpdate.end()) {
+//        ofxUIWidget * w = it->first;
+//        vector<float> values = it->second;
+//        ofxXmlSettings *XML = new ofxXmlSettings();
+//        bool canDelete = false;
+//        // if widget is a range slider we have two values to interpolate to
+//        if(w->getKind() == 6){ // kind 6 is a range slider widget
+//            w->saveState(XML);
+//            float targetHighValue = values.at(0);
+//            float targetLowValue = values.at(1);
+//            float currentHighValue = XML->getValue("HighValue", targetHighValue, 0);
+//            float currentLowValue = XML->getValue("LowValue", targetLowValue, 0);
+//            float highDifference = targetHighValue-currentHighValue;
+//            float lowDifference = targetLowValue-currentLowValue;
+//            // if the difference is small we assign the target value
+//            if(abs(highDifference) < 1 && abs(lowDifference) < 1){
+//                canDelete = true;
+//                XML->setValue("HighValue", targetHighValue, 0);
+//                XML->setValue("LowValue", targetLowValue, 0);
+//                w->loadState(XML);
+//            }
+//            else{
+//                float highIncrement = highDifference/100.0; // TODO: use float ofLerp(float start, float stop, float amt)
+//                float lowIncrement = lowDifference/100.0;
+//                XML->setValue("HighValue", currentHighValue+highIncrement, 0);
+//                XML->setValue("LowValue", currentLowValue+lowIncrement, 0);
+//                w->loadState(XML);
+//            }
+//        }
+//        else{
+//            w->saveState(XML);
+//            float targetValue = values.front();
+//            float currentValue = XML->getValue("Value", targetValue, 0);
+//            float difference = targetValue-currentValue;
+//            if(abs(difference) < 1 || w->getKind() == 2 || w->getKind() == 20){ // kind 2 is a toggle and 20 is ofxUIImageToggle
+//                canDelete = true;
+//                XML->setValue("Value", targetValue, 0);
+//                w->loadState(XML);
+//            }
+//            else{
+//                float increment = difference/100.0;
+//                XML->setValue("Value", currentValue+increment, 0);
+//                w->loadState(XML);
+//            }
+//        }
+//
+//        // If values already interpolated we delete widget from the map
+//        if (canDelete){
+//            map<ofxUIWidget *, vector<float> >::iterator toErase = it;
+//            ++it;
+//            widgetsToUpdate.erase(toErase);
+//        }
+//        else{
+//            ++it;
+//        }
+//        // Delete XML where we load and save values
+//        delete XML;
+//    }
+//
+//    if(widgetsToUpdate.empty()) interpolatingWidgets = false;
+//}
+
 //--------------------------------------------------------------
 void ofApp::interpolateWidgetValues(){
+
+    interpolatedFrames++;
+
     map<ofxUIWidget *, vector<float> >::iterator it = widgetsToUpdate.begin();
-    while (it != widgetsToUpdate.end()) {
+    while (it != widgetsToUpdate.end()){
         ofxUIWidget * w = it->first;
         vector<float> values = it->second;
         ofxXmlSettings *XML = new ofxXmlSettings();
@@ -1321,46 +1420,37 @@ void ofApp::interpolateWidgetValues(){
         // if widget is a range slider we have two values to interpolate to
         if(w->getKind() == 6){ // kind 6 is a range slider widget
             w->saveState(XML);
-            float targetHighValue = values.at(0);
-            float targetLowValue = values.at(1);
-            float currentHighValue = XML->getValue("HighValue", targetHighValue, 0);
-            float currentLowValue = XML->getValue("LowValue", targetLowValue, 0);
-            float highDifference = targetHighValue-currentHighValue;
-            float lowDifference = targetLowValue-currentLowValue;
-            // if the difference is small we assign the target value
-            if(abs(highDifference) < 1 && abs(lowDifference) < 1){
-                canDelete = true;
-                XML->setValue("HighValue", targetHighValue, 0);
-                XML->setValue("LowValue", targetLowValue, 0);
-                w->loadState(XML);
-            }
-            else{
-                float highIncrement = highDifference/100.0; // TODO: use float ofLerp(float start, float stop, float amt)
-                float lowIncrement = lowDifference/100.0;
-                XML->setValue("HighValue", currentHighValue+highIncrement, 0);
-                XML->setValue("LowValue", currentLowValue+lowIncrement, 0);
-                w->loadState(XML);
-            }
+            float initialLowValue = values.at(0);
+            float initialHighValue = values.at(1);
+            float targetLowValue = values.at(2);
+            float targetHighValue = values.at(3);
+            float currentLowValue = ofMap(interpolatedFrames*(1.0/(float)maxTransitionFrames), 0.0, 1.0, initialLowValue, targetLowValue, true);;
+            float currentHighValue = ofMap(interpolatedFrames*(1.0/(float)maxTransitionFrames), 0.0, 1.0, initialHighValue, targetHighValue, true);;
+            XML->setValue("HighValue", currentHighValue, 0);
+            XML->setValue("LowValue", currentLowValue, 0);
+            w->loadState(XML);
         }
         else{
             w->saveState(XML);
-            float targetValue = values.front();
-            float currentValue = XML->getValue("Value", targetValue, 0);
-            float difference = targetValue-currentValue;
-            if(abs(difference) < 1 || w->getKind() == 2 || w->getKind() == 20){ // kind 2 is a toggle and 20 is ofxUIImageToggle
+            float initialValue = values.at(0);
+            float targetValue = values.at(1);
+            float currentValue = ofMap(interpolatedFrames*(1.0/(float)maxTransitionFrames), 0.0, 1.0, initialValue, targetValue, true);
+            XML->setValue("Value", currentValue, 0);
+            w->loadState(XML);
+            // kind 2 is a toggle and 20 is ofxUIImageToggle, so they only can have 0 or 1 value
+            // We switch the value in half maxTransitionFrames frames
+            if(currentValue == targetValue){
                 canDelete = true;
+            }
+            else if((w->getKind() == 2 || w->getKind() == 20) && interpolatedFrames > maxTransitionFrames/2.0){
                 XML->setValue("Value", targetValue, 0);
                 w->loadState(XML);
-            }
-            else{
-                float increment = difference/100.0;
-                XML->setValue("Value", currentValue+increment, 0);
-                w->loadState(XML);
+                canDelete = true;
             }
         }
 
-        // If values already interpolated we delete widget from the map
-        if (canDelete){
+        // If values are already target value we delete them from the map
+        if(canDelete){
             map<ofxUIWidget *, vector<float> >::iterator toErase = it;
             ++it;
             widgetsToUpdate.erase(toErase);
@@ -1368,6 +1458,7 @@ void ofApp::interpolateWidgetValues(){
         else{
             ++it;
         }
+
         // Delete XML where we load and save values
         delete XML;
     }
@@ -1483,6 +1574,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     }
 
     if(e.getName() == "Sequence percent"){
+        // Update segments polylines in sequence
         vector< pair<float, float> > segmentsPcts;
         for (int i = 0; i < cueSliders.size(); i++){
             pair<float, float> pcts;
@@ -1498,6 +1590,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 
     if(e.getName() == "Show sequence segmentation"){
         ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
+        // Update segments polylines in sequence
         if(toggle->getValue() == true){
             vector< pair<float, float> > segmentsPcts;
             for (int i = 0; i < cueSliders.size(); i++){
@@ -1685,7 +1778,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         ofxUILabelButton *button = (ofxUILabelButton *) e.widget;
         if(button->getValue() == true){
             if(cues.size() == 0) return;
-            if(!interpolatingWidgets) saveGUISettings(cues[currentCueIndex], true);
+//            if(!interpolatingWidgets) saveGUISettings(cues[currentCueIndex], true);
             if(currentCueIndex+1 < cues.size()) currentCueIndex++;
             else if(currentCueIndex+1 == cues.size()) currentCueIndex = 0;
             loadGUISettings(cues[currentCueIndex], true, true);
@@ -1698,7 +1791,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     //-------------------------------------------------------------
     // 8. PARTICLES
     //-------------------------------------------------------------
-    if(e.getName() == "Particles Active"){
+    if(e.getName() == "Activate Particles"){
         ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
         if(toggle->getValue() == true) particleSystems[currentParticleSystem]->bornParticles();
         else particleSystems[currentParticleSystem]->killParticles();

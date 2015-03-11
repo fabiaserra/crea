@@ -15,7 +15,7 @@ ParticleSystem::ParticleSystem(){
     lifetime            = 5.0;          // Lifetime of particles
 
     // Specific properties
-    nParticles          = 1000;         // Number of particles born in the beginning
+    nParticles          = 200;          // Number of particles born in the beginning
     bornRate            = 5.0;          // Number of particles born per frame
 
     // Emitter
@@ -111,6 +111,8 @@ void ParticleSystem::setup(ParticleMode particleMode, InputSource inputSource, i
 
     else if(particleMode == BOIDS){ // TODO: BOIDS == RANDOM?
         flock = true;
+        interact = true;
+        repulseInteraction = true;
         steer = true;
         immortal = true;
         addParticles(nParticles);
@@ -290,8 +292,8 @@ void ParticleSystem::addParticles(int n, const ofPolyline &contour){
 }
 
 void ParticleSystem::createParticleGrid(int width, int height){
-    for(int y = 0; y < height/gridRes; y++){
-        for(int x = 0; x < width/gridRes; x++){
+    for(int y = 0; y <= height/gridRes; y++){
+        for(int x = 0; x <= width/gridRes; x++){
             int xi = (x + 0.5f) * gridRes;
             int yi = (y + 0.5f) * gridRes;
 //            float initialRadius = (float)gridRes / 2.0f;
