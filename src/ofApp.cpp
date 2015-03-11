@@ -949,7 +949,7 @@ void ofApp::setupGUI8Emitter(){
 
     addParticlePropertiesGUI(gui8Emitter, emitterParticles);
 
-    gui8Emitter->addLabel("Time behaviour");
+    gui8Emitter->addLabel("Time behavior");
     gui8Emitter->addToggle("Size", &emitterParticles->sizeAge);
     gui8Emitter->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui8Emitter->setWidgetSpacing(10);
