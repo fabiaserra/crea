@@ -114,3 +114,7 @@ zuzor.xcodeproj/xcshareddata/xcschemes/zuzor Debug.xcscheme
 zuzor.xcodeproj/xcshareddata/xcschemes/zuzor Release.xcscheme
 
 *.jpg
+
+bin/data/cues
+
+bin/data/settings
