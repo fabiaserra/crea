@@ -40,10 +40,11 @@ ParticleSystem::ParticleSystem(){
     // Graphic output
     sizeAge             = true;         // Decrease size when particles get older?
     opacityAge          = true;         // Decrease opacity when particles get older?
-    colorAge            = true;        // Change color when particles get older?
+    colorAge            = true;         // Change color when particles get older?
     flickersAge         = false;        // Particle flickers opacity when about to die?
     isEmpty             = false;        // Draw only contours of the particles?
     drawLine            = false;        // Draw a line instead of a circle for the particle?
+    drawConnections     = false;        // Draw a connecting line between close particles?
 
     // Physics
     friction            = 5.0;          // Friction to velocity 0~100
@@ -213,8 +214,25 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
 
 void ParticleSystem::draw(){
     if(isActive){
+        ofPushStyle();
         for(int i = 0; i < particles.size(); i++){
             particles[i]->draw();
+        }
+        
+        //Draw lines between near points
+        if(drawConnections){
+            float dist = 15; //Threshold parameter of distance
+            float distSqrd = dist*dist;
+            ofSetColor(color);
+            for(int i = 0; i < particles.size(); i++){
+                for(int j = i-1; j >= 0; j--){
+                    if (fabs(particles[j]->pos.x - particles[i]->pos.x) > dist) break; // to speed the loop
+                    if(particles[i]->pos.squareDistance(particles[j]->pos) < distSqrd){
+                        ofLine(particles[i]->pos, particles[j]->pos);
+                    }
+                }
+            }
+            ofPopStyle();
         }
     }
 }

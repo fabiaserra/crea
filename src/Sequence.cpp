@@ -364,18 +364,20 @@ void Sequence::drawSegments(){
 
 // Update the segments of the sequence that belong to the different cues
 void Sequence::updateSegments(const vector< pair<float, float> >& segmentsPcts){
-    // Clear sequence segments polylines
-    for(int segmentIdx = 0; segmentIdx < segments.size(); segmentIdx++){
-        for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
-            segments[segmentIdx][markerIdx].clear();
+    if(markersPosition.size() > 0){
+        // Clear sequence segments polylines
+        for(int segmentIdx = 0; segmentIdx < segments.size(); segmentIdx++){
+            for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
+                segments[segmentIdx][markerIdx].clear();
+            }
+            segments[segmentIdx].clear();
         }
-        segments[segmentIdx].clear();
-    }
-    segments.clear();
-
-    for(int segmentIdx = 0; segmentIdx < segmentsPcts.size(); segmentIdx++){
-        vector<ofPolyline> segment = getSegment(segmentsPcts[segmentIdx]);
-        segments.push_back(segment);
+        segments.clear();
+        
+        for(int segmentIdx = 0; segmentIdx < segmentsPcts.size(); segmentIdx++){
+            vector<ofPolyline> segment = getSegment(segmentsPcts[segmentIdx]);
+            segments.push_back(segment);
+        }
     }
 }
 

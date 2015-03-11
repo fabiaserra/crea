@@ -81,6 +81,7 @@ class ParticleSystem
 		bool flickersAge;           // Particles flicker opacity when about to die?
 		bool isEmpty;               // Particles are empty inside, only draw the contour?
 		bool drawLine;              // Draw a line instead of a circle for the particle?
+        bool drawConnections;       // Draw a connecting line between close particles?
 		//--------------------------------------------------------------
 		// Physics
 		float friction;        	    // Friction to velocity 0~100

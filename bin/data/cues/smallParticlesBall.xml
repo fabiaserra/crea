@@ -15,10 +15,131 @@
         <Name>Blue</Name>
         <Value>0.000000000</Value>
     </Widget>
+    <Widget>
+        <Kind>42</Kind>
+        <Name>Transition Frames</Name>
+        <Value>100</Value>
+    </Widget>
 </GUI>
-<GUI></GUI>
-<GUI></GUI>
-<GUI></GUI>
+<GUI>
+    <Widget>
+        <Kind>17</Kind>
+        <Name>Flip Kinect</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>6</Kind>
+        <Name>Clipping range</Name>
+        <HighValue>4000.000000000</HighValue>
+        <LowValue>500.000000000</LowValue>
+    </Widget>
+    <Widget>
+        <Kind>6</Kind>
+        <Name>Threshold range</Name>
+        <HighValue>255.000000000</HighValue>
+        <LowValue>165.000000000</LowValue>
+    </Widget>
+    <Widget>
+        <Kind>6</Kind>
+        <Name>Contour Size</Name>
+        <HighValue>4000.000000000</HighValue>
+        <LowValue>20.000001907</LowValue>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>IR Threshold</Name>
+        <Value>80.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>6</Kind>
+        <Name>Markers size</Name>
+        <HighValue>350.000000000</HighValue>
+        <LowValue>10.000000000</LowValue>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Tracker persistence</Name>
+        <Value>150.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Tracker max distance</Name>
+        <Value>300.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Show Markers</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Show Markers Path</Name>
+        <Value>0</Value>
+    </Widget>
+</GUI>
+<GUI>
+    <Widget>
+        <Kind>20</Kind>
+        <Name>Record Sequence</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>20</Kind>
+        <Name>Play Sequence</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Show sequence segmentation</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>6</Kind>
+        <Name>Sequence percent</Name>
+        <HighValue>25.000000000</HighValue>
+        <LowValue>0.000000000</LowValue>
+    </Widget>
+    <Widget>
+        <Kind>6</Kind>
+        <Name>Sequence percent</Name>
+        <HighValue>50.000000000</HighValue>
+        <LowValue>25.000000000</LowValue>
+    </Widget>
+    <Widget>
+        <Kind>6</Kind>
+        <Name>Sequence percent</Name>
+        <HighValue>75.000000000</HighValue>
+        <LowValue>50.000000000</LowValue>
+    </Widget>
+    <Widget>
+        <Kind>6</Kind>
+        <Name>Sequence percent</Name>
+        <HighValue>100.000000000</HighValue>
+        <LowValue>75.000000000</LowValue>
+    </Widget>
+</GUI>
+<GUI>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Decay</Name>
+        <Value>0.250000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Slide</Name>
+        <Value>1.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Show patterns inside sequence</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Show patterns in the side</Name>
+        <Value>0</Value>
+    </Widget>
+</GUI>
 <GUI></GUI>
 <GUI></GUI>
 <GUI>
@@ -102,6 +223,11 @@
     <Widget>
         <Kind>2</Kind>
         <Name>Empty</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Connected</Name>
         <Value>0</Value>
     </Widget>
     <Widget>
@@ -265,11 +391,6 @@
     </Widget>
     <Widget>
         <Kind>4</Kind>
-        <Name>Particles radius</Name>
-        <Value>3.000000000</Value>
-    </Widget>
-    <Widget>
-        <Kind>4</Kind>
         <Name>Flocking Radius</Name>
         <Value>39.000000000</Value>
     </Widget>
@@ -302,6 +423,46 @@
         <Kind>4</Kind>
         <Name>Alignment Strength</Name>
         <Value>0.001000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Immortal</Name>
+        <Value>1</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Empty</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Connected</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Line</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Lifetime</Name>
+        <Value>5.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Life Random[%]</Name>
+        <Value>20.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Radius</Name>
+        <Value>3.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Radius Random[%]</Name>
+        <Value>50.000000000</Value>
     </Widget>
     <Widget>
         <Kind>4</Kind>
@@ -414,3 +575,10 @@
 <PARTICLES>
     <Active>0</Active>
 </PARTICLES>
+<CUES>
+    <Active>1</Active>
+    <Cue>cues/contourParticles.xml</Cue>
+    <Cue>cues/smallParticlesBall.xml</Cue>
+    <Cue>cues/bigParticlesInfiniteWalls.xml</Cue>
+    <Cue>cues/gridRepulse.xml</Cue>
+</CUES>

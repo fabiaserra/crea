@@ -106,6 +106,11 @@
     </Widget>
     <Widget>
         <Kind>2</Kind>
+        <Name>Connected</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
         <Name>Line</Name>
         <Value>0</Value>
     </Widget>
@@ -265,11 +270,6 @@
     </Widget>
     <Widget>
         <Kind>4</Kind>
-        <Name>Particles radius</Name>
-        <Value>3.000000000</Value>
-    </Widget>
-    <Widget>
-        <Kind>4</Kind>
         <Name>Flocking Radius</Name>
         <Value>39.000000000</Value>
     </Widget>
@@ -302,6 +302,46 @@
         <Kind>4</Kind>
         <Name>Alignment Strength</Name>
         <Value>0.001000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Immortal</Name>
+        <Value>1</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Empty</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Connected</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Line</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Lifetime</Name>
+        <Value>5.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Life Random[%]</Name>
+        <Value>20.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Radius</Name>
+        <Value>3.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Radius Random[%]</Name>
+        <Value>50.000000000</Value>
     </Widget>
     <Widget>
         <Kind>4</Kind>

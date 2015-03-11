@@ -947,21 +947,8 @@ void ofApp::setupGUI8Emitter(){
     gui8Emitter->addSlider("Velocity from Motion[%]", 0.0, 100.0, &emitterParticles->velocityMotion);
     gui8Emitter->addSlider("Emitter size", 0.0, 60.0, &emitterParticles->emitterSize);
 
-    gui8Emitter->addSpacer();
-    gui8Emitter->addLabel("Particle");
-    gui8Emitter->addToggle("Immortal", &emitterParticles->immortal);
-    gui8Emitter->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui8Emitter->setWidgetSpacing(10);
-    gui8Emitter->addToggle("Empty", &emitterParticles->isEmpty);
-    gui8Emitter->addToggle("Line", &emitterParticles->drawLine);
-    gui8Emitter->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui8Emitter->setWidgetSpacing(3);
-    gui8Emitter->addSlider("Lifetime", 0.1, 20.0, &emitterParticles->lifetime);
-    gui8Emitter->addSlider("Life Random[%]", 0.0, 100.0, &emitterParticles->lifetimeRnd);
-    gui8Emitter->addSlider("Radius", 0.1, 25.0, &emitterParticles->radius);
-    gui8Emitter->addSlider("Radius Random[%]", 0.0, 100.0, &emitterParticles->radiusRnd);
+    addParticlePropertiesGUI(gui8Emitter, emitterParticles);
 
-    gui8Emitter->addSpacer();
     gui8Emitter->addLabel("Time behaviour");
     gui8Emitter->addToggle("Size", &emitterParticles->sizeAge);
     gui8Emitter->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
@@ -1014,21 +1001,19 @@ void ofApp::setupGUI8Boids(){
     gui8Boids->addSpacer();
     gui8Boids->addLabel("BOIDS", OFX_UI_FONT_LARGE);
     gui8Boids->addSpacer();
-
-    gui8Boids->addSlider("Particles radius", 0.1, 25.0, &boidsParticles->radius);
-
+    
+    gui8Boids->addLabel("FLOCKING");
     gui8Boids->addSlider("Flocking Radius", 10.0, 100.0, &boidsParticles->flockingRadius);
     lowThresh = gui8Boids->addSlider("Lower Threshold", 0.025, 1.0, &boidsParticles->lowThresh);
     lowThresh->setLabelPrecision(3);
     highThresh = gui8Boids->addSlider("Higher Threshold", 0.025, 1.0, &boidsParticles->highThresh);
     highThresh->setLabelPrecision(3);
-
     gui8Boids->addSlider("Max speed", 1.0, 100.0, &boidsParticles->maxSpeed);
-
     gui8Boids->addSlider("Separation Strength", 0.001, 0.1, &boidsParticles->separationStrength)->setLabelPrecision(3);
     gui8Boids->addSlider("Attraction Strength", 0.001, 0.1, &boidsParticles->attractionStrength)->setLabelPrecision(3);
     gui8Boids->addSlider("Alignment Strength", 0.001, 0.1, &boidsParticles->alignmentStrength)->setLabelPrecision(3);
-
+    
+    addParticlePropertiesGUI(gui8Boids, boidsParticles);
     addParticlePhysicsGUI(gui8Boids, boidsParticles);
 
     gui8Boids->autoSizeToFitWidgets();
@@ -1055,20 +1040,6 @@ void ofApp::setupGUI8Animations(){
 	animations.push_back("Wind");
 	animations.push_back("Explosion");
 	gui8Animations->addRadio("Animations", animations, OFX_UI_ORIENTATION_HORIZONTAL);
-
-//    gui8Animations->addSpacer();
-//    gui8Animations->addLabel("Particle");
-//    gui8Animations->addToggle("Immortal", &animationsParticles->immortal);
-//    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-//    gui8Animations->setWidgetSpacing(10);
-//    gui8Animations->addToggle("Empty", &animationsParticles->isEmpty);
-//    gui8Animations->addToggle("Line", &animationsParticles->drawLine);
-//    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-//    gui8Animations->setWidgetSpacing(3);
-//    gui8Animations->addSlider("Lifetime", 0.1, 20.0, &animationsParticles->lifetime);
-//    gui8Animations->addSlider("Life Random[%]", 0.0, 100.0, &animationsParticles->lifetimeRnd);
-//    gui8Animations->addSlider("Radius", 0.1, 25.0, &animationsParticles->radius);
-//    gui8Animations->addSlider("Radius Random[%]", 0.0, 100.0, &animationsParticles->radiusRnd);
 
     addParticlePhysicsGUI(gui8Animations, animationsParticles);
 
@@ -1108,21 +1079,24 @@ void ofApp::addParticleBasicsGUI(ofxUISuperCanvas* gui, ParticleSystem* ps){
     gui->setWidgetSpacing(3);
 }
 
-////--------------------------------------------------------------
-//void ofApp::addParticlePropertiesGUI(ofxUISuperCanvas* gui, ParticleSystem* ps){
-//    gui->addLabel("Particle");
-//    gui->addToggle("Immortal", &ps->immortal);
-//    gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-//    gui->setWidgetSpacing(10);
-//    gui->addToggle("Empty", &ps->isEmpty);
-//    gui->addToggle("Line", &ps->drawLine);
-//    gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-//    gui->setWidgetSpacing(3);
-//    gui->addSlider("Lifetime", 0.1, 20.0, &ps->lifetime);
-//    gui->addSlider("Life Random[%]", 0.0, 100.0, &ps->lifetimeRnd);
-//    gui->addSlider("Radius", 0.1, 25.0, &ps->radius);
-//    gui->addSlider("Radius Random[%]", 0.0, 100.0, &ps->radiusRnd);
-//}
+//--------------------------------------------------------------
+void ofApp::addParticlePropertiesGUI(ofxUISuperCanvas* gui, ParticleSystem* ps){
+    gui->addSpacer();
+    gui->addLabel("Particle");
+    gui->addToggle("Immortal", &ps->immortal);
+    gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui->setWidgetSpacing(10);
+    gui->addToggle("Empty", &ps->isEmpty);
+    gui->addToggle("Connected", &ps->drawConnections);
+    gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui->setWidgetSpacing(3);
+    gui->addToggle("Line", &ps->drawLine);
+    gui->addSlider("Lifetime", 0.1, 20.0, &ps->lifetime);
+    gui->addSlider("Life Random[%]", 0.0, 100.0, &ps->lifetimeRnd);
+    gui->addSlider("Radius", 0.1, 25.0, &ps->radius);
+    gui->addSlider("Radius Random[%]", 0.0, 100.0, &ps->radiusRnd);
+    gui->addSpacer();
+}
 
 //--------------------------------------------------------------
 void ofApp::addParticlePhysicsGUI(ofxUISuperCanvas* gui, ParticleSystem* ps){
