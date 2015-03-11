@@ -134,7 +134,7 @@ void ofApp::setup(){
 
     // VMO SETUP
     dimensions = 2;
-    slide = 5.07767;
+    slide = 1.0;
     decay = 0.25;
 
     initStatus = true;
@@ -208,7 +208,7 @@ void ofApp::setup(){
 //			int minLen = 2;
 //			float t = 3.6; // for simple5.xml
         int minLen = 2;
-        float t = 4.8; // for tammuzT2.xml
+        float t = 4.8; // for sequenceT2.xml
 
         
 		cout << t << endl;
@@ -783,8 +783,8 @@ void ofApp::setupGUI4(){
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui4->addToggle("Show patterns in the side", &drawPatterns);
     gui4->addToggle("Show patterns inside sequence", &drawPatternsInSequence);
-    gui4->addSlider("Decay", 0.01, 1.0, &decay)->setLabelPrecision(3);
-    gui4->addSlider("Slide", 1.0, 30.0, &slide);
+    gui4->addSlider("Decay", 0.01, 1.0, &decay)->setLabelPrecision(2);
+//    gui4->addSlider("Slide", 1.0, 30.0, &slide);
 
 
     gui4->addSpacer();
