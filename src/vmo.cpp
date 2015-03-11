@@ -494,19 +494,19 @@ vmo::belief &vmo::tracking(vmo &oracle, vmo::belief &prevBf,
 		}
 
 		// Possible states from one reverse suffix forward
-		int prevRsfx = oracle.rsfx[prevPath][0]; // Just the first one
-		for (int j = 0; j < oracle.trn[prevRsfx].size(); j++) {
-			sym = oracle.data[oracle.trn[prevRsfx][j]];
-			for (int i = 0; i < oracle.latent[sym].size(); i++) {
-				d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
-				if (d < minD) {
-					minD = d;
-					ind = oracle.latent[sym][i];
-					prevBf.path[k] = ind;
-					tmpCostK = minD;
-				}
-			}
-		}
+//		int prevRsfx = oracle.rsfx[prevPath][0]; // Just the first one
+//		for (int j = 0; j < oracle.trn[prevRsfx].size(); j++) {
+//			sym = oracle.data[oracle.trn[prevRsfx][j]];
+//			for (int i = 0; i < oracle.latent[sym].size(); i++) {
+//				d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
+//				if (d < minD) {
+//					minD = d;
+//					ind = oracle.latent[sym][i];
+//					prevBf.path[k] = ind;
+//					tmpCostK = minD;
+//				}
+//			}
+//		}
 		// If next symbol is the same as current one, try advance for one step.
 		if (prevPath<oracle.nStates-1 && oracle.data[prevPath] == oracle.data[prevPath+1]) {
 			int nextPath = prevPath + 1;
@@ -537,20 +537,20 @@ vmo::belief &vmo::tracking(vmo &oracle, vmo::belief &prevBf,
 				}
 			}
 			// Possible states from one reverse suffix forward
-			int prevRsfx = oracle.rsfx[nextPath][0]; // Just the first one
-			for (int j = 0; j < oracle.trn[prevRsfx].size(); j++) {
-				sym = oracle.data[oracle.trn[prevRsfx][j]];
-				for (int i = 0; i < oracle.latent[sym].size(); i++) {
-					d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
-					if (d < minD) {
-						minD = d;
-						ind = oracle.latent[sym][i];
-						prevBf.path[k] = ind;
-						tmpCostK = minD;
-					}
-				}
-			}
-		}
+//			int prevRsfx = oracle.rsfx[nextPath][0]; // Just the first one
+//			for (int j = 0; j < oracle.trn[prevRsfx].size(); j++) {
+//				sym = oracle.data[oracle.trn[prevRsfx][j]];
+//				for (int i = 0; i < oracle.latent[sym].size(); i++) {
+//					d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
+//					if (d < minD) {
+//						minD = d;
+//						ind = oracle.latent[sym][i];
+//						prevBf.path[k] = ind;
+//						tmpCostK = minD;
+//					}
+//				}
+//			}
+//		}
 
 		prevBf.cost[k] = (1.0-decay)*prevBf.cost[k] + decay*tmpCostK;
 		if (prevBf.cost[k] < tempCost) {

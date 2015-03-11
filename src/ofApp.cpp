@@ -22,7 +22,7 @@ void ofApp::setup(){
         // Use xml sequence marker file
         #ifdef KINECT_SEQUENCE
             kinectSequence.setup(maxMarkers);
-            kinectSequence.load("sequences/simple5.xml");
+            kinectSequence.load("sequences/sequenceT2.xml");
         #endif // KINECT_SEQUENCE
 
         // Load png files from file
@@ -124,7 +124,7 @@ void ofApp::setup(){
 
     // SEQUENCE
     sequence.setup(maxMarkers);
-    sequence.load("sequences/simple5.xml");
+    sequence.load("sequences/sequenceT2.xml");
     drawSequence = false;
     drawSequenceSegments = false;
 
@@ -135,8 +135,8 @@ void ofApp::setup(){
 
     // VMO SETUP
     dimensions = 2;
-    slide = 1.0;
-    decay = 0.75;
+    slide = 5.07767;
+    decay = 0.25;
 
     initStatus = true;
     isTracking = false;
@@ -173,7 +173,6 @@ void ofApp::setup(){
 		drawPatterns = false;
         drawPatternsInSequence = false;
 		cout << sequence.patterns.size() << endl;
-
 	}
 	else{
 		numElements = maxMarkers*dimensions;
@@ -190,9 +189,9 @@ void ofApp::setup(){
 //        int minLen = 1; // Temporary setting
 //        float start = 0.0, step = 0.05, stop = 10.0;
 
-		float start = 10.0, step = 0.01, stop = 20.0;
+		float start = 0.0, step = 0.01, stop = 10.0;
 
-//        float t = vmo::findThreshold(obs, numElements, start, step, stop); // Temporary threshold range and step
+//        float t = vmo::findThreshold(savedObs, numElements, start, step, stop); // Temporary threshold range and step
 //        float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
 //        int minLen = 2; // sequence.xml
 //        float t = 12.3; // for sequence.xml
@@ -207,8 +206,12 @@ void ofApp::setup(){
 //        float t = 5.7; // for sequence1marker2.xml
 //        int minLen = 10;
 //        float t = 6.0; // for sequence1marker3.xml
+//        int minLen = 2;
+//        float t = 3.6; // for simple5.xml
         int minLen = 2;
-        float t = 3.6; // for simple5.xml
+        float t = 4.8; // for sequenceT2.xml
+
+
 		cout << t << endl;
 
 		seqVmo = vmo::buildOracle(savedObs, numElements, t);
@@ -783,10 +786,14 @@ void ofApp::setupGUI4(){
     gui4->addImageButton("Start vmo", "icons/play.png", false, dim, dim)->setColorBack(ofColor(150, 255));
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui4->addImageButton("Stop vmo", "icons/delete.png", false, dim, dim)->setColorBack(ofColor(150, 255));
+    gui4->setWidgetSpacing(30);
     trackingInfoLabel = gui4->addLabel("", OFX_UI_FONT_SMALL);
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui4->setWidgetSpacing(5);
     gui4->addToggle("Show patterns in the side", &drawPatterns);
     gui4->addToggle("Show patterns inside sequence", &drawPatternsInSequence);
+    gui4->addSlider("Decay", 0.01, 1.0, &decay)->setLabelPrecision(3);
+    gui4->addSlider("Slide", 1.0, 30.0, &slide);
 
     gui4->addSpacer();
 
