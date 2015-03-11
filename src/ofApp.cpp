@@ -135,7 +135,7 @@ void ofApp::setup(){
 
     // VMO SETUP
     dimensions = 2;
-    slide = 5.07767;
+    slide = 1.0;
     decay = 0.25;
 
     initStatus = true;
@@ -450,6 +450,7 @@ void ofApp::update(){
                     }
                 }
             }
+            gestureUpdate = getGestureUpdate(currentBf.currentIdx, seqVmo, pttrList, sequence);
             gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
             for (int i = 0; i < sequence.patterns.size(); i++) {
                 if(gestureUpdate.find(i) != gestureUpdate.end()) {
@@ -461,7 +462,6 @@ void ofApp::update(){
 
     #else
 
-        // Gesture Tracking with VMO here?
 //        if(tempMarkers.size()>0){
             if(isTracking){
                 vector<float> obs(maxMarkers*dimensions, 0.0); // Temporary code
@@ -473,7 +473,6 @@ void ofApp::update(){
                     if(tempMarkers[i].hasDisappeared && (tempMarkers.size() - i) > maxMarkers) continue;
 
                     ofPoint currentPoint = tempMarkers[i].smoothPos;
-                    cout << currentPoint << endl;
 
                     // Use the lowpass here??
                     obs[i] = lowpass(currentPoint.x, pastObs[i], slide);
@@ -524,7 +523,8 @@ void ofApp::update(){
                         }
                     }
                 }
-                gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
+                gestureUpdate = getGestureUpdate(currentBf.currentIdx, seqVmo, pttrList, sequence);
+//                gestureUpdate = seqVmo.getGestureUpdate(currentBf.currentIdx, pttrList);
 //                for (int i = 0; i < sequence.patterns.size(); i++) {
 //                    if(gestureUpdate.find(i) != gestureUpdate.end()) {
 //                        cout << "key: "<< i << endl;
@@ -795,7 +795,7 @@ void ofApp::setupGUI4(){
     gui4->addLabel("File: " + sequence.filename, OFX_UI_FONT_SMALL);
     trackingInfoLabel = gui4->addLabel(" ", OFX_UI_FONT_SMALL);
     gui4->addSpacer();
-    gui4->addSlider("Decay", 0.01, 1.0, &decay)->setLabelPrecision(3);
+    gui4->addSlider("Decay", 0.01, 1.0, &decay)->setLabelPrecision(2);
     gui4->addSlider("Slide", 1.0, 30.0, &slide);
     gui4->addSpacer();
     gui4->addToggle("Show patterns in the side", &drawPatterns);

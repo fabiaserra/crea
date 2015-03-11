@@ -47,7 +47,6 @@ vmo::belief::belief(){
 
     vector1D tmpPath(0);
     path = tmpPath;
-
     vector<float> tmpCost(0);
     cost = tmpCost;
 }
@@ -58,7 +57,6 @@ vmo::vmo(){
 void vmo::setup(int numElement, float threshold = 0.0){
     nStates = 1;
     this->nElement = numElement;
-//    this->numFeature = num;
     this->thresh = threshold;
 
     // Suffix link vector
@@ -135,7 +133,6 @@ void vmo::reset(){
     latent.clear();
     obs.clear();
     ir.clear();
-    //	maxLrs.clear();
 }
 
 int vmo::lenCommonSfx(int p1, int p2){
@@ -479,34 +476,39 @@ vmo::belief &vmo::tracking(vmo &oracle, vmo::belief &prevBf,
 		}
 
 		// Possible states from one suffix back
-		int prevSfx = oracle.sfx[prevPath];
-		for (int j = 0; j < oracle.trn[prevSfx].size(); j++) {
-			sym = oracle.data[oracle.trn[prevSfx][j]];
-			for (int i = 0; i < oracle.latent[sym].size(); i++) {
-				d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
-				if (d < minD) {
-					minD = d;
-					ind = oracle.latent[sym][i];
-					prevBf.path[k] = ind;
-					tmpCostK = minD;
+		if (oracle.sfx[prevPath] != -1) {
+			int prevSfx = oracle.sfx[prevPath];
+			for (int j = 0; j < oracle.trn[prevSfx].size(); j++) {
+				sym = oracle.data[oracle.trn[prevSfx][j]];
+				for (int i = 0; i < oracle.latent[sym].size(); i++) {
+					d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
+					if (d < minD) {
+						minD = d;
+						ind = oracle.latent[sym][i];
+						prevBf.path[k] = ind;
+						tmpCostK = minD;
+					}
 				}
 			}
 		}
 
+
 		// Possible states from one reverse suffix forward
-//		int prevRsfx = oracle.rsfx[prevPath][0]; // Just the first one
-//		for (int j = 0; j < oracle.trn[prevRsfx].size(); j++) {
-//			sym = oracle.data[oracle.trn[prevRsfx][j]];
-//			for (int i = 0; i < oracle.latent[sym].size(); i++) {
-//				d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
-//				if (d < minD) {
-//					minD = d;
-//					ind = oracle.latent[sym][i];
-//					prevBf.path[k] = ind;
-//					tmpCostK = minD;
-//				}
-//			}
-//		}
+		if (oracle.rsfx[prevPath].size()>0) {
+			int prevRsfx = oracle.rsfx[prevPath][0]; // Just the first one
+			for (int j = 0; j < oracle.trn[prevRsfx].size(); j++) {
+				sym = oracle.data[oracle.trn[prevRsfx][j]];
+				for (int i = 0; i < oracle.latent[sym].size(); i++) {
+					d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
+					if (d < minD) {
+						minD = d;
+						ind = oracle.latent[sym][i];
+						prevBf.path[k] = ind;
+						tmpCostK = minD;
+					}
+				}
+			}
+		}
 		// If next symbol is the same as current one, try advance for one step.
 		if (prevPath<oracle.nStates-1 && oracle.data[prevPath] == oracle.data[prevPath+1]) {
 			int nextPath = prevPath + 1;
@@ -523,36 +525,41 @@ vmo::belief &vmo::tracking(vmo &oracle, vmo::belief &prevBf,
 				}
 			}
 			// Possible states from one suffix back
-			int prevSfx = oracle.sfx[nextPath];
-			for (int j = 0; j < oracle.trn[prevSfx].size(); j++) {
-				sym = oracle.data[oracle.trn[prevSfx][j]];
-				for (int i = 0; i < oracle.latent[sym].size(); i++) {
-					d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
-					if (d < minD) {
-						minD = d;
-						ind = oracle.latent[sym][i];
-						prevBf.path[k] = ind;
-						tmpCostK = minD;
+			if (oracle.sfx[nextPath]!=-1) {
+				int prevSfx = oracle.sfx[nextPath];
+				for (int j = 0; j < oracle.trn[prevSfx].size(); j++) {
+					sym = oracle.data[oracle.trn[prevSfx][j]];
+					for (int i = 0; i < oracle.latent[sym].size(); i++) {
+						d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
+						if (d < minD) {
+							minD = d;
+							ind = oracle.latent[sym][i];
+							prevBf.path[k] = ind;
+							tmpCostK = minD;
+						}
 					}
 				}
 			}
+
 			// Possible states from one reverse suffix forward
-//			int prevRsfx = oracle.rsfx[nextPath][0]; // Just the first one
-//			for (int j = 0; j < oracle.trn[prevRsfx].size(); j++) {
-//				sym = oracle.data[oracle.trn[prevRsfx][j]];
-//				for (int i = 0; i < oracle.latent[sym].size(); i++) {
-//					d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
-//					if (d < minD) {
-//						minD = d;
-//						ind = oracle.latent[sym][i];
-//						prevBf.path[k] = ind;
-//						tmpCostK = minD;
-//					}
-//				}
-//			}
+			if (oracle.rsfx[nextPath].size()>0) {
+				int prevRsfx = oracle.rsfx[nextPath][0]; // Just the first one
+				for (int j = 0; j < oracle.trn[prevRsfx].size(); j++) {
+					sym = oracle.data[oracle.trn[prevRsfx][j]];
+					for (int i = 0; i < oracle.latent[sym].size(); i++) {
+						d = getDistance(obs, oracle.obs[oracle.latent[sym][i]]);
+						if (d < minD) {
+							minD = d;
+							ind = oracle.latent[sym][i];
+							prevBf.path[k] = ind;
+							tmpCostK = minD;
+						}
+					}
+				}
+			}
 		}
 
-		prevBf.cost[k] = (1.0-decay)*prevBf.cost[k] + decay*tmpCostK;
+		prevBf.cost[k] = decay * prevBf.cost[k] + tmpCostK;
 		if (prevBf.cost[k] < tempCost) {
 			tempCost = prevBf.cost[k];
 			tempIdx = ind;

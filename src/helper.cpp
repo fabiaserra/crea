@@ -71,6 +71,26 @@ vector<float> cov_cal(vector<float> &prevObs, vector<float> &obs, int numElement
 	return out;
 }
 
+map<int, float> getGestureUpdate(int ind, vmo& oracle, vmo::pttr& pttrList, Sequence& sequence){
+	map<int, float> out;
+	if (oracle.pttrCat[ind].size() == 0 || ind == -1) {
+		out[-1] = 0.0;
+	}else{
+		float idx;
+		float len;
+		for (int i = 0; i < oracle.pttrCat[ind].size(); i++) {
+			idx = float(oracle.pttrInd[ind][i]);
+			len = float(pttrList.sfxLen[oracle.pttrCat[ind][i]]);
+			float realPercent = sequence.markersPosition[0].getLengthAtIndexInterpolated(ind) / sequence.markersPosition[0].getPerimeter();
+//			out[oracle.pttrCat[ind][i]] = ofMap(idx, 0.0, len, 0.0, 1.0);
+			out[oracle.pttrCat[ind][i]] = realPercent;
+		}
+	}
+	return out;
+}
+
+
+
 // Not finished yet.
 vector< vector< float> > centroidSplit(vector< vector< float> > &input, int numMarker, int dim){
 	int len = input.size();
