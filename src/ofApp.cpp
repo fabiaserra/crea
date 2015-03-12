@@ -29,7 +29,7 @@ void ofApp::setup(){
         ofDirectory dir;                    // directory lister
         dir.allowExt("jpg");
 
-        string depthFolder = "depth1/";
+        string depthFolder = "depth4/";
         int totalImages = dir.listDir(depthFolder);
         dir.sort();
         savedDepthImages.resize(totalImages);
@@ -42,7 +42,7 @@ void ofApp::setup(){
             savedDepthImages[i] = img;
         }
 
-        string irFolder = "ir1/";
+        string irFolder = "ir4/";
         totalImages = dir.listDir(irFolder);
         dir.sort();
         savedIrImages.resize(totalImages);
@@ -338,22 +338,20 @@ void ofApp::update(){
 
         ofImage *depthImg = savedDepthImages.at(i);
         depthOriginal.setFromPixels(depthImg->getPixels(), depthImg->getWidth(), depthImg->getHeight(), OF_IMAGE_GRAYSCALE);
-
+        if(flipKinect) depthOriginal.mirror(false, true);
         ofImage *irImg = savedIrImages.at(i);
         irOriginal.setFromPixels(irImg->getPixels(), irImg->getWidth(), irImg->getHeight(), OF_IMAGE_GRAYSCALE);
-
+        if(flipKinect) irOriginal.mirror(false, true);
     #endif // KINECT_CONNECTED
 
     // Nothing will happen here if the kinect is unplugged
     kinect.update();
     if(kinect.isFrameNew()){
         depthOriginal.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
+        if(flipKinect) depthOriginal.mirror(false, true);
         irOriginal.setFromPixels(kinect.getPixels(), kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
+        if(flipKinect) irOriginal.mirror(false, true);
     }
-
-    // Flip image
-    if(flipKinect) depthOriginal.mirror(false, true);
-    if(flipKinect) irOriginal.mirror(false, true);
 
     copy(irOriginal, irImage);
 
@@ -784,6 +782,7 @@ void ofApp::setupGUI3(){
     gui3->addImageButton("Load Sequence", "icons/open.png", false, dim, dim)->setColorBack(ofColor(150, 255));
     gui3->addImageToggle("Play Sequence", "icons/play.png", &drawSequence, dim, dim)->setColorBack(ofColor(150, 255));
     gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui3->addIntSlider("Number of markers", 1, 4, &maxMarkers);
 
     gui3->addSpacer();
     sequenceFilename = gui3->addLabel("Filename: "+sequence.filename, OFX_UI_FONT_SMALL);
@@ -1519,7 +1518,6 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             if(result.bSuccess){
                 song.unloadSound();
                 song.loadSound(result.getPath(), true);
-                song.setMultiPlay(false);
                 songFilename->setLabel(ofFilePath::getFileName(result.getPath()));
             }
         }
@@ -1567,6 +1565,16 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     if(e.getName() == "Tracker max distance"){
         tracker.setMaximumDistance(trackerMaxDistance); // an object can move up to 'trackerMaxDistance' pixels per frame
     }
+    if(e.getName() == "Show Markers Path"){
+        ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
+        if(toggle->getValue() == true){
+            vector<irMarker>& tempMarkers = tracker.getFollowers();
+            // Delete path from markers
+            for (int i = 0; i < tempMarkers.size(); i++){
+                tempMarkers[i].clearPath();
+            }
+        }
+    }
     //-------------------------------------------------------------
     // 3. GESTURE SEQUENCE
     //-------------------------------------------------------------
@@ -1609,6 +1617,9 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             sequence.clearPlayback();
             drawSequence = false;
         }
+    }
+    if(e.getName() == "Number of markers"){
+        sequence.maxMarkers = maxMarkers;
     }
     if(e.getName() == "Sequence percent"){
         // Update segments polylines in sequence
@@ -1902,7 +1913,6 @@ void ofApp::exit(){
     delete gui8Animations;
     guis.clear();
 }
-
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
     if(!cueName->isFocused()){
@@ -2028,33 +2038,25 @@ void ofApp::keyPressed(int key){
 }
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
-
 }
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y ){
-
 }
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button){
-
 }
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
-
 }
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button){
-
 }
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h){
-
 }
 //--------------------------------------------------------------
 void ofApp::gotMessage(ofMessage msg){
-
 }
 //--------------------------------------------------------------
 void ofApp::dragEvent(ofDragInfo dragInfo){
-
 }
