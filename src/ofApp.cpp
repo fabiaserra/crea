@@ -1617,6 +1617,9 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             drawSequence = false;
         }
     }
+    if(e.getName() == "Number of markers"){
+        sequence.maxMarkers = maxMarkers;
+    }
     if(e.getName() == "Sequence percent"){
         // Update segments polylines in sequence
         vector< pair<float, float> > segmentsPcts;
