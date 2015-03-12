@@ -260,18 +260,18 @@ void ofApp::setup(){
 //    uiThemecf.set(252, 53, 76, 255); uiThemecfh.set(252, 247, 197, 255), uiThemecp.set(10, 191, 188, 192);
 //    uiThemecpo.set(19, 116, 125, 192);
 
-    setupGUI0();
-    setupGUI1();
-    setupGUI2();
-    setupGUI3();
-    setupGUI4();
-    setupGUI5();
-    setupGUI6();
-    setupGUI7();
-    setupGUI8Emitter();
-    setupGUI8Grid();
-    setupGUI8Boids();
-    setupGUI8Animations();
+//    setupGUI0();
+//    setupGUI1();
+//    setupGUI2();
+//    setupGUI3();
+//    setupGUI4();
+//    setupGUI5();
+//    setupGUI6();
+//    setupGUI7();
+//    setupGUI8Emitter();
+//    setupGUI8Grid();
+//    setupGUI8Boids();
+//    setupGUI8Animations();
 
     interpolatingWidgets = false;
     nInterpolatedFrames = 0;
@@ -1196,6 +1196,34 @@ void ofApp::saveGUISettings(const string path, const bool isACue){
 
 //--------------------------------------------------------------
 void ofApp::loadGUISettings(const string path, const bool interpolate, const bool isACue){
+
+    if(!isACue){
+        if(guis.size() > 0){
+            gui0->setVisible(false);
+            gui1->setVisible(false);
+            gui2->setVisible(false);
+            gui3->setVisible(false);
+            gui4->setVisible(false);
+            gui5->setVisible(false);
+            gui6->setVisible(false);
+            gui7->setVisible(false);
+            particleGuis.at(currentParticleSystem)->setVisible(false);
+        }
+
+        setupGUI0();
+        setupGUI1();
+        setupGUI2();
+        setupGUI3();
+        setupGUI4();
+        setupGUI5();
+        setupGUI6();
+        setupGUI7();
+        setupGUI8Emitter();
+        setupGUI8Grid();
+        setupGUI8Boids();
+        setupGUI8Animations();
+    }
+
     ofxXmlSettings *XML = new ofxXmlSettings();
     if(!XML->loadFile(path)){
         ofLogWarning("File " + ofFilePath::getFileName(path) + " not found.");
@@ -1468,7 +1496,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             ofFileDialogResult result = ofSystemSaveDialog("sequence.xml", "Save current settings");
             if(result.bSuccess){
                 saveGUISettings(result.getPath(), false);
-                settingsFilename->setLabel(ofFilePath::getBaseName(result.getPath()));
+                settingsFilename->setLabel(ofFilePath::getFileName(result.getPath()));
             }
         }
     }
@@ -1478,7 +1506,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             ofFileDialogResult result = ofSystemLoadDialog("Select settings xml file.", false, ofToDataPath("settings/"));
             if(result.bSuccess){
                 loadGUISettings(result.getPath(), false, false);
-                settingsFilename->setLabel(ofFilePath::getBaseName(result.getPath()));
+                settingsFilename->setLabel(ofFilePath::getFileName(result.getPath()));
             }
         }
     }
