@@ -347,11 +347,12 @@ void ofApp::update(){
     kinect.update();
     if(kinect.isFrameNew()){
         depthOriginal.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
-        if(flipKinect) depthOriginal.mirror(false, true);
-
         irOriginal.setFromPixels(kinect.getPixels(), kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
-        if(flipKinect) irOriginal.mirror(false, true);
     }
+
+    // Flip image
+    if(flipKinect) depthOriginal.mirror(false, true);
+    if(flipKinect) irOriginal.mirror(false, true);
 
     copy(irOriginal, irImage);
 
