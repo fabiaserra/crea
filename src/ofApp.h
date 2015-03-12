@@ -6,7 +6,7 @@
 #include "ofxKinect.h"
 
 // comment this to use the recorded images
-//#define KINECT_CONNECTED
+#define KINECT_CONNECTED
 
 // Uncomment this to use an xml sequence file for the tracking
 //#define KINECT_SEQUENCE
@@ -70,27 +70,25 @@ class ofApp : public ofBaseApp{
         //--------------------------------------------------------------
         ofxKinect kinect;
         //--------------------------------------------------------------
+        vector<ofImage *> savedDepthImages; // the saved Depth images for playback
+        vector<ofImage *> savedIrImages;    // the saved IR images for playback
+        //--------------------------------------------------------------
+        Sequence kinectSequence;            // offline sequence for vmo tracking
+        //--------------------------------------------------------------
         bool  flipKinect;       // Flip kinect image
         bool  resetKinect;      // Reset kinect
         float reScale;          // Ratio to scale the Image to full screen
-        //--------------------------------------------------------------
-        vector<ofImage *> savedDepthImages; // the saved Depth images for playback
-        vector<ofImage *> savedIrImages;    // the saved IR images for playback
-        Sequence kinectSequence;
         //--------------------------------------------------------------
         ofImage irImage, irOriginal;
         ofImage depthImage, depthOriginal;
         ofImage grayThreshNear;
         ofImage grayThreshFar;
         //--------------------------------------------------------------
-        ofFbo fbo;
-        float history;
-        //--------------------------------------------------------------
         ofxCv::ContourFinder contourFinder;
         ofxCv::ContourFinder irMarkerFinder;
         ofxCv::RectTrackerFollower<irMarker> tracker;
         //--------------------------------------------------------------
-        vector<irMarker> markers;
+//        vector<irMarker> markers;
         //--------------------------------------------------------------
         ParticleSystem *emitterParticles;
         ParticleSystem *gridParticles;
@@ -101,7 +99,20 @@ class ofApp : public ofBaseApp{
         //--------------------------------------------------------------
         Contour contour;        // User silhouette contour
         //--------------------------------------------------------------
+        ofSoundPlayer song;     // Song
+        //--------------------------------------------------------------
         Sequence sequence;      // Gestures sequence
+        //--------------------------------------------------------------
+        ofFbo fbo;
+        float history;
+        //--------------------------------------------------------------
+        vector<string> cueList;
+        int currentCueIndex;
+        //--------------------------------------------------------------
+        bool interpolatingWidgets;
+        int maxTransitionFrames;
+        int nInterpolatedFrames;
+        map<ofxUIWidget *, vector<float> > widgetsToUpdate;
         //--------------------------------------------------------------
         bool drawSequence;
         bool drawSequenceSegments;
@@ -109,14 +120,6 @@ class ofApp : public ofBaseApp{
         bool drawSequencePatternsSeparate;
         bool drawMarkers;
         bool drawMarkersPath;
-        //--------------------------------------------------------------
-        vector<string> cues;
-        int currentCueIndex;
-        //--------------------------------------------------------------
-        bool interpolatingWidgets;
-        int maxTransitionFrames;
-        int interpolatedFrames;
-        map<ofxUIWidget *, vector<float> > widgetsToUpdate;
         //--------------------------------------------------------------
         ofxUISuperCanvas *gui0;
         ofxUISuperCanvas *gui1;
@@ -136,6 +139,8 @@ class ofApp : public ofBaseApp{
         ofColor uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo;
         //--------------------------------------------------------------
         ofxUIImageToggle *recordingSequence;  // Toggle to record gestures sequence
+        ofxUILabel *songFilename;             // Name of the song
+        ofxUILabel *settingsFilename;         // Name of the settings
         ofxUILabel *sequenceFilename;         // Name of the sequence
         ofxUILabel *sequenceDuration;         // Duration of the sequence in seconds
         ofxUILabel *sequenceNumFrames;        // Number of frames of the sequence
