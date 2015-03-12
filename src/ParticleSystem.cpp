@@ -176,9 +176,10 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
         if(emit){ // Born new particles
             if(markersInput){
                 for(unsigned int i = 0; i < markers.size(); i++){
-                    if (markers[i].hasDisappeared) markers[i].bornRate -= 0.5;
-                    else markers[i].bornRate = bornRate;
-                    addParticles(markers[i].bornRate, markers[i]);
+//                    if (markers[i].hasDisappeared) bornRate -= 1.0;
+//                    else markers[i].bornRate = bornRate;
+//                    addParticles(markers[i].bornRate, markers[i]);
+                    if (!markers[i].hasDisappeared) addParticles(bornRate, markers[i]);
                 }
             }
             if(contourInput){
@@ -218,7 +219,7 @@ void ParticleSystem::draw(){
         for(int i = 0; i < particles.size(); i++){
             particles[i]->draw();
         }
-        
+
         //Draw lines between near points
         if(drawConnections){
             float dist = 15; //Threshold parameter of distance
@@ -275,7 +276,7 @@ void ParticleSystem::addParticles(int n){
 void ParticleSystem::addParticles(int n, const irMarker &marker){
     for(int i = 0; i < n; i++){
         ofPoint pos = marker.smoothPos + randomVector()*ofRandom(0, emitterSize);
-        ofPoint vel = randomVector()*(velocity+randomRange(velocityRnd, velocity));
+        ofPoint vel = randomVector()*(velocity+2*randomRange(velocityRnd, velocity));
         vel += marker.velocity*(velocityMotion/100)*6;
 
         float initialRadius = radius + randomRange(radiusRnd, radius);
@@ -299,7 +300,7 @@ void ParticleSystem::addParticles(int n, const ofPolyline &contour){
             pos.y = center.y + (ofRandom(1.0f) - 0.5f) * box.getHeight();
         }
 
-        ofPoint vel = randomVector()*(velocity+randomRange(velocityRnd, velocity));
+        ofPoint vel = randomVector()*(velocity+2*randomRange(velocityRnd, velocity));
 //        vel += contour.velocity*(velocityMotion/100)*6;
 
         float initialRadius = radius + randomRange(radiusRnd, radius);
