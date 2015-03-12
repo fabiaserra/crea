@@ -134,7 +134,7 @@ void ofApp::setup(){
     drawMarkersPath = false;
 
     // SONG
-    song.loadSound("songs/ASuitableEnsemble.mp3");
+    song.loadSound("songs/ASuitableEnsemble.mp3", true);
 //    song.setMultiPlay(false);
 
     // VMO SETUP
@@ -704,6 +704,7 @@ void ofApp::setupGUI1(){
     gui1->addImageButton("Stop Song", "icons/delete.png", false, dim, dim)->setColorBack(ofColor(150, 255)); // TODO: create stop icon
     gui1->addImageToggle("Loop Song", "icons/reset.png", true, dim, dim)->setColorBack(ofColor(150, 255));
     gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    songFilename = gui1->addLabel("ASuitableEnsemble.mp3", OFX_UI_FONT_SMALL);
 
     gui1->addSpacer();
 
@@ -1516,9 +1517,9 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             ofFileDialogResult result = ofSystemLoadDialog("Select an audio file.", false, ofToDataPath("songs/"));
             if(result.bSuccess){
                 song.unloadSound();
-                song.loadSound(result.getPath());
+                song.loadSound(result.getPath(), true);
                 song.setMultiPlay(false);
-                songFilename->setLabel(ofFilePath::getBaseName(result.getPath()));
+                songFilename->setLabel(ofFilePath::getFileName(result.getPath()));
             }
         }
     }
