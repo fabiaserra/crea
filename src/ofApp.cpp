@@ -9,7 +9,7 @@ void ofApp::setup(){
 //    ofSetFrameRate(30);
 
     // Number of IR markers
-    maxMarkers = 1;
+    numMarkers = 1;
 
     // Using a live kinect?
     #ifdef KINECT_CONNECTED
@@ -21,7 +21,7 @@ void ofApp::setup(){
     #else
         // Use xml sequence marker file
         #ifdef KINECT_SEQUENCE
-            kinectSequence.setup(maxMarkers);
+            kinectSequence.setup(numMarkers);
             kinectSequence.load("sequences/sequenceT2.xml");
         #endif // KINECT_SEQUENCE
 
@@ -123,13 +123,13 @@ void ofApp::setup(){
     contour.setup();
 
     // SEQUENCE
-    sequence.setup(maxMarkers);
+    sequence.setup(numMarkers);
     sequence.load("sequences/sequenceT2.xml");
     drawSequence = false;
     drawSequenceSegments = false;
 
     // MARKERS
-//    markers.resize(maxMarkers);
+//    markers.resize(numMarkers);
     drawMarkers = false;
     drawMarkersPath = false;
 
@@ -147,17 +147,17 @@ void ofApp::setup(){
     isConv = false; //Don`t try this, too slow.
 
     if (isConv){
-		numElements = (maxMarkers*dimensions+1)*(maxMarkers*dimensions)/2;
-		savedObs.assign(sequence.numFrames, vector<float>(maxMarkers*dimensions));
+		numElements = (numMarkers*dimensions+1)*(numMarkers*dimensions)/2;
+		savedObs.assign(sequence.numFrames, vector<float>(numMarkers*dimensions));
 		vmoObs.assign(sequence.numFrames, vector<float>(numElements));
-		for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
+		for(int markerIndex = 0; markerIndex < numMarkers; markerIndex++){
 			for(int frameIndex = 0; frameIndex < sequence.numFrames; frameIndex++){
 				savedObs[frameIndex][markerIndex*dimensions] = sequence.markersPosition[markerIndex][frameIndex].x;
 				savedObs[frameIndex][markerIndex*dimensions+1] = sequence.markersPosition[markerIndex][frameIndex].y;
 			}
 		}
 
-		vmoObs = covarianceMat(savedObs, maxMarkers, dimensions);
+		vmoObs = covarianceMat(savedObs, numMarkers, dimensions);
 
 		// 2. Processing
 		// 2.1 Load file into VMO
@@ -173,15 +173,15 @@ void ofApp::setup(){
 		seqVmo = vmo::buildOracle(vmoObs, numElements, t);
 		// 2.2 Output pattern list
 		pttrList = vmo::findPttr(seqVmo, minLen);
-		sequence.loadPatterns(processPttr(seqVmo, savedObs, pttrList, maxMarkers, dimensions));
+		sequence.loadPatterns(processPttr(seqVmo, savedObs, pttrList, numMarkers, dimensions));
 		drawSequencePatterns = false;
         drawSequencePatternsSeparate = false;
 		cout << sequence.patterns.size() << endl;
 	}
 	else{
-		numElements = maxMarkers*dimensions;
+		numElements = numMarkers*dimensions;
 		savedObs.assign(sequence.numFrames, vector<float>(numElements));
-		for(int markerIndex = 0; markerIndex < maxMarkers; markerIndex++){
+		for(int markerIndex = 0; markerIndex < numMarkers; markerIndex++){
 			for(int frameIndex = 0; frameIndex < sequence.numFrames; frameIndex++){
 				savedObs[frameIndex][markerIndex*dimensions] = sequence.markersPosition[markerIndex][frameIndex].x;
 				savedObs[frameIndex][markerIndex*dimensions+1] = sequence.markersPosition[markerIndex][frameIndex].y;
@@ -196,7 +196,7 @@ void ofApp::setup(){
 		float start = 0.0, step = 0.01, stop = 10.0;
 
 //        float t = vmo::findThreshold(savedObs, numElements, start, step, stop); // Temporary threshold range and step
-//        float t = vmo::findThreshold(obs, dimensions, maxMarkers, start, step, stop); // Temporary threshold range and step
+//        float t = vmo::findThreshold(obs, dimensions, numMarkers, start, step, stop); // Temporary threshold range and step
 //        int minLen = 2; // sequence.xml
 //        float t = 12.3; // for sequence.xml
 //
@@ -222,12 +222,12 @@ void ofApp::setup(){
 
 		// 2.2 Output pattern list
 		pttrList = vmo::findPttr(seqVmo, minLen);
-		sequence.loadPatterns(processPttr(seqVmo, savedObs, pttrList, maxMarkers, dimensions));
+		sequence.loadPatterns(processPttr(seqVmo, savedObs, pttrList, numMarkers, dimensions));
 		drawSequencePatterns = false;
         drawSequencePatternsSeparate = false;
 		cout << sequence.patterns.size() << endl;
 	}
-    pastObs.assign(maxMarkers*dimensions, 0.0);
+    pastObs.assign(numMarkers*dimensions, 0.0);
 //    pastFeatures.assign(numElements, 0.0);
     currentFeatures.assign(numElements, 0.0);
 
@@ -410,8 +410,8 @@ void ofApp::update(){
     #ifdef KINECT_SEQUENCE
 
         if(isTracking){
-            vector<float> obs(maxMarkers*dimensions, 0.0); // Temporary code
-            for(unsigned int i = 0; i < kinectSequence.maxMarkers; i++){
+            vector<float> obs(numMarkers*dimensions, 0.0); // Temporary code
+            for(unsigned int i = 0; i < kinectSequence.numMarkers; i++){
                 ofPoint currentPoint = kinectSequence.getCurrentPoint(i);
 				// Use the lowpass here??
 				obs[i] = lowpass(currentPoint.x, pastObs[i], slide);
@@ -473,13 +473,13 @@ void ofApp::update(){
 
         if(tempMarkers.size()>0){
             if(isTracking){
-                vector<float> obs(maxMarkers*dimensions, 0.0); // Temporary code
+                vector<float> obs(numMarkers*dimensions, 0.0); // Temporary code
                 int numObs = 0;
                 for(unsigned int i = 0; i < tempMarkers.size(); i++){
-                    // If we have already filled maxMarkers observations jump to tracking
-                    if(numObs == maxMarkers*dimensions) break;
-                    // If marker has disappeared but we have more markers to fill maxMarkers jump to the next marker
-                    if(tempMarkers[i].hasDisappeared && (tempMarkers.size() - i) > maxMarkers) continue;
+                    // If we have already filled numMarkers observations jump to tracking
+                    if(numObs == numMarkers*dimensions) break;
+                    // If marker has disappeared but we have more markers to fill numMarkers jump to the next marker
+                    if(tempMarkers[i].hasDisappeared && (tempMarkers.size() - i) > numMarkers) continue;
 
                     ofPoint currentPoint = tempMarkers[i].smoothPos;
 
@@ -781,12 +781,13 @@ void ofApp::setupGUI3(){
     gui3->addImageButton("Load Sequence", "icons/open.png", false, dim, dim)->setColorBack(ofColor(150, 255));
     gui3->addImageToggle("Play Sequence", "icons/play.png", &drawSequence, dim, dim)->setColorBack(ofColor(150, 255));
     gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui3->addIntSlider("Number of markers", 1, 4, &maxMarkers);
+//    gui3->addIntSlider("Number of markers", 1, 4, &numMarkers);
 
     gui3->addSpacer();
     sequenceFilename = gui3->addLabel("Filename: "+sequence.filename, OFX_UI_FONT_SMALL);
     sequenceDuration = gui3->addLabel("Duration: "+ofToString(sequence.duration, 2) + " s", OFX_UI_FONT_SMALL);
     sequenceNumFrames = gui3->addLabel("Number of frames: "+ofToString(sequence.numFrames), OFX_UI_FONT_SMALL);
+    sequenceNumMarkers = gui3->addLabel("Number of markers: "+ofToString(sequence.getNumMarkers()), OFX_UI_FONT_SMALL);
 
     gui3->addSpacer();
     gui3->addLabel("CUE MAPPING");
@@ -1343,15 +1344,15 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
             }
             gui3->autoSizeToFitWidgets();
 
-            // Update segments polylines in sequence
-            vector< pair<float, float> > segmentsPcts;
-            for (int i = 0; i < cueSliders.size(); i++){
-                pair<float, float> pcts;
-                pcts.first = cueSliders.at(i).second->getValueLow();
-                pcts.second = cueSliders.at(i).second->getValueHigh();
-                segmentsPcts.push_back(pcts);
-            }
-            sequence.updateSegments(segmentsPcts);
+//            // Update segments polylines in sequence
+//            vector< pair<float, float> > segmentsPcts;
+//            for (int i = 0; i < cueSliders.size(); i++){
+//                pair<float, float> pcts;
+//                pcts.first = cueSliders.at(i).second->getValueLow();
+//                pcts.second = cueSliders.at(i).second->getValueHigh();
+//                segmentsPcts.push_back(pcts);
+//            }
+//            sequence.updateSegments(segmentsPcts);
 
         }
         else currentCueIndex = -1;
@@ -1603,6 +1604,8 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
                 sequenceFilename->setLabel("Filename: "+sequence.filename);
                 sequenceDuration->setLabel("Duration: "+ofToString(sequence.duration, 2) + " s");
                 sequenceNumFrames->setLabel("Number of frames: "+ofToString(sequence.numFrames));
+                sequenceNumMarkers->setLabel("Number of markers: "+ofToString(sequence.getNumMarkers()));
+                numMarkers = sequence.getNumMarkers();
             }
         }
     }
@@ -1616,9 +1619,6 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             sequence.clearPlayback();
             drawSequence = false;
         }
-    }
-    if(e.getName() == "Number of markers"){
-        sequence.maxMarkers = maxMarkers;
     }
     if(e.getName() == "Sequence percent"){
         // Update segments polylines in sequence
