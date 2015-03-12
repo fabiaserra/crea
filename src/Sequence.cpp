@@ -314,18 +314,18 @@ void Sequence::drawTracking(int currentIdx){
         for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
             ofColor c(0,255,0);
 
-            // Draw all past points
-            ofPolyline line;
-            line.resize(currentIdx + 1);
-
-            for(size_t idx = 0; idx <= currentIdx; idx++){
-                ofPoint point = markersPosition[markerIdx].getPointAtIndexInterpolated(idx);
-                line[idx] = point;
-            }
-
-            ofSetColor(c);
-            ofSetLineWidth(2.5);
-            line.draw();
+//            // Draw all past points
+//            ofPolyline line;
+//            line.resize(currentIdx + 1);
+//
+//            for(size_t idx = 0; idx <= currentIdx; idx++){
+//                ofPoint point = markersPosition[markerIdx].getPointAtIndexInterpolated(idx);
+//                line[idx] = point;
+//            }
+//
+//            ofSetColor(c);
+//            ofSetLineWidth(2.5);
+//            line.draw();
 
             // Current point
             ofPoint currentPoint;
@@ -373,7 +373,7 @@ void Sequence::updateSegments(const vector< pair<float, float> >& segmentsPcts){
             segments[segmentIdx].clear();
         }
         segments.clear();
-        
+
         for(int segmentIdx = 0; segmentIdx < segmentsPcts.size(); segmentIdx++){
             vector<ofPolyline> segment = getSegment(segmentsPcts[segmentIdx]);
             segments.push_back(segment);
