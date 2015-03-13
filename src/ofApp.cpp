@@ -260,22 +260,22 @@ void ofApp::setup(){
 //    uiThemecf.set(252, 53, 76, 255); uiThemecfh.set(252, 247, 197, 255), uiThemecp.set(10, 191, 188, 192);
 //    uiThemecpo.set(19, 116, 125, 192);
 
-//    setupGUI0();
-//    setupGUI1();
-//    setupGUI2();
-//    setupGUI3();
-//    setupGUI4();
-//    setupGUI5();
-//    setupGUI6();
-//    setupGUI7();
-//    setupGUI8Emitter();
-//    setupGUI8Grid();
-//    setupGUI8Boids();
-//    setupGUI8Animations();
+    setupGUI0();
+    setupGUI1();
+    setupGUI2();
+    setupGUI3();
+    setupGUI4();
+    setupGUI5();
+    setupGUI6();
+    setupGUI7();
+    setupGUI8Emitter();
+    setupGUI8Grid();
+    setupGUI8Boids();
+    setupGUI8Animations();
 
     interpolatingWidgets = false;
     nInterpolatedFrames = 0;
-    maxTransitionFrames = 100;
+    maxTransitionFrames = 20;
     loadGUISettings("settings/lastSettings.xml", false, false);
 
 //    // ALLOCATE FBO AND FILL WITH BG COLOR
@@ -696,11 +696,11 @@ void ofApp::setupGUI1(){
 
     gui1->addSpacer();
     gui1->addLabel("MUSIC");
-    gui1->addImageButton("Load Song", "icons/open.png", false, dim, dim)->setColorBack(ofColor(150, 255));
-    gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui1->addImageButton("Play Song", "icons/play.png", false, dim, dim)->setColorBack(ofColor(150, 255));
+    gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui1->addImageButton("Stop Song", "icons/delete.png", false, dim, dim)->setColorBack(ofColor(150, 255)); // TODO: create stop icon
     gui1->addImageToggle("Loop Song", "icons/reset.png", true, dim, dim)->setColorBack(ofColor(150, 255));
+    gui1->addImageButton("Load Song", "icons/open.png", false, dim, dim)->setColorBack(ofColor(150, 255));
     gui1->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     songFilename = gui1->addLabel("ASuitableEnsemble.mp3", OFX_UI_FONT_SMALL);
 
@@ -794,8 +794,6 @@ void ofApp::setupGUI3(){
     gui3->addToggle("Show sequence segmentation", &drawSequenceSegments);
     gui3->addSpacer();
 
-    gui3->addSpacer();
-
     gui3->autoSizeToFitWidgets();
     gui3->setVisible(false);
     ofAddListener(gui3->newGUIEvent, this, &ofApp::guiEvent);
@@ -874,12 +872,12 @@ void ofApp::setupGUI5(){
 
     ofxUIButton *previous;
     previous = gui5->addImageButton("Previous Cue", "icons/previous.png", false, dim, dim);
-    previous->bindToKey(OF_KEY_LEFT);
+//    previous->bindToKey(OF_KEY_LEFT);
     previous->setColorBack(ofColor(150, 255));
 
     ofxUIButton *next;
     next = gui5->addImageButton("Next Cue", "icons/play.png", false, dim, dim);
-    next->bindToKey(OF_KEY_RIGHT);
+//    next->bindToKey(OF_KEY_RIGHT);
     next->setColorBack(ofColor(150, 255));
 
     gui5->addImageButton("Load Cue", "icons/open.png", false, dim, dim)->setColorBack(ofColor(150, 255));
@@ -888,7 +886,8 @@ void ofApp::setupGUI5(){
     gui5->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN, OFX_UI_ALIGN_CENTER);
 
     gui5->addSpacer();
-    gui5->addLabelButton("GO", false, 230, 40)->bindToKey(' ');
+//    gui5->addLabelButton("GO", false, 230, 40)->bindToKey(' ');
+    gui5->addLabelButton("GO", false, 230, 40);
 
     gui5->addSpacer();
 
@@ -1059,6 +1058,12 @@ void ofApp::setupGUI8Animations(){
 	animations.push_back("Explosion");
 	gui8Animations->addRadio("Animations", animations, OFX_UI_ORIENTATION_HORIZONTAL);
 
+    gui8Animations->addSpacer();
+    gui8Animations->addImageButton("Play Animation", "icons/play.png", false, dim, dim)->setColorBack(ofColor(150, 255));
+    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8Animations->addImageButton("Stop Animation", "icons/delete.png", false, dim, dim)->setColorBack(ofColor(150, 255)); // TODO: create stop icon
+    gui8Animations->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+
     addParticlePhysicsGUI(gui8Animations, animationsParticles);
 
     gui8Animations->autoSizeToFitWidgets();
@@ -1198,33 +1203,6 @@ void ofApp::saveGUISettings(const string path, const bool isACue){
 //--------------------------------------------------------------
 void ofApp::loadGUISettings(const string path, const bool interpolate, const bool isACue){
 
-    if(!isACue){
-        if(guis.size() > 0){
-            gui0->setVisible(false);
-            gui1->setVisible(false);
-            gui2->setVisible(false);
-            gui3->setVisible(false);
-            gui4->setVisible(false);
-            gui5->setVisible(false);
-            gui6->setVisible(false);
-            gui7->setVisible(false);
-            particleGuis.at(currentParticleSystem)->setVisible(false);
-        }
-
-        setupGUI0();
-        setupGUI1();
-        setupGUI2();
-        setupGUI3();
-        setupGUI4();
-        setupGUI5();
-        setupGUI6();
-        setupGUI7();
-        setupGUI8Emitter();
-        setupGUI8Grid();
-        setupGUI8Boids();
-        setupGUI8Animations();
-    }
-
     ofxXmlSettings *XML = new ofxXmlSettings();
     if(!XML->loadFile(path)){
         ofLogWarning("File " + ofFilePath::getFileName(path) + " not found.");
@@ -1328,7 +1306,14 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
             cueName->setVisible(true);
             loadGUISettings(cueList[currentCueIndex], false, true);
 
-            // Sequence segmentation range sliders
+            // Delete all existing sequence segmentation cueSliders
+            for(int cueIdx = 0; cueIdx < cueSliders.size(); cueIdx++){
+                gui3->removeWidget(cueSliders.at(cueIdx).first);
+                gui3->removeWidget(cueSliders.at(cueIdx).second);
+            }
+            cueSliders.erase(cueSliders.begin(), cueSliders.end());
+
+            // Create sequence segmentation range sliders
             float n = cueList.size();
             for(int i = 0; i < cueList.size(); i++){
                 ofxUILabel *label;
@@ -1338,93 +1323,16 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
                 float high = ((float)i+1.0)/n*100;
                 ofxUIRangeSlider *slider;
                 slider = gui3->addRangeSlider(cueName, 0, 100, low, high);
-//                slider->setTriggerType(OFX_UI_TRIGGER_END);
                 pair<ofxUILabel *, ofxUIRangeSlider*> cue(label, slider);
                 cueSliders.push_back(cue);
             }
             gui3->autoSizeToFitWidgets();
-
-//            // Update segments polylines in sequence
-//            vector< pair<float, float> > segmentsPcts;
-//            for (int i = 0; i < cueSliders.size(); i++){
-//                pair<float, float> pcts;
-//                pcts.first = cueSliders.at(i).second->getValueLow();
-//                pcts.second = cueSliders.at(i).second->getValueHigh();
-//                segmentsPcts.push_back(pcts);
-//            }
-//            sequence.updateSegments(segmentsPcts);
-
         }
         else currentCueIndex = -1;
     }
 
     delete XML;
 }
-
-////--------------------------------------------------------------
-//void ofApp::interpolateWidgetValues(){
-//    map<ofxUIWidget *, vector<float> >::iterator it = widgetsToUpdate.begin();
-//    while (it != widgetsToUpdate.end()) {
-//        ofxUIWidget * w = it->first;
-//        vector<float> values = it->second;
-//        ofxXmlSettings *XML = new ofxXmlSettings();
-//        bool canDelete = false;
-//        // if widget is a range slider we have two values to interpolate to
-//        if(w->getKind() == 6){ // kind 6 is a range slider widget
-//            w->saveState(XML);
-//            float targetHighValue = values.at(0);
-//            float targetLowValue = values.at(1);
-//            float currentHighValue = XML->getValue("HighValue", targetHighValue, 0);
-//            float currentLowValue = XML->getValue("LowValue", targetLowValue, 0);
-//            float highDifference = targetHighValue-currentHighValue;
-//            float lowDifference = targetLowValue-currentLowValue;
-//            // if the difference is small we assign the target value
-//            if(abs(highDifference) < 1 && abs(lowDifference) < 1){
-//                canDelete = true;
-//                XML->setValue("HighValue", targetHighValue, 0);
-//                XML->setValue("LowValue", targetLowValue, 0);
-//                w->loadState(XML);
-//            }
-//            else{
-//                float highIncrement = highDifference/100.0; // TODO: use float ofLerp(float start, float stop, float amt)
-//                float lowIncrement = lowDifference/100.0;
-//                XML->setValue("HighValue", currentHighValue+highIncrement, 0);
-//                XML->setValue("LowValue", currentLowValue+lowIncrement, 0);
-//                w->loadState(XML);
-//            }
-//        }
-//        else{
-//            w->saveState(XML);
-//            float targetValue = values.front();
-//            float currentValue = XML->getValue("Value", targetValue, 0);
-//            float difference = targetValue-currentValue;
-//            if(abs(difference) < 1 || w->getKind() == 2 || w->getKind() == 20){ // kind 2 is a toggle and 20 is ofxUIImageToggle
-//                canDelete = true;
-//                XML->setValue("Value", targetValue, 0);
-//                w->loadState(XML);
-//            }
-//            else{
-//                float increment = difference/100.0;
-//                XML->setValue("Value", currentValue+increment, 0);
-//                w->loadState(XML);
-//            }
-//        }
-//
-//        // If values already interpolated we delete widget from the map
-//        if (canDelete){
-//            map<ofxUIWidget *, vector<float> >::iterator toErase = it;
-//            ++it;
-//            widgetsToUpdate.erase(toErase);
-//        }
-//        else{
-//            ++it;
-//        }
-//        // Delete XML where we load and save values
-//        delete XML;
-//    }
-//
-//    if(widgetsToUpdate.empty()) interpolatingWidgets = false;
-//}
 
 //--------------------------------------------------------------
 void ofApp::interpolateWidgetValues(){
@@ -1696,24 +1604,25 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             cueName->setTextString(cueFileName);
             cueName->setVisible(true);
 
-            // Add new empty cue in the end and modify all of them
-            ofxUILabel *label;
-            label = gui3->addLabel(" ");
-            string cueName = "Sequence percent";
-            ofxUIRangeSlider *slider;
-            slider = gui3->addRangeSlider(cueName, 0, 100, 0, 100);
-//            slider->setTriggerType(OFX_UI_TRIGGER_END);
-            pair<ofxUILabel *, ofxUIRangeSlider*> cue(label, slider);
-            cueSliders.push_back(cue);
+            // Delete all existing sequence segmentation cueSliders widgets...
+            for(int cueIdx = 0; cueIdx < cueSliders.size(); cueIdx++){
+                gui3->removeWidget(cueSliders.at(cueIdx).first);
+                gui3->removeWidget(cueSliders.at(cueIdx).second);
+            }
+            cueSliders.erase(cueSliders.begin(), cueSliders.end());
 
-            float n = cueSliders.size();
-            for (int i = 0; i < cueSliders.size(); i++){
-                cueSliders.at(i).first->setLabel(ofFilePath::getBaseName(cueList[i]));
-                cueSliders.at(i).first->setVisible(true);
+            // ...and create them all again
+            float n = cueList.size();
+            for(int i = 0; i < cueList.size(); i++){
+                ofxUILabel *label;
+                label = gui3->addLabel(ofFilePath::getBaseName(cueList[i]));
+                string cueName = "Sequence percent";
                 float low = (float)i/n*100;
                 float high = ((float)i+1.0)/n*100;
-                cueSliders.at(i).second->setValueLow(low);
-                cueSliders.at(i).second->setValueHigh(high);
+                ofxUIRangeSlider *slider;
+                slider = gui3->addRangeSlider(cueName, 0, 100, low, high);
+                pair<ofxUILabel *, ofxUIRangeSlider*> cue(label, slider);
+                cueSliders.push_back(cue);
             }
             gui3->autoSizeToFitWidgets();
         }
@@ -1776,11 +1685,6 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             // Delete cue string from vector
             cueList.erase(cueList.begin()+currentCueIndex);
 
-            // Delete cue slider
-            gui3->removeWidget(cueSliders.at(currentCueIndex).first);
-            gui3->removeWidget(cueSliders.at(currentCueIndex).second);
-            cueSliders.erase(cueSliders.begin()+currentCueIndex);
-
             // Show previous cue
             if(currentCueIndex-1 >= 0) currentCueIndex--;
             else if(currentCueIndex-1 < 0) currentCueIndex = cueList.size()-1;
@@ -1797,14 +1701,25 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
                 cueName->setTextString(cueFileName);
             }
 
-            // Modify all cue sliders after deleting the current one
-            float n = cueSliders.size();
-            for (int i = 0; i < cueSliders.size(); i++){
-                cueSliders.at(i).first->setLabel(ofFilePath::getBaseName(cueList[i]));
+            // Delete all existing sequence segmentation cueSliders widgets...
+            for(int cueIdx = 0; cueIdx < cueSliders.size(); cueIdx++){
+                gui3->removeWidget(cueSliders.at(cueIdx).first);
+                gui3->removeWidget(cueSliders.at(cueIdx).second);
+            }
+            cueSliders.erase(cueSliders.begin(), cueSliders.end());
+
+            // ...and create them all again
+            float n = cueList.size();
+            for(int i = 0; i < cueList.size(); i++){
+                ofxUILabel *label;
+                label = gui3->addLabel(ofFilePath::getBaseName(cueList[i]));
+                string cueName = "Sequence percent";
                 float low = (float)i/n*100;
                 float high = ((float)i+1.0)/n*100;
-                cueSliders.at(i).second->setValueLow(low);
-                cueSliders.at(i).second->setValueHigh(high);
+                ofxUIRangeSlider *slider;
+                slider = gui3->addRangeSlider(cueName, 0, 100, low, high);
+                pair<ofxUILabel *, ofxUIRangeSlider*> cue(label, slider);
+                cueSliders.push_back(cue);
             }
             gui3->autoSizeToFitWidgets();
         }
@@ -1882,6 +1797,8 @@ void ofApp::exit(){
 //    }
 //    particleSystems.clear();
 
+//    song.unloadSound();
+
     // Delete cue sliders map
     cueSliders.clear();
 
@@ -1915,123 +1832,151 @@ void ofApp::exit(){
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
     if(!cueName->isFocused()){
-        switch (key){
-            case 'f':
-                ofToggleFullscreen();
-                break;
-            case 'h':
-                gui0->setVisible(false);
-                gui1->setVisible(false);
-                gui2->setVisible(false);
-                gui3->setVisible(false);
-                gui4->setVisible(false);
-                gui5->setVisible(false);
-                gui6->setVisible(false);
-                gui7->setVisible(false);
+        if(key == 'f') ofToggleFullscreen();
+        else if(key == 'h'){
+            gui0->setVisible(false);
+            gui1->setVisible(false);
+            gui2->setVisible(false);
+            gui3->setVisible(false);
+            gui4->setVisible(false);
+            gui5->setVisible(false);
+            gui6->setVisible(false);
+            gui7->setVisible(false);
+            particleGuis.at(currentParticleSystem)->setVisible(false);
+        }
+        else if(key == '0' || key == '`'){
+            gui0->toggleVisible();
+            gui1->setVisible(false);
+            gui2->setVisible(false);
+            gui3->setVisible(false);
+            gui4->setVisible(false);
+            gui5->setVisible(false);
+            gui6->setVisible(false);
+            gui7->setVisible(false);
+            particleGuis.at(currentParticleSystem)->setVisible(false);
+        }
+        else if(key == '1'){
+            gui0->setVisible(false);
+            gui1->toggleVisible();
+            gui2->setVisible(false);
+            gui3->setVisible(false);
+            gui4->setVisible(false);
+            gui5->setVisible(false);
+            gui6->setVisible(false);
+            gui7->setVisible(false);
+            particleGuis.at(currentParticleSystem)->setVisible(false);
+        }
+        else if(key == '2'){
+            gui0->setVisible(false);
+            gui1->setVisible(false);
+            gui2->toggleVisible();
+            gui3->setVisible(false);
+            gui4->setVisible(false);
+            gui5->setVisible(false);
+            gui6->setVisible(false);
+            gui7->setVisible(false);
+            particleGuis.at(currentParticleSystem)->setVisible(false);
+        }
+        else if(key == '3'){
+            gui0->setVisible(false);
+            gui1->setVisible(false);
+            gui2->setVisible(false);
+            gui3->toggleVisible();
+            gui4->setVisible(false);
+            gui5->setVisible(false);
+            gui6->setVisible(false);
+            gui7->setVisible(false);
+            particleGuis.at(currentParticleSystem)->setVisible(false);
+        }
+        else if(key == '4'){
+            gui0->setVisible(false);
+            gui1->setVisible(false);
+            gui2->setVisible(false);
+            gui3->setVisible(false);
+            gui4->toggleVisible();
+            gui5->setVisible(false);
+            gui6->setVisible(false);
+            gui7->setVisible(false);
+            particleGuis.at(currentParticleSystem)->setVisible(false);
+        }
+        else if(key == '5'){
+            gui0->setVisible(false);
+            gui1->setVisible(false);
+            gui2->setVisible(false);
+            gui3->setVisible(false);
+            gui4->setVisible(false);
+            gui5->toggleVisible();
+            gui6->setVisible(false);
+            gui7->setVisible(false);
+            particleGuis.at(currentParticleSystem)->setVisible(false);
+        }
+        else if(key == '6'){
+            gui0->setVisible(false);
+            gui1->setVisible(false);
+            gui2->setVisible(false);
+            gui3->setVisible(false);
+            gui4->setVisible(false);
+            gui5->setVisible(false);
+            gui6->toggleVisible();
+            gui7->setVisible(false);
+            particleGuis.at(currentParticleSystem)->setVisible(false);
+        }
+        else if(key == '7'){
+            gui0->setVisible(false);
+            gui1->setVisible(false);
+            gui2->setVisible(false);
+            gui3->setVisible(false);
+            gui4->setVisible(false);
+            gui5->setVisible(false);
+            gui6->setVisible(false);
+            gui7->toggleVisible();
+            particleGuis.at(currentParticleSystem)->setVisible(false);
+        }
+        else if(key == '8'){
+            gui0->setVisible(false);
+            gui1->setVisible(false);
+            gui2->setVisible(false);
+            gui3->setVisible(false);
+            gui4->setVisible(false);
+            gui5->setVisible(false);
+            gui6->setVisible(false);
+            gui7->setVisible(false);
+            particleGuis.at(currentParticleSystem)->toggleVisible();
+        }
+        else if(key == ' '){
+            ofxUILabelButton *button = (ofxUILabelButton *) gui5->getWidget("GO");
+            button->setValue(true);
+            gui3->triggerEvent(button);
+            button->setValue(false);
+        }
+        if(particleGuis.at(currentParticleSystem)->isVisible()){
+            if(key == OF_KEY_RIGHT){
                 particleGuis.at(currentParticleSystem)->setVisible(false);
-                break;
-            case '0':
-            case '`':
-                gui0->toggleVisible();
-                gui1->setVisible(false);
-                gui2->setVisible(false);
-                gui3->setVisible(false);
-                gui4->setVisible(false);
-                gui5->setVisible(false);
-                gui6->setVisible(false);
-                gui7->setVisible(false);
+                if(currentParticleSystem < particleSystems.size()-1) currentParticleSystem++;
+                else currentParticleSystem = 0;
+                particleGuis.at(currentParticleSystem)->setVisible(true);
+
+            }
+            if(key == OF_KEY_LEFT){
                 particleGuis.at(currentParticleSystem)->setVisible(false);
-                break;
-            case '1':
-                gui0->setVisible(false);
-                gui1->toggleVisible();
-                gui2->setVisible(false);
-                gui3->setVisible(false);
-                gui4->setVisible(false);
-                gui5->setVisible(false);
-                gui6->setVisible(false);
-                gui7->setVisible(false);
-                particleGuis.at(currentParticleSystem)->setVisible(false);
-                break;
-            case '2':
-                gui0->setVisible(false);
-                gui1->setVisible(false);
-                gui2->toggleVisible();
-                gui3->setVisible(false);
-                gui4->setVisible(false);
-                gui5->setVisible(false);
-                gui6->setVisible(false);
-                gui7->setVisible(false);
-                particleGuis.at(currentParticleSystem)->setVisible(false);
-                break;
-            case '3':
-                gui0->setVisible(false);
-                gui1->setVisible(false);
-                gui2->setVisible(false);
-                gui3->toggleVisible();
-                gui4->setVisible(false);
-                gui5->setVisible(false);
-                gui6->setVisible(false);
-                gui7->setVisible(false);
-                particleGuis.at(currentParticleSystem)->setVisible(false);
-                break;
-            case '4':
-                gui0->setVisible(false);
-                gui1->setVisible(false);
-                gui2->setVisible(false);
-                gui3->setVisible(false);
-                gui4->toggleVisible();
-                gui5->setVisible(false);
-                gui6->setVisible(false);
-                gui7->setVisible(false);
-                particleGuis.at(currentParticleSystem)->setVisible(false);
-                break;
-            case '5':
-                gui0->setVisible(false);
-                gui1->setVisible(false);
-                gui2->setVisible(false);
-                gui3->setVisible(false);
-                gui4->setVisible(false);
-                gui5->toggleVisible();
-                gui6->setVisible(false);
-                gui7->setVisible(false);
-                particleGuis.at(currentParticleSystem)->setVisible(false);
-                break;
-            case '6':
-                gui0->setVisible(false);
-                gui1->setVisible(false);
-                gui2->setVisible(false);
-                gui3->setVisible(false);
-                gui4->setVisible(false);
-                gui5->setVisible(false);
-                gui6->toggleVisible();
-                gui7->setVisible(false);
-                particleGuis.at(currentParticleSystem)->setVisible(false);
-                break;
-            case '7':
-                gui0->setVisible(false);
-                gui1->setVisible(false);
-                gui2->setVisible(false);
-                gui3->setVisible(false);
-                gui4->setVisible(false);
-                gui5->setVisible(false);
-                gui6->setVisible(false);
-                gui7->toggleVisible();
-                particleGuis.at(currentParticleSystem)->setVisible(false);
-                break;
-            case '8':
-                gui0->setVisible(false);
-                gui1->setVisible(false);
-                gui2->setVisible(false);
-                gui3->setVisible(false);
-                gui4->setVisible(false);
-                gui5->setVisible(false);
-                gui6->setVisible(false);
-                gui7->setVisible(false);
-                particleGuis.at(currentParticleSystem)->toggleVisible();
-                break;
-            default:
-                break;
+                if(currentParticleSystem > 0) currentParticleSystem--;
+                else currentParticleSystem = particleSystems.size()-1;
+                particleGuis.at(currentParticleSystem)->setVisible(true);
+            }
+        }
+        else{
+            if(key == OF_KEY_RIGHT){
+                ofxUIImageButton *button = (ofxUIImageButton *) gui5->getWidget("Next Cue");
+                button->setValue(true);
+                gui3->triggerEvent(button);
+                button->setValue(false);
+            }
+            if(key == OF_KEY_LEFT){
+                ofxUIImageButton *button = (ofxUIImageButton *) gui5->getWidget("Previous Cue");
+                button->setValue(true);
+                gui3->triggerEvent(button);
+                button->setValue(false);
+            }
         }
     }
 }
