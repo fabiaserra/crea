@@ -412,7 +412,7 @@ void ofApp::update(){
 
         if(isTracking){
             vector<float> obs(numMarkers*dimensions, 0.0); // Temporary code
-            for(unsigned int i = 0; i < kinectSequence.numMarkers; i++){
+            for(unsigned int i = 0; i < kinectSequence.getNumMarkers(); i++){
                 ofPoint currentPoint = kinectSequence.getCurrentPoint(i);
 				// Use the lowpass here??
 				obs[i] = lowpass(currentPoint.x, pastObs[i], slide);
