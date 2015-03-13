@@ -118,6 +118,10 @@ void ParticleSystem::setup(ParticleMode particleMode, InputSource inputSource, i
         immortal = true;
         addParticles(nParticles);
     }
+
+    else if(particleMode == ANIMATIONS){
+        immortal = true;
+    }
 }
 
 void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contour){
@@ -353,6 +357,14 @@ void ParticleSystem::bornParticles(){
     else if(particleMode == RANDOM || particleMode == BOIDS){
         addParticles(nParticles);
     }
+
+    else if(particleMode == ANIMATIONS){
+        if(animation == WIND){
+            infiniteWalls = true;
+            turbulence = 20;
+            addParticles(nParticles);
+        }
+    }
 }
 
 void ParticleSystem::repulseParticles(){
@@ -397,6 +409,9 @@ ofPoint ParticleSystem::getClosestMarker(const Particle &particle, const vector<
             }
         }
     }
-
     return closestMarker;
+}
+
+void ParticleSystem::setAnimation(Animation animation){
+    this->animation = animation;
 }

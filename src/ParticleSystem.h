@@ -6,6 +6,7 @@
 
 enum ParticleMode {EMITTER, BOIDS, GRID, RANDOM, ANIMATIONS};
 enum InputSource {MARKERS, CONTOUR};
+enum Animation {SNOW, RAIN, WIND, EXPLOSION};
 
 class ParticleSystem
 {
@@ -31,6 +32,8 @@ class ParticleSystem
 		void repulseParticles();
 		void flockParticles();
 
+        void setAnimation(Animation animation);
+
 		//--------------------------------------------------------------
 		bool isActive;          // Particle system active
 		//--------------------------------------------------------------
@@ -43,6 +46,8 @@ class ParticleSystem
 		int totalParticlesCreated;
 		//--------------------------------------------------------------
 		ParticleMode particleMode;
+		//--------------------------------------------------------------
+		Animation animation;
 		//--------------------------------------------------------------
 		// General properties
         bool immortal;              // Can the particles die?
