@@ -491,6 +491,7 @@ vmo::belief &vmo::tracking(vmo &oracle, vmo::belief &prevBf,
 				}
 			}
 		}
+		
 
 
 		// Possible states from one reverse suffix forward

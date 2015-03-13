@@ -195,6 +195,7 @@ void ofApp::setup(){
 
 		float start = 0.0, step = 0.01, stop = 10.0;
 
+
 //        float t = vmo::findThreshold(savedObs, numElements, start, step, stop); // Temporary threshold range and step
 //        float t = vmo::findThreshold(obs, dimensions, numMarkers, start, step, stop); // Temporary threshold range and step
 //        int minLen = 2; // sequence.xml
@@ -411,7 +412,7 @@ void ofApp::update(){
 
         if(isTracking){
             vector<float> obs(numMarkers*dimensions, 0.0); // Temporary code
-            for(unsigned int i = 0; i < kinectSequence.numMarkers; i++){
+            for(unsigned int i = 0; i < kinectSequence.getNumMarkers(); i++){
                 ofPoint currentPoint = kinectSequence.getCurrentPoint(i);
 				// Use the lowpass here??
 				obs[i] = lowpass(currentPoint.x, pastObs[i], slide);
@@ -565,7 +566,7 @@ void ofApp::draw(){
     ofSetColor(255);
 
 //    // Kinect images
-//    irImage.draw(0, 0);
+    irImage.draw(0, 0);
 //    depthImage.draw(0, 0);
 
 //    fbo.begin();

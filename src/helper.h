@@ -15,7 +15,6 @@
 #include "vmo.h"
 #include "Sequence.h"
 
-
 #endif /* defined(__zuzor__helper__) */
 
 float lowpass(float input, float past, float slide);
