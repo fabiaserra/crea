@@ -549,10 +549,16 @@ void ofApp::update(){
 void ofApp::draw(){
 
     ofPushMatrix();
+    ofColor bg(red, green, blue);
+    ofColor darkBg(bg);
+    if(bg.getBrightness() > 50) darkBg.setBrightness(50);
+    ofBackgroundGradient(bg, darkBg);
 //    ofSetRectMode(OF_RECTMODE_CENTER);
 //    ofTranslate(ofGetWidth()/2, ofGetHeight()/2);  // Translate to the center of the screen
     ofScale(reScale, reScale);
-    ofBackground(red, green, blue);
+//    ofBackground(red, green, blue);
+
+
 //    depthOriginal.draw(0,0); // Pre-recorded depth image
 //    ofEnableBlendMode(OF_BLENDMODE_SCREEN);
 
@@ -1770,10 +1776,10 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     }
     if(e.getName() == "Animations"){
         ofxUIRadio *radio = (ofxUIRadio *) e.widget;
-//        if(radio->getName() == "Wind"){
-//
-//        }
-        cout << radio->getName() << " value: " << radio->getValue() << " active name: " << radio->getActiveName() << endl;
+        if(radio->getActiveName() == "Wind"){
+            animationsParticles->setAnimation(WIND);
+            animationsParticles->bornParticles();
+        }
     }
 }
 
