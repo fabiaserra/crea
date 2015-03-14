@@ -119,7 +119,8 @@ void Particle::draw(){
             ofCircle(pos, radius);
         }
         else{
-            ofLine(pos, prevPos);
+            if(pos.squareDistance(prevPos) > height) ofLine(pos, pos);
+            else ofLine(pos, prevPos);
             prevPos = pos;
         }
 
@@ -140,6 +141,7 @@ void Particle::draw(){
 
 void Particle::addForce(ofPoint force){
 	frc += force/mass;
+//	frc += force;
 }
 
 void Particle::addNoise(float angle, float turbulence, float dt){

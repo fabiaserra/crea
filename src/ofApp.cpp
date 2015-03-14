@@ -29,7 +29,7 @@ void ofApp::setup(){
         ofDirectory dir;                    // directory lister
         dir.allowExt("jpg");
 
-        string depthFolder = "depth4/";
+        string depthFolder = "depth1/";
         int totalImages = dir.listDir(depthFolder);
         dir.sort();
         savedDepthImages.resize(totalImages);
@@ -42,7 +42,7 @@ void ofApp::setup(){
             savedDepthImages[i] = img;
         }
 
-        string irFolder = "ir4/";
+        string irFolder = "ir1/";
         totalImages = dir.listDir(irFolder);
         dir.sort();
         savedIrImages.resize(totalImages);
@@ -411,7 +411,7 @@ void ofApp::update(){
 
         if(isTracking){
             vector<float> obs(numMarkers*dimensions, 0.0); // Temporary code
-            for(unsigned int i = 0; i < kinectSequence.numMarkers; i++){
+            for(unsigned int i = 0; i < kinectSequence.getNumMarkers(); i++){
                 ofPoint currentPoint = kinectSequence.getCurrentPoint(i);
 				// Use the lowpass here??
 				obs[i] = lowpass(currentPoint.x, pastObs[i], slide);
@@ -1769,15 +1769,29 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             particleGuis.at(currentParticleSystem)->setVisible(true);
         }
     }
+    // BOIDS SPECIFIC
     if(e.getName() == "Lower Threshold" || e.getName() == "Higher Threshold"){
         if(lowThresh->getValue() > highThresh->getValue()){
             highThresh->setValue(lowThresh->getValue());
         }
     }
+    // ANIMATIONS SPECIFIC
     if(e.getName() == "Animations"){
         ofxUIRadio *radio = (ofxUIRadio *) e.widget;
-        if(radio->getActiveName() == "Wind"){
+        if(radio->getActiveName() == "Rain"){
+            animationsParticles->setAnimation(RAIN);
+            animationsParticles->bornParticles();
+        }
+        else if(radio->getActiveName() == "Snow"){
+            animationsParticles->setAnimation(SNOW);
+            animationsParticles->bornParticles();
+        }
+        else if(radio->getActiveName() == "Wind"){
             animationsParticles->setAnimation(WIND);
+            animationsParticles->bornParticles();
+        }
+        else if(radio->getActiveName() == "Explosion"){
+            animationsParticles->setAnimation(EXPLOSION);
             animationsParticles->bornParticles();
         }
     }

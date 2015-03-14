@@ -15,7 +15,7 @@ ParticleSystem::ParticleSystem(){
     lifetime            = 5.0;          // Lifetime of particles
 
     // Specific properties
-    nParticles          = 200;          // Number of particles born in the beginning
+    nParticles          = 600;          // Number of particles born in the beginning
     bornRate            = 5.0;          // Number of particles born per frame
 
     // Emitter
@@ -113,7 +113,10 @@ void ParticleSystem::setup(ParticleMode particleMode, InputSource inputSource, i
     else if(particleMode == BOIDS){ // TODO: BOIDS == RANDOM?
         flock = true;
         interact = true;
-        repulseInteraction = true;
+        markerRadius = 600;
+        radiusRnd = 0;
+        attractInteraction = true;
+//        repulseInteraction = true;
         steer = true;
         immortal = true;
         addParticles(nParticles);
@@ -121,6 +124,33 @@ void ParticleSystem::setup(ParticleMode particleMode, InputSource inputSource, i
 
     else if(particleMode == ANIMATIONS){
         immortal = true;
+        drawLine = false;
+        radius = 2;
+        radiusRnd = 20;
+        turbulence = 0.0;
+        gravity = 0.0;
+        numParticles = 1500;
+        if(animation == SNOW){
+            velocity = 8;
+            friction = 4;
+            infiniteWalls = true;
+            addParticles(nParticles);
+        }
+        else if(animation == RAIN){
+            infiniteWalls = true;
+            drawLine = true;
+            gravity = 2.0;
+            addParticles(nParticles);
+        }
+        else if(animation == WIND){
+            infiniteWalls = true;
+            turbulence = 20;
+            addParticles(nParticles);
+        }
+        else if(animation == EXPLOSION){
+            infiniteWalls = true;
+            addParticles(nParticles);
+        }
     }
 }
 
@@ -147,15 +177,16 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
             if(interact){ // Interact particles with input
                 if(markersInput){
                     // Get closest marker to particle
-                    ofPoint closestMarker = getClosestMarker(*particles[i], markers, markerRadius);
+//                    ofPoint closestMarker = getClosestMarker(*particles[i], markers, markerRadius);
+                    ofPoint closestMarker = getClosestMarker(*particles[i], markers, 20000);
 
                     // Get direction vector to closest marker
                     // dir = closestMarker - particles[i]->pos;
                     // dir.normalize();
 
                     if(closestMarker != ofPoint(-1, -1)){
-                        if(repulseInteraction) particles[i]->addRepulsionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, 5.0);
-                        if(attractInteraction) particles[i]->addAttractionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, 5.0);
+                        if(repulseInteraction) particles[i]->addRepulsionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, 10.0);
+                        if(attractInteraction) particles[i]->addAttractionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, 8.0);
                         if(gravityInteraction) particles[i]->addForce(ofPoint(0, gravity*particles[i]->mass));
                         particles[i]->isTouched = true;
                     }
@@ -198,11 +229,18 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
 
         // ---------- (3) Add some general behavior and update the particles
         for(int i = 0; i < particles.size(); i++){
-            ofPoint gravityForce(0, gravity*particles[i]->mass/10);
-            particles[i]->addForce(gravityForce);
+            ofPoint gravityForce(0, gravity);
+//            ofPoint gravityForce(0, gravity);
+            particles[i]->addForce(gravityForce*particles[i]->mass);
 
 //            ofPoint windForce(ofRandom(-0.1, 0.1), ofRandom(-0.08, 0.06));
 //            particles[i]->addForce(windForce*particles[i]->mass);
+//
+//            float windX = ofSignedNoise(particles[i]->pos.x * 0.003, particles[i]->pos.y * 0.006, ofGetElapsedTimef() * 0.6) * 0.6;
+//            ofPoint frc;
+//            frc.x = windX * 0.4 + ofSignedNoise(particles[i]->id, particles[i]->pos.y * 0.04) * 0.6;
+//            frc.y = ofSignedNoise(particles[i]->id, particles[i]->pos.x * 0.006, ofGetElapsedTimef() * 0.2) * 0.1 + 0.25;
+//            particles[i]->addForce(frc*particles[i]->mass/2.0);
 
             particles[i]->addNoise(15.0, turbulence, dt);
 
@@ -269,6 +307,10 @@ void ParticleSystem::addParticles(int n){
     for(int i = 0; i < n; i++){
         ofPoint pos = ofPoint(ofRandom(width), ofRandom(height));
         ofPoint vel = randomVector()*(velocity+randomRange(velocityRnd, velocity));
+
+        if(particleMode == ANIMATIONS && (animation == RAIN || animation == SNOW)){
+            vel.y = fabs(vel.y) * 10.0; // make particles all be going down when born
+        }
 
         float initialRadius = radius + randomRange(radiusRnd, radius);
         float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
@@ -350,21 +392,25 @@ void ParticleSystem::bornParticles(){
         particles[i]->isAlive = false;
     }
 
-    if(particleMode == GRID){
-        createParticleGrid(width, height);
-    }
+    InputSource inputSource = MARKERS;
+    if(contourInput = true) inputSource = CONTOUR;
 
-    else if(particleMode == RANDOM || particleMode == BOIDS){
-        addParticles(nParticles);
-    }
-
-    else if(particleMode == ANIMATIONS){
-        if(animation == WIND){
-            infiniteWalls = true;
-            turbulence = 20;
-            addParticles(nParticles);
-        }
-    }
+    setup(particleMode, inputSource, width, height);
+//    if(particleMode == GRID){
+//        createParticleGrid(width, height);
+//    }
+//
+//    else if(particleMode == RANDOM || particleMode == BOIDS){
+//        addParticles(nParticles);
+//    }
+//
+//    else if(particleMode == ANIMATIONS){
+//        if(animation == WIND){
+//            infiniteWalls = true;
+//            turbulence = 20;
+//            addParticles(nParticles);
+//        }
+//    }
 }
 
 void ParticleSystem::repulseParticles(){
