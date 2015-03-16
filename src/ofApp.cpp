@@ -6,7 +6,8 @@ using namespace cv;
 //--------------------------------------------------------------
 void ofApp::setup(){
 
-//    ofSetFrameRate(30);
+    ofSetFrameRate(60);
+    ofSetVerticalSync(false);
 
     // Number of IR markers
     numMarkers = 1;

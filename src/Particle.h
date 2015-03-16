@@ -64,6 +64,7 @@ class Particle
         bool drawLine;          // Draw particle as a line from prevPos to pos?
 
         bool limitSpeed;        // Limit the speed of the particle?
+        bool bounceDamping;     // Decrease velocity when particle bounces?
 
         bool bounces;           // Particle bounces with the window margins?
         bool steers;            // Particle steers direction before touching the walls?

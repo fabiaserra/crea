@@ -19,6 +19,7 @@ Particle::Particle(){
     drawLine        = false;
 
     limitSpeed      = false;
+    bounceDamping   = true;
 
     age             = 0;
 
@@ -53,10 +54,9 @@ void Particle::update(float dt){
         frc.set(0, 0);
 
         // Update age and check if particle has to die
-        if(!immortal){
-        	age += dt;
-	        if(age >= lifetime) isAlive = false;
-        }
+        age += dt;
+        if(!immortal && age >= lifetime) isAlive = false;
+        else if(immortal) age = fmodf(age, lifetime);
 
         // Decrease particle radius with age
         if (sizeAge) radius = initialRadius * (1.0f - (age/lifetime));
@@ -64,24 +64,12 @@ void Particle::update(float dt){
         // Decrease particle opacity with age
         opacity = 255;
         if (opacityAge) opacity *= (1.0f - (age/lifetime));
-        if (flickersAge && (age/lifetime) > 0.94f && ofRandomf() > 0.3) opacity *= 0.2;
+        if (flickersAge && (age/lifetime) > 0.85f && ofRandomf() > 0.6) opacity *= 0.2;
 
         // Change particle color with age
         if (colorAge){
-            float saturation;
-            float hue;
-
-            if(!immortal){
-                saturation = ofMap(age, 0, lifetime, 255, 128);
-                hue = ofMap(age, 0, lifetime, originalHue, originalHue-100);
-            }
-            else{
-//                saturation = 255%(int)ofGetElapsedTimef();
-//                hue = 255%(int)ofGetElapsedTimef();
-            }
-
-            color.setSaturation(saturation);
-            color.setHue(hue);
+//            color.setSaturation(ofMap(age, 0, lifetime, 255, 128));
+            color.setHue(ofMap(age, 0, lifetime, originalHue, originalHue-100));
         }
 
         // Bounce particle with the window margins
@@ -107,14 +95,14 @@ void Particle::draw(){
 
         if(isEmpty){
             ofNoFill();
-            ofSetLineWidth(1);
+            ofSetLineWidth(2);
         }
         else{
             ofFill();
         }
 
         if(!drawLine){
-            int resolution = ofMap(radius, 0, 10, 6, 22, true);
+            int resolution = ofMap(fabs(radius), 0, 10, 6, 22, true);
             ofSetCircleResolution(resolution);
             ofCircle(pos, radius);
         }
@@ -376,7 +364,7 @@ void Particle::bounceParticle(){
         isBouncing = true;
     }
 
-    if (isBouncing){
+    if (isBouncing && bounceDamping){
         vel *= 0.9;
         // vel.y *= -0.5;
     }

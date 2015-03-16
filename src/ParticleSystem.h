@@ -96,6 +96,7 @@ class ParticleSystem
 		bool bounce;                // Particles bounce with the window margins?
 		bool steer;                 // Particles steer direction with the window margins?
 		bool infiniteWalls;         // Infinite walls?
+        bool bounceDamping;         // Decrease velocity when particle bounces walls?
         //--------------------------------------------------------------
         // Behavior
         bool interact;              // Can we interact with the particles?
