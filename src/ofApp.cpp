@@ -8,6 +8,10 @@ void ofApp::setup(){
 
     ofSetFrameRate(60);
     ofSetVerticalSync(false);
+    
+    ofHideCursor(); // trick to show the cursor icon (see mouseMoved())
+    
+//    ofSoundPlayer::
 
     // Number of IR markers
     numMarkers = 1;
@@ -63,6 +67,7 @@ void ofApp::setup(){
 
     // BACKGROUND COLOR
     red = 0; green = 0; blue = 0;
+    bgGradient = true;
 
     // ALLOCATE IMAGES
     depthImage.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
@@ -135,6 +140,7 @@ void ofApp::setup(){
     drawMarkersPath = false;
 
     // SONG
+//    song.setPlayer();
     song.loadSound("songs/ASuitableEnsemble.mp3", true);
 //    song.setMultiPlay(false);
 
@@ -552,7 +558,7 @@ void ofApp::draw(){
     ofPushMatrix();
     ofColor bg(red, green, blue);
     ofColor darkBg(bg);
-    if(bg.getBrightness() > 50) darkBg.setBrightness(50);
+    if(bgGradient && bg.getBrightness() > 50) darkBg.setBrightness(50);
     ofBackgroundGradient(bg, darkBg);
 //    ofSetRectMode(OF_RECTMODE_CENTER);
 //    ofTranslate(ofGetWidth()/2, ofGetHeight()/2);  // Translate to the center of the screen
@@ -688,6 +694,7 @@ void ofApp::setupGUI1(){
     gui1->addSlider("Red", 0.0, 255.0, &red);
     gui1->addSlider("Green", 0.0, 255.0, &green);
     gui1->addSlider("Blue", 0.0, 255.0, &blue);
+    gui1->addToggle("Gradient", &bgGradient);
 
     gui1->addSpacer();
     gui1->addLabel("SETTINGS");
@@ -1107,6 +1114,9 @@ void ofApp::addParticleBasicsGUI(ofxUISuperCanvas* gui, ParticleSystem* ps){
     gui->addToggle("Contour", &ps->contourInput);
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui->setWidgetSpacing(3);
+    
+    gui->addSlider("Opacity", 0.0, 255.0, &ps->opacity);
+
 }
 
 //--------------------------------------------------------------
@@ -2006,6 +2016,7 @@ void ofApp::keyReleased(int key){
 }
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y ){
+    ofShowCursor();
 }
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button){

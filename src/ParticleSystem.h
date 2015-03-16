@@ -40,6 +40,8 @@ class ParticleSystem
         int width;              // Particle system boundaries
         int height;
 		//--------------------------------------------------------------
+        float opacity;
+        //--------------------------------------------------------------
 		vector<Particle *> particles;
 		//--------------------------------------------------------------
 		int numParticles;

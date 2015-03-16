@@ -31,6 +31,9 @@ class Particle
 
         void kill();
 //--------------------------------------------------------------
+        float opacity;
+        float opacityTmp;
+//--------------------------------------------------------------
         ofPoint pos;            // Position
         ofPoint prevPos;        // Previous position
         ofPoint iniPos;         // Initial position
@@ -48,8 +51,6 @@ class Particle
         float friction;         // Decay of the velocity
         float initialRadius;    // Radius of the particle when borns
         float radius;           // Radius of the particle
-        float opacity;          // Radius of the particle
-        float noise;            // Perlin noise to add some randomness
         float originalHue;      // Initial hue color
 // --------------------------------------------------------------
         bool immortal;          // Can the particle die?

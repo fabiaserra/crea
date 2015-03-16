@@ -6,6 +6,8 @@ bool comparisonFunction(Particle * a, Particle * b) {
 
 ParticleSystem::ParticleSystem(){
     isActive            = false;        // Particle system is active?
+    
+    opacity             = 255.0;          // Opacity of the particles
 
     // General properties
     immortal            = false;        // Can particles die?
@@ -130,6 +132,7 @@ void ParticleSystem::setup(ParticleMode particleMode, InputSource inputSource, i
     else if(particleMode == ANIMATIONS){
         immortal = true;
         drawLine = false;
+        opacity = 150.0;
         radius = 2.0;
         radiusRnd = 20.0;
         turbulence = 0.0;
@@ -258,6 +261,7 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
             particles[i]->addNoise(15.0, turbulence, dt);
 
             particles[i]->immortal = immortal;
+            particles[i]->opacity = opacity;
             particles[i]->friction = 1-friction/1000;
             particles[i]->bounces = bounce;
             particles[i]->bounceDamping = bounceDamping;

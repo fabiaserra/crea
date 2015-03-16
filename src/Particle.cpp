@@ -2,6 +2,8 @@
 
 Particle::Particle(){
     isAlive         = true;
+    
+    opacity         = 255;
 
     isTouched		= false;
 
@@ -62,9 +64,9 @@ void Particle::update(float dt){
         if (sizeAge) radius = initialRadius * (1.0f - (age/lifetime));
 
         // Decrease particle opacity with age
-        opacity = 255;
-        if (opacityAge) opacity *= (1.0f - (age/lifetime));
-        if (flickersAge && (age/lifetime) > 0.85f && ofRandomf() > 0.6) opacity *= 0.2;
+        opacityTmp = opacity;
+        if (opacityAge) opacityTmp *= (1.0f - (age/lifetime));
+        if (flickersAge && (age/lifetime) > 0.85f && ofRandomf() > 0.6) opacityTmp *= 0.2;
 
         // Change particle color with age
         if (colorAge){
@@ -91,7 +93,7 @@ void Particle::draw(){
     if(isAlive){
         ofPushStyle();
 
-        ofSetColor(color, opacity);
+        ofSetColor(color, opacityTmp);
 
         if(isEmpty){
             ofNoFill();
@@ -107,7 +109,7 @@ void Particle::draw(){
             ofCircle(pos, radius);
         }
         else{
-            if(pos.squareDistance(prevPos) > height) ofLine(pos, pos);
+            if(pos.squareDistance(prevPos) > 5) ofLine(pos, pos-vel.getNormalized()*5);
             else ofLine(pos, prevPos);
             prevPos = pos;
         }
