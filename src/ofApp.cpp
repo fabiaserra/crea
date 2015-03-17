@@ -8,10 +8,8 @@ void ofApp::setup(){
 
     ofSetFrameRate(60);
     ofSetVerticalSync(false);
-    
+
     ofHideCursor(); // trick to show the cursor icon (see mouseMoved())
-    
-//    ofSoundPlayer::
 
     // Number of IR markers
     numMarkers = 1;
@@ -285,13 +283,14 @@ void ofApp::setup(){
     maxTransitionFrames = 20;
     loadGUISettings("settings/lastSettings.xml", false, false);
 
-//    // ALLOCATE FBO AND FILL WITH BG COLOR
-//    fbo.allocate(kinect.width, kinect.height, GL_RGB32F_ARB);
-//    fbo.begin();
-//    ofClear(red, green, blue);
-//    fbo.end();
-//
-//    history = 0.8;
+    // ALLOCATE FBO AND FILL WITH BG COLOR
+    fbo.allocate(kinect.width, kinect.height, GL_RGB32F_ARB);
+    fbo.begin();
+    ofClear(red, green, blue);
+    fbo.end();
+
+    fadeAmount = 40;
+    useFBO = false;
 
     // CREATE DIRECTORIES IN /DATA IF THEY DONT EXIST
     string directory[3] = {"sequences", "settings", "cues"};
@@ -360,7 +359,6 @@ void ofApp::update(){
     }
 
     copy(irOriginal, irImage);
-
     copy(depthOriginal, depthImage);
     copy(depthOriginal, grayThreshNear);
     copy(depthOriginal, grayThreshFar);
@@ -369,16 +367,23 @@ void ofApp::update(){
     erode(irImage);
     blur(irImage, 21);
     dilate(irImage);
+    dilate(irImage);
     threshold(irImage, irThreshold);
 
     // Treshold and filter depth image
     threshold(grayThreshNear, nearThreshold, true);
     threshold(grayThreshFar, farThreshold);
     bitwise_and(grayThreshNear, grayThreshFar, depthImage);
+    if(flipKinect){
     dilate(depthImage);
     dilate(depthImage);
     dilate(depthImage);
+    dilate(depthImage);
+    blur(depthImage, 31);
+    erode(depthImage);
+    erode(depthImage);
     blur(depthImage, 21);
+    }
 
     // Update images
     irImage.update();
@@ -556,10 +561,12 @@ void ofApp::update(){
 void ofApp::draw(){
 
     ofPushMatrix();
-    ofColor bg(red, green, blue);
-    ofColor darkBg(bg);
-    if(bgGradient && bg.getBrightness() > 50) darkBg.setBrightness(50);
-    ofBackgroundGradient(bg, darkBg);
+    ofColor contourBg(red, green, blue);
+    ofColor centerBg(red, green, blue);
+    if(bgGradient){
+        if(centerBg.getBrightness() > 0) contourBg.setBrightness(ofMap(centerBg.getBrightness(), 0.0, 255.0, 20.0, 130.0));
+    }
+    ofBackgroundGradient(centerBg, contourBg);
 //    ofSetRectMode(OF_RECTMODE_CENTER);
 //    ofTranslate(ofGetWidth()/2, ofGetHeight()/2);  // Translate to the center of the screen
     ofScale(reScale, reScale);
@@ -575,30 +582,36 @@ void ofApp::draw(){
 //    irImage.draw(0, 0);
 //    depthImage.draw(0, 0);
 
-//    fbo.begin();
-//
-//    // Draw semi-transparent white rectangle to slightly clear buffer (depends on the history value)
-//    float alpha = (1-history) * 255;
-//    ofSetColor(red, green, blue, alpha);
-//    ofFill();
-//    ofRect(0, 0, kinect.width, kinect.height);
-//
-//    // Graphics
-//    ofSetColor(255);
-//    contour.draw();
+    fbo.begin();
+
+    // clear the fbo if useFBO is false
+	// this completely clears the buffer so we won't see any trails
+    if(!useFBO){
+		ofClear(red, green, blue, 0);
+    }
+    // Draw semi-transparent white rectangle to slightly clear buffer (depends on the history value)
+    ofSetColor(red, green, blue, fadeAmount);
+    ofFill();
+    ofRect(0, 0, kinect.width, kinect.height);
+
+    // Graphics
+    ofSetColor(255);
+    contour.draw();
+    emitterParticles->draw();
 //    gridParticles->draw();
-//    emitterParticles->draw();
 //    boidsParticles->draw();
-//
-//    fbo.end();
-//
-//    // Draw buffer (graphics) on the screen
-//    fbo.draw(0, 0);
+//    animationsParticles->draw();
+
+    fbo.end();
+
+    // Draw buffer (graphics) on the screen
+    ofSetColor(255);
+    fbo.draw(0, 0);
 
     // Draw Graphics
-    contour.draw();
+//    contour.draw();
+//    emitterParticles->draw();
     gridParticles->draw();
-    emitterParticles->draw();
     boidsParticles->draw();
     animationsParticles->draw();
 
@@ -707,6 +720,10 @@ void ofApp::setupGUI1(){
     gui1->addSpacer();
     gui1->addLabel("INTERPOLATION");
     gui1->addIntSlider("Transition Frames", 0, 200, &maxTransitionFrames);
+
+    gui1->addLabel("FBO");
+    gui1->addToggle("Use FBO", &useFBO);
+    gui1->addIntSlider("FBO fade amount", 0, 50, &fadeAmount);
 
     gui1->addSpacer();
     gui1->addLabel("MUSIC");
@@ -1114,7 +1131,7 @@ void ofApp::addParticleBasicsGUI(ofxUISuperCanvas* gui, ParticleSystem* ps){
     gui->addToggle("Contour", &ps->contourInput);
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui->setWidgetSpacing(3);
-    
+
     gui->addSlider("Opacity", 0.0, 255.0, &ps->opacity);
 
 }
@@ -1441,7 +1458,6 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         if(button->getValue() == true){
             ofFileDialogResult result = ofSystemLoadDialog("Select an audio file.", false, ofToDataPath("songs/"));
             if(result.bSuccess){
-                song.unloadSound();
                 song.loadSound(result.getPath(), true);
                 songFilename->setLabel(ofFilePath::getFileName(result.getPath()));
             }
@@ -1827,8 +1843,6 @@ void ofApp::exit(){
 //        particleSystems.at(i) = NULL;
 //    }
 //    particleSystems.clear();
-
-//    song.unloadSound();
 
     // Delete cue sliders map
     cueSliders.clear();
