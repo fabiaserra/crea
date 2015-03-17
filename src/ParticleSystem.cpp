@@ -6,7 +6,7 @@ bool comparisonFunction(Particle * a, Particle * b) {
 
 ParticleSystem::ParticleSystem(){
     isActive            = false;        // Particle system is active?
-    
+
     opacity             = 255.0;          // Opacity of the particles
 
     // General properties
@@ -132,6 +132,9 @@ void ParticleSystem::setup(ParticleMode particleMode, InputSource inputSource, i
     else if(particleMode == ANIMATIONS){
         immortal = true;
         drawLine = false;
+        bounce = false;
+        infiniteWalls = false;
+        flickersAge = false;
         opacity = 150.0;
         radius = 2.0;
         radiusRnd = 20.0;
@@ -139,14 +142,16 @@ void ParticleSystem::setup(ParticleMode particleMode, InputSource inputSource, i
         gravity = 0.0;
         numParticles = 1500;
         friction = 4.0;
-        
+        velocity = 10.0;
+        velocityRnd = 30.0;
+
         if(animation == SNOW){
-            velocity = 8.0;
+//            velocity = 8.0;
             infiniteWalls = true;
             addParticles(nParticles);
         }
         else if(animation == RAIN){
-            velocity = 15.0;
+//            velocity = 15.0;
             friction = 6.0;
             infiniteWalls = true;
             radius = 0.8;
@@ -154,11 +159,21 @@ void ParticleSystem::setup(ParticleMode particleMode, InputSource inputSource, i
         }
         else if(animation == WIND){
             infiniteWalls = true;
-            turbulence = 14.0;
+            velocity = 30.0;
+            velocityRnd = 80.0;
+            turbulence = 8.0;
             addParticles(nParticles);
         }
         else if(animation == EXPLOSION){
-            bounce = true;
+//            bounce = true;
+            radius = 6.0;
+            radiusRnd = 60.0;
+            friction = 50.0;
+//            velocity = 6.0;
+            immortal = false;
+            lifetime = 3.0;
+            lifetimeRnd = 10.0;
+            flickersAge = true;
             addParticles(nParticles);
         }
     }
@@ -216,11 +231,11 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
             }
 
             if(returnToOrigin) particles[i]->xenoToOrigin(0.03);
-            
+
             if(animation == SNOW || animation == WIND){
                 ofPoint windForce(ofRandom(-0.1, 0.1), ofRandom(-0.08, 0.06));
                 particles[i]->addForce(windForce*particles[i]->mass);
-                
+
                 float windX = ofSignedNoise(particles[i]->pos.x * 0.003, particles[i]->pos.y * 0.006, ofGetElapsedTimef() * 0.6) * 0.6;
                 ofPoint frc;
                 frc.x = windX * 0.25 + ofSignedNoise(particles[i]->id, particles[i]->pos.y * 0.04) * 0.6;
@@ -328,10 +343,14 @@ void ParticleSystem::addParticles(int n){
 
         if(particleMode == ANIMATIONS && animation == RAIN){
             vel.x = 0;
-            vel.y = fabs(vel.y) * 15.0; // make particles all be going down when born
+            vel.y = fabs(vel.y) * 30.0; // make particles all be going down when born
         }
         else if(particleMode == ANIMATIONS && animation == SNOW){
-            vel.y = fabs(vel.y) * 10.0; // make particles all be going down when born
+            vel.y = fabs(vel.y) * 17.0; // make particles all be going down when born
+        }
+        else if(particleMode == ANIMATIONS && animation == EXPLOSION){
+            pos = ofPoint(ofRandom(width), ofRandom(height+radius, height*2));
+            vel.y = fabs(vel.y) * -200.0; // make particles all be going up when born
         }
 
         float initialRadius = radius + randomRange(radiusRnd, radius);
@@ -417,11 +436,11 @@ void ParticleSystem::bornParticles(){
     InputSource inputSource = MARKERS;
     if(contourInput == true) inputSource = CONTOUR;
     setup(particleMode, inputSource, width, height); // resets the settings to default
-    
+
 //    if(particleMode == GRID){
 //        createParticleGrid(width, height);
 //    }
-//    
+//
 //    else if(particleMode == RANDOM || particleMode == BOIDS || particleMode == ANIMATIONS){
 //        addParticles(nParticles);
 //    }
