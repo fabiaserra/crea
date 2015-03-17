@@ -24,6 +24,7 @@ class Contour
         bool drawConvexHull;
         bool drawConvexHullLine;
         bool drawContourLine;
+        bool drawTangentLines;
 
     protected:
     private:
