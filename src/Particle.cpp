@@ -2,7 +2,7 @@
 
 Particle::Particle(){
     isAlive         = true;
-    
+
     opacity         = 255;
 
     isTouched		= false;
@@ -22,6 +22,7 @@ Particle::Particle(){
 
     limitSpeed      = false;
     bounceDamping   = true;
+    damping         = 0.8;
 
     age             = 0;
 
@@ -367,7 +368,7 @@ void Particle::bounceParticle(){
     }
 
     if (isBouncing && bounceDamping){
-        vel *= 0.9;
+        vel *= damping;
         // vel.y *= -0.5;
     }
 }

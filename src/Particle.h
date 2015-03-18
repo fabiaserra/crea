@@ -78,6 +78,7 @@ class Particle
         float alignmentStrength;
         float attractionStrength;
         float maxSpeed;         // Maximum speed
+        float damping;          // Damping when particle bounces walls
 // --------------------------------------------------------------
         int width;              // Particle boundaries
         int height;

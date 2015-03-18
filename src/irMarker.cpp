@@ -45,8 +45,8 @@ void irMarker::draw(){
     }
     ofSetColor(color);
     ofCircle(currentPos, size);
-//    ofSetColor(color.getInverted());
-//    ofDrawBitmapString(ofToString(label), currentPos.x-2, currentPos.y+2);
+    ofSetColor(color.getInverted());
+    ofDrawBitmapString(ofToString(label), currentPos.x-2, currentPos.y+2);
     ofPopStyle();
 }
 

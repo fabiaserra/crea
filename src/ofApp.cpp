@@ -7,7 +7,7 @@ using namespace cv;
 void ofApp::setup(){
 
     ofSetFrameRate(60);
-    ofSetVerticalSync(false);
+//    ofSetVerticalSync(false);
 
     ofHideCursor(); // trick to show the cursor icon (see mouseMoved())
 
@@ -60,7 +60,8 @@ void ofApp::setup(){
 
     #endif
 
-    reScale = (float)ofGetHeight() / (float)kinect.height;
+//    reScale = (float)ofGetHeight() / (float)kinect.height;
+//    reScale = ofVec2f((float)ofGetHeight()/(float)kinect.height, (float)ofGetHeight()/(float)kinect.height);
     time0 = ofGetElapsedTimef();
 
     // BACKGROUND COLOR
@@ -220,7 +221,6 @@ void ofApp::setup(){
         int minLen = 2;
         float t = 4.8; // for sequenceT2.xml
 
-
 		cout << t << endl;
 
 		seqVmo = vmo::buildOracle(savedObs, numElements, t);
@@ -310,7 +310,8 @@ void ofApp::update(){
     time0 = time;
 
     // Compute rescale value to scale kinect image
-    reScale = (float)ofGetHeight() / (float)kinect.height;
+//    reScale = (float)ofGetHeight() / (float)kinect.height;
+    reScale = ofVec2f((float)ofGetHeight()/(float)kinect.height, (float)ofGetHeight()/(float)kinect.height);
 
     // Update the sound playing system
     ofSoundUpdate();
@@ -569,51 +570,53 @@ void ofApp::draw(){
     ofBackgroundGradient(centerBg, contourBg);
 //    ofSetRectMode(OF_RECTMODE_CENTER);
 //    ofTranslate(ofGetWidth()/2, ofGetHeight()/2);  // Translate to the center of the screen
-    ofScale(reScale, reScale);
+    ofScale(reScale.x, reScale.y);
 //    ofBackground(red, green, blue);
 
-
-//    depthOriginal.draw(0,0); // Pre-recorded depth image
+//    depthOriginal.draw(0,0);
 //    ofEnableBlendMode(OF_BLENDMODE_SCREEN);
 
     ofSetColor(255);
 
 //    // Kinect images
-//    irImage.draw(0, 0);
+    irImage.draw(0, 0);
 //    depthImage.draw(0, 0);
 
-    fbo.begin();
+    if(useFBO){
+        fbo.begin();
 
-    // clear the fbo if useFBO is false
-	// this completely clears the buffer so we won't see any trails
-    if(!useFBO){
-		ofClear(red, green, blue, 0);
+//        // clear the fbo if useFBO is false
+//        	// this completely clears the buffer so we won't see any trails
+//            if(!useFBO){
+//        		ofClear(red, green, blue, 0);
+//            }
+        // Draw semi-transparent white rectangle to slightly clear buffer (depends on the history value)
+        ofSetColor(red, green, blue, fadeAmount);
+        ofFill();
+        ofRect(0, 0, kinect.width, kinect.height);
+
+        // Graphics
+        ofSetColor(255);
+        contour.draw();
+        emitterParticles->draw();
+        gridParticles->draw();
+        boidsParticles->draw();
+        animationsParticles->draw();
+
+        fbo.end();
+
+        // Draw buffer (graphics) on the screen
+        ofSetColor(255);
+        fbo.draw(0, 0);
     }
-    // Draw semi-transparent white rectangle to slightly clear buffer (depends on the history value)
-    ofSetColor(red, green, blue, fadeAmount);
-    ofFill();
-    ofRect(0, 0, kinect.width, kinect.height);
-
-    // Graphics
-    ofSetColor(255);
-    contour.draw();
-    emitterParticles->draw();
-//    gridParticles->draw();
-//    boidsParticles->draw();
-//    animationsParticles->draw();
-
-    fbo.end();
-
-    // Draw buffer (graphics) on the screen
-    ofSetColor(255);
-    fbo.draw(0, 0);
-
-    // Draw Graphics
-//    contour.draw();
-//    emitterParticles->draw();
-    gridParticles->draw();
-    boidsParticles->draw();
-    animationsParticles->draw();
+    else{
+        // Draw Graphics
+        contour.draw();
+        emitterParticles->draw();
+        gridParticles->draw();
+        boidsParticles->draw();
+        animationsParticles->draw();
+    }
 
     if(drawMarkers || drawMarkersPath){
 //        irMarkerFinder.draw();
@@ -750,6 +753,7 @@ void ofApp::setupGUI2(){
 
     gui2->addSpacer();
     gui2->addLabel("Press '2' to toggle panel", OFX_UI_FONT_SMALL);
+    gui2->addLabel("'Up' and 'down' keys to tilt", OFX_UI_FONT_SMALL);
 
     gui2->addSpacer();
     gui2->addFPS(OFX_UI_FONT_SMALL);
@@ -1993,6 +1997,16 @@ void ofApp::keyPressed(int key){
             button->setValue(true);
             gui3->triggerEvent(button);
             button->setValue(false);
+        }
+        else if(key == OF_KEY_UP){
+            angle++;
+			if(angle>30) angle=30;
+			kinect.setCameraTiltAngle(angle);
+        }
+        else if(key == OF_KEY_DOWN){
+            angle--;
+			if(angle<-30) angle=-30;
+			kinect.setCameraTiltAngle(angle);
         }
         if(particleGuis.at(currentParticleSystem)->isVisible()){
             if(key == OF_KEY_RIGHT){
