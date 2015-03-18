@@ -311,7 +311,9 @@ void ofApp::update(){
 
     // Compute rescale value to scale kinect image
 //    reScale = (float)ofGetHeight() / (float)kinect.height;
-    reScale = ofVec2f((float)ofGetHeight()/(float)kinect.height, (float)ofGetHeight()/(float)kinect.height);
+    reScale = ofVec2f((float)ofGetWidth()/(float)kinect.width, (float)ofGetHeight()/(float)kinect.height); // deforms the image a little bit
+//    reScale = ofVec2f((float)ofGetHeight()/(float)kinect.height, (float)ofGetHeight()/(float)kinect.height);
+//    cout << reScale << endl;
 
     // Update the sound playing system
     ofSoundUpdate();
