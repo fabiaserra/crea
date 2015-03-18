@@ -1,27 +1,29 @@
 #pragma once
 
+// Addons
+//-----------------------
 #include "ofMain.h"
 #include "ofxUI.h"
 #include "ofxCv.h"
 #include "ofxKinect.h"
 
-// comment this to use the recorded images
-//#define KINECT_CONNECTED
-
-// Uncomment this to use an xml sequence file for the tracking
-#define KINECT_SEQUENCE
-
+// Classes
+//-----------------------
 #include "ParticleSystem.h"
 #include "irMarker.h"
 #include "Contour.h"
-
 #include "Sequence.h"
 
-// Include VMO files here
+// VMO files
 //-----------------------
 #include "vmo.h"
 #include "helper.h"
-//-----------------------
+
+// comment this to use the recorded images
+#define KINECT_CONNECTED
+
+// Uncomment this to use an xml sequence file for the tracking
+//#define KINECT_SEQUENCE
 
 class ofApp : public ofBaseApp{
 
@@ -77,7 +79,9 @@ class ofApp : public ofBaseApp{
         //--------------------------------------------------------------
         bool  flipKinect;       // Flip kinect image
         bool  resetKinect;      // Reset kinect
-        float reScale;          // Ratio to scale the Image to full screen
+        int   angle;            // Tilt angle of the kinect
+        ofVec2f reScale;        // Ratios to scale the Image to full screen
+//        float reScale;          // Ratio to scale the Image to full screen
         //--------------------------------------------------------------
         ofImage irImage, irOriginal;
         ofImage depthImage, depthOriginal;
@@ -105,7 +109,8 @@ class ofApp : public ofBaseApp{
         Sequence sequence;      // Gestures sequence
         //--------------------------------------------------------------
         ofFbo fbo;
-        float history;
+        int fadeAmount;
+        bool useFBO;
         //--------------------------------------------------------------
         vector<string> cueList;
         int currentCueIndex;
@@ -157,6 +162,7 @@ class ofApp : public ofBaseApp{
         float guiWidth;
         //--------------------------------------------------------------
         float red, green, blue;
+        bool bgGradient;
         //--------------------------------------------------------------
         float nearClipping, farClipping;
         float nearThreshold, farThreshold;

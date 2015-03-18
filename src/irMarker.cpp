@@ -15,12 +15,13 @@ void irMarker::setup(const cv::Rect& track){
     currentPos = toOf(track).getCenter();
     smoothPos = currentPos;
     previousPos = currentPos;
+    all.curveTo(smoothPos); // necessary duplicate first point for control point
 }
 
 void irMarker::update(const cv::Rect& track){
     currentPos = toOf(track).getCenter();
     smoothPos.interpolate(currentPos, .5);
-    all.addVertex(smoothPos);
+    all.curveTo(smoothPos);
     velocity = smoothPos - previousPos;
     previousPos = smoothPos;
 }
@@ -75,6 +76,7 @@ void irMarker::kill(){
     float currentTime = ofGetElapsedTimef();
     if(startedDying == 0){
         startedDying = currentTime;
+        all.curveTo(smoothPos);  // necessary duplicate last point for control point
     }
     else if((currentTime - startedDying) > dyingTime){
         dead = true;

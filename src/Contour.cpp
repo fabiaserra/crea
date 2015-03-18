@@ -11,10 +11,11 @@ Contour::Contour()
 void Contour::setup(){
     smoothingSize = 0;
 
-    drawBoundingRect = false;
-    drawConvexHull = true;
-    drawConvexHullLine = false;
-    drawContourLine = false;
+    drawBoundingRect    = false;
+    drawConvexHull      = false;
+    drawConvexHullLine  = false;
+    drawContourLine     = false;
+    drawTangentLines    = true;
 }
 
 void Contour::update(ofxCv::ContourFinder & contourFinder){
@@ -76,6 +77,22 @@ void Contour::draw(){
             for(int i = 0; i < contours.size(); i++)
                 contours[i].draw();
         }
+
+//        if(drawTangentLines){
+//            ofSetLineWidth(1);
+//            ofSetColor(255, 50);
+//            for(int i = 0; i < contours.size(); i++){
+//                float numPoints = contours[i].size();
+//                float tangentLength = 100;
+//                for(int p = 0; p < 1000; p++){
+//                    ofPoint point = contours[i].getPointAtPercent(p/1000.0);
+//                    float floatIndex = p/1000.0 * (numPoints-1);
+//                    ofVec3f tangent = contours[i].getTangentAtIndexInterpolated(floatIndex) * tangentLength;
+//                    ofLine(point-tangent/2, point+tangent/2);
+//                }
+//            }
+//        }
+
         ofPopStyle();
     }
 }

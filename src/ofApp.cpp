@@ -6,7 +6,10 @@ using namespace cv;
 //--------------------------------------------------------------
 void ofApp::setup(){
 
-//    ofSetFrameRate(30);
+    ofSetFrameRate(60);
+//    ofSetVerticalSync(false);
+
+    ofHideCursor(); // trick to show the cursor icon (see mouseMoved())
 
     // Number of IR markers
     numMarkers = 1;
@@ -29,7 +32,7 @@ void ofApp::setup(){
         ofDirectory dir;                    // directory lister
         dir.allowExt("jpg");
 
-        string depthFolder = "depth4/";
+        string depthFolder = "depth1/";
         int totalImages = dir.listDir(depthFolder);
         dir.sort();
         savedDepthImages.resize(totalImages);
@@ -42,7 +45,7 @@ void ofApp::setup(){
             savedDepthImages[i] = img;
         }
 
-        string irFolder = "ir4/";
+        string irFolder = "ir1/";
         totalImages = dir.listDir(irFolder);
         dir.sort();
         savedIrImages.resize(totalImages);
@@ -57,11 +60,13 @@ void ofApp::setup(){
 
     #endif
 
-    reScale = (float)ofGetHeight() / (float)kinect.height;
+//    reScale = (float)ofGetHeight() / (float)kinect.height;
+//    reScale = ofVec2f((float)ofGetHeight()/(float)kinect.height, (float)ofGetHeight()/(float)kinect.height);
     time0 = ofGetElapsedTimef();
 
     // BACKGROUND COLOR
     red = 0; green = 0; blue = 0;
+    bgGradient = true;
 
     // ALLOCATE IMAGES
     depthImage.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
@@ -134,6 +139,7 @@ void ofApp::setup(){
     drawMarkersPath = false;
 
     // SONG
+//    song.setPlayer();
     song.loadSound("songs/ASuitableEnsemble.mp3", true);
 //    song.setMultiPlay(false);
 
@@ -216,7 +222,6 @@ void ofApp::setup(){
         int minLen = 2;
         float t = 4.8; // for sequenceT2.xml
 
-
 		cout << t << endl;
 
 		seqVmo = vmo::buildOracle(savedObs, numElements, t);
@@ -279,13 +284,14 @@ void ofApp::setup(){
     maxTransitionFrames = 20;
     loadGUISettings("settings/lastSettings.xml", false, false);
 
-//    // ALLOCATE FBO AND FILL WITH BG COLOR
-//    fbo.allocate(kinect.width, kinect.height, GL_RGB32F_ARB);
-//    fbo.begin();
-//    ofClear(red, green, blue);
-//    fbo.end();
-//
-//    history = 0.8;
+    // ALLOCATE FBO AND FILL WITH BG COLOR
+    fbo.allocate(kinect.width, kinect.height, GL_RGB32F_ARB);
+    fbo.begin();
+    ofClear(red, green, blue);
+    fbo.end();
+
+    fadeAmount = 40;
+    useFBO = false;
 
     // CREATE DIRECTORIES IN /DATA IF THEY DONT EXIST
     string directory[3] = {"sequences", "settings", "cues"};
@@ -305,7 +311,10 @@ void ofApp::update(){
     time0 = time;
 
     // Compute rescale value to scale kinect image
-    reScale = (float)ofGetHeight() / (float)kinect.height;
+//    reScale = (float)ofGetHeight() / (float)kinect.height;
+    reScale = ofVec2f((float)ofGetWidth()/(float)kinect.width, (float)ofGetHeight()/(float)kinect.height); // deforms the image a little bit
+//    reScale = ofVec2f((float)ofGetHeight()/(float)kinect.height, (float)ofGetHeight()/(float)kinect.height);
+//    cout << reScale << endl;
 
     // Update the sound playing system
     ofSoundUpdate();
@@ -354,7 +363,6 @@ void ofApp::update(){
     }
 
     copy(irOriginal, irImage);
-
     copy(depthOriginal, depthImage);
     copy(depthOriginal, grayThreshNear);
     copy(depthOriginal, grayThreshFar);
@@ -363,16 +371,23 @@ void ofApp::update(){
     erode(irImage);
     blur(irImage, 21);
     dilate(irImage);
+    dilate(irImage);
     threshold(irImage, irThreshold);
 
     // Treshold and filter depth image
     threshold(grayThreshNear, nearThreshold, true);
     threshold(grayThreshFar, farThreshold);
     bitwise_and(grayThreshNear, grayThreshFar, depthImage);
+    if(flipKinect){
     dilate(depthImage);
     dilate(depthImage);
     dilate(depthImage);
+    dilate(depthImage);
+    blur(depthImage, 31);
+    erode(depthImage);
+    erode(depthImage);
     blur(depthImage, 21);
+    }
 
     // Update images
     irImage.update();
@@ -550,17 +565,18 @@ void ofApp::update(){
 void ofApp::draw(){
 
     ofPushMatrix();
-    ofColor bg(red, green, blue);
-    ofColor darkBg(bg);
-    if(bg.getBrightness() > 50) darkBg.setBrightness(50);
-    ofBackgroundGradient(bg, darkBg);
+    ofColor contourBg(red, green, blue);
+    ofColor centerBg(red, green, blue);
+    if(bgGradient){
+        if(centerBg.getBrightness() > 0) contourBg.setBrightness(ofMap(centerBg.getBrightness(), 0.0, 255.0, 20.0, 130.0));
+    }
+    ofBackgroundGradient(centerBg, contourBg);
 //    ofSetRectMode(OF_RECTMODE_CENTER);
 //    ofTranslate(ofGetWidth()/2, ofGetHeight()/2);  // Translate to the center of the screen
-    ofScale(reScale, reScale);
+    ofScale(reScale.x, reScale.y);
 //    ofBackground(red, green, blue);
 
-
-//    depthOriginal.draw(0,0); // Pre-recorded depth image
+//    depthOriginal.draw(0,0);
 //    ofEnableBlendMode(OF_BLENDMODE_SCREEN);
 
     ofSetColor(255);
@@ -569,32 +585,41 @@ void ofApp::draw(){
     irImage.draw(0, 0);
 //    depthImage.draw(0, 0);
 
-//    fbo.begin();
-//
-//    // Draw semi-transparent white rectangle to slightly clear buffer (depends on the history value)
-//    float alpha = (1-history) * 255;
-//    ofSetColor(red, green, blue, alpha);
-//    ofFill();
-//    ofRect(0, 0, kinect.width, kinect.height);
-//
-//    // Graphics
-//    ofSetColor(255);
-//    contour.draw();
-//    gridParticles->draw();
-//    emitterParticles->draw();
-//    boidsParticles->draw();
-//
-//    fbo.end();
-//
-//    // Draw buffer (graphics) on the screen
-//    fbo.draw(0, 0);
+    if(useFBO){
+        fbo.begin();
 
-    // Draw Graphics
-    contour.draw();
-    gridParticles->draw();
-    emitterParticles->draw();
-    boidsParticles->draw();
-    animationsParticles->draw();
+//        // clear the fbo if useFBO is false
+//        	// this completely clears the buffer so we won't see any trails
+//            if(!useFBO){
+//        		ofClear(red, green, blue, 0);
+//            }
+        // Draw semi-transparent white rectangle to slightly clear buffer (depends on the history value)
+        ofSetColor(red, green, blue, fadeAmount);
+        ofFill();
+        ofRect(0, 0, kinect.width, kinect.height);
+
+        // Graphics
+        ofSetColor(255);
+        contour.draw();
+        emitterParticles->draw();
+        gridParticles->draw();
+        boidsParticles->draw();
+        animationsParticles->draw();
+
+        fbo.end();
+
+        // Draw buffer (graphics) on the screen
+        ofSetColor(255);
+        fbo.draw(0, 0);
+    }
+    else{
+        // Draw Graphics
+        contour.draw();
+        emitterParticles->draw();
+        gridParticles->draw();
+        boidsParticles->draw();
+        animationsParticles->draw();
+    }
 
     if(drawMarkers || drawMarkersPath){
 //        irMarkerFinder.draw();
@@ -688,6 +713,7 @@ void ofApp::setupGUI1(){
     gui1->addSlider("Red", 0.0, 255.0, &red);
     gui1->addSlider("Green", 0.0, 255.0, &green);
     gui1->addSlider("Blue", 0.0, 255.0, &blue);
+    gui1->addToggle("Gradient", &bgGradient);
 
     gui1->addSpacer();
     gui1->addLabel("SETTINGS");
@@ -700,6 +726,10 @@ void ofApp::setupGUI1(){
     gui1->addSpacer();
     gui1->addLabel("INTERPOLATION");
     gui1->addIntSlider("Transition Frames", 0, 200, &maxTransitionFrames);
+
+    gui1->addLabel("FBO");
+    gui1->addToggle("Use FBO", &useFBO);
+    gui1->addIntSlider("FBO fade amount", 0, 50, &fadeAmount);
 
     gui1->addSpacer();
     gui1->addLabel("MUSIC");
@@ -726,6 +756,7 @@ void ofApp::setupGUI2(){
 
     gui2->addSpacer();
     gui2->addLabel("Press '2' to toggle panel", OFX_UI_FONT_SMALL);
+    gui2->addLabel("'Up' and 'down' keys to tilt", OFX_UI_FONT_SMALL);
 
     gui2->addSpacer();
     gui2->addFPS(OFX_UI_FONT_SMALL);
@@ -1107,6 +1138,9 @@ void ofApp::addParticleBasicsGUI(ofxUISuperCanvas* gui, ParticleSystem* ps){
     gui->addToggle("Contour", &ps->contourInput);
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui->setWidgetSpacing(3);
+
+    gui->addSlider("Opacity", 0.0, 255.0, &ps->opacity);
+
 }
 
 //--------------------------------------------------------------
@@ -1431,7 +1465,6 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         if(button->getValue() == true){
             ofFileDialogResult result = ofSystemLoadDialog("Select an audio file.", false, ofToDataPath("songs/"));
             if(result.bSuccess){
-                song.unloadSound();
                 song.loadSound(result.getPath(), true);
                 songFilename->setLabel(ofFilePath::getFileName(result.getPath()));
             }
@@ -1770,15 +1803,29 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             particleGuis.at(currentParticleSystem)->setVisible(true);
         }
     }
+    // BOIDS SPECIFIC
     if(e.getName() == "Lower Threshold" || e.getName() == "Higher Threshold"){
         if(lowThresh->getValue() > highThresh->getValue()){
             highThresh->setValue(lowThresh->getValue());
         }
     }
+    // ANIMATIONS SPECIFIC
     if(e.getName() == "Animations"){
         ofxUIRadio *radio = (ofxUIRadio *) e.widget;
-        if(radio->getActiveName() == "Wind"){
+        if(radio->getActiveName() == "Rain"){
+            animationsParticles->setAnimation(RAIN);
+            animationsParticles->bornParticles();
+        }
+        else if(radio->getActiveName() == "Snow"){
+            animationsParticles->setAnimation(SNOW);
+            animationsParticles->bornParticles();
+        }
+        else if(radio->getActiveName() == "Wind"){
             animationsParticles->setAnimation(WIND);
+            animationsParticles->bornParticles();
+        }
+        else if(radio->getActiveName() == "Explosion"){
+            animationsParticles->setAnimation(EXPLOSION);
             animationsParticles->bornParticles();
         }
     }
@@ -1803,8 +1850,6 @@ void ofApp::exit(){
 //        particleSystems.at(i) = NULL;
 //    }
 //    particleSystems.clear();
-
-//    song.unloadSound();
 
     // Delete cue sliders map
     cueSliders.clear();
@@ -1956,6 +2001,16 @@ void ofApp::keyPressed(int key){
             gui3->triggerEvent(button);
             button->setValue(false);
         }
+        else if(key == OF_KEY_UP){
+            angle++;
+			if(angle>30) angle=30;
+			kinect.setCameraTiltAngle(angle);
+        }
+        else if(key == OF_KEY_DOWN){
+            angle--;
+			if(angle<-30) angle=-30;
+			kinect.setCameraTiltAngle(angle);
+        }
         if(particleGuis.at(currentParticleSystem)->isVisible()){
             if(key == OF_KEY_RIGHT){
                 particleGuis.at(currentParticleSystem)->setVisible(false);
@@ -1992,6 +2047,7 @@ void ofApp::keyReleased(int key){
 }
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y ){
+    ofShowCursor();
 }
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button){
