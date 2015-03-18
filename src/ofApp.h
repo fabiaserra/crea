@@ -6,10 +6,10 @@
 #include "ofxKinect.h"
 
 // comment this to use the recorded images
-#define KINECT_CONNECTED
+//#define KINECT_CONNECTED
 
 // Uncomment this to use an xml sequence file for the tracking
-//#define KINECT_SEQUENCE
+#define KINECT_SEQUENCE
 
 #include "ParticleSystem.h"
 #include "irMarker.h"
@@ -89,6 +89,7 @@ class ofApp : public ofBaseApp{
         ofxCv::RectTrackerFollower<irMarker> tracker;
         //--------------------------------------------------------------
 //        vector<irMarker> markers;
+        int numMarkers;
         //--------------------------------------------------------------
         ParticleSystem *emitterParticles;
         ParticleSystem *gridParticles;
@@ -144,6 +145,7 @@ class ofApp : public ofBaseApp{
         ofxUILabel *sequenceFilename;         // Name of the sequence
         ofxUILabel *sequenceDuration;         // Duration of the sequence in seconds
         ofxUILabel *sequenceNumFrames;        // Number of frames of the sequence
+        ofxUILabel *sequenceNumMarkers;       // Number of markers of the sequence
         ofxUILabel *cueIndexLabel;            // Current cue index
         ofxUILabel *trackingInfoLabel;        // Information about tracking
         ofxUITextInput *cueName;              // Name of the cue
@@ -171,7 +173,6 @@ class ofApp : public ofBaseApp{
         vmo::belief prevBf;
 
         // vector<ofPoint>& loadedFrames;
-        int maxMarkers;
         int dimensions;
         int numElements;
         float slide;

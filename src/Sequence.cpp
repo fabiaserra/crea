@@ -7,11 +7,11 @@ Sequence::Sequence(){
     playhead = 0;
     elapsedTime = 0;
     maxPatternsWindow = 10;
+    verdana.loadFont("fonts/verdana.ttf", 80, true, true);
 }
 
-void Sequence::setup(const int maxMarkers){
-    this->maxMarkers = maxMarkers;
-    verdana.loadFont("fonts/verdana.ttf", 80, true, true);
+void Sequence::setup(const int numMarkers){
+    this->numMarkers = numMarkers;
 }
 
 void Sequence::update(){
@@ -32,7 +32,7 @@ void Sequence::record(const vector<irMarker>& markers){
         xml.popTag();
     }
 //    // fill with dummy markers if not enough markers
-//    while(xml.getNumTags("marker") < maxMarkers){
+//    while(xml.getNumTags("marker") < numMarkers){
 //        int numMarker = xml.addTag("marker");
 //        xml.pushTag("marker", numMarker);
 //        xml.setValue("id", -1, numMarker);
@@ -47,7 +47,7 @@ void Sequence::record(const vector<irMarker>& markers){
 void Sequence::draw(){
     ofPushStyle();
     // Draw entire sequence
-    for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
+    for(int markerIdx = 0; markerIdx < numMarkers; markerIdx++){
 
         ofSetColor(255, 50);
         ofSetLineWidth(1.5);
@@ -56,25 +56,27 @@ void Sequence::draw(){
         ofPoint currentPoint;
         ofPolyline line;
         int currentIdx = calcCurrentFrameIndex();
-        line.resize(currentIdx + 1);
+        if(currentIdx >= 0){
+            line.resize(currentIdx + 1);
 
-        for(size_t idx = 0; idx <= currentIdx; idx++){
-            currentPoint = markersPosition[markerIdx].getPointAtIndexInterpolated(idx);
-            line[idx] = currentPoint;
+            for(size_t idx = 0; idx <= currentIdx; idx++){
+                currentPoint = markersPosition[markerIdx].getPointAtIndexInterpolated(idx);
+                line[idx] = currentPoint;
+            }
+
+            ofColor c;
+            if(markerIdx == 0) c.set(255, 0, 0);
+            else if(markerIdx == 1) c.set(0, 0, 255);
+            else if(markerIdx == 2) c.set(0, 255, 0);
+            ofSetColor(c);
+            ofSetLineWidth(2.5);
+            line.draw();
+
+            ofFill();
+            c.setBrightness(150);
+            ofSetColor(c);
+            ofCircle(currentPoint, 3);
         }
-
-        ofColor c;
-        if(markerIdx == 0) c.set(255, 0, 0);
-        else if(markerIdx == 1) c.set(0, 0, 255);
-        else if(markerIdx == 2) c.set(0, 255, 0);
-        ofSetColor(c);
-        ofSetLineWidth(2.5);
-        line.draw();
-
-        ofFill();
-        c.setBrightness(150);
-        ofSetColor(c);
-        ofCircle(currentPoint, 3);
     }
     ofPopStyle();
 }
@@ -83,9 +85,11 @@ void Sequence::load(const string path){
 
     if(!xml.load(path)) return;
 
+    numMarkers = xml.getValue("numMarkers", numMarkers, 0);
+
     // Initialize polylines sequence
     markersPosition.clear();
-    for(int i = 0; i < maxMarkers; i++){
+    for(int i = 0; i < numMarkers; i++){
         ofPolyline newPolyline;
         markersPosition.push_back(newPolyline);
     }
@@ -100,21 +104,21 @@ void Sequence::load(const string path){
     for(size_t frameIdx = 0; frameIdx < numFrames; frameIdx++){
         xml.pushTag("frame", frameIdx);
 
-        const size_t nMarkers = xml.getNumTags("marker");
+        const size_t frameNumMarkers = xml.getNumTags("marker");
 
         // Frame timestamp
-        if(timestampFirstFrame == -1 && nMarkers >= maxMarkers) timestampFirstFrame = xml.getValue("timestamp", -2.0);
-        if(nMarkers >= maxMarkers) timestampLastFrame = xml.getValue("timestamp", -2.0);
+        if(timestampFirstFrame == -1 && frameNumMarkers >= numMarkers) timestampFirstFrame = xml.getValue("timestamp", -2.0);
+        if(frameNumMarkers >= numMarkers) timestampLastFrame = xml.getValue("timestamp", -2.0);
 
-        // If no recorded markers or less than maxMarkers we don't consider that frame
-        if(nMarkers < maxMarkers){
+        // If no recorded markers or less than numMarkers we don't consider that frame
+        if(frameNumMarkers < numMarkers){
             emptyFrames++;
             xml.popTag();
             continue;
         }
 
         int addedMarkers = 0;
-        for(size_t markerIdx = 0; markerIdx < nMarkers; markerIdx++){
+        for(size_t markerIdx = 0; markerIdx < frameNumMarkers; markerIdx++){
             xml.pushTag("marker", markerIdx);
             unsigned int id = xml.getValue("id", -2.0);
             const float px = xml.getValue("x", -2.0);
@@ -122,14 +126,14 @@ void Sequence::load(const string path){
             const bool disappeared = xml.getValue("disappeared", -1.0);
 
             // Number of markers we still have to take the value from
-            int aheadMarkers = (nMarkers-1) - markerIdx;
+            int aheadMarkers = (frameNumMarkers-1) - markerIdx;
             // If marker is not disappeared in that frame we add it
             if(!disappeared){
                 markersPosition[addedMarkers].addVertex(ofPoint(px, py));
                 addedMarkers++;
             }
-            // If marker is disappeared but not enough markers to fill maxMarkers we add it too
-            else if(disappeared && aheadMarkers < (maxMarkers-addedMarkers)){
+            // If marker is disappeared but not enough markers to fill numMarkers we add it too
+            else if(disappeared && aheadMarkers < (numMarkers-addedMarkers)){
                 markersPosition[addedMarkers].addVertex(ofPoint(px, py));
                 addedMarkers++;
             }
@@ -138,14 +142,14 @@ void Sequence::load(const string path){
 
             xml.popTag();
 
-            // If we have already loaded more or equal maxMarkers we go to the next frame
-            if(addedMarkers >= maxMarkers ){
+            // If we have already loaded more or equal numMarkers we go to the next frame
+            if(addedMarkers >= numMarkers ){
                 break;
             }
         }
 
-//        // If not enough markers in the frame to fill maxMarkers we add dummy vertices to the polyline
-//        while(addedMarkers < maxMarkers){
+//        // If not enough markers in the frame to fill numMarkers we add dummy vertices to the polyline
+//        while(addedMarkers < numMarkers){
 //            markersPosition[addedMarkers].addVertex(ofPoint(-1, -1));
 //            addedMarkers++;
 //        }
@@ -182,7 +186,7 @@ void Sequence::drawPatterns(map<int, float>& currentPatterns){
         ofColor c = ofColor::fromHsb(0, 255, 255);
         c.setHue(ofMap(patternIdx, 0, nPatterns-1, 0, 255));
 
-        for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
+        for(int markerIdx = 0; markerIdx < numMarkers; markerIdx++){
             int opacity = 100;
             if(highlight) opacity = 170;
 
@@ -272,7 +276,7 @@ void Sequence::drawPattern(const int patternPosition, const int patternIdx, floa
     ofNoFill();
     ofRect(0, 0, width, height);
 
-    for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
+    for(int markerIdx = 0; markerIdx < numMarkers; markerIdx++){
         // Pattern lines
         ofSetColor(120, opacity);
         ofSetLineWidth(2);
@@ -311,7 +315,7 @@ void Sequence::drawPattern(const int patternPosition, const int patternIdx, floa
 void Sequence::drawTracking(int currentIdx){
     if(currentIdx >= 0){
         ofPushStyle();
-        for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
+        for(int markerIdx = 0; markerIdx < numMarkers; markerIdx++){
             ofColor c(0,255,0);
 
 //            // Draw all past points
@@ -355,7 +359,7 @@ void Sequence::drawSegments(){
 
         ofSetLineWidth(4);
         ofSetColor(c);
-        for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
+        for(int markerIdx = 0; markerIdx < numMarkers; markerIdx++){
             segments[segmentIdx][markerIdx].draw();
         }
     }
@@ -364,21 +368,19 @@ void Sequence::drawSegments(){
 
 // Update the segments of the sequence that belong to the different cues
 void Sequence::updateSegments(const vector< pair<float, float> >& segmentsPcts){
-//    if(markersPosition.size() > 0){
-        // Clear sequence segments polylines
-        for(int segmentIdx = 0; segmentIdx < segments.size(); segmentIdx++){
-            for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
-                segments[segmentIdx][markerIdx].clear();
-            }
-            segments[segmentIdx].clear();
+    // Clear sequence segments polylines
+    for(int segmentIdx = 0; segmentIdx < segments.size(); segmentIdx++){
+        for(int markerIdx = 0; markerIdx < numMarkers; markerIdx++){
+            segments[segmentIdx][markerIdx].clear();
         }
-        segments.clear();
+        segments[segmentIdx].clear();
+    }
+    segments.clear();
 
-        for(int segmentIdx = 0; segmentIdx < segmentsPcts.size(); segmentIdx++){
-            vector<ofPolyline> segment = getSegment(segmentsPcts[segmentIdx]);
-            segments.push_back(segment);
-        }
-//    }
+    for(int segmentIdx = 0; segmentIdx < segmentsPcts.size(); segmentIdx++){
+        vector<ofPolyline> segment = getSegment(segmentsPcts[segmentIdx]);
+        segments.push_back(segment);
+    }
 }
 
 vector<ofPolyline> Sequence::getSegment(const pair<float, float>& segmentPctRange){
@@ -387,7 +389,7 @@ vector<ofPolyline> Sequence::getSegment(const pair<float, float>& segmentPctRang
 
     vector<ofPolyline> segment;
     float increment = 0.0001; // TODO: change it depending on how many frames has the sequence?
-    for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
+    for(int markerIdx = 0; markerIdx < numMarkers; markerIdx++){
         ofPolyline markerSegment;
 //        float increment = ofMap(markersPosition[markerIdx].getPerimeter(), 0, 15000, 0.005, 0.0001, true);
         for(float pct = lowPct; pct < highPct; pct += increment){
@@ -409,7 +411,7 @@ void Sequence::createPatterns(int nPatterns){
     patterns.clear();
     for(int patternIdx = 0; patternIdx < nPatterns; patternIdx++){
         vector<ofPolyline> newPattern;
-        for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
+        for(int markerIdx = 0; markerIdx < numMarkers; markerIdx++){
             ofPolyline newPolyline;
             newPattern.push_back(newPolyline);
         }
@@ -418,7 +420,7 @@ void Sequence::createPatterns(int nPatterns){
 
     // Break sequence in n patterns
     for(int patternIdx = 0; patternIdx < nPatterns; patternIdx++){
-        for(int markerIdx = 0; markerIdx < maxMarkers; markerIdx++){
+        for(int markerIdx = 0; markerIdx < numMarkers; markerIdx++){
             int startIdx = markersPosition[markerIdx].getIndexAtPercent(patternIdx * (1.01/nPatterns));
             int endIdx = markersPosition[markerIdx].getIndexAtPercent((patternIdx+1) * (1.01/nPatterns))+1;
             if (endIdx == 1) endIdx = markersPosition[markerIdx].size();
@@ -435,6 +437,7 @@ void Sequence::save(const string path) {
 
 void Sequence::startRecording(){
     xml.clear();
+    xml.setValue("numMarkers", numMarkers, 0);
 }
 
 void Sequence::clearPlayback(){
@@ -463,9 +466,13 @@ size_t Sequence::calcCurrentFrameIndex()
 }
 
 float Sequence::getCurrentPercent(int currentIdx){
-    return markersPosition[0].getLengthAtIndexInterpolated(currentIdx) / markersPosition[0].getPerimeter();
+    return markersPosition.at(0).getLengthAtIndexInterpolated(currentIdx) / markersPosition.at(0).getPerimeter();
 }
 
 ofPoint Sequence::getCurrentPoint(int markerIdx){
     return markersPosition[markerIdx].getPointAtIndexInterpolated(calcCurrentFrameIndex());
+}
+
+int Sequence::getNumMarkers(){
+    return numMarkers;
 }

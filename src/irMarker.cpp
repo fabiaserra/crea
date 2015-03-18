@@ -80,3 +80,7 @@ void irMarker::kill(){
         dead = true;
     }
 }
+
+void irMarker::clearPath(){
+    all.clear();
+}

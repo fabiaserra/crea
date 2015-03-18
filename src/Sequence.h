@@ -9,7 +9,7 @@ class Sequence{
     public:
         Sequence();
 
-        void setup(const int nMarkers);
+        void setup(const int numMarkers);
         void update();
         void record(const vector<irMarker>& markers);
         void load(const string path);
@@ -31,10 +31,10 @@ class Sequence{
         ofPoint getCurrentPoint(int markerIdx);
         float getCurrentPercent(int currentIdx);
 
+        int getNumMarkers();
+
         //--------------------------------------------------------------
         ofxXmlSettings xml;
-        //--------------------------------------------------------------
-        size_t maxMarkers;
         //--------------------------------------------------------------
         int maxPatternsWindow;
         //--------------------------------------------------------------
@@ -58,4 +58,5 @@ class Sequence{
         vector<ofPolyline> getSegment(const pair<float, float>& segmentPctRange);
         void updatePlayhead();
         size_t calcCurrentFrameIndex();
+        int numMarkers;
 };

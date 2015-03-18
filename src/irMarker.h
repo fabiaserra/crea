@@ -12,6 +12,7 @@ class irMarker : public ofxCv::RectFollower{
         void draw();
         void drawPath();
         void kill();
+        void clearPath();
         //--------------------------------------------------------------
         ofPoint currentPos;
         ofPoint previousPos;
