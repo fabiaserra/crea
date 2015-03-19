@@ -398,8 +398,8 @@ void ParticleSystem::addParticles(int n, const ofPolyline &contour){
 }
 
 void ParticleSystem::createParticleGrid(int width, int height){
-    for(int y = 0; y <= height/gridRes; y++){
-        for(int x = 0; x <= width/gridRes; x++){
+    for(int y = 0; y < height/gridRes; y++){
+        for(int x = 0; x < width/gridRes; x++){
             int xi = (x + 0.5f) * gridRes;
             int yi = (y + 0.5f) * gridRes;
 //            float initialRadius = (float)gridRes / 2.0f;
