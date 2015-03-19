@@ -11,7 +11,6 @@ class Contour
         void update(ofxCv::ContourFinder & contourFinder);
         void draw();
 
-
         vector<ofRectangle> boundingRects;
         vector<ofPolyline> convexHulls;
         vector<ofPolyline> contours;

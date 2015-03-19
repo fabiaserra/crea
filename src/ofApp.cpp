@@ -74,6 +74,8 @@ void ofApp::setup(){
     irImage.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
     irOriginal.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
 
+    depthScaled.allocate(kinect.width/4.0, kinect.height/4.0, OF_IMAGE_GRAYSCALE);
+
     numDilates = 4;
     numErodes = 2;
     blurValue = 21;
@@ -391,6 +393,9 @@ void ofApp::update(){
     irImage.update();
     depthImage.update();
 
+    resize(depthImage, depthScaled);
+    depthScaled.update();
+
     // Contour Finder + marker tracker in the IR Image
     irMarkerFinder.findContours(irImage);
     tracker.track(irMarkerFinder.getBoundingRects());
@@ -411,6 +416,16 @@ void ofApp::update(){
 
     // Record sequence when recording button is true
     if(recordingSequence->getValue() == true) sequence.record(tempMarkers);
+
+    // Compute optical flow
+    flow.setPyramidScale( 0.5 ); // 0~1
+    flow.setNumLevels( 4 ); // 1~8
+    flow.setWindowSize( 8 ); // 4~64
+    flow.setNumIterations( 2 ); // 1~8
+    flow.setPolyN( 7 ); // 5~10
+    flow.setPolySigma( 1.5 ); // 1.1~2
+    flow.setUseGaussian( false );
+    flow.calcOpticalFlow(depthScaled); // optical flow on depth image
 
     // Update contour
     contour.update(contourFinder);
@@ -579,7 +594,9 @@ void ofApp::draw(){
     ofScale(reScale, reScale);
 
     ofSetColor(255);
-
+    depthScaled.draw(10, 10, 320, 240);
+    ofSetColor(255, 0, 0);
+    flow.draw(10, 10, 320, 240);
 //    // Kinect images
 //    irImage.draw(0, 0);
 //    depthImage.draw(0, 0);
