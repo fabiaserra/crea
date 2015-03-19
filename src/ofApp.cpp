@@ -60,8 +60,6 @@ void ofApp::setup(){
 
     #endif
 
-//    reScale = (float)ofGetHeight() / (float)kinect.height;
-//    reScale = ofVec2f((float)ofGetHeight()/(float)kinect.height, (float)ofGetHeight()/(float)kinect.height);
     time0 = ofGetElapsedTimef();
 
     // BACKGROUND COLOR
@@ -75,6 +73,10 @@ void ofApp::setup(){
     grayThreshFar.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
     irImage.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
     irOriginal.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
+
+    numDilates = 4;
+    numErodes = 2;
+    blurValue = 21;
 
     // KINECT PARAMETERS
     flipKinect      = false;
@@ -152,7 +154,7 @@ void ofApp::setup(){
     isTracking = false;
     isConv = false; //Don`t try this, too slow.
 
-    if (isConv){
+    if(isConv){
 		numElements = (numMarkers*dimensions+1)*(numMarkers*dimensions)/2;
 		savedObs.assign(sequence.numFrames, vector<float>(numMarkers*dimensions));
 		vmoObs.assign(sequence.numFrames, vector<float>(numElements));
@@ -310,10 +312,9 @@ void ofApp::update(){
     time0 = time;
 
     // Compute rescale value to scale kinect image
-//    reScale = (float)ofGetHeight() / (float)kinect.height;
-    reScale = ofVec2f((float)ofGetWidth()/(float)kinect.width, (float)ofGetHeight()/(float)kinect.height); // deforms the image a little bit
+    reScale = (float)ofGetHeight() / (float)kinect.height;
+//    reScale = ofVec2f((float)ofGetWidth()/(float)kinect.width, (float)ofGetHeight()/(float)kinect.height); // deforms the image a little bit
 //    reScale = ofVec2f((float)ofGetHeight()/(float)kinect.height, (float)ofGetHeight()/(float)kinect.height);
-//    cout << reScale << endl;
 
     // Update the sound playing system
     ofSoundUpdate();
@@ -367,26 +368,24 @@ void ofApp::update(){
     copy(depthOriginal, grayThreshFar);
 
     // Filter the IR image
-    erode(irImage);
+    erode(irImage); // delete small white dots
+    dilate(irImage);
+    dilate(irImage);
+    dilate(irImage);
     blur(irImage, 21);
-    dilate(irImage);
-    dilate(irImage);
     threshold(irImage, irThreshold);
 
     // Treshold and filter depth image
     threshold(grayThreshNear, nearThreshold, true);
     threshold(grayThreshFar, farThreshold);
     bitwise_and(grayThreshNear, grayThreshFar, depthImage);
-    if(flipKinect){
-    dilate(depthImage);
-    dilate(depthImage);
-    dilate(depthImage);
-    dilate(depthImage);
-    blur(depthImage, 31);
-    erode(depthImage);
-    erode(depthImage);
-    blur(depthImage, 21);
+    for(int i = 0; i < numDilates; i++){
+        dilate(depthImage);
     }
+    for(int i = 0; i < numErodes; i++){
+        erode(depthImage);
+    }
+    blur(depthImage, blurValue);
 
     // Update images
     irImage.update();
@@ -544,7 +543,8 @@ void ofApp::update(){
                             string cueFileName = ofFilePath::getBaseName(cueList[currentCueIndex]);
                             cueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
                             cueName->setTextString(cueFileName);
-                        }
+                        }    reScale = (float)ofGetHeight() / (float)kinect.height;
+
                     }
                 }
                 gestureUpdate = getGestureUpdate(currentBf.currentIdx, seqVmo, pttrList, sequence);
@@ -570,18 +570,18 @@ void ofApp::draw(){
         if(centerBg.getBrightness() > 0) contourBg.setBrightness(ofMap(centerBg.getBrightness(), 0.0, 255.0, 20.0, 130.0));
     }
     ofBackgroundGradient(centerBg, contourBg);
-//    ofSetRectMode(OF_RECTMODE_CENTER);
-//    ofTranslate(ofGetWidth()/2, ofGetHeight()/2);  // Translate to the center of the screen
-    ofScale(reScale.x, reScale.y);
-//    ofBackground(red, green, blue);
 
-//    depthOriginal.draw(0,0);
-//    ofEnableBlendMode(OF_BLENDMODE_SCREEN);
+    ofRectangle canvasRect(0, 0, ofGetWidth(), ofGetHeight());
+    ofRectangle kinectRect(0, 0, kinect.width, kinect.height);
+    kinectRect.scaleTo(canvasRect, OF_SCALEMODE_FIT);
+    ofTranslate(kinectRect.x, kinectRect.y);
+//    ofScale(reScale.x, reScale.y);
+    ofScale(reScale, reScale);
 
     ofSetColor(255);
 
 //    // Kinect images
-    irImage.draw(0, 0);
+//    irImage.draw(0, 0);
 //    depthImage.draw(0, 0);
 
     if(useFBO){
@@ -771,6 +771,11 @@ void ofApp::setupGUI2(){
     gui2->addRangeSlider("Clipping range", 500, 5000, &nearClipping, &farClipping);
     gui2->addRangeSlider("Threshold range", 0.0, 255.0, &farThreshold, &nearThreshold);
     gui2->addRangeSlider("Contour size", 0.0, 400.0, &minContourSize, &maxContourSize);
+
+    gui2->addIntSlider("Erode", 0, 8, &numErodes);
+    gui2->addIntSlider("Dilate", 0, 8, &numDilates);
+    gui2->addIntSlider("Blur", 0, 41, &blurValue);
+
     gui2->addImage("Depth original", &depthOriginal, kinect.width/6, kinect.height/6, true);
     gui2->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui2->addImage("Depth filtered", &depthImage, kinect.width/6, kinect.height/6, true);
