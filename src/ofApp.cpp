@@ -19,6 +19,7 @@ void ofApp::setup(){
         // OPEN KINECT
         kinect.init(true); // shows infrared instead of RGB video Image
         kinect.open();
+        kinect.setLed(ofxKinect::LED_OFF);
 
     // Kinect not connected
     #else
@@ -74,8 +75,6 @@ void ofApp::setup(){
     irImage.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
     irOriginal.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
 
-    depthScaled.allocate(kinect.width/4.0, kinect.height/4.0, OF_IMAGE_GRAYSCALE);
-
     numDilates = 4;
     numErodes = 2;
     blurValue = 21;
@@ -90,8 +89,6 @@ void ofApp::setup(){
     farThreshold    = 165;
     minContourSize  = 20.0;
     maxContourSize  = 250.0;
-    contourFinder.setMinAreaRadius(minContourSize);
-    contourFinder.setMaxAreaRadius(maxContourSize);
 
     irThreshold     = 70;
     minMarkerSize   = 5.0;
@@ -128,8 +125,9 @@ void ofApp::setup(){
     currentParticleSystem = 0;
 
     // DEPTH CONTOUR
-    // smoothingSize = 0;
-    contour.setup();
+    contour.setup(kinect.width, kinect.height);
+    contour.setMinAreaRadius(minContourSize);
+    contour.setMaxAreaRadius(maxContourSize);
 
     // SEQUENCE
     sequence.setup(numMarkers);
@@ -143,9 +141,7 @@ void ofApp::setup(){
     drawMarkersPath = false;
 
     // SONG
-//    song.setPlayer();
     song.loadSound("songs/ASuitableEnsemble.mp3", true);
-//    song.setMultiPlay(false);
 
     // VMO SETUP
     dimensions = 2;
@@ -393,15 +389,9 @@ void ofApp::update(){
     irImage.update();
     depthImage.update();
 
-    resize(depthImage, depthScaled);
-    depthScaled.update();
-
     // Contour Finder + marker tracker in the IR Image
     irMarkerFinder.findContours(irImage);
     tracker.track(irMarkerFinder.getBoundingRects());
-
-    // Contour Finder in the depth Image
-    contourFinder.findContours(depthImage);
 
     // Track markers
     vector<irMarker>& tempMarkers       = tracker.getFollowers();   // TODO: assign dead labels to new labels and have a MAX number of markers
@@ -417,18 +407,8 @@ void ofApp::update(){
     // Record sequence when recording button is true
     if(recordingSequence->getValue() == true) sequence.record(tempMarkers);
 
-    // Compute optical flow
-    flow.setPyramidScale( 0.5 ); // 0~1
-    flow.setNumLevels( 4 ); // 1~8
-    flow.setWindowSize( 8 ); // 4~64
-    flow.setNumIterations( 2 ); // 1~8
-    flow.setPolyN( 7 ); // 5~10
-    flow.setPolySigma( 1.5 ); // 1.1~2
-    flow.setUseGaussian( false );
-    flow.calcOpticalFlow(depthScaled); // optical flow on depth image
-
     // Update contour
-    contour.update(contourFinder);
+    contour.update(depthImage);
 
     // Update particles
     emitterParticles->update(dt, tempMarkers, contour);
@@ -590,13 +570,9 @@ void ofApp::draw(){
     ofRectangle kinectRect(0, 0, kinect.width, kinect.height);
     kinectRect.scaleTo(canvasRect, OF_SCALEMODE_FIT);
     ofTranslate(kinectRect.x, kinectRect.y);
-//    ofScale(reScale.x, reScale.y);
     ofScale(reScale, reScale);
+//    ofScale(reScale.x, reScale.y);
 
-    ofSetColor(255);
-    depthScaled.draw(10, 10, 320, 240);
-    ofSetColor(255, 0, 0);
-    flow.draw(10, 10, 320, 240);
 //    // Kinect images
 //    irImage.draw(0, 0);
 //    depthImage.draw(0, 0);
@@ -997,6 +973,7 @@ void ofApp::setupGUI7(){
     gui7->addToggle("Convex Hull", &contour.drawConvexHull);
     gui7->addToggle("Convex Hull Line", &contour.drawConvexHullLine);
     gui7->addToggle("Contour Line", &contour.drawContourLine);
+    gui7->addToggle("Optical Flow", &contour.drawFlow);
     gui7->addSlider("Smoothing Size", 0.0, 40.0, &contour.smoothingSize);
 
     gui7->autoSizeToFitWidgets();
@@ -1521,8 +1498,8 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         kinect.setDepthClipping(nearClipping, farClipping);
     }
     if(e.getName() == "Contour size"){
-        contourFinder.setMinAreaRadius(minContourSize);
-        contourFinder.setMaxAreaRadius(maxContourSize);
+        contour.setMinAreaRadius(minContourSize);
+        contour.setMaxAreaRadius(maxContourSize);
     }
     if(e.getName() == "Markers size"){
         irMarkerFinder.setMinAreaRadius(minMarkerSize);

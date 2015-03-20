@@ -88,15 +88,11 @@ class ofApp : public ofBaseApp{
         //--------------------------------------------------------------
         ofImage irImage, irOriginal;
         ofImage depthImage, depthOriginal;
-        ofImage depthScaled;
         ofImage grayThreshNear;
         ofImage grayThreshFar;
         //--------------------------------------------------------------
-        ofxCv::ContourFinder contourFinder;
         ofxCv::ContourFinder irMarkerFinder;
         ofxCv::RectTrackerFollower<irMarker> tracker;
-        //--------------------------------------------------------------
-        ofxCv::FlowFarneback flow; // Optical Flow
         //--------------------------------------------------------------
 //        vector<irMarker> markers;
         int numMarkers;
