@@ -75,6 +75,12 @@ void Particle::update(float dt){
             color.setHue(ofMap(age, 0, lifetime, originalHue, originalHue-100));
         }
 
+//        // hackish way to make particles glitter when they slow down a lot
+//        if(vel.x * vel.x + vel.y * vel.y < 5) {
+//                vel.x = ofRandom(-10, 10);
+//                vel.y = ofRandom(-10, 10);
+//        }
+
         // Bounce particle with the window margins
         if(bounces){
         	bounceParticle();
@@ -110,9 +116,10 @@ void Particle::draw(){
             ofCircle(pos, radius);
         }
         else{
-            if(pos.squareDistance(prevPos) > 5) ofLine(pos, pos-vel.getNormalized()*5);
-            else ofLine(pos, prevPos);
-            prevPos = pos;
+//            if(pos.squareDistance(prevPos) > 5) ofLine(pos, pos-vel.getNormalized()*5);
+//            else ofLine(pos, prevPos);
+//            prevPos = pos;
+            ofLine(pos, pos-vel);
         }
 
         // // Draw arrows

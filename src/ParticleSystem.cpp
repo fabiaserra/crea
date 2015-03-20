@@ -381,22 +381,45 @@ void ParticleSystem::addParticles(int n, const irMarker &marker){
     }
 }
 
+//void ParticleSystem::addParticles(int n, const ofPolyline &contour, Contour &flow){
+//    for(int i = 0; i < n; i++){
+//        // Create particles only inside contour polyline
+//        ofRectangle box = contour.getBoundingBox();
+//        ofPoint center = box.getCenter();
+//        ofPoint pos;
+//        pos.x = center.x + (ofRandom(1.0f) - 0.5f) * box.getWidth();
+//        pos.y = center.y + (ofRandom(1.0f) - 0.5f) * box.getHeight();
+//
+//        while(!contour.inside(pos)){
+//            pos.x = center.x + (ofRandom(1.0f) - 0.5f) * box.getWidth();
+//            pos.y = center.y + (ofRandom(1.0f) - 0.5f) * box.getHeight();
+//        }
+//
+//        ofPoint vel = randomVector()*(velocity+2*randomRange(velocityRnd, velocity));
+////        vel += flow.getAverageFlowInRegion(box)*(velocityMotion/100)*6;
+////        vel += flow.getFlowOffset(contour.getClosestPoint(pos))*(velocityMotion/100)*6;
+//        vel += flow.getFlowOffset(pos)*(velocityMotion/100)*6;
+//
+//        float initialRadius = radius + randomRange(radiusRnd, radius);
+//        float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
+//
+//        addParticle(pos, vel, color, initialRadius, lifetime);
+//    }
+//}
+
 void ParticleSystem::addParticles(int n, const ofPolyline &contour, Contour &flow){
     for(int i = 0; i < n; i++){
-        // Create particles only inside contour polyline
-        ofRectangle box = contour.getBoundingBox();
-        ofPoint center = box.getCenter();
-        ofPoint pos;
-        pos.x = center.x + (ofRandom(1.0f) - 0.5f) * box.getWidth();
-        pos.y = center.y + (ofRandom(1.0f) - 0.5f) * box.getHeight();
+        // Create particles only on the contour polyline
+        float indexInterpolated = ofRandom(0, contour.size());
+        ofPoint pos = contour.getPointAtIndexInterpolated(indexInterpolated);
 
-        while(!contour.inside(pos)){
-            pos.x = center.x + (ofRandom(1.0f) - 0.5f) * box.getWidth();
-            pos.y = center.y + (ofRandom(1.0f) - 0.5f) * box.getHeight();
-        }
+//        pos.x += ofRandom(-0.5, 0.5);
+//        pos.y += ofRandom(-0.5, 0.5);
 
-        ofPoint vel = randomVector()*(velocity+2*randomRange(velocityRnd, velocity));
-        vel += flow.getAverageFlowInRegion(box)*(velocityMotion/100)*6;
+        ofPoint vel = contour.getNormalAtIndexInterpolated(indexInterpolated)*(velocity+2*randomRange(velocityRnd, velocity))*-1;
+//        ofPoint vel = randomVector()*(velocity+2*randomRange(velocityRnd, velocity));
+//        vel += flow.getAverageFlowInRegion(box)*(velocityMotion/100)*6;
+//        vel += flow.getFlowOffset(contour.getClosestPoint(pos))*(velocityMotion/100)*6;
 //        vel += flow.getFlowOffset(pos)*(velocityMotion/100)*6;
 
         float initialRadius = radius + randomRange(radiusRnd, radius);
