@@ -216,6 +216,14 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
                         particles[i]->isTouched = true;
                     }
                 }
+                if(contourInput){
+                    ofPoint frc = contour.getFlowOffset(particles[i]->pos);
+                    particles[i]->addForce(frc);
+//                    if(repulseInteraction) particles[i]->addRepulsionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, 10.0);
+//                    if(attractInteraction) particles[i]->addAttractionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, 8.0);
+//                    if(gravityInteraction) particles[i]->addForce(ofPoint(0, gravity*particles[i]->mass));
+//                    particles[i]->isTouched = true;
+                }
             }
 
             if(flock){ // Flocking behavior
@@ -259,7 +267,7 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
             }
             if(contourInput){
                 for(unsigned int i = 0; i < contour.contours.size(); i++){
-                    addParticles(bornRate, contour.contours[i]);
+                    addParticles(bornRate, contour.contours[i], contour);
                 }
             }
         }
@@ -299,7 +307,7 @@ void ParticleSystem::draw(){
         if(drawConnections){
             float dist = 15; //Threshold parameter of distance
             float distSqrd = dist*dist;
-            ofSetColor(color);
+            ofSetColor(color, opacity);
             for(int i = 0; i < particles.size(); i++){
                 for(int j = i-1; j >= 0; j--){
                     if (fabs(particles[j]->pos.x - particles[i]->pos.x) > dist) break; // to speed the loop
@@ -373,22 +381,46 @@ void ParticleSystem::addParticles(int n, const irMarker &marker){
     }
 }
 
-void ParticleSystem::addParticles(int n, const ofPolyline &contour){
+//void ParticleSystem::addParticles(int n, const ofPolyline &contour, Contour &flow){
+//    for(int i = 0; i < n; i++){
+//        // Create particles only inside contour polyline
+//        ofRectangle box = contour.getBoundingBox();
+//        ofPoint center = box.getCenter();
+//        ofPoint pos;
+//        pos.x = center.x + (ofRandom(1.0f) - 0.5f) * box.getWidth();
+//        pos.y = center.y + (ofRandom(1.0f) - 0.5f) * box.getHeight();
+//
+//        while(!contour.inside(pos)){
+//            pos.x = center.x + (ofRandom(1.0f) - 0.5f) * box.getWidth();
+//            pos.y = center.y + (ofRandom(1.0f) - 0.5f) * box.getHeight();
+//        }
+//
+//        ofPoint vel = randomVector()*(velocity+2*randomRange(velocityRnd, velocity));
+////        vel += flow.getAverageFlowInRegion(box)*(velocityMotion/100)*6;
+////        vel += flow.getFlowOffset(contour.getClosestPoint(pos))*(velocityMotion/100)*6;
+//        vel += flow.getFlowOffset(pos)*(velocityMotion/100)*6;
+//
+//        float initialRadius = radius + randomRange(radiusRnd, radius);
+//        float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
+//
+//        addParticle(pos, vel, color, initialRadius, lifetime);
+//    }
+//}
+
+void ParticleSystem::addParticles(int n, const ofPolyline &contour, Contour &flow){
     for(int i = 0; i < n; i++){
-        // Create particles only inside contour polyline
-        ofRectangle box = contour.getBoundingBox();
-        ofPoint center = box.getCenter();
-        ofPoint pos;
-        pos.x = center.x + (ofRandom(1.0f) - 0.5f) * box.getWidth();
-        pos.y = center.y + (ofRandom(1.0f) - 0.5f) * box.getHeight();
+        // Create particles only on the contour polyline
+        float indexInterpolated = ofRandom(0, contour.size());
+        ofPoint pos = contour.getPointAtIndexInterpolated(indexInterpolated);
 
-        while(!contour.inside(pos)){
-            pos.x = center.x + (ofRandom(1.0f) - 0.5f) * box.getWidth();
-            pos.y = center.y + (ofRandom(1.0f) - 0.5f) * box.getHeight();
-        }
+//        pos.x += ofRandom(-0.5, 0.5);
+//        pos.y += ofRandom(-0.5, 0.5);
 
-        ofPoint vel = randomVector()*(velocity+2*randomRange(velocityRnd, velocity));
-//        vel += contour.velocity*(velocityMotion/100)*6;
+        ofPoint vel = contour.getNormalAtIndexInterpolated(indexInterpolated)*(velocity+2*randomRange(velocityRnd, velocity))*-1;
+//        ofPoint vel = randomVector()*(velocity+2*randomRange(velocityRnd, velocity));
+//        vel += flow.getAverageFlowInRegion(box)*(velocityMotion/100)*6;
+//        vel += flow.getFlowOffset(contour.getClosestPoint(pos))*(velocityMotion/100)*6;
+//        vel += flow.getFlowOffset(pos)*(velocityMotion/100)*6;
 
         float initialRadius = radius + randomRange(radiusRnd, radius);
         float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
@@ -398,8 +430,8 @@ void ParticleSystem::addParticles(int n, const ofPolyline &contour){
 }
 
 void ParticleSystem::createParticleGrid(int width, int height){
-    for(int y = 0; y <= height/gridRes; y++){
-        for(int x = 0; x <= width/gridRes; x++){
+    for(int y = 0; y < height/gridRes; y++){
+        for(int x = 0; x < width/gridRes; x++){
             int xi = (x + 0.5f) * gridRes;
             int yi = (y + 0.5f) * gridRes;
 //            float initialRadius = (float)gridRes / 2.0f;

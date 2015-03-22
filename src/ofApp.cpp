@@ -19,6 +19,7 @@ void ofApp::setup(){
         // OPEN KINECT
         kinect.init(true); // shows infrared instead of RGB video Image
         kinect.open();
+        kinect.setLed(ofxKinect::LED_OFF);
 
     // Kinect not connected
     #else
@@ -60,8 +61,6 @@ void ofApp::setup(){
 
     #endif
 
-//    reScale = (float)ofGetHeight() / (float)kinect.height;
-//    reScale = ofVec2f((float)ofGetHeight()/(float)kinect.height, (float)ofGetHeight()/(float)kinect.height);
     time0 = ofGetElapsedTimef();
 
     // BACKGROUND COLOR
@@ -76,6 +75,10 @@ void ofApp::setup(){
     irImage.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
     irOriginal.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
 
+    numDilates = 4;
+    numErodes = 2;
+    blurValue = 21;
+
     // KINECT PARAMETERS
     flipKinect      = false;
 
@@ -86,8 +89,6 @@ void ofApp::setup(){
     farThreshold    = 165;
     minContourSize  = 20.0;
     maxContourSize  = 250.0;
-    contourFinder.setMinAreaRadius(minContourSize);
-    contourFinder.setMaxAreaRadius(maxContourSize);
 
     irThreshold     = 70;
     minMarkerSize   = 5.0;
@@ -124,8 +125,9 @@ void ofApp::setup(){
     currentParticleSystem = 0;
 
     // DEPTH CONTOUR
-    // smoothingSize = 0;
-    contour.setup();
+    contour.setup(kinect.width, kinect.height);
+    contour.setMinAreaRadius(minContourSize);
+    contour.setMaxAreaRadius(maxContourSize);
 
     // SEQUENCE
     sequence.setup(numMarkers);
@@ -139,9 +141,7 @@ void ofApp::setup(){
     drawMarkersPath = false;
 
     // SONG
-//    song.setPlayer();
     song.loadSound("songs/ASuitableEnsemble.mp3", true);
-//    song.setMultiPlay(false);
 
     // VMO SETUP
     dimensions = 2;
@@ -152,7 +152,7 @@ void ofApp::setup(){
     isTracking = false;
     isConv = false; //Don`t try this, too slow.
 
-    if (isConv){
+    if(isConv){
 		numElements = (numMarkers*dimensions+1)*(numMarkers*dimensions)/2;
 		savedObs.assign(sequence.numFrames, vector<float>(numMarkers*dimensions));
 		vmoObs.assign(sequence.numFrames, vector<float>(numElements));
@@ -311,10 +311,9 @@ void ofApp::update(){
     time0 = time;
 
     // Compute rescale value to scale kinect image
-//    reScale = (float)ofGetHeight() / (float)kinect.height;
-    reScale = ofVec2f((float)ofGetWidth()/(float)kinect.width, (float)ofGetHeight()/(float)kinect.height); // deforms the image a little bit
+    reScale = (float)ofGetHeight() / (float)kinect.height;
+//    reScale = ofVec2f((float)ofGetWidth()/(float)kinect.width, (float)ofGetHeight()/(float)kinect.height); // deforms the image a little bit
 //    reScale = ofVec2f((float)ofGetHeight()/(float)kinect.height, (float)ofGetHeight()/(float)kinect.height);
-//    cout << reScale << endl;
 
     // Update the sound playing system
     ofSoundUpdate();
@@ -368,26 +367,24 @@ void ofApp::update(){
     copy(depthOriginal, grayThreshFar);
 
     // Filter the IR image
-    erode(irImage);
+    erode(irImage); // delete small white dots
+    dilate(irImage);
+    dilate(irImage);
+    dilate(irImage);
     blur(irImage, 21);
-    dilate(irImage);
-    dilate(irImage);
     threshold(irImage, irThreshold);
 
     // Treshold and filter depth image
     threshold(grayThreshNear, nearThreshold, true);
     threshold(grayThreshFar, farThreshold);
     bitwise_and(grayThreshNear, grayThreshFar, depthImage);
-    if(flipKinect){
-    dilate(depthImage);
-    dilate(depthImage);
-    dilate(depthImage);
-    dilate(depthImage);
-    blur(depthImage, 31);
-    erode(depthImage);
-    erode(depthImage);
-    blur(depthImage, 21);
+    for(int i = 0; i < numDilates; i++){
+        dilate(depthImage);
     }
+    for(int i = 0; i < numErodes; i++){
+        erode(depthImage);
+    }
+    blur(depthImage, blurValue);
 
     // Update images
     irImage.update();
@@ -396,9 +393,6 @@ void ofApp::update(){
     // Contour Finder + marker tracker in the IR Image
     irMarkerFinder.findContours(irImage);
     tracker.track(irMarkerFinder.getBoundingRects());
-
-    // Contour Finder in the depth Image
-    contourFinder.findContours(depthImage);
 
     // Track markers
     vector<irMarker>& tempMarkers       = tracker.getFollowers();   // TODO: assign dead labels to new labels and have a MAX number of markers
@@ -415,7 +409,7 @@ void ofApp::update(){
     if(recordingSequence->getValue() == true) sequence.record(tempMarkers);
 
     // Update contour
-    contour.update(contourFinder);
+    contour.update(depthImage);
 
     // Update particles
     emitterParticles->update(dt, tempMarkers, contour);
@@ -545,7 +539,8 @@ void ofApp::update(){
                             string cueFileName = ofFilePath::getBaseName(cueList[currentCueIndex]);
                             cueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
                             cueName->setTextString(cueFileName);
-                        }
+                        }    reScale = (float)ofGetHeight() / (float)kinect.height;
+
                     }
                 }
                 gestureUpdate = getGestureUpdate(currentBf.currentIdx, seqVmo, pttrList, sequence);
@@ -571,18 +566,16 @@ void ofApp::draw(){
         if(centerBg.getBrightness() > 0) contourBg.setBrightness(ofMap(centerBg.getBrightness(), 0.0, 255.0, 20.0, 130.0));
     }
     ofBackgroundGradient(centerBg, contourBg);
-//    ofSetRectMode(OF_RECTMODE_CENTER);
-//    ofTranslate(ofGetWidth()/2, ofGetHeight()/2);  // Translate to the center of the screen
-    ofScale(reScale.x, reScale.y);
-//    ofBackground(red, green, blue);
 
-//    depthOriginal.draw(0,0);
-//    ofEnableBlendMode(OF_BLENDMODE_SCREEN);
-
-    ofSetColor(255);
+    ofRectangle canvasRect(0, 0, ofGetWidth(), ofGetHeight());
+    ofRectangle kinectRect(0, 0, kinect.width, kinect.height);
+    kinectRect.scaleTo(canvasRect, OF_SCALEMODE_FIT);
+    ofTranslate(kinectRect.x, kinectRect.y);
+    ofScale(reScale, reScale);
+//    ofScale(reScale.x, reScale.y);
 
 //    // Kinect images
-    irImage.draw(0, 0);
+//    irImage.draw(0, 0);
 //    depthImage.draw(0, 0);
 
     if(useFBO){
@@ -772,6 +765,11 @@ void ofApp::setupGUI2(){
     gui2->addRangeSlider("Clipping range", 500, 5000, &nearClipping, &farClipping);
     gui2->addRangeSlider("Threshold range", 0.0, 255.0, &farThreshold, &nearThreshold);
     gui2->addRangeSlider("Contour size", 0.0, 400.0, &minContourSize, &maxContourSize);
+
+    gui2->addIntSlider("Erode", 0, 8, &numErodes);
+    gui2->addIntSlider("Dilate", 0, 8, &numDilates);
+    gui2->addIntSlider("Blur", 0, 41, &blurValue);
+
     gui2->addImage("Depth original", &depthOriginal, kinect.width/6, kinect.height/6, true);
     gui2->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui2->addImage("Depth filtered", &depthImage, kinect.width/6, kinect.height/6, true);
@@ -976,6 +974,7 @@ void ofApp::setupGUI7(){
     gui7->addToggle("Convex Hull", &contour.drawConvexHull);
     gui7->addToggle("Convex Hull Line", &contour.drawConvexHullLine);
     gui7->addToggle("Contour Line", &contour.drawContourLine);
+    gui7->addToggle("Optical Flow", &contour.drawFlow);
     gui7->addSlider("Smoothing Size", 0.0, 40.0, &contour.smoothingSize);
 
     gui7->autoSizeToFitWidgets();
@@ -1500,8 +1499,8 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         kinect.setDepthClipping(nearClipping, farClipping);
     }
     if(e.getName() == "Contour size"){
-        contourFinder.setMinAreaRadius(minContourSize);
-        contourFinder.setMaxAreaRadius(maxContourSize);
+        contour.setMinAreaRadius(minContourSize);
+        contour.setMaxAreaRadius(maxContourSize);
     }
     if(e.getName() == "Markers size"){
         irMarkerFinder.setMinAreaRadius(minMarkerSize);

@@ -3,4 +3,3 @@ ofxXmlSettings
 ofxKinect
 ofxCv
 ofxUI
-ofxImageSequence

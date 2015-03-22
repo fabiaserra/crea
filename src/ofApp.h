@@ -80,15 +80,17 @@ class ofApp : public ofBaseApp{
         bool  flipKinect;       // Flip kinect image
         bool  resetKinect;      // Reset kinect
         int   angle;            // Tilt angle of the kinect
-        ofVec2f reScale;        // Ratios to scale the Image to full screen
-//        float reScale;          // Ratio to scale the Image to full screen
+//        ofVec2f reScale;        // Ratios to scale the Image to full screen
+        float reScale;          // Ratio to scale the Image to full screen
+        int numDilates;         // Number of dilates applied to depth image
+        int numErodes;          // Number of erodes applied to depth image
+        int blurValue;          // Size of the blur filter
         //--------------------------------------------------------------
         ofImage irImage, irOriginal;
         ofImage depthImage, depthOriginal;
         ofImage grayThreshNear;
         ofImage grayThreshFar;
         //--------------------------------------------------------------
-        ofxCv::ContourFinder contourFinder;
         ofxCv::ContourFinder irMarkerFinder;
         ofxCv::RectTrackerFollower<irMarker> tracker;
         //--------------------------------------------------------------

@@ -21,7 +21,7 @@ class ParticleSystem
         void addParticle(ofPoint pos, ofPoint vel, ofColor color, float radius, float lifetime);
 		void addParticles(int n);
 		void addParticles(int n, const irMarker &marker);
-		void addParticles(int n, const ofPolyline &contour);
+		void addParticles(int n, const ofPolyline &contour, Contour &flow);
 
         void createParticleGrid(int width, int height);
 
