@@ -14,10 +14,14 @@ void Contour::setup(int width, int height){
     this->width     = width;
     this->height    = height;
 
+    opticalFlow = false;
+
     scaleFactor = 4.0;
     flowScale = 0.1;
     rescaled.allocate((float)width/scaleFactor, (float)height/scaleFactor, OF_IMAGE_GRAYSCALE);
     rescaledRect.set(0, 0, rescaled.width, rescaled.height);
+
+    contourFinder.setSortBySize(true);
 
     pyrScale        = 0.5;  // 0~1
     levels          = 4;    // 1~8
@@ -38,21 +42,24 @@ void Contour::setup(int width, int height){
 void Contour::update(ofImage &depthImage){
 
     if(isActive){
-        resize(depthImage, rescaled);
-        rescaled.update();
 
-        // Compute optical flow
-        flow.setPyramidScale(pyrScale);
-        flow.setNumLevels(levels);
-        flow.setWindowSize(winSize);
-        flow.setNumIterations(iterations);
-        flow.setPolyN(polyN);
-        flow.setPolySigma(polySigma);
-        flow.setUseGaussian(gaussianMode);
-        flow.calcOpticalFlow(rescaled); // optical flow on rescaled depth image
+        if(opticalFlow){
+            resize(depthImage, rescaled);
+            rescaled.update();
 
-    //    int blurAmount = 21;
-    //    blur(flow, blurAmount);
+            // Compute optical flow
+            flow.setPyramidScale(pyrScale);
+            flow.setNumLevels(levels);
+            flow.setWindowSize(winSize);
+            flow.setNumIterations(iterations);
+            flow.setPolyN(polyN);
+            flow.setPolySigma(polySigma);
+            flow.setUseGaussian(gaussianMode);
+            flow.calcOpticalFlow(rescaled); // optical flow on rescaled depth image
+
+//            int blurAmount = 21;
+//            blur(flow, blurAmount);
+        }
 
         // Contour Finder in the depth Image
         contourFinder.findContours(depthImage);
@@ -62,7 +69,6 @@ void Contour::update(ofImage &depthImage){
         contours.clear();
 
         for(int i = 0; i < contourFinder.size(); i++){
-
             boundingRects.push_back(toOf(contourFinder.getBoundingRect(i)));
 
             ofPolyline convexHull;
@@ -74,6 +80,8 @@ void Contour::update(ofImage &depthImage){
             contour = contour.getSmoothed(smoothingSize, 0.5);
             contours.push_back(contour);
         }
+
+//        if(prevContours.size() > 0) getVelocities();
     }
 }
 
@@ -109,8 +117,26 @@ void Contour::draw(){
         if(drawContourLine){
             ofSetColor(0);
             ofSetLineWidth(3);
-            for(int i = 0; i < contours.size(); i++)
+            for(int i = 0; i < contours.size(); i++){
+//                if(i == 0) ofSetColor(255, 0, 0);
+//                else if(i == 1) ofSetColor(0, 255, 0);
+//                else ofSetColor(0, 0, 255);
                 contours[i].draw();
+//                if(velocities.size() > 0){
+//                    ofSetColor(255, 0, 0);
+//                    ofSetLineWidth(1.5);
+//                    for(int p = 0; p < velocities[i].size(); p++){
+//                        cout << contours[i][p] << " ... " << velocities[i][p] << endl;
+//                        ofLine(contours[i][p], contours[i][p] - velocities[i][p]);
+//                    }
+//                }
+
+                ofSetColor(255, 0, 0);
+                ofSetLineWidth(1);
+                for(int p = 0; p < contours[i].size(); p++){
+                    ofLine(contours[i][p], contours[i][p] - getVelocityInPoint(contours[i][p]));
+                }
+            }
         }
 
         if(drawFlow){
@@ -119,6 +145,7 @@ void Contour::draw(){
             ofSetColor(255, 0, 0);
             flow.draw(0, 0, width, height);
         }
+
 
 //        if(drawTangentLines){
 //            ofSetLineWidth(1);
@@ -135,6 +162,7 @@ void Contour::draw(){
 //            }
 //        }
 
+        prevContours = contours;
         ofPopStyle();
     }
 }
@@ -160,6 +188,40 @@ ofPoint Contour::getAverageFlowInRegion(ofRectangle rect){
 
 ofPoint Contour::getAverageVelocity(){
     return flow.getAverageFlow();
+}
+
+void Contour::getVelocities(){
+    // Get velocities from prev frame to current frame
+//    int numContours = MIN(contours.size(), prevContours.size());
+    velocities.clear();
+    for(int i = 0; i < contours.size(); i++){
+        vector<ofPoint> contourVelocities;
+        for(int p = 0; p < contours[i].size(); p++){
+            ofPoint curPoint = contours[i][p];
+            ofPoint prevPoint = prevContours[i].getClosestPoint(curPoint);
+            ofPoint vel(0, 0);
+            if(prevPoint.squareDistance(curPoint) < 200){
+                vel = curPoint - prevPoint;
+            }
+            contourVelocities.push_back(vel);
+        }
+        velocities.push_back(contourVelocities);
+    }
+}
+
+ofPoint Contour::getVelocityInPoint(ofPoint curPoint){
+    // Get velocity in point from closest point in prev frame
+    float minDistSqrd = 500;
+    ofPoint vel(0, 0);
+    for(int i = 0; i < prevContours.size(); i++){
+        ofPoint prevPoint = prevContours[i].getClosestPoint(curPoint);
+        float distSqrd = prevPoint.squareDistance(curPoint);
+        if(distSqrd < minDistSqrd){
+            minDistSqrd = distSqrd;
+            vel = curPoint - prevPoint;
+        }
+    }
+    return vel;
 }
 
 void Contour::setMinAreaRadius(float minContourSize){

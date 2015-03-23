@@ -973,6 +973,7 @@ void ofApp::setupGUI7(){
     gui7->addToggle("Convex Hull", &contour.drawConvexHull);
     gui7->addToggle("Convex Hull Line", &contour.drawConvexHullLine);
     gui7->addToggle("Contour Line", &contour.drawContourLine);
+    gui7->addToggle("Compute Flow", &contour.opticalFlow);
     gui7->addToggle("Optical Flow", &contour.drawFlow);
     gui7->addSlider("Smoothing Size", 0.0, 40.0, &contour.smoothingSize);
 
