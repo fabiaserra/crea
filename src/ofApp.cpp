@@ -1139,7 +1139,6 @@ void ofApp::addParticleBasicsGUI(ofxUISuperCanvas* gui, ParticleSystem* ps){
     gui->setWidgetSpacing(3);
 
     gui->addSlider("Opacity", 0.0, 255.0, &ps->opacity);
-
 }
 
 //--------------------------------------------------------------

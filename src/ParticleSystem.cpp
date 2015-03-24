@@ -51,7 +51,7 @@ ParticleSystem::ParticleSystem(){
     // Physics
     friction            = 5.0;          // Friction to velocity 0~100
     gravity             = 0.0f;         // Makes particles fall down in a natural way
-    turbulence          = 0.2f;         // Turbulence perlin noise
+    turbulence          = 0.0f;         // Turbulence perlin noise
     repulse             = false;        // Repulse particles between each other?
     bounce              = false;        // Bounce particles with the walls of the window?
     steer               = false;        // Steers direction before touching the walls of the window?
@@ -72,9 +72,11 @@ ParticleSystem::ParticleSystem(){
     contourInput        = false;        // Input is the depth contour?
     markerRadius        = 50.0;         // Radius of interaction of the markers
 
+    emitInMovement      = true;         // Emit particles only in regions that there has been some movement?
     emitInsideContour   = false;        // Emit particles inside all the area of the contour?
     useFlow             = false;        // Use optical flow to get the motion velocity?
     useFlowRegion       = false;        // Use optical flow region to get the motion velocity?
+    useContourArea      = true;         // Use contour area to interact with particles?
 }
 
 ParticleSystem::~ParticleSystem(){
@@ -102,88 +104,94 @@ void ParticleSystem::setup(ParticleMode particleMode, InputSource inputSource, i
         sizeAge             = true;        // Decrease size when particles get older?
         opacityAge          = true;        // Decrease opacity when particles get older?
         colorAge            = true;        // Change color when particles get older?
-        velocity = 20;
+        velocity            = 20;
     }
 
     else if(particleMode == GRID){
-        interact = true;
-        returnToOrigin = true;
-        repulseInteraction = true;
-        immortal = true;
-        friction = 30;
+        interact            = true;
+        returnToOrigin      = true;
+//        repulseInteraction  = true;
+//        attractInteraction  = true;
+        gravityInteraction  = true;
+        immortal            = true;
+        velocity            = 0.0;
+        velocityRnd         = 0.0;
+//        friction          = 30;
+        friction            = 5;
         createParticleGrid(width, height);
     }
 
     else if(particleMode == RANDOM){
-        interact = true;
-        immortal = true;
+        interact            = true;
+        immortal            = true;
         addParticles(nParticles);
     }
 
     else if(particleMode == BOIDS){ // TODO: BOIDS == RANDOM?
-        flock = true;
-        interact = true;
-        markerRadius = 600;
-        radiusRnd = 0;
-        attractInteraction = true;
-//        repulseInteraction = true;
-        bounceDamping = false;
-        bounce = true;
-        immortal = true;
+        flock               = true;
+        interact            = true;
+        markerRadius        = 600;
+        radiusRnd           = 0;
+        attractInteraction  = true;
+//        repulseInteraction  = true;
+        bounceDamping       = false;
+        bounce              = true;
+        immortal            = true;
         addParticles(nParticles);
     }
 
     else if(particleMode == ANIMATIONS){
-        immortal = true;
-        drawLine = false;
-        bounce = false;
-        infiniteWalls = false;
-        flickersAge = false;
-        opacity = 150.0;
-        radius = 2.0;
-        radiusRnd = 20.0;
-        turbulence = 0.0;
-        gravity = 0.0;
-        numParticles = 1500;
-        friction = 4.0;
-        velocity = 10.0;
-        velocityRnd = 30.0;
+        immortal            = true;
+        drawLine            = false;
+        bounce              = false;
+        infiniteWalls       = false;
+        flickersAge         = false;
+        opacity             = 150.0;
+        radius              = 2.0;
+        radiusRnd           = 20.0;
+        turbulence          = 0.0;
+        gravity             = 0.0;
+        numParticles        = 1500;
+        friction            = 4.0;
+        velocity            = 10.0;
+        velocityRnd         = 30.0;
 
         if(animation == SNOW){
-//            velocity = 8.0;
-            infiniteWalls = true;
+//            velocity        = 8.0;
+            infiniteWalls   = true;
             addParticles(nParticles);
         }
         else if(animation == RAIN){
-//            velocity = 15.0;
-            friction = 6.0;
-            infiniteWalls = true;
-            radius = 0.8;
+//            velocity        = 15.0;
+            friction        = 6.0;
+            infiniteWalls   = true;
+            radius          = 0.8;
             addParticles(nParticles);
         }
         else if(animation == WIND){
-            infiniteWalls = true;
-            velocity = 30.0;
-            velocityRnd = 80.0;
-            turbulence = 8.0;
+            infiniteWalls   = true;
+            velocity        = 30.0;
+            velocityRnd     = 80.0;
+            turbulence      = 8.0;
             addParticles(nParticles);
         }
         else if(animation == EXPLOSION){
-//            bounce = true;
-            radius = 6.0;
-            radiusRnd = 60.0;
-            friction = 50.0;
-//            velocity = 6.0;
-            immortal = false;
-            lifetime = 3.0;
-            lifetimeRnd = 10.0;
-            flickersAge = true;
+//            bounce          = true;
+            radius          = 6.0;
+//            velocity        = 6.0;
+            radiusRnd       = 60.0;
+            friction        = 50.0;
+            immortal        = false;
+            lifetime        = 3.0;
+            lifetimeRnd     = 10.0;
+            flickersAge     = true;
             addParticles(nParticles);
         }
     }
 }
 
 void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contour){
+
     if(isActive){
         // sort particles so it is more effective to do particle/particle interactions
         sort(particles.begin(), particles.end(), comparisonFunction);
@@ -216,17 +224,38 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
                     if(closestMarker != ofPoint(-1, -1)){
                         if(repulseInteraction) particles[i]->addRepulsionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, 10.0);
                         if(attractInteraction) particles[i]->addAttractionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, 8.0);
-                        if(gravityInteraction) particles[i]->addForce(ofPoint(0, gravity*particles[i]->mass));
-                        particles[i]->isTouched = true;
+                        if(gravityInteraction){
+                            particles[i]->addForce(ofPoint(0, 3.0*particles[i]->mass));
+                            particles[i]->isTouched = true;
+                        }
                     }
                 }
                 if(contourInput){
-//                    ofPoint frc = contour.getFlowOffset(particles[i]->pos);
-//                    particles[i]->addForce(frc);
-                    float dimRegion = 10.0;
-                    ofRectangle flowRegion(particles[i]->pos.x-dimRegion/2.0, particles[i]->pos.y-dimRegion/2.0, dimRegion, dimRegion);
-                    ofPoint frc = contour.getAverageFlowInRegion(flowRegion);
-                    particles[i]->addForce(frc);
+//                    contour.isActive = true;
+                    if(useFlow){
+                        ofPoint frc = contour.getFlowOffset(particles[i]->pos);
+                        particles[i]->addForce(frc);
+                    }
+                    else if(useFlowRegion){
+                        float dimRegion = 10.0;
+                        ofRectangle flowRegion(particles[i]->pos.x-dimRegion/2.0, particles[i]->pos.y-dimRegion/2.0, dimRegion, dimRegion);
+                        ofPoint frc = contour.getAverageFlowInRegion(flowRegion);
+                        particles[i]->addForce(frc);
+                    }
+                    else if(useContourArea){
+                        ofPoint closestPointInContour = getClosestPointInContour(*particles[i], contour);
+                        if(closestPointInContour != ofPoint(-1, -1) || particles[i]->isTouched){
+                            if(attractInteraction) particles[i]->addAttractionForce(closestPointInContour.x, closestPointInContour.y, 5000, 10.0);
+                            if(gravityInteraction){
+                                particles[i]->addForce(ofPoint(0, 3.0*particles[i]->mass));
+                                particles[i]->isTouched = true;
+                            }
+                        }
+                    }
+                    else{
+                        ofPoint frc = contour.getVelocityInPoint(particles[i]->pos) * 0.01;
+                        particles[i]->addForce(frc);
+                    }
                 }
             }
 
@@ -242,9 +271,9 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
                 particles[i]->maxSpeed              =   maxSpeed;
             }
 
-            if(returnToOrigin) particles[i]->xenoToOrigin(0.03);
+            if(returnToOrigin && !gravityInteraction) particles[i]->xenoToOrigin(0.03);
 
-            if(animation == SNOW || animation == WIND){
+            if(particleMode == ANIMATIONS && (animation == SNOW || animation == WIND)){
                 ofPoint windForce(ofRandom(-0.1, 0.1), ofRandom(-0.08, 0.06));
                 particles[i]->addForce(windForce*particles[i]->mass);
 
@@ -270,8 +299,18 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
                 }
             }
             if(contourInput){
-                for(unsigned int i = 0; i < contour.contours.size(); i++){
-                    addParticles(bornRate, contour.contours[i], contour);
+                if(emitInMovement){
+                    for(unsigned int i = 0; i < contour.diffContours.size(); i++){
+                        addParticles(bornRate, contour.diffContours[i], contour);
+    //                    // born more particles if bigger area
+    //                    float bornNum = bornRate * abs(contour.diffContours[i].getArea())/1500.0;
+    //                    addParticles(bornNum, contour.diffContours[i], contour);
+                    }
+                }
+                else{
+                    for(unsigned int i = 0; i < contour.contours.size(); i++){
+                        addParticles(bornRate, contour.contours[i], contour);
+                    }
                 }
             }
         }
@@ -489,6 +528,10 @@ void ParticleSystem::bornParticles(){
 //    }
 }
 
+void ParticleSystem::setAnimation(Animation animation){
+    this->animation = animation;
+}
+
 void ParticleSystem::repulseParticles(){
     for(int i = 0; i < particles.size(); i++){
         for(int j = i-1; j >= 0; j--){
@@ -534,6 +577,15 @@ ofPoint ParticleSystem::getClosestMarker(const Particle &particle, const vector<
     return closestMarker;
 }
 
-void ParticleSystem::setAnimation(Animation animation){
-    this->animation = animation;
+ofPoint ParticleSystem::getClosestPointInContour(const Particle &particle, const Contour &contour){
+    ofPoint closestPoint(-1, -1);
+
+    // Get closest point in the contour to particle
+    for(unsigned int i = 0; i < contour.contours.size(); i++){
+        if(contour.contours[i].inside(particle.pos)){
+            closestPoint = contour.contours[i].getClosestPoint(particle.pos);
+        }
+    }
+
+    return closestPoint;
 }

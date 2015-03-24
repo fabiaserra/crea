@@ -22,7 +22,7 @@ Particle::Particle(){
 
     limitSpeed      = false;
     bounceDamping   = true;
-    damping         = 0.8;
+    damping         = 0.5;
 
     age             = 0;
 
