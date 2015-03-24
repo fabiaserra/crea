@@ -14,7 +14,7 @@ void Contour::setup(int width, int height){
     this->width     = width;
     this->height    = height;
 
-    opticalFlow = false;
+    opticalFlow = true;
 
     scaleFactor = 4.0;
     flowScale = 0.1;
@@ -81,7 +81,7 @@ void Contour::update(ofImage &depthImage){
             contours.push_back(contour);
         }
 
-//        if(prevContours.size() > 0) getVelocities();
+//        if(prevContours.size() > 0) computeVelocities();
     }
 }
 
@@ -178,6 +178,7 @@ ofPoint Contour::getFlowOffset(ofPoint p){
 
 ofPoint Contour::getAverageFlowInRegion(ofRectangle rect){
     rect.scale(1.0/scaleFactor);
+    rect.setPosition(rect.getPosition()/scaleFactor);
 
     if(rescaledRect.inside(rect)){
         return flow.getAverageFlowInRegion(rect) * flowScale;
@@ -190,7 +191,7 @@ ofPoint Contour::getAverageVelocity(){
     return flow.getAverageFlow();
 }
 
-void Contour::getVelocities(){
+void Contour::computeVelocities(){
     // Get velocities from prev frame to current frame
 //    int numContours = MIN(contours.size(), prevContours.size());
     velocities.clear();

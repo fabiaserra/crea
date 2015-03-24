@@ -113,6 +113,9 @@ class ParticleSystem
         bool markersInput;          // Input are the IR markers?
         bool contourInput;          // Input is the depth contour?
         float markerRadius;         // Radius of interaction of the markers
+        bool emitInsideContour;     // Emit particles inside all the area of the contour?
+        bool useFlow;               // Use optical flow to get the motion velocity?
+        bool useFlowRegion;         // Use optical flow region to get the motion velocity?
 
 	protected:
 		// Helper functions

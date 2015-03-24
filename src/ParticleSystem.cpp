@@ -71,6 +71,10 @@ ParticleSystem::ParticleSystem(){
     markersInput        = false;        // Input are the IR markers?
     contourInput        = false;        // Input is the depth contour?
     markerRadius        = 50.0;         // Radius of interaction of the markers
+
+    emitInsideContour   = false;        // Emit particles inside all the area of the contour?
+    useFlow             = false;        // Use optical flow to get the motion velocity?
+    useFlowRegion       = false;        // Use optical flow region to get the motion velocity?
 }
 
 ParticleSystem::~ParticleSystem(){
@@ -217,12 +221,12 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
                     }
                 }
                 if(contourInput){
-                    ofPoint frc = contour.getFlowOffset(particles[i]->pos);
+//                    ofPoint frc = contour.getFlowOffset(particles[i]->pos);
+//                    particles[i]->addForce(frc);
+                    float dimRegion = 10.0;
+                    ofRectangle flowRegion(particles[i]->pos.x-dimRegion/2.0, particles[i]->pos.y-dimRegion/2.0, dimRegion, dimRegion);
+                    ofPoint frc = contour.getAverageFlowInRegion(flowRegion);
                     particles[i]->addForce(frc);
-//                    if(repulseInteraction) particles[i]->addRepulsionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, 10.0);
-//                    if(attractInteraction) particles[i]->addAttractionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, 8.0);
-//                    if(gravityInteraction) particles[i]->addForce(ofPoint(0, gravity*particles[i]->mass));
-//                    particles[i]->isTouched = true;
                 }
             }
 
@@ -381,46 +385,53 @@ void ParticleSystem::addParticles(int n, const irMarker &marker){
     }
 }
 
-//void ParticleSystem::addParticles(int n, const ofPolyline &contour, Contour &flow){
-//    for(int i = 0; i < n; i++){
-//        // Create particles only inside contour polyline
-//        ofRectangle box = contour.getBoundingBox();
-//        ofPoint center = box.getCenter();
-//        ofPoint pos;
-//        pos.x = center.x + (ofRandom(1.0f) - 0.5f) * box.getWidth();
-//        pos.y = center.y + (ofRandom(1.0f) - 0.5f) * box.getHeight();
-//
-//        while(!contour.inside(pos)){
-//            pos.x = center.x + (ofRandom(1.0f) - 0.5f) * box.getWidth();
-//            pos.y = center.y + (ofRandom(1.0f) - 0.5f) * box.getHeight();
-//        }
-//
-//        ofPoint vel = randomVector()*(velocity+2*randomRange(velocityRnd, velocity));
-////        vel += flow.getAverageFlowInRegion(box)*(velocityMotion/100)*6;
-////        vel += flow.getFlowOffset(contour.getClosestPoint(pos))*(velocityMotion/100)*6;
-//        vel += flow.getFlowOffset(pos)*(velocityMotion/100)*6;
-//
-//        float initialRadius = radius + randomRange(radiusRnd, radius);
-//        float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
-//
-//        addParticle(pos, vel, color, initialRadius, lifetime);
-//    }
-//}
-
 void ParticleSystem::addParticles(int n, const ofPolyline &contour, Contour &flow){
     for(int i = 0; i < n; i++){
+
+        ofPoint pos, vel;
+
+        // Create random particles inside contour polyline
+        if(emitInsideContour){
+            ofRectangle box = contour.getBoundingBox();
+            ofPoint center = box.getCenter();
+            pos.x = center.x + (ofRandom(1.0f) - 0.5f) * box.getWidth();
+            pos.y = center.y + (ofRandom(1.0f) - 0.5f) * box.getHeight();
+
+            while(!contour.inside(pos)){
+                pos.x = center.x + (ofRandom(1.0f) - 0.5f) * box.getWidth();
+                pos.y = center.y + (ofRandom(1.0f) - 0.5f) * box.getHeight();
+            }
+
+            // random vector
+            vel = randomVector()*(velocity+2*randomRange(velocityRnd, velocity));
+        }
+
         // Create particles only on the contour polyline
-        float indexInterpolated = ofRandom(0, contour.size());
-        ofPoint pos = contour.getPointAtIndexInterpolated(indexInterpolated);
+        else{
+            float indexInterpolated = ofRandom(0, contour.size());
+            pos = contour.getPointAtIndexInterpolated(indexInterpolated);
 
-//        pos.x += ofRandom(-0.5, 0.5);
-//        pos.y += ofRandom(-0.5, 0.5);
+            // use point normal vector as velocity
+            vel = contour.getNormalAtIndexInterpolated(indexInterpolated)*(velocity+2*randomRange(velocityRnd, velocity))*-1;
+        }
 
-        ofPoint vel = contour.getNormalAtIndexInterpolated(indexInterpolated)*(velocity+2*randomRange(velocityRnd, velocity))*-1;
-//        ofPoint vel = randomVector()*(velocity+2*randomRange(velocityRnd, velocity));
-//        vel += flow.getAverageFlowInRegion(box)*(velocityMotion/100)*6;
-//        vel += flow.getFlowOffset(contour.getClosestPoint(pos))*(velocityMotion/100)*6;
-//        vel += flow.getFlowOffset(pos)*(velocityMotion/100)*6;
+        if(useFlow){
+            ofPoint motionVel = flow.getFlowOffset(pos);
+            vel += motionVel*(velocityMotion/100)*150;
+        }
+        else if(useFlowRegion){
+            float dimRegion = 5.0;
+            ofRectangle flowRegion(pos.x-dimRegion/2.0, pos.y-dimRegion/2.0, dimRegion, dimRegion);
+            ofPoint motionVel = flow.getAverageFlowInRegion(flowRegion);
+            vel += motionVel*(velocityMotion/100)*150;
+        }
+        else{
+            ofPoint motionVel = flow.getVelocityInPoint(pos);
+            vel += motionVel*(velocityMotion/100)*6;
+        }
+
+        pos.x += ofRandom(-emitterSize, emitterSize);
+        pos.y += ofRandom(-emitterSize, emitterSize);
 
         float initialRadius = radius + randomRange(radiusRnd, radius);
         float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);

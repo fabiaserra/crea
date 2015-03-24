@@ -15,8 +15,8 @@ class Contour
         ofPoint getAverageFlowInRegion(ofRectangle rect);
         ofPoint getAverageVelocity();
         ofPoint getVelocityInPoint(ofPoint curPoint);
-        void getVelocities();
 
+        void computeVelocities();
         void setMinAreaRadius(float minContourSize);
         void setMaxAreaRadius(float maxContourSize);
 
