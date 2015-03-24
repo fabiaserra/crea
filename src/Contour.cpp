@@ -14,15 +14,23 @@ void Contour::setup(int width, int height){
     this->width     = width;
     this->height    = height;
 
-    opticalFlow = true;
+    opticalFlow = true; // compute optical flow?
 
-    scaleFactor = 4.0;
-    flowScale = 0.1;
+    scaleFactor = 4.0; // scaling factor of the depth image to compute the optical flow in lower res.
+    flowScale = 0.1;   // scalar of flow velocities
     rescaled.allocate((float)width/scaleFactor, (float)height/scaleFactor, OF_IMAGE_GRAYSCALE);
     rescaledRect.set(0, 0, rescaled.width, rescaled.height);
 
-    contourFinder.setSortBySize(true);
+    contourFinder.setSortBySize(true);  // sort contours by size
 
+    contourFinderDiff.setMinAreaRadius(10);
+    contourFinderDiff.setMaxAreaRadius(500);
+
+    // allocate images
+    previous.allocate(width, height, OF_IMAGE_GRAYSCALE);
+    diff.allocate(width, height, OF_IMAGE_GRAYSCALE);
+
+    // optical flow settings
     pyrScale        = 0.5;  // 0~1
     levels          = 4;    // 1~8
     winSize         = 8;    // 4~64
@@ -31,17 +39,25 @@ void Contour::setup(int width, int height){
     polySigma       = 1.5;  // 1.1~2
     gaussianMode    = false;
 
+    // graphics output
     drawBoundingRect    = false;
     drawConvexHull      = false;
     drawConvexHullLine  = false;
     drawContourLine     = false;
     drawFlow            = false;
     drawTangentLines    = false;
+    drawDiff            = false;
 }
 
 void Contour::update(ofImage &depthImage){
 
     if(isActive){
+
+        // absolute difference of previous frame and save it inside diff
+        absdiff(previous, depthImage, diff);
+        diff.update();
+
+        copy(depthImage, previous);
 
         if(opticalFlow){
             resize(depthImage, rescaled);
@@ -64,9 +80,14 @@ void Contour::update(ofImage &depthImage){
         // Contour Finder in the depth Image
         contourFinder.findContours(depthImage);
 
+        // Contour Finder in the depth diff Image
+        contourFinderDiff.findContours(diff);
+
+        // Clear vectors
         boundingRects.clear();
         convexHulls.clear();
         contours.clear();
+        diffContours.clear();
 
         for(int i = 0; i < contourFinder.size(); i++){
             boundingRects.push_back(toOf(contourFinder.getBoundingRect(i)));
@@ -81,13 +102,26 @@ void Contour::update(ofImage &depthImage){
             contours.push_back(contour);
         }
 
+        for(int i = 0; i < contourFinderDiff.size(); i++){
+            ofPolyline diffContour;
+            diffContour = contourFinderDiff.getPolyline(i);
+            diffContours.push_back(diffContour);
+        }
+
+//        // Compute velocities on all the contour points
 //        if(prevContours.size() > 0) computeVelocities();
+
     }
 }
 
 void Contour::draw(){
     if(isActive){
         ofPushStyle();
+
+        if(drawDiff){
+            diff.draw(0, 0);
+        }
+
         if(drawBoundingRect){
             ofFill();
             ofSetColor(255);
@@ -122,21 +156,24 @@ void Contour::draw(){
 //                else if(i == 1) ofSetColor(0, 255, 0);
 //                else ofSetColor(0, 0, 255);
                 contours[i].draw();
-//                if(velocities.size() > 0){
-//                    ofSetColor(255, 0, 0);
-//                    ofSetLineWidth(1.5);
-//                    for(int p = 0; p < velocities[i].size(); p++){
-//                        cout << contours[i][p] << " ... " << velocities[i][p] << endl;
-//                        ofLine(contours[i][p], contours[i][p] - velocities[i][p]);
-//                    }
-//                }
 
                 ofSetColor(255, 0, 0);
                 ofSetLineWidth(1);
                 for(int p = 0; p < contours[i].size(); p++){
                     ofLine(contours[i][p], contours[i][p] - getVelocityInPoint(contours[i][p]));
                 }
+//                if(velocities.size() > 0){
+//                    for(int p = 0; p < velocities[i].size(); p++){
+//                        ofLine(contours[i][p], contours[i][p] - velocities[i][p]);
+//                    }
+//                }
             }
+        }
+
+        ofSetColor(255, 0, 0);
+        ofSetLineWidth(3);
+        for(int i = 0; i < diffContours.size(); i++){
+            diffContours[i].draw();
         }
 
         if(drawFlow){

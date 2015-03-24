@@ -38,12 +38,16 @@ class Contour
         float polySigma;
         bool gaussianMode;
         //--------------------------------------------------------------
+        ofImage previous;
+        ofImage diff;
+        //--------------------------------------------------------------
         float smoothingSize;
         //--------------------------------------------------------------
         vector<ofRectangle> boundingRects;
         vector<ofPolyline> convexHulls;
         vector<ofPolyline> contours;
         vector<ofPolyline> prevContours;
+        vector<ofPolyline> diffContours;
         vector< vector<ofPoint> > velocities;
         //--------------------------------------------------------------
         bool drawBoundingRect;
@@ -52,6 +56,7 @@ class Contour
         bool drawContourLine;
         bool drawTangentLines;
         bool drawFlow;
+        bool drawDiff;
 
     protected:
     private:
@@ -59,4 +64,5 @@ class Contour
         ofRectangle rescaledRect;
         ofxCv::FlowFarneback flow;
         ofxCv::ContourFinder contourFinder;
+        ofxCv::ContourFinder contourFinderDiff;
 };
