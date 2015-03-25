@@ -20,7 +20,7 @@
 #include "helper.h"
 
 // comment this to use the recorded images
-#define KINECT_CONNECTED
+//#define KINECT_CONNECTED
 
 // Uncomment this to use an xml sequence file for the tracking
 //#define KINECT_SEQUENCE
@@ -90,6 +90,12 @@ class ofApp : public ofBaseApp{
         ofImage depthImage, depthOriginal;
         ofImage grayThreshNear;
         ofImage grayThreshFar;
+        //--------------------------------------------------------------
+        cv::Mat croppingMask;
+        float leftMask;
+        float rightMask;
+        float topMask;
+        float bottomMask;
         //--------------------------------------------------------------
         ofxCv::ContourFinder irMarkerFinder;
         ofxCv::RectTrackerFollower<irMarker> tracker;

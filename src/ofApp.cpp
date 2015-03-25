@@ -74,10 +74,14 @@ void ofApp::setup(){
     grayThreshFar.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
     irImage.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
     irOriginal.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
-
+    
+    croppingMask = Mat::ones(kinect.height, kinect.width, CV_8UC1);
+    leftMask = 0; rightMask = kinect.width; topMask = 0; bottomMask = kinect.height;
+    
+    // FILTER PARAMETERS DEPTH IMAGE
     numDilates = 4;
     numErodes = 2;
-    blurValue = 21;
+    blurValue = 7;
 
     // KINECT PARAMETERS
     flipKinect      = false;
@@ -384,6 +388,18 @@ void ofApp::update(){
         erode(depthImage);
     }
     blur(depthImage, blurValue);
+    
+    // Crop images
+    Mat depthMat = toCv(depthImage);
+    Mat irMat = toCv(irImage);
+    Mat depthCropped = Mat::zeros(kinect.height, kinect.width, CV_8UC1);
+    Mat irCropped = Mat::zeros(kinect.height, kinect.width, CV_8UC1);
+    
+    depthCropped = depthMat.mul(croppingMask);
+    irCropped = irMat.mul(croppingMask);
+
+    copy(depthCropped, depthImage);
+    copy(irCropped, irImage);
 
     // Update images
     irImage.update();
@@ -764,10 +780,18 @@ void ofApp::setupGUI2(){
     gui2->addRangeSlider("Clipping range", 500, 5000, &nearClipping, &farClipping);
     gui2->addRangeSlider("Threshold range", 0.0, 255.0, &farThreshold, &nearThreshold);
     gui2->addRangeSlider("Contour size", 0.0, 400.0, &minContourSize, &maxContourSize);
+    
+//    gui2->addIntSlider("Left Crop", 0, 480, &leftMask);
+//    gui2->addIntSlider("Right Crop", 0, 480, &rightMask);
+//    gui2->addIntSlider("Top Crop", 0, 640, &topMask);
+//    gui2->addIntSlider("Bottom Crop", 0, 640, &bottomMask);
+    
+    gui2->addRangeSlider("Left/Right Crop", 0.0, 640.0, &leftMask, &rightMask);
+    gui2->addRangeSlider("Top/Bottom Crop", 0.0, 480.0, &topMask, &bottomMask);
 
-    gui2->addIntSlider("Erode", 0, 8, &numErodes);
-    gui2->addIntSlider("Dilate", 0, 8, &numDilates);
-    gui2->addIntSlider("Blur", 0, 41, &blurValue);
+//    gui2->addIntSlider("Erode", 0, 8, &numErodes);
+//    gui2->addIntSlider("Dilate", 0, 8, &numDilates);
+//    gui2->addIntSlider("Blur", 0, 41, &blurValue);
 
     gui2->addImage("Depth original", &depthOriginal, kinect.width/6, kinect.height/6, true);
     gui2->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
@@ -1056,7 +1080,7 @@ void ofApp::setupGUI8Boids(){
     gui8Boids->addLabel("BOIDS", OFX_UI_FONT_LARGE);
     gui8Boids->addSpacer();
 
-    gui8Boids->addLabel("FLOCKING");
+    gui8Boids->addLabel("Flocking");
     gui8Boids->addSlider("Flocking Radius", 10.0, 100.0, &boidsParticles->flockingRadius);
     lowThresh = gui8Boids->addSlider("Lower Threshold", 0.025, 1.0, &boidsParticles->lowThresh);
     lowThresh->setLabelPrecision(3);
@@ -1500,6 +1524,29 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     if(e.getName() == "Contour size"){
         contour.setMinAreaRadius(minContourSize);
         contour.setMaxAreaRadius(maxContourSize);
+    }
+    if(e.getName() == "Left/Right Crop" || e.getName() == "Top/Bottom Crop"){
+        croppingMask = Mat::ones(480, 640, CV_8UC1);
+        for(int i = 0; i < (int)leftMask; i++){
+            for(int j = 0; j < croppingMask.rows; j++){
+                croppingMask.at<uchar>(cv::Point(i,j)) = 0;
+            }
+        }
+        for(int i = 0; i < croppingMask.cols; i++){
+            for(int j = 0; j < (int)topMask; j++){
+                croppingMask.at<uchar>(cv::Point(i,j)) = 0;
+            }
+        }
+        for(int i = (int)rightMask-1; i < croppingMask.cols; i++){
+            for(int j = 0; j < croppingMask.rows; j++){
+                croppingMask.at<uchar>(cv::Point(i,j)) = 0;
+            }
+        }
+        for(int i = 0; i < croppingMask.cols; i++){
+            for(int j = (int)bottomMask-1; j < croppingMask.rows; j++){
+                croppingMask.at<uchar>(cv::Point(i,j)) = 0;
+            }
+        }
     }
     if(e.getName() == "Markers size"){
         irMarkerFinder.setMinAreaRadius(minMarkerSize);
