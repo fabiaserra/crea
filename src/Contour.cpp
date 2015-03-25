@@ -44,9 +44,13 @@ void Contour::setup(int width, int height){
     drawConvexHull      = false;
     drawConvexHullLine  = false;
     drawContourLine     = false;
-    drawFlow            = false;
+    drawQuads           = false;
     drawTangentLines    = false;
+    
+    // debug
     drawDiff            = false;
+    drawFlow            = false;
+    drawVelocities      = false;
 }
 
 void Contour::update(ofImage &depthImage){
@@ -82,30 +86,46 @@ void Contour::update(ofImage &depthImage){
 
         // Contour Finder in the depth diff Image
         contourFinderDiff.findContours(diff);
+        
+        int n = contourFinder.size();
+        int m = contourFinderDiff.size();
 
         // Clear vectors
         boundingRects.clear();
         convexHulls.clear();
         contours.clear();
+        quads.clear();
         diffContours.clear();
+        
+        // Initialize vectors
+        boundingRects.resize(n);
+        convexHulls.resize(n);
+        contours.resize(n);
+        quads.resize(n);
+        diffContours.resize(m);
 
-        for(int i = 0; i < contourFinder.size(); i++){
-            boundingRects.push_back(toOf(contourFinder.getBoundingRect(i)));
+        for(int i = 0; i < n; i++){
+            boundingRects[i] = toOf(contourFinder.getBoundingRect(i));
 
             ofPolyline convexHull;
             convexHull = toOf(contourFinder.getConvexHull(i));
-            convexHulls.push_back(convexHull);
+            convexHulls[i] = convexHull;
 
             ofPolyline contour;
             contour = contourFinder.getPolyline(i);
             contour = contour.getSmoothed(smoothingSize, 0.5);
-            contours.push_back(contour);
+            contours[i] = contour;
+            
+            ofPolyline quad;
+            quad = toOf(contourFinder.getFitQuad(i));
+            quads[i] = quad;
         }
-
-        for(int i = 0; i < contourFinderDiff.size(); i++){
+        
+        
+        for(int i = 0; i < m; i++){
             ofPolyline diffContour;
             diffContour = contourFinderDiff.getPolyline(i);
-            diffContours.push_back(diffContour);
+            diffContours[i] = diffContour;
         }
 
 //        // Compute velocities on all the contour points
@@ -117,10 +137,6 @@ void Contour::update(ofImage &depthImage){
 void Contour::draw(){
     if(isActive){
         ofPushStyle();
-
-        if(drawDiff){
-            diff.draw(0, 0);
-        }
 
         if(drawBoundingRect){
             ofFill();
@@ -156,24 +172,25 @@ void Contour::draw(){
 //                else if(i == 1) ofSetColor(0, 255, 0);
 //                else ofSetColor(0, 0, 255);
                 contours[i].draw();
-
-                ofSetColor(255, 0, 0);
-                ofSetLineWidth(1);
-                for(int p = 0; p < contours[i].size(); p++){
-                    ofLine(contours[i][p], contours[i][p] - getVelocityInPoint(contours[i][p]));
-                }
-//                if(velocities.size() > 0){
-//                    for(int p = 0; p < velocities[i].size(); p++){
-//                        ofLine(contours[i][p], contours[i][p] - velocities[i][p]);
-//                    }
-//                }
             }
         }
-
-        ofSetColor(255, 0, 0);
-        ofSetLineWidth(3);
-        for(int i = 0; i < diffContours.size(); i++){
-            diffContours[i].draw();
+        
+        if(drawQuads){
+            ofSetColor(255);
+            ofSetLineWidth(3);
+            for(int i = 0; i < quads.size(); i++){
+                quads[i].draw();
+            }
+        }
+        
+        if(drawDiff){
+//            ofSetColor(255);
+//            diff.draw(0, 0);
+            ofSetColor(255, 0, 0);
+            ofSetLineWidth(3);
+            for(int i = 0; i < diffContours.size(); i++){
+                diffContours[i].draw();
+            }
         }
 
         if(drawFlow){
@@ -182,7 +199,16 @@ void Contour::draw(){
             ofSetColor(255, 0, 0);
             flow.draw(0, 0, width, height);
         }
-
+        
+        if(drawVelocities){
+            ofSetColor(255, 0, 0);
+            ofSetLineWidth(1);
+            for(int i = 0; i < contours.size(); i++){
+                for(int p = 0; p < contours[i].size(); p++){
+                    ofLine(contours[i][p], contours[i][p] - getVelocityInPoint(contours[i][p]));
+                }
+            }
+        }
 
 //        if(drawTangentLines){
 //            ofSetLineWidth(1);

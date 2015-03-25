@@ -45,6 +45,7 @@ class Contour
         //--------------------------------------------------------------
         vector<ofRectangle> boundingRects;
         vector<ofPolyline> convexHulls;
+        vector<ofPolyline> quads;
         vector<ofPolyline> contours;
         vector<ofPolyline> prevContours;
         vector<ofPolyline> diffContours;
@@ -54,9 +55,11 @@ class Contour
         bool drawConvexHull;
         bool drawConvexHullLine;
         bool drawContourLine;
+        bool drawQuads;
         bool drawTangentLines;
-        bool drawFlow;
         bool drawDiff;
+        bool drawFlow;
+        bool drawVelocities;
 
     protected:
     private:
