@@ -400,7 +400,7 @@ void ofApp::update(){
 
     copy(depthCropped, depthImage);
     copy(irCropped, irImage);
-
+    
     // Update images
     irImage.update();
     depthImage.update();
@@ -655,8 +655,11 @@ void ofApp::draw(){
 
 //--------------------------------------------------------------
 void ofApp::setupGUI0(){
-
-    gui0 = new ofxUISuperCanvas("0: MAIN WINDOW", 0, 0, guiWidth, ofGetHeight());
+//    gui0 = new ofxUISuperCanvas("0: MAIN WINDOW", 0, 0, guiWidth, ofGetHeight());
+    gui0 = new ofxUIScrollableCanvas(0, 0, guiWidth, ofGetHeight());
+    gui0->setScrollAreaToScreen();
+    gui0->setScrollableDirections(false, true);
+    gui0->addLabel("0: MAIN WINDOW");
     gui0->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui0->addSpacer();
@@ -707,7 +710,11 @@ void ofApp::setupGUI0(){
 
 //--------------------------------------------------------------
 void ofApp::setupGUI1(){
-    gui1 = new ofxUISuperCanvas("1: BASICS", 0, 0, guiWidth, ofGetHeight());
+//    gui1 = new ofxUISuperCanvas("1: BASICS", 0, 0, guiWidth, ofGetHeight());
+    gui1 = new ofxUIScrollableCanvas(0, 0, guiWidth, ofGetHeight());
+    gui1->setScrollAreaToScreen();
+    gui1->setScrollableDirections(false, true);
+    gui1->addLabel("1: BASICS");
     gui1->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui1->addSpacer();
@@ -759,7 +766,11 @@ void ofApp::setupGUI1(){
 
 //--------------------------------------------------------------
 void ofApp::setupGUI2(){
-    gui2 = new ofxUISuperCanvas("2: KINECT", 0, 0, guiWidth, ofGetHeight());
+//    gui2 = new ofxUISuperCanvas("2: KINECT", 0, 0, guiWidth, ofGetHeight());
+    gui2 = new ofxUIScrollableCanvas(0, 0, guiWidth, ofGetHeight());
+    gui2->setScrollAreaToScreen();
+    gui2->setScrollableDirections(false, true);
+    gui2->addLabel("2: KINECT");
     gui2->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui2->addSpacer();
@@ -818,12 +829,16 @@ void ofApp::setupGUI2(){
     gui2->autoSizeToFitWidgets();
     gui2->setVisible(false);
     ofAddListener(gui2->newGUIEvent, this, &ofApp::guiEvent);
-    guis.push_back(gui2);
+//    guis.push_back(gui2);
 }
 
 //--------------------------------------------------------------
 void ofApp::setupGUI3(){
-    gui3 = new ofxUISuperCanvas("3: GESTURE SEQUENCE", 0, 0, guiWidth, ofGetHeight());
+//    gui3 = new ofxUISuperCanvas("3: GESTURE SEQUENCE", 0, 0, guiWidth, ofGetHeight());
+    gui3 = new ofxUIScrollableCanvas(0, 0, guiWidth, ofGetHeight());
+    gui3->setScrollAreaToScreen();
+    gui3->setScrollableDirections(false, true);
+    gui3->addLabel("3: GESTURE SEQUENCE");
     gui3->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui3->addSpacer();
@@ -861,7 +876,11 @@ void ofApp::setupGUI3(){
 
 //--------------------------------------------------------------
 void ofApp::setupGUI4(){
-    gui4 = new ofxUISuperCanvas("4: GESTURE TRACKER", 0, 0, guiWidth, ofGetHeight());
+//    gui4 = new ofxUISuperCanvas("4: GESTURE TRACKER", 0, 0, guiWidth, ofGetHeight());
+    gui4 = new ofxUIScrollableCanvas(0, 0, guiWidth, ofGetHeight());
+    gui4->setScrollAreaToScreen();
+    gui4->setScrollableDirections(false, true);
+    gui4->addLabel("4: GESTURE TRACKER");
     gui4->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui4->addSpacer();
@@ -899,7 +918,11 @@ void ofApp::setupGUI4(){
 
 //--------------------------------------------------------------
 void ofApp::setupGUI5(){
-    gui5 = new ofxUISuperCanvas("5: CUE LIST", 0, 0, guiWidth, ofGetHeight());
+//    gui5 = new ofxUISuperCanvas("5: CUE LIST", 0, 0, guiWidth, ofGetHeight());
+    gui5 = new ofxUIScrollableCanvas(0, 0, guiWidth, ofGetHeight());
+    gui5->setScrollAreaToScreen();
+    gui5->setScrollableDirections(false, true);
+    gui5->addLabel("5: CUE LIST");
     gui5->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui5->addSpacer();
@@ -958,7 +981,11 @@ void ofApp::setupGUI5(){
 
 //--------------------------------------------------------------
 void ofApp::setupGUI6(){
-    gui6 = new ofxUISuperCanvas("6: FLUID SOLVER", 0, 0, guiWidth, ofGetHeight());
+//    gui6 = new ofxUISuperCanvas("6: FLUID SOLVER", 0, 0, guiWidth, ofGetHeight());
+    gui6 = new ofxUIScrollableCanvas(0, 0, guiWidth, ofGetHeight());
+    gui6->setScrollAreaToScreen();
+    gui6->setScrollableDirections(false, true);
+    gui6->addLabel("6: FLUID SOLVER");
     gui6->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui6->addSpacer();
@@ -980,7 +1007,11 @@ void ofApp::setupGUI6(){
 
 //--------------------------------------------------------------
 void ofApp::setupGUI7(){
-    gui7 = new ofxUISuperCanvas("7: DEPTH CONTOUR", 0, 0, guiWidth, ofGetHeight());
+//    gui7 = new ofxUISuperCanvas("7: DEPTH CONTOUR", 0, 0, guiWidth, ofGetHeight());
+    gui7 = new ofxUIScrollableCanvas(0, 0, guiWidth, ofGetHeight());
+    gui7->setScrollAreaToScreen();
+    gui7->setScrollableDirections(false, true);
+    gui7->addLabel("7: DEPTH CONTOUR");
     gui7->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     gui7->addSpacer();
@@ -990,7 +1021,9 @@ void ofApp::setupGUI7(){
     gui7->addFPS(OFX_UI_FONT_SMALL);
 
     gui7->addSpacer();
-    gui7->addImageToggle("Activate Contour", "icons/show.png", &contour.isActive, dim, dim)->bindToKey(' ');
+    ofxUIImageToggle *active;
+    active = gui7->addImageToggle("Activate Contour", "icons/show.png", &contour.isActive, dim, dim);
+    active->setColorBack(ofColor(150, 255));
 
     gui7->addSpacer();
     gui7->addToggle("Bounding Rectangle", &contour.drawBoundingRect);
@@ -1014,14 +1047,20 @@ void ofApp::setupGUI7(){
 
 //--------------------------------------------------------------
 void ofApp::setupGUI8Emitter(){
-    gui8Emitter = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
+//    gui8Emitter = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
+    gui8Emitter = new ofxUIScrollableCanvas(0, 0, guiWidth, ofGetHeight());
+    gui8Emitter->setScrollAreaToScreen();
+    gui8Emitter->setScrollableDirections(false, true);
+    gui8Emitter->addLabel("8: PARTICLES");
     gui8Emitter->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     addParticleBasicsGUI(gui8Emitter, emitterParticles);
 
     gui8Emitter->addSpacer();
-    gui8Emitter->addLabel("EMITTER", OFX_UI_FONT_LARGE);
+    gui8Emitter->addLabel("EMITTER");
     gui8Emitter->addSpacer();
+    
+    addParticleInteractionGUI(gui8Emitter, emitterParticles);
 
     gui8Emitter->addLabel("Emitter");
     gui8Emitter->addSlider("Particles/sec", 0.0, 60.0, &emitterParticles->bornRate);
@@ -1029,7 +1068,13 @@ void ofApp::setupGUI8Emitter(){
     gui8Emitter->addSlider("Velocity Random[%]", 0.0, 100.0, &emitterParticles->velocityRnd);
     gui8Emitter->addSlider("Velocity from Motion[%]", 0.0, 100.0, &emitterParticles->velocityMotion);
     gui8Emitter->addSlider("Emitter size", 0.0, 60.0, &emitterParticles->emitterSize);
-
+    
+    vector<string> emitters;
+    emitters.push_back("Emit all time");
+    emitters.push_back("Emit all time on contour");
+    emitters.push_back("Emit only if movement");
+    gui8Emitter->addRadio("Emitters", emitters, OFX_UI_ORIENTATION_VERTICAL);
+    
     addParticlePropertiesGUI(gui8Emitter, emitterParticles);
 
     gui8Emitter->addLabel("Time behavior");
@@ -1053,14 +1098,20 @@ void ofApp::setupGUI8Emitter(){
 
 //--------------------------------------------------------------
 void ofApp::setupGUI8Grid(){
-    gui8Grid = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
+//    gui8Grid = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
+    gui8Grid = new ofxUIScrollableCanvas(0, 0, guiWidth, ofGetHeight());
+    gui8Grid->setScrollAreaToScreen();
+    gui8Grid->setScrollableDirections(false, true);
+    gui8Grid->addLabel("8: PARTICLES");
     gui8Grid->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     addParticleBasicsGUI(gui8Grid, gridParticles);
 
     gui8Grid->addSpacer();
-    gui8Grid->addLabel("GRID", OFX_UI_FONT_LARGE);
+    gui8Grid->addLabel("GRID");
     gui8Grid->addSpacer();
+    
+    addParticleInteractionGUI(gui8Grid, gridParticles);
 
     gui8Grid->addSlider("Radius", 0.1, 25.0, &gridParticles->radius);
     gui8Grid->addIntSlider("Resolution", 1, 20, &gridParticles->gridRes)->setStickyValue(1.0);
@@ -1076,14 +1127,20 @@ void ofApp::setupGUI8Grid(){
 
 //--------------------------------------------------------------
 void ofApp::setupGUI8Boids(){
-    gui8Boids = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
+//    gui8Boids = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
+    gui8Boids = new ofxUIScrollableCanvas(0, 0, guiWidth, ofGetHeight());
+    gui8Boids->setScrollAreaToScreen();
+    gui8Boids->setScrollableDirections(false, true);
+    gui8Boids->addLabel("8: PARTICLES");
     gui8Boids->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     addParticleBasicsGUI(gui8Boids, boidsParticles);
 
     gui8Boids->addSpacer();
-    gui8Boids->addLabel("BOIDS", OFX_UI_FONT_LARGE);
+    gui8Boids->addLabel("BOIDS");
     gui8Boids->addSpacer();
+    
+    addParticleInteractionGUI(gui8Boids, boidsParticles);
 
     gui8Boids->addLabel("Flocking");
     gui8Boids->addSlider("Flocking Radius", 10.0, 100.0, &boidsParticles->flockingRadius);
@@ -1108,14 +1165,20 @@ void ofApp::setupGUI8Boids(){
 
 //--------------------------------------------------------------
 void ofApp::setupGUI8Animations(){
-    gui8Animations = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
+//    gui8Animations = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
+    gui8Animations = new ofxUIScrollableCanvas(0, 0, guiWidth, ofGetHeight());
+    gui8Animations->setScrollAreaToScreen();
+    gui8Animations->setScrollableDirections(false, true);
+    gui8Animations->addLabel("8: PARTICLES");
     gui8Animations->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     addParticleBasicsGUI(gui8Animations, animationsParticles);
 
     gui8Animations->addSpacer();
-    gui8Animations->addLabel("ANIMATIONS", OFX_UI_FONT_LARGE);
+    gui8Animations->addLabel("ANIMATIONS");
     gui8Animations->addSpacer();
+    
+    addParticleInteractionGUI(gui8Animations, animationsParticles);
 
     vector<string> animations;
 	animations.push_back("Rain");
@@ -1139,7 +1202,7 @@ void ofApp::setupGUI8Animations(){
     particleGuis.push_back(gui8Animations);
 }
 
-void ofApp::addParticleBasicsGUI(ofxUISuperCanvas* gui, ParticleSystem* ps){
+void ofApp::addParticleBasicsGUI(ofxUIScrollableCanvas* gui, ParticleSystem* ps){
     gui->addSpacer();
     gui->addLabel("Press '8' to toggle panel", OFX_UI_FONT_SMALL);
 
@@ -1147,7 +1210,9 @@ void ofApp::addParticleBasicsGUI(ofxUISuperCanvas* gui, ParticleSystem* ps){
     gui->addFPS(OFX_UI_FONT_SMALL);
 
     gui->addSpacer();
-    gui->addImageToggle("Activate Particles", "icons/show.png", &ps->isActive, dim, dim)->bindToKey(' ');
+    ofxUIImageToggle *active;
+    active = gui->addImageToggle("Activate Particles", "icons/show.png", &ps->isActive, dim, dim);
+    active->setColorBack(ofColor(150, 255));
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
 
     ofxUIImageButton *previous;
@@ -1157,7 +1222,7 @@ void ofApp::addParticleBasicsGUI(ofxUISuperCanvas* gui, ParticleSystem* ps){
     ofxUIImageButton *next;
     next = gui->addImageButton("Next Particle System", "icons/play.png", false, dim, dim);
     next->setColorBack(ofColor(150, 255));
-
+ 
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui->addSpacer();
     gui->addToggle("Marker", &ps->markersInput);
@@ -1166,12 +1231,26 @@ void ofApp::addParticleBasicsGUI(ofxUISuperCanvas* gui, ParticleSystem* ps){
     gui->addToggle("Contour", &ps->contourInput);
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui->setWidgetSpacing(3);
-
+    
     gui->addSlider("Opacity", 0.0, 255.0, &ps->opacity);
+    gui->addSpacer();
 }
 
 //--------------------------------------------------------------
-void ofApp::addParticlePropertiesGUI(ofxUISuperCanvas* gui, ParticleSystem* ps){
+void ofApp::addParticleInteractionGUI(ofxUIScrollableCanvas* gui, ParticleSystem* ps){
+    gui->addSpacer();
+    gui->addLabel("Interaction");
+    gui->addToggle("Interact", &ps->interact);
+    gui->addSlider("Marker interaction radius", 5.0, 150.0, &ps->markerRadius);
+    gui->addToggle("Contour Optical Flow", &ps->useFlow);
+    gui->addToggle("Contour Optical Flow Average", &ps->useFlowRegion);
+    gui->addToggle("Contour Velocities", &ps->useContourVel);
+    gui->addToggle("Contour Area", &ps->useContourArea);
+    gui->addSpacer();
+}
+
+//--------------------------------------------------------------
+void ofApp::addParticlePropertiesGUI(ofxUIScrollableCanvas* gui, ParticleSystem* ps){
     gui->addSpacer();
     gui->addLabel("Particle");
     gui->addToggle("Empty", &ps->isEmpty);
@@ -1190,7 +1269,7 @@ void ofApp::addParticlePropertiesGUI(ofxUISuperCanvas* gui, ParticleSystem* ps){
 }
 
 //--------------------------------------------------------------
-void ofApp::addParticlePhysicsGUI(ofxUISuperCanvas* gui, ParticleSystem* ps){
+void ofApp::addParticlePhysicsGUI(ofxUIScrollableCanvas* gui, ParticleSystem* ps){
     gui->addSpacer();
     gui->addLabel("Physics");
     gui->addSlider("Friction", 0, 100, &ps->friction);
@@ -1220,7 +1299,7 @@ void ofApp::saveGUISettings(const string path, const bool isACue){
     ofxXmlSettings *XML = new ofxXmlSettings();
 
     // Save settings
-    for(vector<ofxUISuperCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
+    for(vector<ofxUIScrollableCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
         ofxUICanvas *g = *it;
         int guiIndex = XML->addTag("GUI");
 
@@ -1280,7 +1359,7 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
     widgetsToUpdate.clear();
 
     int guiIndex = 0;
-    for(vector<ofxUISuperCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
+    for(vector<ofxUIScrollableCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
         ofxUICanvas *g = *it;
         // For now we never want to load the settings from panel 4
         if(guiIndex == 4){
@@ -1851,6 +1930,25 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             if(currentParticleSystem < particleSystems.size()-1) currentParticleSystem++;
             else currentParticleSystem = 0;
             particleGuis.at(currentParticleSystem)->setVisible(true);
+        }
+    }
+    // EMITTER SPECIFIC
+    if(e.getName() == "Emitters"){
+        ofxUIRadio *radio = (ofxUIRadio *) e.widget;
+        if(radio->getActiveName() == "Emit all time"){
+            emitterParticles->emitAllTimeInside     = true;
+            emitterParticles->emitAllTimeContour    = false;
+            emitterParticles->emitInMovement        = false;
+        }
+        else if(radio->getActiveName() == "Emit all time on contour"){
+            emitterParticles->emitAllTimeInside     = false;
+            emitterParticles->emitAllTimeContour    = true;
+            emitterParticles->emitInMovement        = false;
+        }
+        else if(radio->getActiveName() == "Emit only if movement"){
+            emitterParticles->emitAllTimeInside     = true;
+            emitterParticles->emitAllTimeContour    = false;
+            emitterParticles->emitInMovement        = true;
         }
     }
     // BOIDS SPECIFIC
