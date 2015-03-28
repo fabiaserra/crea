@@ -20,7 +20,7 @@
 #include "helper.h"
 
 // comment this to use the recorded images
-#define KINECT_CONNECTED
+//#define KINECT_CONNECTED
 
 // Uncomment this to use an xml sequence file for the tracking
 //#define KINECT_SEQUENCE
@@ -63,9 +63,10 @@ class ofApp : public ofBaseApp{
         void dragEvent(ofDragInfo dragInfo);
         void gotMessage(ofMessage msg);
 
-        void addParticleBasicsGUI(ofxUISuperCanvas* gui, ParticleSystem* ps);
-        void addParticlePropertiesGUI(ofxUISuperCanvas* gui, ParticleSystem* ps);
-        void addParticlePhysicsGUI(ofxUISuperCanvas* gui, ParticleSystem* ps);
+        void addParticleBasicsGUI(ofxUIScrollableCanvas* gui, ParticleSystem* ps);
+        void addParticleInteractionGUI(ofxUIScrollableCanvas* gui, ParticleSystem* ps);
+        void addParticlePropertiesGUI(ofxUIScrollableCanvas* gui, ParticleSystem* ps);
+        void addParticlePhysicsGUI(ofxUIScrollableCanvas* gui, ParticleSystem* ps);
 
         //--------------------------------------------------------------
         float time0;            // Time value for computing dt
@@ -90,6 +91,12 @@ class ofApp : public ofBaseApp{
         ofImage depthImage, depthOriginal;
         ofImage grayThreshNear;
         ofImage grayThreshFar;
+        //--------------------------------------------------------------
+        cv::Mat croppingMask;
+        float leftMask;
+        float rightMask;
+        float topMask;
+        float bottomMask;
         //--------------------------------------------------------------
         ofxCv::ContourFinder irMarkerFinder;
         ofxCv::RectTrackerFollower<irMarker> tracker;
@@ -129,20 +136,35 @@ class ofApp : public ofBaseApp{
         bool drawMarkers;
         bool drawMarkersPath;
         //--------------------------------------------------------------
-        ofxUISuperCanvas *gui0;
-        ofxUISuperCanvas *gui1;
-        ofxUISuperCanvas *gui2;
-        ofxUISuperCanvas *gui3;
-        ofxUISuperCanvas *gui4;
-        ofxUISuperCanvas *gui5;
-        ofxUISuperCanvas *gui6;
-        ofxUISuperCanvas *gui7;
-        ofxUISuperCanvas *gui8Emitter;
-        ofxUISuperCanvas *gui8Grid;
-        ofxUISuperCanvas *gui8Boids;
-        ofxUISuperCanvas *gui8Animations;
-        vector<ofxUISuperCanvas *> particleGuis;
-        vector<ofxUISuperCanvas *> guis;
+//        ofxUISuperCanvas *gui0;
+//        ofxUISuperCanvas *gui1;
+//        ofxUISuperCanvas *gui2;
+//        ofxUISuperCanvas *gui3;
+//        ofxUISuperCanvas *gui4;
+//        ofxUISuperCanvas *gui5;
+//        ofxUISuperCanvas *gui6;
+//        ofxUISuperCanvas *gui7;
+//        ofxUISuperCanvas *gui8Emitter;
+//        ofxUISuperCanvas *gui8Grid;
+//        ofxUISuperCanvas *gui8Boids;
+//        ofxUISuperCanvas *gui8Animations;
+//        vector<ofxUISuperCanvas *> particleGuis;
+//        vector<ofxUISuperCanvas *> guis;
+        //--------------------------------------------------------------
+        ofxUIScrollableCanvas *gui0;
+        ofxUIScrollableCanvas *gui1;
+        ofxUIScrollableCanvas *gui2;
+        ofxUIScrollableCanvas *gui3;
+        ofxUIScrollableCanvas *gui4;
+        ofxUIScrollableCanvas *gui5;
+        ofxUIScrollableCanvas *gui6;
+        ofxUIScrollableCanvas *gui7;
+        ofxUIScrollableCanvas *gui8Emitter;
+        ofxUIScrollableCanvas *gui8Grid;
+        ofxUIScrollableCanvas *gui8Boids;
+        ofxUIScrollableCanvas *gui8Animations;
+        vector<ofxUIScrollableCanvas *> particleGuis;
+        vector<ofxUIScrollableCanvas *> guis;
         //--------------------------------------------------------------
         ofColor uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo;
         //--------------------------------------------------------------

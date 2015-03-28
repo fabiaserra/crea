@@ -113,10 +113,19 @@ class ParticleSystem
         bool markersInput;          // Input are the IR markers?
         bool contourInput;          // Input is the depth contour?
         float markerRadius;         // Radius of interaction of the markers
+        bool emitInMovement;        // Emit particles only in regions that there has been some movement?
+        bool emitAllTimeInside;     // Emit particles every frame inside all the defined area?
+        bool emitAllTimeContour;    // Emit particles every frame only on the contour of the defined area?
+        bool useFlow;               // Use optical flow to get the motion velocity?
+        bool useFlowRegion;         // Use optical flow region to get the motion velocity?
+        bool useContourArea;        // Use contour area to interact with particles?
+        bool useContourVel;         // Use contour velocities to interact with particles?
+
 
 	protected:
 		// Helper functions
 		ofPoint randomVector();
 		float randomRange(float percentage, float value);
 		ofPoint getClosestMarker(const Particle &particle, const vector<irMarker> &markers, float markerRadius);
+		ofPoint getClosestPointInContour(const Particle &particle, const Contour &contour);
 };
