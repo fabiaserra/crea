@@ -6,29 +6,13 @@ using namespace cv;
 Contour::Contour()
 {
     isActive = false;
-}
 
-void Contour::setup(int width, int height){
-    smoothingSize = 0;
-
-    this->width     = width;
-    this->height    = height;
+    opacity = 255.0;
 
     opticalFlow = true; // compute optical flow?
 
     scaleFactor = 4.0; // scaling factor of the depth image to compute the optical flow in lower res.
     flowScale = 0.1;   // scalar of flow velocities
-    rescaled.allocate((float)width/scaleFactor, (float)height/scaleFactor, OF_IMAGE_GRAYSCALE);
-    rescaledRect.set(0, 0, rescaled.width, rescaled.height);
-
-    contourFinder.setSortBySize(true);  // sort contours by size
-
-    contourFinderDiff.setMinAreaRadius(10);
-    contourFinderDiff.setMaxAreaRadius(500);
-
-    // allocate images
-    previous.allocate(width, height, OF_IMAGE_GRAYSCALE);
-    diff.allocate(width, height, OF_IMAGE_GRAYSCALE);
 
     // optical flow settings
     pyrScale        = 0.5;  // 0~1
@@ -46,11 +30,30 @@ void Contour::setup(int width, int height){
     drawContourLine     = false;
     drawQuads           = false;
     drawTangentLines    = false;
-    
+
     // debug
     drawDiff            = false;
     drawFlow            = false;
     drawVelocities      = false;
+}
+
+void Contour::setup(int width, int height){
+    smoothingSize = 0;
+
+    this->width     = width;
+    this->height    = height;
+
+    rescaled.allocate((float)width/scaleFactor, (float)height/scaleFactor, OF_IMAGE_GRAYSCALE);
+    rescaledRect.set(0, 0, rescaled.width, rescaled.height);
+
+    contourFinder.setSortBySize(true);  // sort contours by size
+
+    contourFinderDiff.setMinAreaRadius(10);
+    contourFinderDiff.setMaxAreaRadius(500);
+
+    // allocate images
+    previous.allocate(width, height, OF_IMAGE_GRAYSCALE);
+    diff.allocate(width, height, OF_IMAGE_GRAYSCALE);
 }
 
 void Contour::update(ofImage &depthImage){
@@ -86,7 +89,7 @@ void Contour::update(ofImage &depthImage){
 
         // Contour Finder in the depth diff Image
         contourFinderDiff.findContours(diff);
-        
+
         int n = contourFinder.size();
         int m = contourFinderDiff.size();
 
@@ -96,7 +99,7 @@ void Contour::update(ofImage &depthImage){
         contours.clear();
         quads.clear();
         diffContours.clear();
-        
+
         // Initialize vectors
         boundingRects.resize(n);
         convexHulls.resize(n);
@@ -115,13 +118,13 @@ void Contour::update(ofImage &depthImage){
             contour = contourFinder.getPolyline(i);
             contour = contour.getSmoothed(smoothingSize, 0.5);
             contours[i] = contour;
-            
+
             ofPolyline quad;
             quad = toOf(contourFinder.getFitQuad(i));
             quads[i] = quad;
         }
-        
-        
+
+
         for(int i = 0; i < m; i++){
             ofPolyline diffContour;
             diffContour = contourFinderDiff.getPolyline(i);
@@ -140,14 +143,14 @@ void Contour::draw(){
 
         if(drawBoundingRect){
             ofFill();
-            ofSetColor(255);
+            ofSetColor(255, opacity);
             for(int i = 0; i < boundingRects.size(); i++)
                 ofRect(boundingRects[i]);
         }
 
         if(drawConvexHull){
             ofFill();
-            ofSetColor(255);
+            ofSetColor(255, opacity);
             for(int i = 0; i < convexHulls.size(); i++){
                 ofBeginShape();
                 for(int j = 0; j < convexHulls[i].getVertices().size(); j++){
@@ -158,14 +161,14 @@ void Contour::draw(){
         }
 
         if(drawConvexHullLine){
-            ofSetColor(255, 0, 0);
+            ofSetColor(255, 0, 0, opacity);
             ofSetLineWidth(3);
             for(int i = 0; i < convexHulls.size(); i++)
                 convexHulls[i].draw(); //if we only want the contour
         }
 
         if(drawContourLine){
-            ofSetColor(0);
+            ofSetColor(0, opacity);
             ofSetLineWidth(3);
             for(int i = 0; i < contours.size(); i++){
 //                if(i == 0) ofSetColor(255, 0, 0);
@@ -174,15 +177,15 @@ void Contour::draw(){
                 contours[i].draw();
             }
         }
-        
+
         if(drawQuads){
-            ofSetColor(255);
+            ofSetColor(255, opacity);
             ofSetLineWidth(3);
             for(int i = 0; i < quads.size(); i++){
                 quads[i].draw();
             }
         }
-        
+
         if(drawDiff){
 //            ofSetColor(255);
 //            diff.draw(0, 0);
@@ -199,7 +202,7 @@ void Contour::draw(){
             ofSetColor(255, 0, 0);
             flow.draw(0, 0, width, height);
         }
-        
+
         if(drawVelocities){
             ofSetColor(255, 0, 0);
             ofSetLineWidth(1);

@@ -26,6 +26,8 @@ class Contour
         int width;
         int height;
         //--------------------------------------------------------------
+        float opacity;
+        //--------------------------------------------------------------
         bool opticalFlow;   // compute optical flow?
         float scaleFactor;  // scaling factor of the optical flow image
         float flowScale;    // scalar to multiply by the offset of flow
