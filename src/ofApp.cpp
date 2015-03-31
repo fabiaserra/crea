@@ -1058,11 +1058,12 @@ void ofApp::setupGUI8Emitter(){
     addParticleBasicsGUI(gui8Emitter, emitterParticles);
 
     gui8Emitter->addLabel("EMITTER", OFX_UI_FONT_LARGE);
-    gui8Emitter->addSpacer();
+    gui8Emitter->addSpacer(guiWidth, 10);
 
-//    addParticleInteractionGUI(gui8Emitter, emitterParticles);
+    addParticleInteractionGUI(gui8Emitter, emitterParticles);
 
     gui8Emitter->addLabel("Emitter", OFX_UI_FONT_LARGE);
+    gui8Emitter->addSpacer(guiWidth, 5);
     gui8Emitter->addSlider("Particles/sec", 0.0, 150.0, &emitterParticles->bornRate);
     gui8Emitter->addSlider("Velocity", 0.0, 100.0, &emitterParticles->velocity);
     gui8Emitter->addSlider("Velocity Random[%]", 0.0, 100.0, &emitterParticles->velocityRnd);
@@ -1107,7 +1108,7 @@ void ofApp::setupGUI8Grid(){
 
     addParticleBasicsGUI(gui8Grid, gridParticles);
 
-    gui8Grid->addLabel("GRID");
+    gui8Grid->addLabel("GRID", OFX_UI_FONT_LARGE);
     gui8Grid->addSpacer();
 
     addParticleInteractionGUI(gui8Grid, gridParticles);
@@ -1234,9 +1235,9 @@ void ofApp::addParticleBasicsGUI(ofxUIScrollableCanvas* gui, ParticleSystem* ps)
 //--------------------------------------------------------------
 void ofApp::addParticleInteractionGUI(ofxUIScrollableCanvas* gui, ParticleSystem* ps){
 //    gui->addSpacer();
-//    gui->addLabel("Interaction");
-//    gui->addToggle("Interact", &ps->interact);
-//    gui->addSlider("Marker interaction radius", 5.0, 150.0, &ps->markerRadius);
+    gui->addLabel("Interaction", OFX_UI_FONT_LARGE);
+    gui->addToggle("Interact", &ps->interact);
+    gui->addSlider("Marker interaction radius", 5.0, 150.0, &ps->markerRadius);
 //    gui->addToggle("Contour Optical Flow", &ps->useFlow);
 //    gui->addToggle("Contour Optical Flow Average", &ps->useFlowRegion);
 //    gui->addToggle("Contour Velocities", &ps->useContourVel);

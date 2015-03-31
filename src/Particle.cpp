@@ -116,10 +116,10 @@ void Particle::draw(){
             ofCircle(pos, radius);
         }
         else{
-//            if(pos.squareDistance(prevPos) > 5) ofLine(pos, pos-vel.getNormalized()*5);
+//            if(pos.squareDistance(prevPos) >= 25) ofLine(pos, pos-vel.getNormalized()*5);
 //            else ofLine(pos, prevPos);
 //            prevPos = pos;
-            ofLine(pos, pos-vel);
+            ofLine(pos, pos-vel.getNormalized()*radius);
         }
 
         // // Draw arrows
