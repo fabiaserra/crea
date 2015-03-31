@@ -74,10 +74,10 @@ void ofApp::setup(){
     grayThreshFar.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
     irImage.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
     irOriginal.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
-    
+
     croppingMask = Mat::ones(kinect.height, kinect.width, CV_8UC1);
     leftMask = 0; rightMask = kinect.width; topMask = 0; bottomMask = kinect.height;
-    
+
     // FILTER PARAMETERS DEPTH IMAGE
     numDilates = 4;
     numErodes = 2;
@@ -388,19 +388,19 @@ void ofApp::update(){
         erode(depthImage);
     }
     blur(depthImage, blurValue);
-    
+
     // Crop images
     Mat depthMat = toCv(depthImage);
     Mat irMat = toCv(irImage);
     Mat depthCropped = Mat::zeros(kinect.height, kinect.width, CV_8UC1);
     Mat irCropped = Mat::zeros(kinect.height, kinect.width, CV_8UC1);
-    
+
     depthCropped = depthMat.mul(croppingMask);
     irCropped = irMat.mul(croppingMask);
 
     copy(depthCropped, depthImage);
     copy(irCropped, irImage);
-    
+
     // Update images
     irImage.update();
     depthImage.update();
@@ -791,12 +791,12 @@ void ofApp::setupGUI2(){
     gui2->addRangeSlider("Clipping range", 500, 5000, &nearClipping, &farClipping);
     gui2->addRangeSlider("Threshold range", 0.0, 255.0, &farThreshold, &nearThreshold);
     gui2->addRangeSlider("Contour size", 0.0, 400.0, &minContourSize, &maxContourSize);
-    
+
 //    gui2->addIntSlider("Left Crop", 0, 480, &leftMask);
 //    gui2->addIntSlider("Right Crop", 0, 480, &rightMask);
 //    gui2->addIntSlider("Top Crop", 0, 640, &topMask);
 //    gui2->addIntSlider("Bottom Crop", 0, 640, &bottomMask);
-    
+
     gui2->addRangeSlider("Left/Right Crop", 0.0, 640.0, &leftMask, &rightMask);
     gui2->addRangeSlider("Top/Bottom Crop", 0.0, 480.0, &topMask, &bottomMask);
 
@@ -829,7 +829,7 @@ void ofApp::setupGUI2(){
     gui2->autoSizeToFitWidgets();
     gui2->setVisible(false);
     ofAddListener(gui2->newGUIEvent, this, &ofApp::guiEvent);
-//    guis.push_back(gui2);
+    guis.push_back(gui2);
 }
 
 //--------------------------------------------------------------
@@ -1024,6 +1024,7 @@ void ofApp::setupGUI7(){
     ofxUIImageToggle *active;
     active = gui7->addImageToggle("Activate Contour", "icons/show.png", &contour.isActive, dim, dim);
     active->setColorBack(ofColor(150, 255));
+    gui7->addSlider("Opacity", 0.0, 255.0, &contour.opacity);
 
     gui7->addSpacer();
     gui7->addToggle("Bounding Rectangle", &contour.drawBoundingRect);
@@ -1038,7 +1039,7 @@ void ofApp::setupGUI7(){
     gui7->addToggle("Optical Flow", &contour.drawFlow);
     gui7->addToggle("Difference", &contour.drawDiff);
     gui7->addToggle("Contour Velocities", &contour.drawVelocities);
-    
+
     gui7->autoSizeToFitWidgets();
     gui7->setVisible(false);
     ofAddListener(gui7->newGUIEvent, this, &ofApp::guiEvent);
@@ -1056,32 +1057,31 @@ void ofApp::setupGUI8Emitter(){
 
     addParticleBasicsGUI(gui8Emitter, emitterParticles);
 
+    gui8Emitter->addLabel("EMITTER", OFX_UI_FONT_LARGE);
     gui8Emitter->addSpacer();
-    gui8Emitter->addLabel("EMITTER");
-    gui8Emitter->addSpacer();
-    
-    addParticleInteractionGUI(gui8Emitter, emitterParticles);
 
-    gui8Emitter->addLabel("Emitter");
-    gui8Emitter->addSlider("Particles/sec", 0.0, 60.0, &emitterParticles->bornRate);
+//    addParticleInteractionGUI(gui8Emitter, emitterParticles);
+
+    gui8Emitter->addLabel("Emitter", OFX_UI_FONT_LARGE);
+    gui8Emitter->addSlider("Particles/sec", 0.0, 150.0, &emitterParticles->bornRate);
     gui8Emitter->addSlider("Velocity", 0.0, 100.0, &emitterParticles->velocity);
     gui8Emitter->addSlider("Velocity Random[%]", 0.0, 100.0, &emitterParticles->velocityRnd);
     gui8Emitter->addSlider("Velocity from Motion[%]", 0.0, 100.0, &emitterParticles->velocityMotion);
     gui8Emitter->addSlider("Emitter size", 0.0, 60.0, &emitterParticles->emitterSize);
-    
+
     vector<string> emitters;
     emitters.push_back("Emit all time");
     emitters.push_back("Emit all time on contour");
     emitters.push_back("Emit only if movement");
     gui8Emitter->addRadio("Emitters", emitters, OFX_UI_ORIENTATION_VERTICAL);
-    
+
     addParticlePropertiesGUI(gui8Emitter, emitterParticles);
 
-    gui8Emitter->addLabel("Time behavior");
+    gui8Emitter->addLabel("Time behavior", OFX_UI_FONT_LARGE);
     gui8Emitter->addToggle("Size", &emitterParticles->sizeAge);
     gui8Emitter->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui8Emitter->setWidgetSpacing(10);
-    gui8Emitter->addToggle("Opacity", &emitterParticles->opacityAge);
+    gui8Emitter->addToggle("Alpha", &emitterParticles->opacityAge);
     gui8Emitter->addToggle("Flickers", &emitterParticles->flickersAge);
     gui8Emitter->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui8Emitter->setWidgetSpacing(3);
@@ -1107,10 +1107,9 @@ void ofApp::setupGUI8Grid(){
 
     addParticleBasicsGUI(gui8Grid, gridParticles);
 
-    gui8Grid->addSpacer();
     gui8Grid->addLabel("GRID");
     gui8Grid->addSpacer();
-    
+
     addParticleInteractionGUI(gui8Grid, gridParticles);
 
     gui8Grid->addSlider("Radius", 0.1, 25.0, &gridParticles->radius);
@@ -1136,11 +1135,10 @@ void ofApp::setupGUI8Boids(){
 
     addParticleBasicsGUI(gui8Boids, boidsParticles);
 
-    gui8Boids->addSpacer();
     gui8Boids->addLabel("BOIDS");
     gui8Boids->addSpacer();
-    
-    addParticleInteractionGUI(gui8Boids, boidsParticles);
+
+//    addParticleInteractionGUI(gui8Boids, boidsParticles);
 
     gui8Boids->addLabel("Flocking");
     gui8Boids->addSlider("Flocking Radius", 10.0, 100.0, &boidsParticles->flockingRadius);
@@ -1174,11 +1172,8 @@ void ofApp::setupGUI8Animations(){
 
     addParticleBasicsGUI(gui8Animations, animationsParticles);
 
-    gui8Animations->addSpacer();
     gui8Animations->addLabel("ANIMATIONS");
     gui8Animations->addSpacer();
-    
-    addParticleInteractionGUI(gui8Animations, animationsParticles);
 
     vector<string> animations;
 	animations.push_back("Rain");
@@ -1222,7 +1217,7 @@ void ofApp::addParticleBasicsGUI(ofxUIScrollableCanvas* gui, ParticleSystem* ps)
     ofxUIImageButton *next;
     next = gui->addImageButton("Next Particle System", "icons/play.png", false, dim, dim);
     next->setColorBack(ofColor(150, 255));
- 
+
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui->addSpacer();
     gui->addToggle("Marker", &ps->markersInput);
@@ -1231,22 +1226,22 @@ void ofApp::addParticleBasicsGUI(ofxUIScrollableCanvas* gui, ParticleSystem* ps)
     gui->addToggle("Contour", &ps->contourInput);
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui->setWidgetSpacing(3);
-    
+
     gui->addSlider("Opacity", 0.0, 255.0, &ps->opacity);
     gui->addSpacer();
 }
 
 //--------------------------------------------------------------
 void ofApp::addParticleInteractionGUI(ofxUIScrollableCanvas* gui, ParticleSystem* ps){
-    gui->addSpacer();
-    gui->addLabel("Interaction");
-    gui->addToggle("Interact", &ps->interact);
-    gui->addSlider("Marker interaction radius", 5.0, 150.0, &ps->markerRadius);
-    gui->addToggle("Contour Optical Flow", &ps->useFlow);
-    gui->addToggle("Contour Optical Flow Average", &ps->useFlowRegion);
-    gui->addToggle("Contour Velocities", &ps->useContourVel);
-    gui->addToggle("Contour Area", &ps->useContourArea);
-    gui->addSpacer();
+//    gui->addSpacer();
+//    gui->addLabel("Interaction");
+//    gui->addToggle("Interact", &ps->interact);
+//    gui->addSlider("Marker interaction radius", 5.0, 150.0, &ps->markerRadius);
+//    gui->addToggle("Contour Optical Flow", &ps->useFlow);
+//    gui->addToggle("Contour Optical Flow Average", &ps->useFlowRegion);
+//    gui->addToggle("Contour Velocities", &ps->useContourVel);
+//    gui->addToggle("Contour Area", &ps->useContourArea);
+//    gui->addSpacer();
 }
 
 //--------------------------------------------------------------
@@ -1932,6 +1927,12 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             particleGuis.at(currentParticleSystem)->setVisible(true);
         }
     }
+    if(e.getName() == "Contour"){
+        ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
+        if(toggle->getValue() == true){
+            contour.isActive = true; // activate contour detection in case it is not active yet
+        }
+    }
     // EMITTER SPECIFIC
     if(e.getName() == "Emitters"){
         ofxUIRadio *radio = (ofxUIRadio *) e.widget;
@@ -2032,116 +2033,94 @@ void ofApp::exit(){
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
     if(!cueName->isFocused()){
-        if(key == 'f') ofToggleFullscreen();
+        if(key == 'f'){
+            ofToggleFullscreen();
+        }
         else if(key == 'h'){
-            gui0->setVisible(false);
-            gui1->setVisible(false);
-            gui2->setVisible(false);
-            gui3->setVisible(false);
-            gui4->setVisible(false);
-            gui5->setVisible(false);
-            gui6->setVisible(false);
-            gui7->setVisible(false);
-            particleGuis.at(currentParticleSystem)->setVisible(false);
+            for(vector<ofxUIScrollableCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
+                (*it)->setVisible(false);
+            }
         }
         else if(key == '0' || key == '`'){
-            gui0->toggleVisible();
-            gui1->setVisible(false);
-            gui2->setVisible(false);
-            gui3->setVisible(false);
-            gui4->setVisible(false);
-            gui5->setVisible(false);
-            gui6->setVisible(false);
-            gui7->setVisible(false);
-            particleGuis.at(currentParticleSystem)->setVisible(false);
+            int idx = 0;
+            for(vector<ofxUIScrollableCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
+                if(idx == 0) (*it)->toggleVisible();
+                else (*it)->setVisible(false);
+                (*it)->autoSizeToFitWidgets();
+                idx++;
+            }
         }
         else if(key == '1'){
-            gui0->setVisible(false);
-            gui1->toggleVisible();
-            gui2->setVisible(false);
-            gui3->setVisible(false);
-            gui4->setVisible(false);
-            gui5->setVisible(false);
-            gui6->setVisible(false);
-            gui7->setVisible(false);
-            particleGuis.at(currentParticleSystem)->setVisible(false);
+            int idx = 0;
+            for(vector<ofxUIScrollableCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
+                if(idx == 1) (*it)->toggleVisible();
+                else (*it)->setVisible(false);
+                (*it)->autoSizeToFitWidgets();
+                idx++;
+            }
         }
         else if(key == '2'){
-            gui0->setVisible(false);
-            gui1->setVisible(false);
-            gui2->toggleVisible();
-            gui3->setVisible(false);
-            gui4->setVisible(false);
-            gui5->setVisible(false);
-            gui6->setVisible(false);
-            gui7->setVisible(false);
-            particleGuis.at(currentParticleSystem)->setVisible(false);
+            int idx = 0;
+            for(vector<ofxUIScrollableCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
+                if(idx == 2) (*it)->toggleVisible();
+                else (*it)->setVisible(false);
+                (*it)->autoSizeToFitWidgets();
+                idx++;
+            }
         }
         else if(key == '3'){
-            gui0->setVisible(false);
-            gui1->setVisible(false);
-            gui2->setVisible(false);
-            gui3->toggleVisible();
-            gui4->setVisible(false);
-            gui5->setVisible(false);
-            gui6->setVisible(false);
-            gui7->setVisible(false);
-            particleGuis.at(currentParticleSystem)->setVisible(false);
+            int idx = 0;
+            for(vector<ofxUIScrollableCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
+                if(idx == 3) (*it)->toggleVisible();
+                else (*it)->setVisible(false);
+                (*it)->autoSizeToFitWidgets();
+                idx++;
+            }
         }
         else if(key == '4'){
-            gui0->setVisible(false);
-            gui1->setVisible(false);
-            gui2->setVisible(false);
-            gui3->setVisible(false);
-            gui4->toggleVisible();
-            gui5->setVisible(false);
-            gui6->setVisible(false);
-            gui7->setVisible(false);
-            particleGuis.at(currentParticleSystem)->setVisible(false);
+            int idx = 0;
+            for(vector<ofxUIScrollableCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
+                if(idx == 4) (*it)->toggleVisible();
+                else (*it)->setVisible(false);
+                (*it)->autoSizeToFitWidgets();
+                idx++;
+            }
         }
         else if(key == '5'){
-            gui0->setVisible(false);
-            gui1->setVisible(false);
-            gui2->setVisible(false);
-            gui3->setVisible(false);
-            gui4->setVisible(false);
-            gui5->toggleVisible();
-            gui6->setVisible(false);
-            gui7->setVisible(false);
-            particleGuis.at(currentParticleSystem)->setVisible(false);
+            int idx = 0;
+            for(vector<ofxUIScrollableCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
+                if(idx == 5) (*it)->toggleVisible();
+                else (*it)->setVisible(false);
+                (*it)->autoSizeToFitWidgets();
+                idx++;
+            }
         }
         else if(key == '6'){
-            gui0->setVisible(false);
-            gui1->setVisible(false);
-            gui2->setVisible(false);
-            gui3->setVisible(false);
-            gui4->setVisible(false);
-            gui5->setVisible(false);
-            gui6->toggleVisible();
-            gui7->setVisible(false);
-            particleGuis.at(currentParticleSystem)->setVisible(false);
+            int idx = 0;
+            for(vector<ofxUIScrollableCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
+                if(idx == 6) (*it)->toggleVisible();
+                else (*it)->setVisible(false);
+                (*it)->autoSizeToFitWidgets();
+                idx++;
+            }
         }
         else if(key == '7'){
-            gui0->setVisible(false);
-            gui1->setVisible(false);
-            gui2->setVisible(false);
-            gui3->setVisible(false);
-            gui4->setVisible(false);
-            gui5->setVisible(false);
-            gui6->setVisible(false);
-            gui7->toggleVisible();
-            particleGuis.at(currentParticleSystem)->setVisible(false);
+            int idx = 0;
+            for(vector<ofxUIScrollableCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
+                if(idx == 7) (*it)->toggleVisible();
+                else (*it)->setVisible(false);
+                (*it)->autoSizeToFitWidgets();
+                idx++;
+            }
         }
         else if(key == '8'){
-            gui0->setVisible(false);
-            gui1->setVisible(false);
-            gui2->setVisible(false);
-            gui3->setVisible(false);
-            gui4->setVisible(false);
-            gui5->setVisible(false);
-            gui6->setVisible(false);
-            gui7->setVisible(false);
-            particleGuis.at(currentParticleSystem)->toggleVisible();
+            int idx = 0;
+            for(vector<ofxUIScrollableCanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
+                if(idx == 8 + currentParticleSystem) (*it)->toggleVisible();
+                else (*it)->setVisible(false);
+                (*it)->autoSizeToFitWidgets();
+                idx++;
+            }
         }
         else if(key == ' '){
             ofxUILabelButton *button = (ofxUILabelButton *) gui5->getWidget("GO");
