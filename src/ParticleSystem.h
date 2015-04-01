@@ -126,6 +126,7 @@ class ParticleSystem
 		// Helper functions
 		ofPoint randomVector();
 		float randomRange(float percentage, float value);
-		ofPoint getClosestMarker(const Particle &particle, const vector<irMarker> &markers, float markerRadius);
+//		ofPoint getClosestMarker(const Particle &particle, const vector<irMarker> &markers, float markerRadius);
+		irMarker getClosestMarker(const Particle &particle, const vector<irMarker> &markers, float markerRadius);
 		ofPoint getClosestPointInContour(const Particle &particle, const Contour &contour);
 };

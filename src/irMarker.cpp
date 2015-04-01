@@ -7,7 +7,7 @@ irMarker::irMarker(){
     startedDying    = 0;
     dyingTime       = 3;
     bornRate        = 3;
-    hasDisappeared  = false;
+    hasDisappeared  = true;
 }
 
 void irMarker::setup(const cv::Rect& track){
@@ -16,6 +16,7 @@ void irMarker::setup(const cv::Rect& track){
     smoothPos = currentPos;
     previousPos = currentPos;
     all.curveTo(smoothPos); // necessary duplicate first point for control point
+    hasDisappeared  = false;
 }
 
 void irMarker::update(const cv::Rect& track){

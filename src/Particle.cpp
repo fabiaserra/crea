@@ -22,7 +22,7 @@ Particle::Particle(){
 
     limitSpeed      = false;
     bounceDamping   = true;
-    damping         = 0.5;
+    damping         = 0.3;
 
     age             = 0;
 
@@ -376,7 +376,6 @@ void Particle::bounceParticle(){
 
     if (isBouncing && bounceDamping){
         vel *= damping;
-        // vel.y *= -0.5;
     }
 }
 
