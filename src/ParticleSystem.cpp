@@ -171,7 +171,7 @@ void ParticleSystem::setup(ParticleMode particleMode, InputSource inputSource, i
         }
         else if(animation == EXPLOSION){
             radius          = 6.0;
-            radiusRnd       = 60.0;
+            radiusRnd       = 30.0;
 
             velocityRnd     = 0.0;
 

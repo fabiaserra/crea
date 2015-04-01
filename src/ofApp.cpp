@@ -1165,11 +1165,11 @@ void ofApp::setupGUI8Boids(){
 
     gui8Boids->addLabel("Interaction", OFX_UI_FONT_LARGE);
     gui8Boids->addToggle("Interact", &boidsParticles->interact);
-//    gui8Boids->addToggle("Optical Flow", &boidsParticles->useFlow);
-//    gui8Boids->addToggle("Contour Area", &boidsParticles->useContourArea);
-//    gui8Boids->addToggle("Gravity Interaction", &boidsParticles->gravityInteraction);
-//    gui8Boids->addToggle("Repulse Interaction", &boidsParticles->repulseInteraction);
-//    gui8Boids->addToggle("Attract Interaction", &boidsParticles->attractInteraction);
+    gui8Boids->addSpacer();
+    gui8Boids->addSlider("Marker interaction radius", 5.0, 150.0, &boidsParticles->markerRadius);
+    gui8Boids->addSpacer();
+    gui8Boids->addToggle("Repulse particle/particle", &boidsParticles->repulse);
+    gui8Boids->addSpacer();
 
     addParticlePropertiesGUI(gui8Boids, boidsParticles);
     addParticlePhysicsGUI(gui8Boids, boidsParticles);
@@ -1204,6 +1204,11 @@ void ofApp::setupGUI8Animations(){
 
     gui8Animations->addLabel("Interaction", OFX_UI_FONT_LARGE);
     gui8Animations->addToggle("Interact", &animationsParticles->interact);
+    gui8Animations->addSpacer();
+    gui8Animations->addSlider("Marker interaction radius", 5.0, 150.0, &animationsParticles->markerRadius);
+    gui8Animations->addSpacer();
+    gui8Animations->addToggle("Repulse particle/particle", &animationsParticles->repulse);
+    gui8Animations->addSpacer();
 
     addParticlePropertiesGUI(gui8Animations, animationsParticles);
     addParticlePhysicsGUI(gui8Animations, animationsParticles);
