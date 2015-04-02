@@ -33,7 +33,7 @@ void ofApp::setup(){
         ofDirectory dir;                    // directory lister
         dir.allowExt("jpg");
 
-        string depthFolder = "depth1/";
+        string depthFolder = "kinect/depth1/";
         int totalImages = dir.listDir(depthFolder);
         dir.sort();
         savedDepthImages.resize(totalImages);
@@ -46,7 +46,7 @@ void ofApp::setup(){
             savedDepthImages[i] = img;
         }
 
-        string irFolder = "ir1/";
+        string irFolder = "kinect/ir1/";
         totalImages = dir.listDir(irFolder);
         dir.sort();
         savedIrImages.resize(totalImages);

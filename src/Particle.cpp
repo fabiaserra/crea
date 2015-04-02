@@ -119,6 +119,7 @@ void Particle::draw(){
 //            if(pos.squareDistance(prevPos) >= 25) ofLine(pos, pos-vel.getNormalized()*5);
 //            else ofLine(pos, prevPos);
 //            prevPos = pos;
+            ofSetLineWidth(ofMap(radius, 0, 15, 1, 5, true));
             ofLine(pos, pos-vel.getNormalized()*radius);
         }
 
