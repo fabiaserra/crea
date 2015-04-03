@@ -8,6 +8,19 @@ void ofApp::setup(){
 
     ofSetFrameRate(60);
 //    ofSetVerticalSync(false);
+    
+    // the arguments for the second window are its initial x and y position,
+    // and its width and height. the last argument is whether the window
+    // should be undecorated, i.e. title bar is visible. setting it to
+    // true removes the title bar.
+    
+    secondWindow.setup("second window", 50, 50, 1024, 768, false);
+    
+    // running the command below positions an undecorated window to display on a second
+    // monitor or projector. this is a good way to set up a fullscreen display, while
+    // retaining a control window in the primary monitor.
+    
+    //secondWindow.setup("second window", ofGetScreenWidth(), 0, 1280, 800, true);
 
     ofHideCursor(); // trick to show the cursor icon (see mouseMoved())
 
@@ -574,7 +587,11 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-
+    
+    #ifdef SECOND_WINDOW
+        secondWindow.begin();
+    #endif //SECOND_WINDOW
+    
     ofPushMatrix();
     ofColor contourBg(red, green, blue);
     ofColor centerBg(red, green, blue);
@@ -652,6 +669,10 @@ void ofApp::draw(){
     ofPopMatrix();
 
     if(drawSequencePatternsSeparate) sequence.drawPatternsSeparate(gestureUpdate);
+    
+    #ifdef SECOND_WINDOW
+        secondWindow.end();
+    #endif //SECOND_WINDOW
 }
 
 //--------------------------------------------------------------

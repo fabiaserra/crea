@@ -7,6 +7,8 @@
 #include "ofxCv.h"
 #include "ofxKinect.h"
 
+#include "ofxSecondWindow.h"
+
 // Classes
 //-----------------------
 #include "ParticleSystem.h"
@@ -24,6 +26,9 @@
 
 // Uncomment this to use an xml sequence file for the tracking
 //#define KINECT_SEQUENCE
+
+// Uncomment this to use a separate glfw window to draw the GUI
+#define SECOND_WINDOW
 
 class ofApp : public ofBaseApp{
 
@@ -150,6 +155,8 @@ class ofApp : public ofBaseApp{
 //        ofxUISuperCanvas *gui8Animations;
 //        vector<ofxUISuperCanvas *> particleGuis;
 //        vector<ofxUISuperCanvas *> guis;
+        //--------------------------------------------------------------
+        ofxSecondWindow secondWindow;
         //--------------------------------------------------------------
         ofxUIScrollableCanvas *gui0;
         ofxUIScrollableCanvas *gui1;
