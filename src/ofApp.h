@@ -6,7 +6,6 @@
 #include "ofxUI.h"
 #include "ofxCv.h"
 #include "ofxKinect.h"
-
 #include "ofxSecondWindow.h"
 
 // Classes
@@ -22,13 +21,10 @@
 #include "helper.h"
 
 // comment this to use the recorded images
-//#define KINECT_CONNECTED
+#define KINECT_CONNECTED
 
 // Uncomment this to use an xml sequence file for the tracking
 //#define KINECT_SEQUENCE
-
-// Uncomment this to use a separate glfw window to draw the GUI
-#define SECOND_WINDOW
 
 class ofApp : public ofBaseApp{
 
@@ -36,19 +32,18 @@ class ofApp : public ofBaseApp{
         void setup();
         void update();
         void draw();
-
-        void setupGUI0();
-        void setupGUI1();
-        void setupGUI2();
-        void setupGUI3();
-        void setupGUI4();
-        void setupGUI5();
-        void setupGUI6();
-        void setupGUI7();
-        void setupGUI8Emitter();
-        void setupGUI8Grid();
-        void setupGUI8Boids();
-        void setupGUI8Animations();
+    
+        void setupHelperGUI();
+        void setupBasicsGUI();
+        void setupKinectGUI();
+        void setupGesturesGUI();
+        void setupCueListGUI();
+        void setupFluidSolverGUI();
+        void setupContourGUI();
+        void setupEmitterGUI();
+        void setupGridGUI();
+        void setupBoidsGUI();
+        void setupAnimationsGUI();
 
         void saveGUISettings(const string path, const bool saveCues);
         void loadGUISettings(const string path, const bool interpolate, const bool loadCues);
@@ -68,10 +63,10 @@ class ofApp : public ofBaseApp{
         void dragEvent(ofDragInfo dragInfo);
         void gotMessage(ofMessage msg);
 
-        void addParticleBasicsGUI(ofxUIScrollableCanvas* gui, ParticleSystem* ps);
-        void addParticleInteractionGUI(ofxUIScrollableCanvas* gui, ParticleSystem* ps);
-        void addParticlePropertiesGUI(ofxUIScrollableCanvas* gui, ParticleSystem* ps);
-        void addParticlePhysicsGUI(ofxUIScrollableCanvas* gui, ParticleSystem* ps);
+        void addParticleBasicsGUI(ofxUICanvas* gui, ParticleSystem* ps);
+        void addParticleInteractionGUI(ofxUICanvas* gui, ParticleSystem* ps);
+        void addParticlePropertiesGUI(ofxUICanvas* gui, ParticleSystem* ps);
+        void addParticlePhysicsGUI(ofxUICanvas* gui, ParticleSystem* ps);
 
         //--------------------------------------------------------------
         float time0;            // Time value for computing dt
@@ -141,37 +136,10 @@ class ofApp : public ofBaseApp{
         bool drawMarkers;
         bool drawMarkersPath;
         //--------------------------------------------------------------
-//        ofxUISuperCanvas *gui0;
-//        ofxUISuperCanvas *gui1;
-//        ofxUISuperCanvas *gui2;
-//        ofxUISuperCanvas *gui3;
-//        ofxUISuperCanvas *gui4;
-//        ofxUISuperCanvas *gui5;
-//        ofxUISuperCanvas *gui6;
-//        ofxUISuperCanvas *gui7;
-//        ofxUISuperCanvas *gui8Emitter;
-//        ofxUISuperCanvas *gui8Grid;
-//        ofxUISuperCanvas *gui8Boids;
-//        ofxUISuperCanvas *gui8Animations;
-//        vector<ofxUISuperCanvas *> particleGuis;
-//        vector<ofxUISuperCanvas *> guis;
-        //--------------------------------------------------------------
         ofxSecondWindow secondWindow;
         //--------------------------------------------------------------
-        ofxUIScrollableCanvas *gui0;
-        ofxUIScrollableCanvas *gui1;
-        ofxUIScrollableCanvas *gui2;
-        ofxUIScrollableCanvas *gui3;
-        ofxUIScrollableCanvas *gui4;
-        ofxUIScrollableCanvas *gui5;
-        ofxUIScrollableCanvas *gui6;
-        ofxUIScrollableCanvas *gui7;
-        ofxUIScrollableCanvas *gui8Emitter;
-        ofxUIScrollableCanvas *gui8Grid;
-        ofxUIScrollableCanvas *gui8Boids;
-        ofxUIScrollableCanvas *gui8Animations;
-        vector<ofxUIScrollableCanvas *> particleGuis;
-        vector<ofxUIScrollableCanvas *> guis;
+//        vector< vector<ofxUICanvas *> > particleGuis;
+        vector<ofxUICanvas *> guis;
         //--------------------------------------------------------------
         ofColor uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo;
         //--------------------------------------------------------------
@@ -191,6 +159,7 @@ class ofApp : public ofBaseApp{
         //--------------------------------------------------------------
         float dim;                            // Size of GUI elements
         float guiWidth;
+        float guiMargin;
         //--------------------------------------------------------------
         float red, green, blue;
         bool bgGradient;
