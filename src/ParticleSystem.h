@@ -57,6 +57,7 @@ class ParticleSystem
         float radius;               // Radius of the particles
         float lifetime;             // Lifetime of particles
         ofColor color;              // Color of the particles
+        float red, green, blue;         // Color of particles 
         //--------------------------------------------------------------
         // Specific properties
         float nParticles;           // Number of particles born in the beginning

@@ -13,9 +13,12 @@ ParticleSystem::ParticleSystem(){
     immortal            = false;        // Can particles die?
     velocity            = 0.0;          // Initial velocity magnitude of newborn particles
     radius              = 3.0;          // Radius of the particles
-    color               = ofColor(255); // Color of the particles
     lifetime            = 5.0;          // Lifetime of particles
-
+    red                 = 255;
+    green               = 255;
+    blue                = 255;
+    color               = ofColor(red, green, blue); // Color of the particles
+    
     // Specific properties
     nParticles          = 600;          // Number of particles born in the beginning
     bornRate            = 5.0;          // Number of particles born per frame
@@ -175,7 +178,7 @@ void ParticleSystem::setup(ParticleMode particleMode, InputSource inputSource, i
 
             velocityRnd     = 0.0;
 
-            friction        = 80.0;
+            friction        = 70.0;
 
             lifetime        = 3.0;
             lifetimeRnd     = 20.0;
@@ -375,7 +378,7 @@ void ParticleSystem::draw(){
         if(drawConnections){
             float dist = 15; //Threshold parameter of distance
             float distSqrd = dist*dist;
-            ofSetColor(color, opacity);
+            ofSetColor(ofColor(red, green, blue), opacity);
             for(int i = 0; i < particles.size(); i++){
                 for(int j = i-1; j >= 0; j--){
                     if (fabs(particles[j]->pos.x - particles[i]->pos.x) > dist) break; // to speed the loop
@@ -392,6 +395,10 @@ void ParticleSystem::draw(){
 void ParticleSystem::addParticle(ofPoint pos, ofPoint vel, ofColor color, float radius, float lifetime){
     Particle * newParticle = new Particle();
     float id = totalParticlesCreated;
+    
+//    float initialRadius = radius + randomRange(radiusRnd, radius);
+//    float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
+//    ofColor color(red, green, blue);
 
     newParticle->sizeAge        = sizeAge;
     newParticle->opacityAge     = opacityAge;
@@ -434,7 +441,7 @@ void ParticleSystem::addParticles(int n){
         float initialRadius = radius + randomRange(radiusRnd, radius);
         float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
 
-        addParticle(pos, vel, color, initialRadius, lifetime);
+        addParticle(pos, vel, ofColor(red, green, blue), initialRadius, lifetime);
     }
 }
 
@@ -455,7 +462,8 @@ void ParticleSystem::addParticles(int n, const irMarker &marker){
         float initialRadius = radius + randomRange(radiusRnd, radius);
         float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
 
-        addParticle(pos, vel, marker.color, initialRadius, lifetime);
+//        addParticle(pos, vel, marker.color, initialRadius, lifetime);
+        addParticle(pos, vel, ofColor(red, green, blue), initialRadius, lifetime);
     }
 }
 
@@ -511,7 +519,7 @@ void ParticleSystem::addParticles(int n, const ofPolyline &contour, Contour &flo
         float initialRadius = radius + randomRange(radiusRnd, radius);
         float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
 
-        addParticle(pos, vel, color, initialRadius, lifetime);
+        addParticle(pos, vel, ofColor(red, green, blue), initialRadius, lifetime);
     }
 }
 
@@ -527,7 +535,7 @@ void ParticleSystem::createParticleGrid(int width, int height){
 //            float xyOffset = sin( cos( sin( yi * 0.3183f ) + cos( xi * 0.3183f ) ) ) + 1.0f;
 //            float initialRadius = xyOffset * xyOffset * 1.8f;
             ofPoint vel = ofPoint(0, 0);
-            addParticle(ofPoint(xi, yi), vel, color, radius, lifetime);
+            addParticle(ofPoint(xi, yi), vel, ofColor(red, green, blue), radius, lifetime);
         }
     }
 }
