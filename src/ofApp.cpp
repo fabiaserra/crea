@@ -730,10 +730,15 @@ void ofApp::setupBasicsGUI(){
     guiBasics->addSpacer();
     guiBasics->addLabel("Background", OFX_UI_FONT_MEDIUM);
     guiBasics->addSpacer();
-    guiBasics->addSlider("Red", 0.0, 255.0, &red);
-    guiBasics->addSlider("Green", 0.0, 255.0, &green);
-    guiBasics->addSlider("Blue", 0.0, 255.0, &blue);
-    guiBasics->addToggle("Gradient", &bgGradient);
+    ofxUISlider *redSlider = guiBasics->addSlider("Red", 0.0, 255.0, &red);
+    redSlider->setColorFill(ofColor(240, 30, 30));
+    redSlider->setColorFillHighlight(ofColor(150, 30, 30));
+    ofxUISlider *greenSlider = guiBasics->addSlider("Green", 0.0, 255.0, &green);
+    greenSlider->setColorFill(ofColor(30, 240, 30));
+    greenSlider->setColorFillHighlight(ofColor(30, 150, 30));
+    ofxUISlider *blueSlider = guiBasics->addSlider("Blue", 0.0, 255.0, &blue);
+    blueSlider->setColorFill(ofColor(30, 30, 240));
+    blueSlider->setColorFillHighlight(ofColor(30, 30, 150));
 
     guiBasics->addSpacer();
     guiBasics->addLabel("Settings", OFX_UI_FONT_MEDIUM);
@@ -1182,15 +1187,15 @@ void ofApp::addParticleBasicsGUI(ofxUICanvas* gui, ParticleSystem* ps){
     gui->setWidgetSpacing(3);
     
     gui->addSpacer();
-    ofxUISlider *red = gui->addSlider("Red", 0.0, 255.0, &ps->red);
-    red->setColorFill(ofColor(240, 30, 30));
-    red->setColorFillHighlight(ofColor(150, 30, 30));
-    ofxUISlider *green = gui->addSlider("Green", 0.0, 255.0, &ps->green);
-    green->setColorFill(ofColor(30, 240, 30));
-    green->setColorFillHighlight(ofColor(30, 150, 30));
-    ofxUISlider *blue = gui->addSlider("Blue", 0.0, 255.0, &ps->blue);
-    blue->setColorFill(ofColor(30, 30, 240));
-    blue->setColorFillHighlight(ofColor(30, 30, 150));
+    ofxUISlider *redSlider = gui->addSlider("Red", 0.0, 255.0, &ps->red);
+    redSlider->setColorFill(ofColor(240, 30, 30));
+    redSlider->setColorFillHighlight(ofColor(150, 30, 30));
+    ofxUISlider *greenSlider = gui->addSlider("Green", 0.0, 255.0, &ps->green);
+    greenSlider->setColorFill(ofColor(30, 240, 30));
+    greenSlider->setColorFillHighlight(ofColor(30, 150, 30));
+    ofxUISlider *blueSlider = gui->addSlider("Blue", 0.0, 255.0, &ps->blue);
+    blueSlider->setColorFill(ofColor(30, 30, 240));
+    blueSlider->setColorFillHighlight(ofColor(30, 30, 150));
 
     gui->addSpacer();
     gui->addSlider("Opacity", 0.0, 255.0, &ps->opacity);
