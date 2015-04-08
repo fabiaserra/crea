@@ -7,6 +7,7 @@
 #include "ofxCv.h"
 #include "ofxKinect.h"
 #include "ofxSecondWindow.h"
+#include "ofxFluid.h"
 
 // Classes
 //-----------------------
@@ -27,7 +28,6 @@
 //#define KINECT_SEQUENCE
 
 class ofApp : public ofBaseApp{
-
     public:
         void setup();
         void update();
@@ -104,6 +104,8 @@ class ofApp : public ofBaseApp{
 //        vector<irMarker> markers;
         int numMarkers;
         //--------------------------------------------------------------
+        Contour contour;        // User silhouette contour
+        //--------------------------------------------------------------
         ParticleSystem *emitterParticles;
         ParticleSystem *gridParticles;
         ParticleSystem *boidsParticles;
@@ -111,7 +113,7 @@ class ofApp : public ofBaseApp{
         vector<ParticleSystem *> particleSystems;
         int currentParticleSystem;
         //--------------------------------------------------------------
-        Contour contour;        // User silhouette contour
+        ofxFluid fluid;
         //--------------------------------------------------------------
         ofSoundPlayer song;     // Song
         //--------------------------------------------------------------

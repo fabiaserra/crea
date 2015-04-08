@@ -5,23 +5,30 @@ using namespace cv;
 
 Contour::Contour()
 {
-    isActive = false;
+    isActive            = false;
+    
+    red                 = 255.0;
+    green               = 255.0;
+    blue                = 255.0;
+    
+    opacity             = 255.0;
+    
+    opticalFlow         = true; // compute optical flow?
 
-    opacity = 255.0;
-
-    opticalFlow = true; // compute optical flow?
-
-    scaleFactor = 4.0; // scaling factor of the depth image to compute the optical flow in lower res.
-    flowScale = 0.1;   // scalar of flow velocities
+    scaleFactor         = 4.0;  // scaling factor of the depth image to compute the optical flow in lower res.
+    flowScale           = 0.1;  // scalar of flow velocities
 
     // optical flow settings
-    pyrScale        = 0.5;  // 0~1
-    levels          = 4;    // 1~8
-    winSize         = 8;    // 4~64
-    iterations      = 2;    // 1~8
-    polyN           = 7;    // 5~10
-    polySigma       = 1.5;  // 1.1~2
-    gaussianMode    = false;
+    pyrScale            = 0.5;  // 0~1
+    levels              = 4;    // 1~8
+    winSize             = 8;    // 4~64
+    iterations          = 2;    // 1~8
+    polyN               = 7;    // 5~10
+    polySigma           = 1.5;  // 1.1~2
+    gaussianMode        = false;
+    
+    smoothingSize       = 0;
+    scaleContour        = 1;
 
     // graphics output
     drawBoundingRect    = false;
@@ -38,8 +45,6 @@ Contour::Contour()
 }
 
 void Contour::setup(int width, int height){
-    smoothingSize = 0;
-
     this->width     = width;
     this->height    = height;
 
@@ -140,17 +145,24 @@ void Contour::update(ofImage &depthImage){
 void Contour::draw(){
     if(isActive){
         ofPushStyle();
-
+        
+        ofPushMatrix();
+        ofTranslate(width/2.0, height/2.0);
+        ofScale(scaleContour, scaleContour); // Scale it so we can see more contour on the projection
+        
+        ofPushMatrix();
+        ofTranslate(-width/2.0, -height/2.0);
+        
         if(drawBoundingRect){
             ofFill();
-            ofSetColor(255, opacity);
+            ofSetColor(ofColor(red, green, blue), opacity);
             for(int i = 0; i < boundingRects.size(); i++)
                 ofRect(boundingRects[i]);
         }
 
         if(drawConvexHull){
             ofFill();
-            ofSetColor(255, opacity);
+            ofSetColor(ofColor(red, green, blue), opacity);
             for(int i = 0; i < convexHulls.size(); i++){
                 ofBeginShape();
                 for(int j = 0; j < convexHulls[i].getVertices().size(); j++){
@@ -161,14 +173,14 @@ void Contour::draw(){
         }
 
         if(drawConvexHullLine){
-            ofSetColor(255, 0, 0, opacity);
+            ofSetColor(ofColor(red, green, blue), opacity);
             ofSetLineWidth(3);
             for(int i = 0; i < convexHulls.size(); i++)
                 convexHulls[i].draw(); //if we only want the contour
         }
 
         if(drawContourLine){
-            ofSetColor(0, opacity);
+            ofSetColor(ofColor(red, green, blue), opacity);
             ofSetLineWidth(3);
             for(int i = 0; i < contours.size(); i++){
 //                if(i == 0) ofSetColor(255, 0, 0);
@@ -179,7 +191,7 @@ void Contour::draw(){
         }
 
         if(drawQuads){
-            ofSetColor(255, opacity);
+            ofSetColor(ofColor(red, green, blue), opacity);
             ofSetLineWidth(3);
             for(int i = 0; i < quads.size(); i++){
                 quads[i].draw();
@@ -229,6 +241,8 @@ void Contour::draw(){
 //        }
 
         prevContours = contours;
+        ofPopMatrix();
+        ofPopMatrix();
         ofPopStyle();
     }
 }

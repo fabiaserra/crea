@@ -2,5 +2,7 @@ ofxKinect
 ofxOpenCv
 ofxCv
 ofxUI
+ofxFX
+ofxFluid
 ofxXmlSettings
 ofxSecondWindow

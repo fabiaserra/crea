@@ -14,9 +14,9 @@ ParticleSystem::ParticleSystem(){
     velocity            = 0.0;          // Initial velocity magnitude of newborn particles
     radius              = 3.0;          // Radius of the particles
     lifetime            = 5.0;          // Lifetime of particles
-    red                 = 255;
-    green               = 255;
-    blue                = 255;
+    red                 = 255.0;
+    green               = 255.0;
+    blue                = 255.0;
     color               = ofColor(red, green, blue); // Color of the particles
     
     // Specific properties

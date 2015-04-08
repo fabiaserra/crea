@@ -7,16 +7,9 @@
 //
 #pragma once
 
-#ifndef __zuzor__helper__
-#define __zuzor__helper__
-
-#include <stdio.h>
 #include "ofMain.h"
 #include "vmo.h"
 #include "Sequence.h"
-
-
-#endif /* defined(__zuzor__helper__) */
 
 float lowpass(float input, float past, float slide);
 

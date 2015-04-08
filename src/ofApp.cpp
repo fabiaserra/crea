@@ -14,13 +14,15 @@ void ofApp::setup(){
     // should be undecorated, i.e. title bar is visible. setting it to
     // true removes the title bar.
     
-    secondWindow.setup("second window", 50, 50, 1024, 768, false);
+//    secondWindow.setup("second window", ofGetScreenWidth(), 0, 1024, 768, false);
     
     // running the command below positions an undecorated window to display on a second
     // monitor or projector. this is a good way to set up a fullscreen display, while
     // retaining a control window in the primary monitor.
     
-    //secondWindow.setup("second window", ofGetScreenWidth(), 0, 1280, 800, true);
+//    secondWindow.setup("second window", ofGetScreenWidth(), 0, 1280, 800, true);
+    secondWindow.setup("second window", ofGetScreenWidth(), 0, 1280, 800, false);
+
 
     ofHideCursor(); // trick to show the cursor icon (see mouseMoved())
 
@@ -509,7 +511,6 @@ void ofApp::update(){
         }
 
     #else
-
         if(tempMarkers.size()>0){
             if(isTracking){
                 vector<float> obs(numMarkers*dimensions, 0.0); // Temporary code
@@ -588,7 +589,6 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
     secondWindow.begin();
-    
     ofPushMatrix();
     ofColor contourBg(red, green, blue);
     ofColor centerBg(red, green, blue);
@@ -611,11 +611,6 @@ void ofApp::draw(){
     if(useFBO){
         fbo.begin();
 
-//        // clear the fbo if useFBO is false
-//        	// this completely clears the buffer so we won't see any trails
-//            if(!useFBO){
-//        		ofClear(red, green, blue, 0);
-//            }
         // Draw semi-transparent white rectangle to slightly clear buffer (depends on the history value)
         ofSetColor(red, green, blue, fadeAmount);
         ofFill();
@@ -664,10 +659,9 @@ void ofApp::draw(){
     if(isTracking) sequence.drawTracking(currentBf.currentIdx);
 
     ofPopMatrix();
-
-    if(drawSequencePatternsSeparate) sequence.drawPatternsSeparate(gestureUpdate);
-    
     secondWindow.end();
+    
+    if(drawSequencePatternsSeparate) sequence.drawPatternsSeparate(gestureUpdate);
 }
 
 //--------------------------------------------------------------
@@ -989,6 +983,18 @@ void ofApp::setupContourGUI(){
     ofxUIImageToggle *active;
     active = guiContour->addImageToggle("Activate Contour", "icons/show.png", &contour.isActive, dim, dim);
     active->setColorBack(ofColor(150, 255));
+    
+    guiContour->addSpacer();
+    ofxUISlider *redSlider = guiContour->addSlider("Red", 0.0, 255.0, &contour.red);
+    redSlider->setColorFill(ofColor(240, 30, 30));
+    redSlider->setColorFillHighlight(ofColor(150, 30, 30));
+    ofxUISlider *greenSlider = guiContour->addSlider("Green", 0.0, 255.0, &contour.green);
+    greenSlider->setColorFill(ofColor(30, 240, 30));
+    greenSlider->setColorFillHighlight(ofColor(30, 150, 30));
+    ofxUISlider *blueSlider = guiContour->addSlider("Blue", 0.0, 255.0, &contour.blue);
+    blueSlider->setColorFill(ofColor(30, 30, 240));
+    blueSlider->setColorFillHighlight(ofColor(30, 30, 150));
+    
     guiContour->addSlider("Opacity", 0.0, 255.0, &contour.opacity);
 
     guiContour->addSpacer();
@@ -998,6 +1004,8 @@ void ofApp::setupContourGUI(){
     guiContour->addToggle("Contour Line", &contour.drawContourLine);
     guiContour->addToggle("Quads Line", &contour.drawQuads);
     guiContour->addSlider("Smoothing Size", 0.0, 40.0, &contour.smoothingSize);
+    guiContour->addSlider("Scale", 1.0, 1.6, &contour.scaleContour);
+
     guiContour->addSpacer();
 
     guiContour->autoSizeToFitWidgets();

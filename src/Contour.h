@@ -2,8 +2,7 @@
 #include "ofMain.h"
 #include "ofxCv.h"
 
-class Contour
-{
+class Contour{
     public:
         Contour();
 
@@ -28,6 +27,8 @@ class Contour
         //--------------------------------------------------------------
         float opacity;
         //--------------------------------------------------------------
+        float red, green, blue;     // Color of the contour
+        //--------------------------------------------------------------
         bool opticalFlow;   // compute optical flow?
         float scaleFactor;  // scaling factor of the optical flow image
         float flowScale;    // scalar to multiply by the offset of flow
@@ -44,6 +45,8 @@ class Contour
         ofImage diff;
         //--------------------------------------------------------------
         float smoothingSize;
+        //--------------------------------------------------------------
+        float scaleContour;
         //--------------------------------------------------------------
         vector<ofRectangle> boundingRects;
         vector<ofPolyline> convexHulls;
