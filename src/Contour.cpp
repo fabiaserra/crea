@@ -15,7 +15,7 @@ Contour::Contour()
     
     opticalFlow         = true; // compute optical flow?
 
-    scaleFactor         = 4.0;  // scaling factor of the depth image to compute the optical flow in lower res.
+    scaleFactor         = 3.5;  // scaling factor of the depth image to compute the optical flow in lower res.
     flowScale           = 0.1;  // scalar of flow velocities
 
     // optical flow settings
@@ -27,8 +27,9 @@ Contour::Contour()
     polySigma           = 1.5;  // 1.1~2
     gaussianMode        = false;
     
-    smoothingSize       = 0;
-    scaleContour        = 1;
+    smoothingSize       = 0.0;
+    scaleContour        = 1.0;
+    lineWidth           = 1.5;
 
     // graphics output
     drawBoundingRect    = false;
@@ -84,9 +85,6 @@ void Contour::update(ofImage &depthImage){
             flow.setPolySigma(polySigma);
             flow.setUseGaussian(gaussianMode);
             flow.calcOpticalFlow(rescaled); // optical flow on rescaled depth image
-
-//            int blurAmount = 21;
-//            blur(flow, blurAmount);
         }
 
         // Contour Finder in the depth Image
@@ -174,14 +172,14 @@ void Contour::draw(){
 
         if(drawConvexHullLine){
             ofSetColor(ofColor(red, green, blue), opacity);
-            ofSetLineWidth(3);
+            ofSetLineWidth(lineWidth);
             for(int i = 0; i < convexHulls.size(); i++)
                 convexHulls[i].draw(); //if we only want the contour
         }
 
         if(drawContourLine){
             ofSetColor(ofColor(red, green, blue), opacity);
-            ofSetLineWidth(3);
+            ofSetLineWidth(lineWidth);
             for(int i = 0; i < contours.size(); i++){
 //                if(i == 0) ofSetColor(255, 0, 0);
 //                else if(i == 1) ofSetColor(0, 255, 0);
@@ -192,7 +190,7 @@ void Contour::draw(){
 
         if(drawQuads){
             ofSetColor(ofColor(red, green, blue), opacity);
-            ofSetLineWidth(3);
+            ofSetLineWidth(lineWidth);
             for(int i = 0; i < quads.size(); i++){
                 quads[i].draw();
             }
@@ -202,7 +200,7 @@ void Contour::draw(){
 //            ofSetColor(255);
 //            diff.draw(0, 0);
             ofSetColor(255, 0, 0);
-            ofSetLineWidth(3);
+            ofSetLineWidth(2);
             for(int i = 0; i < diffContours.size(); i++){
                 diffContours[i].draw();
             }
@@ -212,6 +210,7 @@ void Contour::draw(){
 //            ofSetColor(255);
 //            rescaled.draw(0, 0, width, height);
             ofSetColor(255, 0, 0);
+            ofSetLineWidth(1.5);
             flow.draw(0, 0, width, height);
         }
 
@@ -292,7 +291,7 @@ void Contour::computeVelocities(){
 
 ofPoint Contour::getVelocityInPoint(ofPoint curPoint){
     // Get velocity in point from closest point in prev frame
-    float minDistSqrd = 500;
+    float minDistSqrd = 600;
     ofPoint vel(0, 0);
     for(int i = 0; i < prevContours.size(); i++){
         ofPoint prevPoint = prevContours[i].getClosestPoint(curPoint);

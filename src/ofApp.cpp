@@ -20,8 +20,8 @@ void ofApp::setup(){
     // monitor or projector. this is a good way to set up a fullscreen display, while
     // retaining a control window in the primary monitor.
     
-//    secondWindow.setup("second window", ofGetScreenWidth(), 0, 1280, 800, true);
-    secondWindow.setup("second window", ofGetScreenWidth(), 0, 1280, 800, false);
+    secondWindow.setup("second window", ofGetScreenWidth()+100, -50, 1280, 800, true);
+//    secondWindow.setup("second window", ofGetScreenWidth(), 0, 1024, 768, false);
 
 
     ofHideCursor(); // trick to show the cursor icon (see mouseMoved())
@@ -328,9 +328,9 @@ void ofApp::update(){
     float time = ofGetElapsedTimef();
     float dt = ofClamp(time - time0, 0, 0.1);
     time0 = time;
-
+    
     // Compute rescale value to scale kinect image
-    reScale = (float)ofGetHeight() / (float)kinect.height;
+    reScale = (float)secondWindow.getHeight() / (float)kinect.height;
 //    reScale = ofVec2f((float)ofGetWidth()/(float)kinect.width, (float)ofGetHeight()/(float)kinect.height); // deforms the image a little bit
 //    reScale = ofVec2f((float)ofGetHeight()/(float)kinect.height, (float)ofGetHeight()/(float)kinect.height);
 
@@ -569,7 +569,7 @@ void ofApp::update(){
                             string cueFileName = ofFilePath::getBaseName(cueList[currentCueIndex]);
                             cueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
                             cueName->setTextString(cueFileName);
-                        }    reScale = (float)ofGetHeight() / (float)kinect.height;
+                        }
 
                     }
                 }
@@ -590,14 +590,17 @@ void ofApp::update(){
 void ofApp::draw(){
     secondWindow.begin();
     ofPushMatrix();
+    ofPushStyle();
+    
     ofColor contourBg(red, green, blue);
     ofColor centerBg(red, green, blue);
     if(bgGradient){
         if(centerBg.getBrightness() > 0) contourBg.setBrightness(ofMap(centerBg.getBrightness(), 0.0, 255.0, 20.0, 130.0));
+        ofBackgroundGradient(centerBg, contourBg);
     }
-    ofBackgroundGradient(centerBg, contourBg);
-
-    ofRectangle canvasRect(0, 0, ofGetWidth(), ofGetHeight());
+    else ofBackground(centerBg);
+    
+    ofRectangle canvasRect(0, 0, secondWindow.getWidth(), secondWindow.getHeight());
     ofRectangle kinectRect(0, 0, kinect.width, kinect.height);
     kinectRect.scaleTo(canvasRect, OF_SCALEMODE_FIT);
     ofTranslate(kinectRect.x, kinectRect.y);
@@ -657,10 +660,12 @@ void ofApp::draw(){
     if(drawSequenceSegments) sequence.drawSegments();
     if(drawSequencePatterns) sequence.drawPatterns(gestureUpdate);
     if(isTracking) sequence.drawTracking(currentBf.currentIdx);
-
+    
+    ofPopStyle();
     ofPopMatrix();
     secondWindow.end();
     
+    ofBackground(0);
     if(drawSequencePatternsSeparate) sequence.drawPatternsSeparate(gestureUpdate);
 }
 
@@ -733,6 +738,7 @@ void ofApp::setupBasicsGUI(){
     ofxUISlider *blueSlider = guiBasics->addSlider("Blue", 0.0, 255.0, &blue);
     blueSlider->setColorFill(ofColor(30, 30, 240));
     blueSlider->setColorFillHighlight(ofColor(30, 30, 150));
+    guiBasics->addToggle("Gradient", &bgGradient);
 
     guiBasics->addSpacer();
     guiBasics->addLabel("Settings", OFX_UI_FONT_MEDIUM);
@@ -1004,6 +1010,7 @@ void ofApp::setupContourGUI(){
     guiContour->addToggle("Contour Line", &contour.drawContourLine);
     guiContour->addToggle("Quads Line", &contour.drawQuads);
     guiContour->addSlider("Smoothing Size", 0.0, 40.0, &contour.smoothingSize);
+    guiContour->addSlider("Line Width", 0.5, 10.0, &contour.lineWidth);
     guiContour->addSlider("Scale", 1.0, 1.6, &contour.scaleContour);
 
     guiContour->addSpacer();

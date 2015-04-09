@@ -45,7 +45,7 @@ class Contour{
         ofImage diff;
         //--------------------------------------------------------------
         float smoothingSize;
-        //--------------------------------------------------------------
+        float lineWidth;
         float scaleContour;
         //--------------------------------------------------------------
         vector<ofRectangle> boundingRects;
