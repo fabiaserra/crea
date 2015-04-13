@@ -14,6 +14,8 @@ class Contour{
         ofPoint getAverageFlowInRegion(ofRectangle rect);
         ofPoint getAverageVelocity();
         ofPoint getVelocityInPoint(ofPoint curPoint);
+    
+        ofTexture& getFlowTexture();
 
         void computeVelocities();
         void setMinAreaRadius(float minContourSize);
@@ -65,7 +67,11 @@ class Contour{
         bool drawDiff;
         bool drawFlow;
         bool drawVelocities;
-
+        //--------------------------------------------------------------
+        ofTexture flowTexture;
+//        unsigned char * flowPixels;
+        ofFloatPixels flowPixels;
+    
     protected:
     private:
         ofImage rescaled;

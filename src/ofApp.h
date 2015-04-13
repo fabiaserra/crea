@@ -22,7 +22,7 @@
 #include "helper.h"
 
 // comment this to use the recorded images
-#define KINECT_CONNECTED
+//#define KINECT_CONNECTED
 
 // Uncomment this to use an xml sequence file for the tracking
 //#define KINECT_SEQUENCE
@@ -114,6 +114,13 @@ class ofApp : public ofBaseApp{
         int currentParticleSystem;
         //--------------------------------------------------------------
         ofxFluid fluid;
+        bool fluidActive;
+        float fluidOpacity;
+        float fluidRed, fluidGreen, fluidBlue;
+        float fluidRadius;
+        //--------------------------------------------------------------
+//        ofTexture texColor;
+//        unsigned char * colorPixels;    
         //--------------------------------------------------------------
         ofSoundPlayer song;     // Song
         //--------------------------------------------------------------

@@ -48,10 +48,12 @@ Contour::Contour()
 void Contour::setup(int width, int height){
     this->width     = width;
     this->height    = height;
-
-    rescaled.allocate((float)width/scaleFactor, (float)height/scaleFactor, OF_IMAGE_GRAYSCALE);
+    
+    int wScaled = width/scaleFactor;
+    int hScaled = height/scaleFactor;
+    rescaled.allocate(wScaled, hScaled, OF_IMAGE_GRAYSCALE);
     rescaledRect.set(0, 0, rescaled.width, rescaled.height);
-
+    
     contourFinder.setSortBySize(true);  // sort contours by size
 
     contourFinderDiff.setMinAreaRadius(10);
@@ -60,6 +62,10 @@ void Contour::setup(int width, int height){
     // allocate images
     previous.allocate(width, height, OF_IMAGE_GRAYSCALE);
     diff.allocate(width, height, OF_IMAGE_GRAYSCALE);
+    
+    // allocate flow texture
+    flowTexture.allocate(wScaled, hScaled, GL_RGB32F);
+    flowPixels.allocate(wScaled, hScaled, 3);
 }
 
 void Contour::update(ofImage &depthImage){
@@ -270,6 +276,28 @@ ofPoint Contour::getAverageVelocity(){
     return flow.getAverageFlow();
 }
 
+ofTexture& Contour::getFlowTexture(){
+    // Convert Mats to ofImages for uploading to GPU
+//    ofImage flowImage; // or ofPixels? seems this will do the GPU upload, what we want?
+    
+    if(flow.getWidth() > 0){
+        int w = flow.getWidth();
+        int h = flow.getHeight();
+        
+        for(int y = 0; y < h; y ++) {
+            for(int x = 0; x < w; x ++) {
+                ofPoint v = flow.getFlowOffset(x, y);
+                flowPixels[(y*w+x)*3 + 0] = v.x;	// r
+                flowPixels[(y*w+x)*3 + 1] = v.y;	// g
+                flowPixels[(y*w+x)*3 + 2] = 0.0;    // b
+            }
+        }
+        
+        flowTexture.loadData(flowPixels);
+    }
+    return flowTexture;
+}
+
 void Contour::computeVelocities(){
     // Get velocities from prev frame to current frame
 //    int numContours = MIN(contours.size(), prevContours.size());
@@ -311,4 +339,3 @@ void Contour::setMinAreaRadius(float minContourSize){
 void Contour::setMaxAreaRadius(float maxContourSize){
     contourFinder.setMaxAreaRadius(maxContourSize);
 }
-

@@ -21,6 +21,8 @@ void ofApp::setup(){
     // retaining a control window in the primary monitor.
     
     secondWindow.setup("second window", ofGetScreenWidth()+100, -50, 1280, 800, true);
+//    secondWindow.setup("second window", 0, 0, 1024, 768, true);
+
 //    secondWindow.setup("second window", ofGetScreenWidth(), 0, 1024, 768, false);
 
 
@@ -148,6 +150,31 @@ void ofApp::setup(){
     contour.setup(kinect.width, kinect.height);
     contour.setMinAreaRadius(minContourSize);
     contour.setMaxAreaRadius(maxContourSize);
+    
+    // FLUID
+    // Initial Allocation
+    fluid.allocate(kinect.width, kinect.height, 0.5);
+    fluidRed = 0.5, fluidGreen = 0.1, fluidBlue = 0.0;
+    fluidActive = true;
+    
+    fluidOpacity = 1.0;
+    fluidRadius = 10.0;
+    
+    // Seting the gravity set up
+    fluid.dissipation = 0.99;
+    fluid.velocityDissipation = 0.99;
+    fluid.setGravity(ofVec2f(0.0,0.0));
+    
+    // Set obstacle
+//    fluid.begin();
+//    ofSetColor(0,0);
+//    ofSetColor(255);
+//    ofCircle(kinect.width*0.5, kinect.height*0.35, 40);
+//    fluid.end();
+//    fluid.setUseObstacles(false);
+    
+    // Adding constant forces
+    fluid.addConstantForce(ofPoint(kinect.width*0.5,kinect.height*0.85), ofPoint(0,-2), ofFloatColor(fluidRed,fluidGreen,fluidBlue)*fluidOpacity, fluidRadius);
 
     // SEQUENCE
     sequence.setup(numMarkers);
@@ -447,6 +474,23 @@ void ofApp::update(){
     gridParticles->update(dt, tempMarkers, contour);
     boidsParticles->update(dt, tempMarkers, contour);
     animationsParticles->update(dt, tempMarkers, contour);
+    
+    // Update fluid
+    if(fluidActive){
+//        for(unsigned int i = 0; i < tempMarkers.size(); i++){
+//            if (!tempMarkers[i].hasDisappeared){
+//                ofPoint m = tempMarkers[i].smoothPos;
+//                ofPoint c = ofPoint(640*0.5, 480*0.5) - m;
+//    //            fluid.addTemporalForce(m, tempMarkers[i].velocity, ofFloatColor(0.5,0.1,0.0), 10.0f);
+//                c.normalize();
+//                fluid.addTemporalForce(m, tempMarkers[i].velocity, ofFloatColor(fluidRed, fluidGreen, fluidBlue, fluidOpacity), fluidRadius);
+//            }
+//        }
+//        ofTexture& flow = contour.getFlowTexture();
+//        fluid.update();
+        
+//        if(flow.isAllocated()) fluid.addVelocity(flow, 1.0);
+    }
 
     #ifdef KINECT_SEQUENCE
 
@@ -640,6 +684,38 @@ void ofApp::draw(){
         gridParticles->draw();
         boidsParticles->draw();
         animationsParticles->draw();
+//        if(fluidActive){
+//            fluid.draw(kinect.width/2, kinect.height/2, kinect.width/2, kinect.height/2);
+//            fluid.drawVelocity(0, kinect.height/2, kinect.width/2, kinect.height/2);
+//            
+//        }
+//
+//        ofTexture& flow = contour.getFlowTexture();
+//        int w = flow.getWidth();
+//        int h = flow.getHeight();
+//        
+//        ofSetColor(255, 255, 255);
+//        if(flow.isAllocated())
+//            flow.draw(0, 0);
+//        
+//        ofFloatPixels flowPixels;
+//        flow.readToPixels(flowPixels);
+        
+//        ofSetLineWidth(1.5);
+//        ofSetColor(255, 255, 255);
+        
+//        // color pixels, use w and h to control red and green
+//        for (int i = 0; i < w; i+=5){
+//            for (int j = 0; j < h; j+=5){
+//                ofVec2f vel;
+//                vel.x = flowPixels[(j*w+i)*3 + 0]; // r
+//                vel.y = flowPixels[(j*w+i)*3 + 1]; // g
+//                ofLine(ofVec2f(i, j), ofVec2f(i, j)+vel);
+//            }
+//        }
+        
+//        if(flow.isAllocated()) fluid.addVelocity(flow, 1.0);
+        
     }
 
     if(drawMarkers || drawMarkersPath){
@@ -964,19 +1040,53 @@ void ofApp::setupCueListGUI(){
 
 //--------------------------------------------------------------
 void ofApp::setupFluidSolverGUI(){
-    ofxUICanvas *guiFluidSolver = new ofxUICanvas(guiWidth+guiMargin, 0, guiWidth, ofGetHeight());
-    guiFluidSolver->addLabel("FLUID SOLVER", OFX_UI_FONT_LARGE);
-    guiFluidSolver->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
+    ofxUICanvas *guiFluid = new ofxUICanvas(guiWidth+guiMargin, 0, guiWidth, ofGetHeight());
+    guiFluid->addLabel("FLUID", OFX_UI_FONT_LARGE);
+    guiFluid->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
-//    gui6->addSpacer();
-//    gui6->addLabel("Physics");
+    
+    guiFluid->addSpacer();
+    ofxUIImageToggle *active;
+    active = guiFluid->addImageToggle("Activate Fluid", "icons/show.png", &fluidActive, dim, dim);
+    active->setColorBack(ofColor(150, 255));
+    
+    guiFluid->addSpacer();
+    ofxUISlider *redSlider = guiFluid->addSlider("Red", 0.0, 1.0, &fluidRed);
+    redSlider->setColorFill(ofColor(240, 30, 30));
+    redSlider->setColorFillHighlight(ofColor(150, 30, 30));
+    ofxUISlider *greenSlider = guiFluid->addSlider("Green", 0.0, 1.0, &fluidGreen);
+    greenSlider->setColorFill(ofColor(30, 240, 30));
+    greenSlider->setColorFillHighlight(ofColor(30, 150, 30));
+    ofxUISlider *blueSlider = guiFluid->addSlider("Blue", 0.0, 1.0, &fluidBlue);
+    blueSlider->setColorFill(ofColor(30, 30, 240));
+    blueSlider->setColorFillHighlight(ofColor(30, 30, 150));
+    
+    guiFluid->addSlider("Opacity", 0.0, 1.0, &fluidOpacity);
+    
+    guiFluid->addSpacer();
+    guiFluid->addLabel("Solver");
+    
+    guiFluid->addSlider("cellSize", 0.1, 1.6, &fluid.cellSize);
+//    guiFluid->addSlider("gradientScale", 0.1, 1.0, &fluid.gradientScale);
+//    guifluid->addSlider("ambientTemperature", 0.0, 1.0, &fluid.ambientTemperature);
+//    guifluid->addIntSlider("jacobiIterations", 1, 100, &fluid.numJacobiIterations);
+//    guifluid->addSlider("timeStep", 0.05, 0.5, &fluid.timeStep);
+//    guifluid->addSlider("smokeBuoyancy", 0.0, 1.0, &fluid.smokeBuoyancy);
+//    guifluid->addSlider("smokeWeight", 0.0, 1.0, &fluid.smokeWeight);
+//    
+    guiFluid->addSpacer();
+    guiFluid->addSlider("dissipation", 0.7, 0.99, &fluid.dissipation);
+    guiFluid->addSlider("velocityDissipation", 0.7, 0.99, &fluid.velocityDissipation);
+    guiFluid->addSpacer();
+    
+    guiFluid->addSlider("Fluid Gravity", 0.001, 0.1, 0.0098);
 
-    guiFluidSolver->addSpacer();
+    guiFluid->addSpacer();
 
-    guiFluidSolver->autoSizeToFitWidgets();
-    guiFluidSolver->setVisible(false);
-    ofAddListener(guiFluidSolver->newGUIEvent, this, &ofApp::guiEvent);
-    guis.push_back(guiFluidSolver);
+    guiFluid->autoSizeToFitWidgets();
+    guiFluid->setVisible(false);
+    ofAddListener(guiFluid->newGUIEvent, this, &ofApp::guiEvent);
+    guis.push_back(guiFluid);
 }
 
 //--------------------------------------------------------------
@@ -1288,7 +1398,7 @@ void ofApp::addParticlePhysicsGUI(ofxUICanvas* gui, ParticleSystem* ps){
 //  4: guiGestures_1
 //  5: guiGestures_2
 //  6: guiCueList
-//  7: guiFluidSolver
+//  7: guiFluid
 //  8: guiContour
 //  9: guiEmitter_1
 // 10: guiEmitter_2
@@ -1923,6 +2033,14 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             cueName->setTextString(cueFileName);
         }
     }
+    //-------------------------------------------------------------
+    // FLUID SOLVER
+    //-------------------------------------------------------------
+    if(e.getName() == "Fluid Gravity"){
+        ofxUISlider *slider = (ofxUISlider *) e.widget;
+        fluid.setGravity(ofVec2f(0.0, slider->getValue()));
+    }
+    
     //-------------------------------------------------------------
     // PARTICLES
     //-------------------------------------------------------------
