@@ -69,7 +69,6 @@ class Contour{
         bool drawVelocities;
         //--------------------------------------------------------------
         ofTexture flowTexture;
-//        unsigned char * flowPixels;
         ofFloatPixels flowPixels;
     
     protected:

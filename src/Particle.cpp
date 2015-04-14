@@ -125,13 +125,13 @@ void Particle::draw(){
 
         // // Draw arrows
         // if (markerDist == 0){
-        //     ofCircle(pos, 2);
+        //     ofDrawCircle(pos, 2);
         // }
         // else{
         //     float length = 15.0f;
         //     ofPoint p1(pos);
         //     ofPoint p2(pos + dir*length);
-        //     ofLine(p1, p2);
+        //     ofDrawLine(p1, p2);
         // }
 
         ofPopStyle();

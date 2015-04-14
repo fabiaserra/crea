@@ -378,8 +378,8 @@ void ParticleSystem::draw(){
                     }
                 }
             }
-            ofPopStyle();
         }
+        ofPopStyle();
     }
 }
 
@@ -532,6 +532,7 @@ void ParticleSystem::createParticleGrid(int width, int height){
 }
 
 void ParticleSystem::removeParticles(int n){
+    n = MIN(particles.size(), n);
     for(int i = 0; i < n; i++){
         particles[i]->immortal = false;
     }
@@ -546,8 +547,10 @@ void ParticleSystem::killParticles(){
 
 void ParticleSystem::bornParticles(){
     // Kill all the remaining particles before creating new ones
-    for(int i = 0; i < particles.size(); i++){
-        particles[i]->isAlive = false;
+    if(!particles.empty()){
+        for(int i = 0; i < particles.size(); i++){
+            particles[i]->isAlive = false;
+        }
     }
 
     InputSource inputSource = MARKERS;

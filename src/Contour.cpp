@@ -277,9 +277,6 @@ ofPoint Contour::getAverageVelocity(){
 }
 
 ofTexture& Contour::getFlowTexture(){
-    // Convert Mats to ofImages for uploading to GPU
-//    ofImage flowImage; // or ofPixels? seems this will do the GPU upload, what we want?
-    
     if(flow.getWidth() > 0){
         int w = flow.getWidth();
         int h = flow.getHeight();
@@ -292,7 +289,7 @@ ofTexture& Contour::getFlowTexture(){
                 flowPixels[(y*w+x)*3 + 2] = 0.0;    // b
             }
         }
-        
+//        toOf(flow.getFlow(), flowPixels); // maybe faster but doesn't work as expected
         flowTexture.loadData(flowPixels);
     }
     return flowTexture;

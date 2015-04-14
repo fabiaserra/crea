@@ -20,11 +20,10 @@ void ofApp::setup(){
     // monitor or projector. this is a good way to set up a fullscreen display, while
     // retaining a control window in the primary monitor.
     
-    secondWindow.setup("second window", ofGetScreenWidth()+100, -50, 1280, 800, true);
+//    secondWindow.setup("second window", ofGetScreenWidth()+100, -50, 1280, 800, true);
 //    secondWindow.setup("second window", 0, 0, 1024, 768, true);
 
 //    secondWindow.setup("second window", ofGetScreenWidth(), 0, 1024, 768, false);
-
 
     ofHideCursor(); // trick to show the cursor icon (see mouseMoved())
 
@@ -164,7 +163,7 @@ void ofApp::setup(){
     fluid.dissipation = 0.99;
     fluid.velocityDissipation = 0.99;
     fluid.setGravity(ofVec2f(0.0,0.0));
-    
+
     // Set obstacle
 //    fluid.begin();
 //    ofSetColor(0,0);
@@ -174,7 +173,7 @@ void ofApp::setup(){
 //    fluid.setUseObstacles(false);
     
     // Adding constant forces
-    fluid.addConstantForce(ofPoint(kinect.width*0.5,kinect.height*0.85), ofPoint(0,-2), ofFloatColor(fluidRed,fluidGreen,fluidBlue)*fluidOpacity, fluidRadius);
+//    fluid.addConstantForce(ofPoint(kinect.width*0.5,kinect.height*0.85), ofPoint(0,-2), ofFloatColor(fluidRed,fluidGreen,fluidBlue)*fluidOpacity, fluidRadius);
 
     // SEQUENCE
     sequence.setup(numMarkers);
@@ -294,42 +293,10 @@ void ofApp::setup(){
 //            cout << "	end  :"<< pttrList.sfxPts[i][j] << endl;
 //        }
 //    }
-
-    // GUI COLORS
-//    uiThemecb.set(128, 210), uiThemeco.set(192, 255), uiThemecoh.set(192, 255);
-//    uiThemecf.set(255, 255); uiThemecfh.set(160, 255), uiThemecp.set(128, 192);
-//    uiThemecpo.set(255, 192);
-
-    uiThemecb.set(64, 192), uiThemeco.set(192, 192), uiThemecoh.set(128, 192);
-    uiThemecf.set(240, 255); uiThemecfh.set(128, 255), uiThemecp.set(96, 192);
-    uiThemecpo.set(255, 192);
-
-//    uiThemecb.set(41, 34, 31, 192), uiThemeco.set(19, 116, 125, 192), uiThemecoh.set(41, 34, 31, 192);
-//    uiThemecf.set(252, 53, 76, 255); uiThemecfh.set(252, 247, 197, 255), uiThemecp.set(10, 191, 188, 192);
-//    uiThemecpo.set(19, 116, 125, 192);
     
-    // SETUP GUIs
-    dim = 32;
-    guiWidth = 240;
-    guiMargin = 2;
+    // SETUP GUI
+    setupGUI();
     
-    setupHelperGUI();
-    setupBasicsGUI();
-    setupKinectGUI();
-    setupGesturesGUI();
-    setupCueListGUI();
-    setupFluidSolverGUI();
-    setupContourGUI();
-    setupEmitterGUI();
-    setupGridGUI();
-    setupBoidsGUI();
-    setupAnimationsGUI();
-
-    interpolatingWidgets = false;
-    nInterpolatedFrames = 0;
-    maxTransitionFrames = 20;
-    loadGUISettings("settings/lastSettings.xml", false, false);
-
     // ALLOCATE FBO AND FILL WITH BG COLOR
     fbo.allocate(kinect.width, kinect.height, GL_RGB32F_ARB);
     fbo.begin();
@@ -357,7 +324,7 @@ void ofApp::update(){
     time0 = time;
     
     // Compute rescale value to scale kinect image
-    reScale = (float)secondWindow.getHeight() / (float)kinect.height;
+    reScale = (float)ofGetHeight() / (float)kinect.height;
 //    reScale = ofVec2f((float)ofGetWidth()/(float)kinect.width, (float)ofGetHeight()/(float)kinect.height); // deforms the image a little bit
 //    reScale = ofVec2f((float)ofGetHeight()/(float)kinect.height, (float)ofGetHeight()/(float)kinect.height);
 
@@ -401,9 +368,9 @@ void ofApp::update(){
     // Nothing will happen here if the kinect is unplugged
     kinect.update();
     if(kinect.isFrameNew()){
-        depthOriginal.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
+        depthOriginal.setFromPixels(kinect.getDepthPixels(), kinect.getWidth(), kinect.getHeight(), OF_IMAGE_GRAYSCALE);
         if(flipKinect) depthOriginal.mirror(false, true);
-        irOriginal.setFromPixels(kinect.getPixels(), kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
+        irOriginal.setFromPixels(kinect.getPixels(), kinect.getWidth(), kinect.getHeight(), OF_IMAGE_GRAYSCALE);
         if(flipKinect) irOriginal.mirror(false, true);
     }
 
@@ -477,7 +444,7 @@ void ofApp::update(){
     
     // Update fluid
     if(fluidActive){
-//        for(unsigned int i = 0; i < tempMarkers.size(); i++){
+        for(unsigned int i = 0; i < tempMarkers.size(); i++){
 //            if (!tempMarkers[i].hasDisappeared){
 //                ofPoint m = tempMarkers[i].smoothPos;
 //                ofPoint c = ofPoint(640*0.5, 480*0.5) - m;
@@ -485,11 +452,11 @@ void ofApp::update(){
 //                c.normalize();
 //                fluid.addTemporalForce(m, tempMarkers[i].velocity, ofFloatColor(fluidRed, fluidGreen, fluidBlue, fluidOpacity), fluidRadius);
 //            }
-//        }
-//        ofTexture& flow = contour.getFlowTexture();
-//        fluid.update();
+        }
+//        fluid.addVelocity(contour.getFlowTexture(), 1.0);
+//        fluid.addColor(contour.getFlowTexture(), 0.1);
         
-//        if(flow.isAllocated()) fluid.addVelocity(flow, 1.0);
+        fluid.update();
     }
 
     #ifdef KINECT_SEQUENCE
@@ -632,7 +599,7 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    secondWindow.begin();
+//    secondWindow.begin();
     ofPushMatrix();
     ofPushStyle();
     
@@ -644,7 +611,7 @@ void ofApp::draw(){
     }
     else ofBackground(centerBg);
     
-    ofRectangle canvasRect(0, 0, secondWindow.getWidth(), secondWindow.getHeight());
+    ofRectangle canvasRect(0, 0, ofGetWidth(), ofGetHeight());
     ofRectangle kinectRect(0, 0, kinect.width, kinect.height);
     kinectRect.scaleTo(canvasRect, OF_SCALEMODE_FIT);
     ofTranslate(kinectRect.x, kinectRect.y);
@@ -661,7 +628,7 @@ void ofApp::draw(){
         // Draw semi-transparent white rectangle to slightly clear buffer (depends on the history value)
         ofSetColor(red, green, blue, fadeAmount);
         ofFill();
-        ofRect(0, 0, kinect.width, kinect.height);
+        ofRectangle(0, 0, kinect.width, kinect.height);
 
         // Graphics
         ofSetColor(255);
@@ -684,35 +651,34 @@ void ofApp::draw(){
         gridParticles->draw();
         boidsParticles->draw();
         animationsParticles->draw();
-//        if(fluidActive){
-//            fluid.draw(kinect.width/2, kinect.height/2, kinect.width/2, kinect.height/2);
-//            fluid.drawVelocity(0, kinect.height/2, kinect.width/2, kinect.height/2);
-//            
-//        }
-//
-//        ofTexture& flow = contour.getFlowTexture();
-//        int w = flow.getWidth();
-//        int h = flow.getHeight();
-//        
-//        ofSetColor(255, 255, 255);
-//        if(flow.isAllocated())
-//            flow.draw(0, 0);
-//        
-//        ofFloatPixels flowPixels;
-//        flow.readToPixels(flowPixels);
+        if(fluidActive){
+            fluid.draw(kinect.width/2, kinect.height/2, kinect.width/2, kinect.height/2);
+            fluid.drawVelocity(0, kinect.height/2, kinect.width/2, kinect.height/2);
+        }
+
+        ofTexture& flow = contour.getFlowTexture();
+        int w = flow.getWidth();
+        int h = flow.getHeight();
         
-//        ofSetLineWidth(1.5);
-//        ofSetColor(255, 255, 255);
+        ofSetColor(255, 255, 255);
+        if(flow.isAllocated())
+            flow.draw(0, 0);
         
-//        // color pixels, use w and h to control red and green
-//        for (int i = 0; i < w; i+=5){
-//            for (int j = 0; j < h; j+=5){
-//                ofVec2f vel;
-//                vel.x = flowPixels[(j*w+i)*3 + 0]; // r
-//                vel.y = flowPixels[(j*w+i)*3 + 1]; // g
-//                ofLine(ofVec2f(i, j), ofVec2f(i, j)+vel);
-//            }
-//        }
+        ofFloatPixels flowPixels;
+        flow.readToPixels(flowPixels);
+        
+        ofSetLineWidth(1.5);
+        ofSetColor(255, 0, 0);
+        
+        // color pixels, use w and h to control red and green
+        for (int i = 0; i < w; i+=5){
+            for (int j = 0; j < h; j+=5){
+                ofVec2f vel;
+                vel.x = flowPixels[(j*w+i)*3 + 0]; // r
+                vel.y = flowPixels[(j*w+i)*3 + 1]; // g
+                ofLine(ofVec2f(i, j), ofVec2f(i, j)+vel);
+            }
+        }
         
 //        if(flow.isAllocated()) fluid.addVelocity(flow, 1.0);
         
@@ -739,10 +705,47 @@ void ofApp::draw(){
     
     ofPopStyle();
     ofPopMatrix();
-    secondWindow.end();
+//    secondWindow.end();
     
-    ofBackground(0);
+//    ofBackground(0);
     if(drawSequencePatternsSeparate) sequence.drawPatternsSeparate(gestureUpdate);
+}
+
+//--------------------------------------------------------------
+void ofApp::setupGUI(){
+    // GUI COLORS
+    //    uiThemecb.set(128, 210), uiThemeco.set(192, 255), uiThemecoh.set(192, 255);
+    //    uiThemecf.set(255, 255); uiThemecfh.set(160, 255), uiThemecp.set(128, 192);
+    //    uiThemecpo.set(255, 192);
+    
+    uiThemecb.set(64, 192), uiThemeco.set(192, 192), uiThemecoh.set(128, 192);
+    uiThemecf.set(240, 255); uiThemecfh.set(128, 255), uiThemecp.set(96, 192);
+    uiThemecpo.set(255, 192);
+    
+    //    uiThemecb.set(41, 34, 31, 192), uiThemeco.set(19, 116, 125, 192), uiThemecoh.set(41, 34, 31, 192);
+    //    uiThemecf.set(252, 53, 76, 255); uiThemecfh.set(252, 247, 197, 255), uiThemecp.set(10, 191, 188, 192);
+    //    uiThemecpo.set(19, 116, 125, 192);
+    
+    dim = 32;
+    guiWidth = 240;
+    guiMargin = 2;
+    
+    setupHelperGUI();
+    setupBasicsGUI();
+    setupKinectGUI();
+    setupGesturesGUI();
+    setupCueListGUI();
+    setupFluidSolverGUI();
+    setupContourGUI();
+    setupEmitterGUI();
+    setupGridGUI();
+    setupBoidsGUI();
+    setupAnimationsGUI();
+    
+    interpolatingWidgets = false;
+    nInterpolatedFrames = 0;
+    maxTransitionFrames = 20;
+    loadGUISettings("settings/lastSettings.xml", false, false);
 }
 
 //--------------------------------------------------------------
@@ -1067,13 +1070,13 @@ void ofApp::setupFluidSolverGUI(){
     guiFluid->addLabel("Solver");
     
     guiFluid->addSlider("cellSize", 0.1, 1.6, &fluid.cellSize);
-//    guiFluid->addSlider("gradientScale", 0.1, 1.0, &fluid.gradientScale);
-//    guifluid->addSlider("ambientTemperature", 0.0, 1.0, &fluid.ambientTemperature);
-//    guifluid->addIntSlider("jacobiIterations", 1, 100, &fluid.numJacobiIterations);
-//    guifluid->addSlider("timeStep", 0.05, 0.5, &fluid.timeStep);
-//    guifluid->addSlider("smokeBuoyancy", 0.0, 1.0, &fluid.smokeBuoyancy);
-//    guifluid->addSlider("smokeWeight", 0.0, 1.0, &fluid.smokeWeight);
-//    
+    guiFluid->addSlider("gradientScale", 0.1, 1.0, &fluid.gradientScale);
+    guiFluid->addSlider("ambientTemperature", 0.0, 1.0, &fluid.ambientTemperature);
+    guiFluid->addIntSlider("jacobiIterations", 1, 100, &fluid.numJacobiIterations);
+    guiFluid->addSlider("timeStep", 0.05, 0.5, &fluid.timeStep);
+    guiFluid->addSlider("smokeBuoyancy", 0.0, 1.0, &fluid.smokeBuoyancy);
+    guiFluid->addSlider("smokeWeight", 0.0, 1.0, &fluid.smokeWeight);
+
     guiFluid->addSpacer();
     guiFluid->addSlider("dissipation", 0.7, 0.99, &fluid.dissipation);
     guiFluid->addSlider("velocityDissipation", 0.7, 0.99, &fluid.velocityDissipation);
@@ -1210,7 +1213,7 @@ void ofApp::setupGridGUI(){
     gui8Grid->addToggle("Repulse particle/particle", &gridParticles->repulse);
     gui8Grid->addSpacer();
 
-//    addParticlePhysicsGUI(gui8Grid, gridParticles);
+    addParticlePhysicsGUI(gui8Grid, gridParticles);
 
     gui8Grid->autoSizeToFitWidgets();
     gui8Grid->setVisible(false);
@@ -1249,7 +1252,7 @@ void ofApp::setupBoidsGUI(){
     gui8Boids_1->setVisible(false);
     ofAddListener(gui8Boids_1->newGUIEvent, this, &ofApp::guiEvent);
     guis.push_back(gui8Boids_1);
-    
+
     ofxUICanvas *gui8Boids_2 = new ofxUICanvas((guiWidth+guiMargin)*2, 0, guiWidth, ofGetHeight());
     gui8Boids_2->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
     
@@ -1341,11 +1344,11 @@ void ofApp::addParticleInteractionGUI(ofxUICanvas* gui, ParticleSystem* ps){
 //    interactions.push_back("Gravity");
 //    gui->addRadio("Interactions", interactions, OFX_UI_ORIENTATION_VERTICAL)->activateToggle("Repulsion");
     gui->addSpacer();
-//    gui->addToggle("Contour Optical Flow", &ps->useFlow);
-//    gui->addToggle("Contour Optical Flow Average", &ps->useFlowRegion);
-//    gui->addToggle("Contour Velocities", &ps->useContourVel);
-//    gui->addToggle("Contour Area", &ps->useContourArea);
-//    gui->addSpacer();
+    gui->addToggle("Contour Optical Flow", &ps->useFlow);
+    gui->addToggle("Contour Optical Flow Average", &ps->useFlowRegion);
+    gui->addToggle("Contour Velocities", &ps->useContourVel);
+    gui->addToggle("Contour Area", &ps->useContourArea);
+    gui->addSpacer();
 }
 
 //--------------------------------------------------------------
@@ -2052,7 +2055,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     if(e.getName() == "Contour"){
         ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
         if(toggle->getValue() == true){
-            contour.isActive = true; // activate contour detection in case it is not active yet
+//            contour.isActive = true; // activate contour detection in case it is not active yet
         }
     }
 //    if(e.getName() == "Interactions"){
@@ -2131,18 +2134,13 @@ void ofApp::exit(){
 
     if(!interpolatingWidgets && cueList.size()) saveGUISettings(cueList[currentCueIndex], false);
     saveGUISettings("settings/lastSettings.xml", false);
-
-    delete emitterParticles;
-    delete gridParticles;
-    delete boidsParticles;
-    delete animationsParticles;
+    
+    // Delete particle systems
+    for (int i=0; i<particleSystems.size(); i++) {
+        delete particleSystems.at(i);
+        particleSystems.at(i) = NULL;
+    }
     particleSystems.clear();
-
-//    for (int i=0; i<particleSystems.size(); i++) {
-//        delete particleSystems.at(i);
-//        particleSystems.at(i) = NULL;
-//    }
-//    particleSystems.clear();
 
     // Delete cue sliders map
     cueSliders.clear();
@@ -2181,8 +2179,7 @@ void ofApp::keyPressed(int key){
         else if(key == '1'){
             int idx = 0;
             for(vector<ofxUICanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
-                if(idx == 0);
-                else if(idx == 1 || idx == 2 || idx == 3) (*it)->setVisible(true);
+                if(idx == 0 || idx == 1 || idx == 2 || idx == 3) (*it)->setVisible(true);
                 else (*it)->setVisible(false);
                 idx++;
             }
@@ -2190,8 +2187,7 @@ void ofApp::keyPressed(int key){
         else if(key == '2'){
             int idx = 0;
             for(vector<ofxUICanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
-                if(idx == 0);
-                else if(idx == 4 || idx == 5 || idx == 6) (*it)->setVisible(true);
+                if(idx == 0 || idx == 4 || idx == 5 || idx == 6) (*it)->setVisible(true);
                 else (*it)->setVisible(false);
                 idx++;
             }
@@ -2199,8 +2195,7 @@ void ofApp::keyPressed(int key){
         else if(key == '3'){
             int idx = 0;
             for(vector<ofxUICanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
-                if(idx == 0);
-                else if(idx == 7 || idx == 8) (*it)->setVisible(true);
+                if(idx == 0 || idx == 7 || idx == 8) (*it)->setVisible(true);
                 else (*it)->setVisible(false);
                 idx++;
             }
@@ -2209,8 +2204,7 @@ void ofApp::keyPressed(int key){
             currentParticleSystem = 0;
             int idx = 0;
             for(vector<ofxUICanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
-                if(idx == 0);
-                else if(idx == 9 || idx == 10) (*it)->setVisible(true);
+                if(idx == 0 || idx == 9 || idx == 10) (*it)->setVisible(true);
                 else (*it)->setVisible(false);
                 idx++;
             }
@@ -2219,8 +2213,7 @@ void ofApp::keyPressed(int key){
             currentParticleSystem = 1;
             int idx = 0;
             for(vector<ofxUICanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
-                if(idx == 0);
-                else if(idx == 11) (*it)->setVisible(true);
+                if(idx == 0 || idx == 11) (*it)->setVisible(true);
                 else (*it)->setVisible(false);
                 idx++;
             }
@@ -2229,8 +2222,7 @@ void ofApp::keyPressed(int key){
             currentParticleSystem = 2;
             int idx = 0;
             for(vector<ofxUICanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
-                if(idx == 0);
-                else if(idx == 12 || idx == 13) (*it)->setVisible(true);
+                if(idx == 0 || idx == 12 || idx == 13) (*it)->setVisible(true);
                 else (*it)->setVisible(false);
                 (*it)->autoSizeToFitWidgets();
                 idx++;
@@ -2240,8 +2232,7 @@ void ofApp::keyPressed(int key){
             currentParticleSystem = 3;
             int idx = 0;
             for(vector<ofxUICanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
-                if(idx == 0);
-                else if(idx == 14) (*it)->setVisible(true);
+                if(idx == 0 || idx == 14) (*it)->setVisible(true);
                 else (*it)->setVisible(false);
                 idx++;
             }

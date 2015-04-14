@@ -32,7 +32,9 @@ class ofApp : public ofBaseApp{
         void setup();
         void update();
         void draw();
+//        void drawGui(ofEventArgs & args);   
     
+        void setupGUI();    
         void setupHelperGUI();
         void setupBasicsGUI();
         void setupKinectGUI();
@@ -169,6 +171,8 @@ class ofApp : public ofBaseApp{
         float dim;                            // Size of GUI elements
         float guiWidth;
         float guiMargin;
+        //--------------------------------------------------------------
+//        shared_ptr<GuiApp> gui;
         //--------------------------------------------------------------
         float red, green, blue;
         bool bgGradient;
