@@ -13,12 +13,12 @@ class Contour{
         void update(float dt, ofImage &depthImage);
         void draw();
 
-        ofPoint getFlowOffset(ofPoint p);
+        ofVec2f getFlowOffset(ofPoint p);
         ofPoint getAverageFlowInRegion(ofRectangle rect);
         ofPoint getAverageVelocity();
         ofPoint getVelocityInPoint(ofPoint curPoint);
     
-        ofTexture& getFlowTexture();
+        ofTexture getFlowTexture();
 
         void computeVelocities();
         void setMinAreaRadius(float minContourSize);
@@ -82,9 +82,7 @@ class Contour{
     
     protected:
     private:
-        ofImage rescaled;
         ofRectangle rescaledRect;
-        ofxCv::FlowFarneback flow;
         ofxCv::ContourFinder contourFinder;
         ofxCv::ContourFinder contourFinderDiff;
     

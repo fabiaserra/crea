@@ -231,9 +231,12 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
                 }
                 if(contourInput){
                     ofPoint closestPointInContour = getClosestPointInContour(*particles[i], contour);
+                    ofPoint frc = contour.getFlowOffset(particles[i]->pos);
+                    particles[i]->addForce(frc);
+
                     if(closestPointInContour != ofPoint(-1, -1) || (!attractInteraction && particles[i]->isTouched)){
-                        ofPoint frc = contour.getFlowOffset(particles[i]->pos);
-                        particles[i]->addForce(frc);
+//                        ofPoint frc = contour.getFlowOffset(particles[i]->pos);
+//                        particles[i]->addForce(frc);
 
                         if(attractInteraction){
                             particles[i]->addAttractionForce(closestPointInContour.x, closestPointInContour.y, 8000, 15.0);
@@ -317,7 +320,6 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
 
                         // born more particles if bigger area
                         float bornNum = bornRate * abs(contour.diffContours[i].getArea())/1500.0;
-                        cout << bornNum << endl;
                         addParticles(bornNum, contour.diffContours[i], contour);
                     }
                 }
@@ -446,7 +448,7 @@ void ParticleSystem::addParticles(int n, const irMarker &marker){
             pos = marker.smoothPos + randomVector()*emitterSize;
         }
         ofPoint vel = randomVector()*(velocity+5.0*randomRange(velocityRnd, velocity));
-        vel += marker.velocity*(velocityMotion/100)*6;
+        vel += marker.velocity*(velocityMotion/100)*5.0;
 
         if(emitInMovement && marker.velocity.lengthSquared() < 25.0) break;
 
@@ -491,7 +493,7 @@ void ParticleSystem::addParticles(int n, const ofPolyline &contour, Contour &flo
 //        if(useFlow){
         if(true){
             ofPoint motionVel = flow.getFlowOffset(pos);
-            vel += motionVel*(velocityMotion/100)*150;
+            vel += motionVel*(velocityMotion/100);
         }
         else if(useFlowRegion){
             float dimRegion = 5.0;

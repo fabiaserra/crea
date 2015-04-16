@@ -660,16 +660,16 @@ void ofApp::draw(){
 //            fluid.drawVelocity(0, kinect.height/2, kinect.width/2, kinect.height/2);
 //        }
 
-//        ofTexture& flow = contour.getFlowTexture();
-//        int w = flow.getWidth();
-//        int h = flow.getHeight();
+//        ofTexture& flowTexture = contour.getFlowTexture();
+//        int w = flowTexture.getWidth();
+//        int h = flowTexture.getHeight();
 //        
 //        ofSetColor(255, 255, 255);
-//        if(flow.isAllocated())
-//            flow.draw(0, 0);
+//        if(flowTexture.isAllocated())
+//            flowTexture.draw(0, 0);
 //        
 //        ofFloatPixels flowPixels;
-//        flow.readToPixels(flowPixels);
+//        flowTexture.readToPixels(flowPixels);
 //        
 //        ofSetLineWidth(1.5);
 //        ofSetColor(255, 0, 0);
