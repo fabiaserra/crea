@@ -235,8 +235,8 @@ void Contour::draw(){
             ofPopStyle();
         }
         
-        ofPopMatrix();
-        ofPopMatrix();
+//        ofPopMatrix();
+//        ofPopMatrix();
         
         // DEBUGGING DRAWINGS
 
@@ -283,13 +283,15 @@ void Contour::draw(){
 
         if(drawVelocities){
             ofPushStyle();
-            ofSetColor(255, 0, 0);
-            ofSetLineWidth(1);
-            for(int i = 0; i < contours.size(); i++){
-                for(int p = 0; p < contours[i].size(); p++){
-                    ofLine(contours[i][p], contours[i][p] - getVelocityInPoint(contours[i][p]));
-                }
-            }
+            ofEnableBlendMode(OF_BLENDMODE_DISABLED);
+            velocityMask.draw(0, 0, width, height);
+//            ofSetColor(255, 0, 0);
+//            ofSetLineWidth(1);
+//            for(int i = 0; i < contours.size(); i++){
+//                for(int p = 0; p < contours[i].size(); p++){
+//                    ofLine(contours[i][p], contours[i][p] - getVelocityInPoint(contours[i][p]));
+//                }
+//            }
             ofPopStyle();
         }
         
@@ -300,7 +302,6 @@ void Contour::draw(){
 ofVec2f Contour::getFlowOffset(ofPoint p){
     ofPoint p_ = p/scaleFactor;
     ofVec2f offset(0,0);
-
     
     if(rescaledRect.inside(p_)){
         int x = p_.x;
