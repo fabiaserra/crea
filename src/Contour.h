@@ -1,13 +1,16 @@
 #pragma once
 #include "ofMain.h"
 #include "ofxCv.h"
+#include "ofxFlowTools.h"
+
+using namespace flowTools;
 
 class Contour{
     public:
         Contour();
 
         void setup(int width, int height);
-        void update(ofImage &depthImage);
+        void update(float dt, ofImage &depthImage);
         void draw();
 
         ofPoint getFlowOffset(ofPoint p);
@@ -27,11 +30,14 @@ class Contour{
         int width;
         int height;
         //--------------------------------------------------------------
+        int flowWidth;
+        int flowHeight;
+        //--------------------------------------------------------------
         float opacity;
         //--------------------------------------------------------------
         float red, green, blue;     // Color of the contour
         //--------------------------------------------------------------
-        bool opticalFlow;   // compute optical flow?
+        bool doOpticalFlow;   // compute optical flow?
         float scaleFactor;  // scaling factor of the optical flow image
         float flowScale;    // scalar to multiply by the offset of flow
         //--------------------------------------------------------------
@@ -64,8 +70,11 @@ class Contour{
         bool drawContourLine;
         bool drawQuads;
         bool drawTangentLines;
+        //--------------------------------------------------------------
         bool drawDiff;
         bool drawFlow;
+        bool drawFlowScalar;
+        bool drawFlowField;
         bool drawVelocities;
         //--------------------------------------------------------------
         ofTexture flowTexture;
@@ -78,4 +87,10 @@ class Contour{
         ofxCv::FlowFarneback flow;
         ofxCv::ContourFinder contourFinder;
         ofxCv::ContourFinder contourFinderDiff;
+    
+        ftOpticalFlow        opticalFlow;
+        ftVelocityMask		 velocityMask;
+    
+        ftDisplayScalar		 displayScalar;
+        ftVelocityField		 velocityField;
 };

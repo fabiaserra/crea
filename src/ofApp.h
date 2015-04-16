@@ -7,6 +7,7 @@
 #include "ofxCv.h"
 #include "ofxKinect.h"
 #include "ofxSecondWindow.h"
+#include "ofxFlowTools.h"
 #include "ofxFluid.h"
 
 // Classes
@@ -69,7 +70,7 @@ class ofApp : public ofBaseApp{
         void addParticleInteractionGUI(ofxUICanvas* gui, ParticleSystem* ps);
         void addParticlePropertiesGUI(ofxUICanvas* gui, ParticleSystem* ps);
         void addParticlePhysicsGUI(ofxUICanvas* gui, ParticleSystem* ps);
-
+    
         //--------------------------------------------------------------
         float time0;            // Time value for computing dt
         //--------------------------------------------------------------
@@ -115,11 +116,11 @@ class ofApp : public ofBaseApp{
         vector<ParticleSystem *> particleSystems;
         int currentParticleSystem;
         //--------------------------------------------------------------
-        ofxFluid fluid;
-        bool fluidActive;
-        float fluidOpacity;
-        float fluidRed, fluidGreen, fluidBlue;
-        float fluidRadius;
+//        ofxFluid fluid;
+//        bool fluidActive;
+//        float fluidOpacity;
+//        float fluidRed, fluidGreen, fluidBlue;
+//        float fluidRadius;
         //--------------------------------------------------------------
 //        ofTexture texColor;
 //        unsigned char * colorPixels;    

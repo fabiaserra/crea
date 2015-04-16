@@ -152,17 +152,17 @@ void ofApp::setup(){
     
     // FLUID
     // Initial Allocation
-    fluid.allocate(kinect.width, kinect.height, 0.5);
-    fluidRed = 0.5, fluidGreen = 0.1, fluidBlue = 0.0;
-    fluidActive = true;
-    
-    fluidOpacity = 1.0;
-    fluidRadius = 10.0;
-    
-    // Seting the gravity set up
-    fluid.dissipation = 0.99;
-    fluid.velocityDissipation = 0.99;
-    fluid.setGravity(ofVec2f(0.0,0.0));
+//    fluid.allocate(kinect.width, kinect.height, 0.5);
+//    fluidRed = 0.5, fluidGreen = 0.1, fluidBlue = 0.0;
+//    fluidActive = true;
+//    
+//    fluidOpacity = 1.0;
+//    fluidRadius = 10.0;
+//    
+//    // Seting the gravity set up
+//    fluid.dissipation = 0.99;
+//    fluid.velocityDissipation = 0.99;
+//    fluid.setGravity(ofVec2f(0.0,0.0));
 
     // Set obstacle
 //    fluid.begin();
@@ -434,7 +434,7 @@ void ofApp::update(){
     if(recordingSequence->getValue() == true) sequence.record(tempMarkers);
 
     // Update contour
-    contour.update(depthImage);
+    contour.update(dt, depthImage);
 
     // Update particles
     emitterParticles->update(dt, tempMarkers, contour);
@@ -443,8 +443,8 @@ void ofApp::update(){
     animationsParticles->update(dt, tempMarkers, contour);
     
     // Update fluid
-    if(fluidActive){
-        for(unsigned int i = 0; i < tempMarkers.size(); i++){
+//    if(fluidActive){
+//        for(unsigned int i = 0; i < tempMarkers.size(); i++){
 //            if (!tempMarkers[i].hasDisappeared){
 //                ofPoint m = tempMarkers[i].smoothPos;
 //                ofPoint c = ofPoint(640*0.5, 480*0.5) - m;
@@ -452,12 +452,12 @@ void ofApp::update(){
 //                c.normalize();
 //                fluid.addTemporalForce(m, tempMarkers[i].velocity, ofFloatColor(fluidRed, fluidGreen, fluidBlue, fluidOpacity), fluidRadius);
 //            }
-        }
+//        }
 //        fluid.addVelocity(contour.getFlowTexture(), 1.0);
 //        fluid.addColor(contour.getFlowTexture(), 0.1);
         
-        fluid.update();
-    }
+//        fluid.update();
+//    }
 
     #ifdef KINECT_SEQUENCE
 
@@ -611,11 +611,15 @@ void ofApp::draw(){
     }
     else ofBackground(centerBg);
     
-    ofRectangle canvasRect(0, 0, ofGetWidth(), ofGetHeight());
+    int windowWidth = ofGetWindowWidth();
+    int windowHeight = ofGetWindowHeight();
+    
+    ofRectangle canvasRect(0, 0, windowWidth, windowHeight);
     ofRectangle kinectRect(0, 0, kinect.width, kinect.height);
     kinectRect.scaleTo(canvasRect, OF_SCALEMODE_FIT);
     ofTranslate(kinectRect.x, kinectRect.y);
     ofScale(reScale, reScale);
+    
 //    ofScale(reScale.x, reScale.y);
 
 //    // Kinect images
@@ -651,36 +655,34 @@ void ofApp::draw(){
         gridParticles->draw();
         boidsParticles->draw();
         animationsParticles->draw();
-        if(fluidActive){
-            fluid.draw(kinect.width/2, kinect.height/2, kinect.width/2, kinect.height/2);
-            fluid.drawVelocity(0, kinect.height/2, kinect.width/2, kinect.height/2);
-        }
+//        if(fluidActive){
+//            fluid.draw(kinect.width/2, kinect.height/2, kinect.width/2, kinect.height/2);
+//            fluid.drawVelocity(0, kinect.height/2, kinect.width/2, kinect.height/2);
+//        }
 
-        ofTexture& flow = contour.getFlowTexture();
-        int w = flow.getWidth();
-        int h = flow.getHeight();
-        
-        ofSetColor(255, 255, 255);
-        if(flow.isAllocated())
-            flow.draw(0, 0);
-        
-        ofFloatPixels flowPixels;
-        flow.readToPixels(flowPixels);
-        
-        ofSetLineWidth(1.5);
-        ofSetColor(255, 0, 0);
-        
-        // color pixels, use w and h to control red and green
-        for (int i = 0; i < w; i+=5){
-            for (int j = 0; j < h; j+=5){
-                ofVec2f vel;
-                vel.x = flowPixels[(j*w+i)*3 + 0]; // r
-                vel.y = flowPixels[(j*w+i)*3 + 1]; // g
-                ofLine(ofVec2f(i, j), ofVec2f(i, j)+vel);
-            }
-        }
-        
-//        if(flow.isAllocated()) fluid.addVelocity(flow, 1.0);
+//        ofTexture& flow = contour.getFlowTexture();
+//        int w = flow.getWidth();
+//        int h = flow.getHeight();
+//        
+//        ofSetColor(255, 255, 255);
+//        if(flow.isAllocated())
+//            flow.draw(0, 0);
+//        
+//        ofFloatPixels flowPixels;
+//        flow.readToPixels(flowPixels);
+//        
+//        ofSetLineWidth(1.5);
+//        ofSetColor(255, 0, 0);
+//        
+//        // color pixels, use w and h to control red and green
+//        for (int i = 0; i < w; i+=5){
+//            for (int j = 0; j < h; j+=5){
+//                ofVec2f vel;
+//                vel.x = flowPixels[(j*w+i)*3 + 0]; // r
+//                vel.y = flowPixels[(j*w+i)*3 + 1]; // g
+//                ofLine(ofVec2f(i, j), ofVec2f(i, j)+vel);
+//            }
+//        }
         
     }
 
@@ -756,7 +758,7 @@ void ofApp::setupHelperGUI(){
     guiHelper->addLabel("MENU", OFX_UI_FONT_LARGE);
 
     guiHelper->addSpacer();
-    guiHelper->addLabel("Press number 0 to 7 to", OFX_UI_FONT_SMALL);
+    guiHelper->addLabel("Press number 1 to 7 to", OFX_UI_FONT_SMALL);
     guiHelper->addLabel("switch between GUI panels", OFX_UI_FONT_SMALL);
     
     guiHelper->addSpacer();
@@ -917,7 +919,7 @@ void ofApp::setupKinectGUI(){
     guiKinect_2->addToggle("Show Markers Path", &drawMarkersPath);
 
     guiKinect_2->addSpacer();
-    guiKinect_2->addToggle("Compute Flow", &contour.opticalFlow);
+    guiKinect_2->addToggle("Compute Flow", &contour.doOpticalFlow);
     guiKinect_2->addSpacer();
     guiKinect_2->addToggle("Draw Optical Flow", &contour.drawFlow);
     guiKinect_2->addToggle("Draw Difference", &contour.drawDiff);
@@ -1048,39 +1050,39 @@ void ofApp::setupFluidSolverGUI(){
     guiFluid->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     
-    guiFluid->addSpacer();
-    ofxUIImageToggle *active;
-    active = guiFluid->addImageToggle("Activate Fluid", "icons/show.png", &fluidActive, dim, dim);
-    active->setColorBack(ofColor(150, 255));
-    
-    guiFluid->addSpacer();
-    ofxUISlider *redSlider = guiFluid->addSlider("Red", 0.0, 1.0, &fluidRed);
-    redSlider->setColorFill(ofColor(240, 30, 30));
-    redSlider->setColorFillHighlight(ofColor(150, 30, 30));
-    ofxUISlider *greenSlider = guiFluid->addSlider("Green", 0.0, 1.0, &fluidGreen);
-    greenSlider->setColorFill(ofColor(30, 240, 30));
-    greenSlider->setColorFillHighlight(ofColor(30, 150, 30));
-    ofxUISlider *blueSlider = guiFluid->addSlider("Blue", 0.0, 1.0, &fluidBlue);
-    blueSlider->setColorFill(ofColor(30, 30, 240));
-    blueSlider->setColorFillHighlight(ofColor(30, 30, 150));
-    
-    guiFluid->addSlider("Opacity", 0.0, 1.0, &fluidOpacity);
+//    guiFluid->addSpacer();
+//    ofxUIImageToggle *active;
+//    active = guiFluid->addImageToggle("Activate Fluid", "icons/show.png", &fluidActive, dim, dim);
+//    active->setColorBack(ofColor(150, 255));
+//    
+//    guiFluid->addSpacer();
+//    ofxUISlider *redSlider = guiFluid->addSlider("Red", 0.0, 1.0, &fluidRed);
+//    redSlider->setColorFill(ofColor(240, 30, 30));
+//    redSlider->setColorFillHighlight(ofColor(150, 30, 30));
+//    ofxUISlider *greenSlider = guiFluid->addSlider("Green", 0.0, 1.0, &fluidGreen);
+//    greenSlider->setColorFill(ofColor(30, 240, 30));
+//    greenSlider->setColorFillHighlight(ofColor(30, 150, 30));
+//    ofxUISlider *blueSlider = guiFluid->addSlider("Blue", 0.0, 1.0, &fluidBlue);
+//    blueSlider->setColorFill(ofColor(30, 30, 240));
+//    blueSlider->setColorFillHighlight(ofColor(30, 30, 150));
+//    
+//    guiFluid->addSlider("Opacity", 0.0, 1.0, &fluidOpacity);
     
     guiFluid->addSpacer();
     guiFluid->addLabel("Solver");
     
-    guiFluid->addSlider("cellSize", 0.1, 1.6, &fluid.cellSize);
-    guiFluid->addSlider("gradientScale", 0.1, 1.0, &fluid.gradientScale);
-    guiFluid->addSlider("ambientTemperature", 0.0, 1.0, &fluid.ambientTemperature);
-    guiFluid->addIntSlider("jacobiIterations", 1, 100, &fluid.numJacobiIterations);
-    guiFluid->addSlider("timeStep", 0.05, 0.5, &fluid.timeStep);
-    guiFluid->addSlider("smokeBuoyancy", 0.0, 1.0, &fluid.smokeBuoyancy);
-    guiFluid->addSlider("smokeWeight", 0.0, 1.0, &fluid.smokeWeight);
-
-    guiFluid->addSpacer();
-    guiFluid->addSlider("dissipation", 0.7, 0.99, &fluid.dissipation);
-    guiFluid->addSlider("velocityDissipation", 0.7, 0.99, &fluid.velocityDissipation);
-    guiFluid->addSpacer();
+//    guiFluid->addSlider("cellSize", 0.1, 1.6, &fluid.cellSize);
+//    guiFluid->addSlider("gradientScale", 0.1, 1.0, &fluid.gradientScale);
+//    guiFluid->addSlider("ambientTemperature", 0.0, 1.0, &fluid.ambientTemperature);
+//    guiFluid->addIntSlider("jacobiIterations", 1, 100, &fluid.numJacobiIterations);
+//    guiFluid->addSlider("timeStep", 0.05, 0.5, &fluid.timeStep);
+//    guiFluid->addSlider("smokeBuoyancy", 0.0, 1.0, &fluid.smokeBuoyancy);
+//    guiFluid->addSlider("smokeWeight", 0.0, 1.0, &fluid.smokeWeight);
+//
+//    guiFluid->addSpacer();
+//    guiFluid->addSlider("dissipation", 0.7, 0.99, &fluid.dissipation);
+//    guiFluid->addSlider("velocityDissipation", 0.7, 0.99, &fluid.velocityDissipation);
+//    guiFluid->addSpacer();
     
     guiFluid->addSlider("Fluid Gravity", 0.001, 0.1, 0.0098);
 
@@ -2041,7 +2043,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     //-------------------------------------------------------------
     if(e.getName() == "Fluid Gravity"){
         ofxUISlider *slider = (ofxUISlider *) e.widget;
-        fluid.setGravity(ofVec2f(0.0, slider->getValue()));
+//        fluid.setGravity(ofVec2f(0.0, slider->getValue()));
     }
     
     //-------------------------------------------------------------

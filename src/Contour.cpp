@@ -13,9 +13,9 @@ Contour::Contour()
     
     opacity             = 255.0;
     
-    opticalFlow         = true; // compute optical flow?
+    doOpticalFlow       = true; // compute optical flow?
 
-    scaleFactor         = 3.5;  // scaling factor of the depth image to compute the optical flow in lower res.
+    scaleFactor         = 4.0;  // scaling factor of the depth image to compute the optical flow in lower res.
     flowScale           = 0.1;  // scalar of flow velocities
 
     // optical flow settings
@@ -42,6 +42,8 @@ Contour::Contour()
     // debug
     drawDiff            = false;
     drawFlow            = false;
+    drawFlowScalar      = true;
+    drawFlowField       = true;
     drawVelocities      = false;
 }
 
@@ -49,10 +51,19 @@ void Contour::setup(int width, int height){
     this->width     = width;
     this->height    = height;
     
-    int wScaled = width/scaleFactor;
-    int hScaled = height/scaleFactor;
-    rescaled.allocate(wScaled, hScaled, OF_IMAGE_GRAYSCALE);
-    rescaledRect.set(0, 0, rescaled.width, rescaled.height);
+    flowWidth = width/scaleFactor;
+    flowHeight = height/scaleFactor;
+    
+    // Flow & Mask
+    opticalFlow.setup(flowWidth, flowHeight);
+    opticalFlow.setStrength(30.0);
+    velocityMask.setup(width, height);
+    
+    displayScalar.allocate(flowWidth, flowHeight);
+    velocityField.allocate(flowWidth / 4, flowHeight / 4);
+    
+//    rescaled.allocate(flowWidth, flowHeight, OF_IMAGE_GRAYSCALE);
+//    rescaledRect.set(0, 0, rescaled.width, rescaled.height);
     
     contourFinder.setSortBySize(true);  // sort contours by size
 
@@ -64,11 +75,11 @@ void Contour::setup(int width, int height){
     diff.allocate(width, height, OF_IMAGE_GRAYSCALE);
     
     // allocate flow texture
-    flowTexture.allocate(wScaled, hScaled, GL_RGB32F);
-    flowPixels.allocate(wScaled, hScaled, 3);
+    flowTexture.allocate(flowWidth, flowHeight, GL_RGB32F);
+    flowPixels.allocate(flowWidth, flowHeight, 3);
 }
 
-void Contour::update(ofImage &depthImage){
+void Contour::update(float dt, ofImage &depthImage){
 
     if(isActive){
 
@@ -78,21 +89,28 @@ void Contour::update(ofImage &depthImage){
 
         copy(depthImage, previous);
 
-        if(opticalFlow){
-            resize(depthImage, rescaled);
-            rescaled.update();
+        if(doOpticalFlow){
+//            resize(depthImage, rescaled);
+//            rescaled.update();
 
-            // Compute optical flow
-            flow.setPyramidScale(pyrScale);
-            flow.setNumLevels(levels);
-            flow.setWindowSize(winSize);
-            flow.setNumIterations(iterations);
-            flow.setPolyN(polyN);
-            flow.setPolySigma(polySigma);
-            flow.setUseGaussian(gaussianMode);
-            flow.calcOpticalFlow(rescaled); // optical flow on rescaled depth image
+//            // Compute optical flow
+//            flow.setPyramidScale(pyrScale);
+//            flow.setNumLevels(levels);
+//            flow.setWindowSize(winSize);
+//            flow.setNumIterations(iterations);
+//            flow.setPolyN(polyN);
+//            flow.setPolySigma(polySigma);
+//            flow.setUseGaussian(gaussianMode);
+//            flow.calcOpticalFlow(rescaled); // optical flow on rescaled depth image
+            
+            opticalFlow.setSource(depthImage.getTextureReference());
+            opticalFlow.update(dt);
+            
+            velocityMask.setDensity(depthImage.getTextureReference());
+            velocityMask.setVelocity(opticalFlow.getOpticalFlow());
+            velocityMask.update();
         }
-
+        
         // Contour Finder in the depth Image
         contourFinder.findContours(depthImage);
 
@@ -133,7 +151,7 @@ void Contour::update(ofImage &depthImage){
             quads[i] = quad;
         }
 
-
+        
         for(int i = 0; i < m; i++){
             ofPolyline diffContour;
             diffContour = contourFinderDiff.getPolyline(i);
@@ -148,23 +166,24 @@ void Contour::update(ofImage &depthImage){
 
 void Contour::draw(){
     if(isActive){
-        ofPushStyle();
-        
-        ofPushMatrix();
-        ofTranslate(width/2.0, height/2.0);
-        ofScale(scaleContour, scaleContour); // Scale it so we can see more contour on the projection
-        
-        ofPushMatrix();
-        ofTranslate(-width/2.0, -height/2.0);
+//        ofPushMatrix();
+//        ofTranslate(width/2.0, height/2.0);
+//        ofScale(scaleContour, scaleContour); // Scale it so we can see more contour on the projection
+//        
+//        ofPushMatrix();
+//        ofTranslate(-width/2.0, -height/2.0);
         
         if(drawBoundingRect){
+            ofPushStyle();
             ofFill();
             ofSetColor(ofColor(red, green, blue), opacity);
             for(int i = 0; i < boundingRects.size(); i++)
                 ofRect(boundingRects[i]);
+            ofPopStyle();
         }
 
         if(drawConvexHull){
+            ofPushStyle();
             ofFill();
             ofSetColor(ofColor(red, green, blue), opacity);
             for(int i = 0; i < convexHulls.size(); i++){
@@ -174,16 +193,20 @@ void Contour::draw(){
                 }
                 ofEndShape();
             }
+            ofPopStyle();
         }
 
         if(drawConvexHullLine){
+            ofPushStyle();
             ofSetColor(ofColor(red, green, blue), opacity);
             ofSetLineWidth(lineWidth);
             for(int i = 0; i < convexHulls.size(); i++)
                 convexHulls[i].draw(); //if we only want the contour
+            ofPopStyle();
         }
 
         if(drawContourLine){
+            ofPushStyle();
             ofSetColor(ofColor(red, green, blue), opacity);
             ofSetLineWidth(lineWidth);
             for(int i = 0; i < contours.size(); i++){
@@ -192,45 +215,21 @@ void Contour::draw(){
 //                else ofSetColor(0, 0, 255);
                 contours[i].draw();
             }
+            ofPopStyle();
         }
 
         if(drawQuads){
+            ofPushStyle();
             ofSetColor(ofColor(red, green, blue), opacity);
             ofSetLineWidth(lineWidth);
             for(int i = 0; i < quads.size(); i++){
                 quads[i].draw();
             }
+            ofPopStyle();
         }
-
-        if(drawDiff){
-//            ofSetColor(255);
-//            diff.draw(0, 0);
-            ofSetColor(255, 0, 0);
-            ofSetLineWidth(2);
-            for(int i = 0; i < diffContours.size(); i++){
-                diffContours[i].draw();
-            }
-        }
-
-        if(drawFlow){
-//            ofSetColor(255);
-//            rescaled.draw(0, 0, width, height);
-            ofSetColor(255, 0, 0);
-            ofSetLineWidth(1.5);
-            flow.draw(0, 0, width, height);
-        }
-
-        if(drawVelocities){
-            ofSetColor(255, 0, 0);
-            ofSetLineWidth(1);
-            for(int i = 0; i < contours.size(); i++){
-                for(int p = 0; p < contours[i].size(); p++){
-                    ofLine(contours[i][p], contours[i][p] - getVelocityInPoint(contours[i][p]));
-                }
-            }
-        }
-
+        
 //        if(drawTangentLines){
+//            ofPushStyle();
 //            ofSetLineWidth(1);
 //            ofSetColor(255, 50);
 //            for(int i = 0; i < contours.size(); i++){
@@ -243,22 +242,79 @@ void Contour::draw(){
 //                    ofLine(point-tangent/2, point+tangent/2);
 //                }
 //            }
+//            ofPopStyle();
 //        }
+        
+//        ofPopMatrix();
+//        ofPopMatrix();
+        
+        // DEBUGGING DRAWINGS
 
-        prevContours = contours;
-        ofPopMatrix();
-        ofPopMatrix();
-        ofPopStyle();
+        if(drawDiff){
+            ofPushStyle();
+            ofSetColor(255);
+//            diff.draw(0, 0);
+//            ofSetColor(255, 0, 0);
+//            ofSetLineWidth(2);
+//            for(int i = 0; i < diffContours.size(); i++){
+//                diffContours[i].draw();
+//            }
+            ofEnableBlendMode(OF_BLENDMODE_DISABLED);
+            velocityMask.draw(0, 0, width, height);
+            ofPopStyle();
+        }
+
+        if(drawFlow){
+            ofPushStyle();
+//            ofSetColor(255);
+//            rescaled.draw(0, 0, width, height);
+//            ofSetColor(255, 0, 0);
+//            ofSetLineWidth(1.5);
+//            flow.draw(0, 0, width, height);
+            
+            opticalFlow.getOpticalFlow().draw(0, 0, width, height);
+            if(drawFlowScalar){
+                ofEnableBlendMode(OF_BLENDMODE_DISABLED);
+                displayScalar.setSource(opticalFlow.getOpticalFlowDecay());
+                displayScalar.draw(0, 0, width, height);
+            }
+            if(drawFlowField){
+                ofEnableBlendMode(OF_BLENDMODE_ADD);
+                velocityField.setSource(opticalFlow.getOpticalFlowDecay());
+                velocityField.draw(0, 0, width, height);
+            }
+            ofPopStyle();
+        }
+
+        if(drawVelocities){
+            ofPushStyle();
+            ofSetColor(255, 0, 0);
+            ofSetLineWidth(1);
+            for(int i = 0; i < contours.size(); i++){
+                for(int p = 0; p < contours[i].size(); p++){
+                    ofLine(contours[i][p], contours[i][p] - getVelocityInPoint(contours[i][p]));
+                }
+            }
+            ofPopStyle();
+        }
+        
+        prevContours = contours; // Save actual contour to do difference with next one
     }
 }
 
 ofPoint Contour::getFlowOffset(ofPoint p){
-    ofPoint p_ = p/scaleFactor;
-
-    if(rescaledRect.inside(p_)){
-        return flow.getFlowOffset(p_.x, p_.y) * flowScale;
-    }
-    else return ofPoint(0, 0);
+//    ofPoint p_ = p/scaleFactor;
+//
+//    if(rescaledRect.inside(p_)){
+//        return flow.getFlowOffset(p_.x, p_.y) * flowScale;
+//    }
+//    else return ofPoint(0, 0);
+    
+    ofVec2f* flowVectors = opticalFlow.getFlowVectors();
+    int idx = p.x + p.y*flowWidth;
+    ofVec2f offset(0, 0);
+    if(idx < opticalFlow.getFlowVectorSize()) offset = *(flowVectors + idx);
+    return offset;
 }
 
 ofPoint Contour::getAverageFlowInRegion(ofRectangle rect){
