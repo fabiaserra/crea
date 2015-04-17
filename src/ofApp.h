@@ -8,7 +8,6 @@
 #include "ofxKinect.h"
 #include "ofxSecondWindow.h"
 #include "ofxFlowTools.h"
-#include "ofxFluid.h"
 
 // Classes
 //-----------------------
@@ -16,6 +15,7 @@
 #include "irMarker.h"
 #include "Contour.h"
 #include "Sequence.h"
+#include "Fluid.h"
 
 // VMO files
 //-----------------------
@@ -27,6 +27,9 @@
 
 // Uncomment this to use an xml sequence file for the tracking
 //#define KINECT_SEQUENCE
+
+// Uncomment this to use two windows
+#define SECOND_WINDOW
 
 class ofApp : public ofBaseApp{
     public:
@@ -78,6 +81,9 @@ class ofApp : public ofBaseApp{
         //--------------------------------------------------------------
         ofxKinect kinect;
         //--------------------------------------------------------------
+        int windowWidth;
+        int windowHeight;
+        //--------------------------------------------------------------
         vector<ofImage *> savedDepthImages; // the saved Depth images for playback
         vector<ofImage *> savedIrImages;    // the saved IR images for playback
         //--------------------------------------------------------------
@@ -106,10 +112,13 @@ class ofApp : public ofBaseApp{
         ofxCv::ContourFinder irMarkerFinder;
         ofxCv::RectTrackerFollower<irMarker> tracker;
         //--------------------------------------------------------------
-//        vector<irMarker> markers;
         int numMarkers;
         //--------------------------------------------------------------
         Contour contour;        // User silhouette contour
+        //--------------------------------------------------------------
+        Fluid fluid;
+//        ftFluidSimulation	fluid;
+//        ftParticleFlow		particleFlow;
         //--------------------------------------------------------------
         ParticleSystem *emitterParticles;
         ParticleSystem *gridParticles;
@@ -117,15 +126,6 @@ class ofApp : public ofBaseApp{
         ParticleSystem *animationsParticles;
         vector<ParticleSystem *> particleSystems;
         int currentParticleSystem;
-        //--------------------------------------------------------------
-//        ofxFluid fluid;
-//        bool fluidActive;
-//        float fluidOpacity;
-//        float fluidRed, fluidGreen, fluidBlue;
-//        float fluidRadius;
-        //--------------------------------------------------------------
-//        ofTexture texColor;
-//        unsigned char * colorPixels;    
         //--------------------------------------------------------------
         ofSoundPlayer song;     // Song
         //--------------------------------------------------------------

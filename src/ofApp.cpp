@@ -9,21 +9,19 @@ void ofApp::setup(){
     ofSetFrameRate(60);
 //    ofSetVerticalSync(false);
     
-    // the arguments for the second window are its initial x and y position,
-    // and its width and height. the last argument is whether the window
-    // should be undecorated, i.e. title bar is visible. setting it to
-    // true removes the title bar.
-    
-//    secondWindow.setup("second window", ofGetScreenWidth(), 0, 1024, 768, false);
-    
-    // running the command below positions an undecorated window to display on a second
-    // monitor or projector. this is a good way to set up a fullscreen display, while
-    // retaining a control window in the primary monitor.
-    
-//    secondWindow.setup("second window", ofGetScreenWidth()+100, -50, 1280, 800, true);
-//    secondWindow.setup("second window", 0, 0, 1024, 768, true);
-
-//    secondWindow.setup("second window", ofGetScreenWidth(), 0, 1024, 768, false);
+    #ifdef SECOND_WINDOW
+        // the arguments for the second window are its initial x and y position,
+        // and its width and height. the last argument is whether the window
+        // should be undecorated, i.e. title bar is visible. setting it to
+        // true removes the title bar.
+        // running the command below positions an undecorated window to display on a second
+        // monitor or projector. this is a good way to set up a fullscreen display, while
+        // retaining a control window in the primary monitor.
+        
+        secondWindow.setup("second window", ofGetScreenWidth()+100, -50, 1280, 720, true);
+        // secondWindow.setup("second window", 0, 0, 1024, 768, true);
+        // secondWindow.setup("second window", ofGetScreenWidth(), 0, 1024, 768, false);
+    #endif
 
     ofHideCursor(); // trick to show the cursor icon (see mouseMoved())
 
@@ -151,14 +149,8 @@ void ofApp::setup(){
     contour.setMaxAreaRadius(maxContourSize);
     
     // FLUID
-    // Initial Allocation
-//    fluid.allocate(kinect.width, kinect.height, 0.5);
-//    fluidRed = 0.5, fluidGreen = 0.1, fluidBlue = 0.0;
-//    fluidActive = true;
-//    
-//    fluidOpacity = 1.0;
-//    fluidRadius = 10.0;
-//    
+    fluid.setup(contour.getFlowWidth(), contour.getFlowHeight(), kinect.width, kinect.height);
+
 //    // Seting the gravity set up
 //    fluid.dissipation = 0.99;
 //    fluid.velocityDissipation = 0.99;
@@ -182,7 +174,6 @@ void ofApp::setup(){
     drawSequenceSegments = false;
 
     // MARKERS
-//    markers.resize(numMarkers);
     drawMarkers = false;
     drawMarkersPath = false;
 
@@ -323,8 +314,16 @@ void ofApp::update(){
     float dt = ofClamp(time - time0, 0, 0.1);
     time0 = time;
     
+    #ifdef SECOND_WINDOW
+        windowWidth = secondWindow.getWidth();
+        windowHeight = secondWindow.getHeight();
+    #else
+        windowWidth = ofGetWindowWidth();
+        windowHeight = ofGetWindowHeight();
+    #endif
+    
     // Compute rescale value to scale kinect image
-    reScale = (float)ofGetHeight() / (float)kinect.height;
+    reScale = (float)windowHeight / (float)kinect.height;
 //    reScale = ofVec2f((float)ofGetWidth()/(float)kinect.width, (float)ofGetHeight()/(float)kinect.height); // deforms the image a little bit
 //    reScale = ofVec2f((float)ofGetHeight()/(float)kinect.height, (float)ofGetHeight()/(float)kinect.height);
 
@@ -420,44 +419,30 @@ void ofApp::update(){
     tracker.track(irMarkerFinder.getBoundingRects());
 
     // Track markers
-    vector<irMarker>& tempMarkers       = tracker.getFollowers();   // TODO: assign dead labels to new labels and have a MAX number of markers
+    vector<irMarker>& markers           = tracker.getFollowers();   // TODO: assign dead labels to new labels and have a MAX number of markers
     vector<unsigned int> deadLabels     = tracker.getDeadLabels();
     vector<unsigned int> currentLabels  = tracker.getCurrentLabels();
     // vector<unsigned int> newLabels      = tracker.getNewLabels();
 
     // Update markers if we loose track of them
-    for(unsigned int i = 0; i < tempMarkers.size(); i++){
-        tempMarkers[i].updateLabels(deadLabels, currentLabels);
+    for(unsigned int i = 0; i < markers.size(); i++){
+        markers[i].updateLabels(deadLabels, currentLabels);
     }
 
     // Record sequence when recording button is true
-    if(recordingSequence->getValue() == true) sequence.record(tempMarkers);
+    if(recordingSequence->getValue() == true) sequence.record(markers);
 
     // Update contour
     contour.update(dt, depthImage);
-
-    // Update particles
-    emitterParticles->update(dt, tempMarkers, contour);
-    gridParticles->update(dt, tempMarkers, contour);
-    boidsParticles->update(dt, tempMarkers, contour);
-    animationsParticles->update(dt, tempMarkers, contour);
     
     // Update fluid
-//    if(fluidActive){
-//        for(unsigned int i = 0; i < tempMarkers.size(); i++){
-//            if (!tempMarkers[i].hasDisappeared){
-//                ofPoint m = tempMarkers[i].smoothPos;
-//                ofPoint c = ofPoint(640*0.5, 480*0.5) - m;
-//    //            fluid.addTemporalForce(m, tempMarkers[i].velocity, ofFloatColor(0.5,0.1,0.0), 10.0f);
-//                c.normalize();
-//                fluid.addTemporalForce(m, tempMarkers[i].velocity, ofFloatColor(fluidRed, fluidGreen, fluidBlue, fluidOpacity), fluidRadius);
-//            }
-//        }
-//        fluid.addVelocity(contour.getFlowTexture(), 1.0);
-//        fluid.addColor(contour.getFlowTexture(), 0.1);
-        
-//        fluid.update();
-//    }
+    fluid.update(dt, markers, contour);
+
+    // Update particles
+    emitterParticles->update(dt, markers, contour);
+    gridParticles->update(dt, markers, contour);
+    boidsParticles->update(dt, markers, contour);
+    animationsParticles->update(dt, markers, contour);
 
     #ifdef KINECT_SEQUENCE
 
@@ -522,17 +507,17 @@ void ofApp::update(){
         }
 
     #else
-        if(tempMarkers.size()>0){
+        if(markers.size()>0){
             if(isTracking){
                 vector<float> obs(numMarkers*dimensions, 0.0); // Temporary code
                 int numObs = 0;
-                for(unsigned int i = 0; i < tempMarkers.size(); i++){
+                for(unsigned int i = 0; i < markers.size(); i++){
                     // If we have already filled numMarkers observations jump to tracking
                     if(numObs == numMarkers*dimensions) break;
                     // If marker has disappeared but we have more markers to fill numMarkers jump to the next marker
-                    if(tempMarkers[i].hasDisappeared && (tempMarkers.size() - i) > numMarkers) continue;
+                    if(markers[i].hasDisappeared && (markers.size() - i) > numMarkers) continue;
 
-                    ofPoint currentPoint = tempMarkers[i].smoothPos;
+                    ofPoint currentPoint = markers[i].smoothPos;
 
                     // Use the lowpass here??
                     obs[i] = lowpass(currentPoint.x, pastObs[i], slide);
@@ -599,7 +584,11 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-//    secondWindow.begin();
+    
+    #ifdef SECOND_WINDOW
+        secondWindow.begin();
+    #endif
+    
     ofPushMatrix();
     ofPushStyle();
     
@@ -610,9 +599,6 @@ void ofApp::draw(){
         ofBackgroundGradient(centerBg, contourBg);
     }
     else ofBackground(centerBg);
-    
-    int windowWidth = ofGetWindowWidth();
-    int windowHeight = ofGetWindowHeight();
     
     ofRectangle canvasRect(0, 0, windowWidth, windowHeight);
     ofRectangle kinectRect(0, 0, kinect.width, kinect.height);
@@ -651,14 +637,11 @@ void ofApp::draw(){
     else{
         // Draw Graphics
         contour.draw();
+        fluid.draw();
         emitterParticles->draw();
         gridParticles->draw();
         boidsParticles->draw();
         animationsParticles->draw();
-//        if(fluidActive){
-//            fluid.draw(kinect.width/2, kinect.height/2, kinect.width/2, kinect.height/2);
-//            fluid.drawVelocity(0, kinect.height/2, kinect.width/2, kinect.height/2);
-//        }
 
 //        ofTexture& flowTexture = contour.getFlowTexture();
 //        int w = flowTexture.getWidth();
@@ -688,11 +671,11 @@ void ofApp::draw(){
 
     if(drawMarkers || drawMarkersPath){
 //        irMarkerFinder.draw();
-        vector<irMarker>& tempMarkers = tracker.getFollowers();
+        vector<irMarker>& markers = tracker.getFollowers();
         // Draw identified IR markers
-        for (int i = 0; i < tempMarkers.size(); i++){
-            if(drawMarkers) tempMarkers[i].draw();
-            if(drawMarkersPath) tempMarkers[i].drawPath();
+        for (int i = 0; i < markers.size(); i++){
+            if(drawMarkers) markers[i].draw();
+            if(drawMarkersPath) markers[i].drawPath();
         }
     }
 
@@ -707,9 +690,12 @@ void ofApp::draw(){
     
     ofPopStyle();
     ofPopMatrix();
-//    secondWindow.end();
     
-//    ofBackground(0);
+    #ifdef SECOND_WINDOW
+        secondWindow.end();
+        ofBackground(0);
+    #endif
+    
     if(drawSequencePatternsSeparate) sequence.drawPatternsSeparate(gestureUpdate);
 }
 
@@ -1064,6 +1050,12 @@ void ofApp::setupOpticalFlowGUI(){
     guiFlow->addToggle("Show Scalar", &contour.drawFlowScalar);
     guiFlow->addSpacer();
     
+    guiFlow->addLabel("VELOCITY MASK", OFX_UI_FONT_LARGE);
+    guiFlow->addSlider("Strength", 0.0, 10.0, &contour.vMaskStrength);
+    guiFlow->addIntSlider("Blur Passes", 0, 10, &contour.vMaskBlurPasses);
+    guiFlow->addSlider("Blur Radius", 0.0, 10.0, &contour.vMaskBlurRadius);
+    guiFlow->addSpacer();
+    
     guiFlow->autoSizeToFitWidgets();
     guiFlow->setVisible(false);
     ofAddListener(guiFlow->newGUIEvent, this, &ofApp::guiEvent);
@@ -1077,23 +1069,32 @@ void ofApp::setupFluidSolverGUI(){
     guiFluid->addLabel("FLUID", OFX_UI_FONT_LARGE);
     guiFluid->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
     
-//    guiFluid->addSpacer();
-//    ofxUIImageToggle *active;
-//    active = guiFluid->addImageToggle("Activate Fluid", "icons/show.png", &fluidActive, dim, dim);
-//    active->setColorBack(ofColor(150, 255));
-//    
-//    guiFluid->addSpacer();
-//    ofxUISlider *redSlider = guiFluid->addSlider("Red", 0.0, 1.0, &fluidRed);
-//    redSlider->setColorFill(ofColor(240, 30, 30));
-//    redSlider->setColorFillHighlight(ofColor(150, 30, 30));
-//    ofxUISlider *greenSlider = guiFluid->addSlider("Green", 0.0, 1.0, &fluidGreen);
-//    greenSlider->setColorFill(ofColor(30, 240, 30));
-//    greenSlider->setColorFillHighlight(ofColor(30, 150, 30));
-//    ofxUISlider *blueSlider = guiFluid->addSlider("Blue", 0.0, 1.0, &fluidBlue);
-//    blueSlider->setColorFill(ofColor(30, 30, 240));
-//    blueSlider->setColorFillHighlight(ofColor(30, 30, 150));
-//    
-//    guiFluid->addSlider("Opacity", 0.0, 1.0, &fluidOpacity);
+    guiFluid->addSpacer();
+    ofxUIImageToggle *active;
+    active = guiFluid->addImageToggle("Activate Fluid", "icons/show.png", &fluid.isActive, dim, dim);
+    active->setColorBack(ofColor(150, 255));
+    
+    guiFluid->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    guiFluid->addSpacer();
+    guiFluid->addToggle("Marker", &fluid.markersInput);
+    guiFluid->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    guiFluid->setWidgetSpacing(15);
+    guiFluid->addToggle("Contour", &fluid.contourInput);
+    guiFluid->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    guiFluid->setWidgetSpacing(3);
+    
+    guiFluid->addSpacer();
+    ofxUISlider *redSlider = guiFluid->addSlider("Red", 0.0, 1.0, &fluid.red);
+    redSlider->setColorFill(ofColor(240, 30, 30));
+    redSlider->setColorFillHighlight(ofColor(150, 30, 30));
+    ofxUISlider *greenSlider = guiFluid->addSlider("Green", 0.0, 1.0, &fluid.green);
+    greenSlider->setColorFill(ofColor(30, 240, 30));
+    greenSlider->setColorFillHighlight(ofColor(30, 150, 30));
+    ofxUISlider *blueSlider = guiFluid->addSlider("Blue", 0.0, 1.0, &fluid.blue);
+    blueSlider->setColorFill(ofColor(30, 30, 240));
+    blueSlider->setColorFillHighlight(ofColor(30, 30, 150));
+
+    guiFluid->addSlider("Opacity", 0.0, 1.0, &fluid.opacity);
     
     guiFluid->addSpacer();
     guiFluid->addLabel("Solver");
@@ -1111,8 +1112,13 @@ void ofApp::setupFluidSolverGUI(){
 //    guiFluid->addSlider("velocityDissipation", 0.7, 0.99, &fluid.velocityDissipation);
 //    guiFluid->addSpacer();
     
-    guiFluid->addSlider("Fluid Gravity", 0.001, 0.1, 0.0098);
-
+//    guiFluid->addSlider("Fluid Gravity", 0.001, 0.1, 0.0098);
+    
+    guiFluid->addSpacer();
+    guiFluid->addToggle("Show Particles", &fluid.particlesActive);
+    guiFluid->addSpacer();
+    guiFluid->addToggle("Show Velocities", &fluid.drawVelocity);
+    guiFluid->addToggle("Show Velocities Scalar", &fluid.drawVelocityScalar);
     guiFluid->addSpacer();
 
     guiFluid->autoSizeToFitWidgets();
@@ -1149,6 +1155,7 @@ void ofApp::setupContourGUI(){
     guiContour->addToggle("Bounding Rectangle", &contour.drawBoundingRect);
     guiContour->addToggle("Convex Hull", &contour.drawConvexHull);
     guiContour->addToggle("Convex Hull Line", &contour.drawConvexHullLine);
+    guiContour->addToggle("Contour", &contour.drawContour);
     guiContour->addToggle("Contour Line", &contour.drawContourLine);
     guiContour->addToggle("Quads Line", &contour.drawQuads);
     guiContour->addSlider("Smoothing Size", 0.0, 40.0, &contour.smoothingSize);
@@ -1157,6 +1164,7 @@ void ofApp::setupContourGUI(){
 
     guiContour->addSpacer();
     guiContour->addToggle("Show Difference", &contour.drawDiff);
+    guiContour->addToggle("Show Difference Image", &contour.drawDiffImage);
     guiContour->addToggle("Show Contour Velocities", &contour.drawVelocities);
     guiContour->addSpacer();
 
@@ -1802,10 +1810,10 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     if(e.getName() == "Show Markers Path"){
         ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
         if(toggle->getValue() == true){
-            vector<irMarker>& tempMarkers = tracker.getFollowers();
+            vector<irMarker>& markers = tracker.getFollowers();
             // Delete path from markers
-            for (int i = 0; i < tempMarkers.size(); i++){
-                tempMarkers[i].clearPath();
+            for (int i = 0; i < markers.size(); i++){
+                markers[i].clearPath();
             }
         }
     }
