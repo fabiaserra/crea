@@ -8,7 +8,7 @@ class Fluid{
     public:
         Fluid();
 
-        void setup(int width, int height, int densityWidth = 0, int densityHeight = 0, bool doFasterInternalFormat = false);
+        void setup(int flowWidth, int flowHeight, int drawWidth, int drawHeight, bool doFasterInternalFormat = false);
         void update(float dt, vector<irMarker> &markers, Contour &contour);
         void draw();
         

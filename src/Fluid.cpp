@@ -20,19 +20,19 @@ Fluid::Fluid(){
     drawVelocityScalar  = false;
 }
 
-void Fluid::setup(int width, int height, int densityWidth, int densityHeight, bool doFasterInternalFormat){
-    this->width = width;
-    this->height = height;
+void Fluid::setup(int flowWidth, int flowHeight, int drawWidth, int drawHeight, bool doFasterInternalFormat){
+    this->width = drawWidth;
+    this->height = drawHeight;
     
     // Fluid
-    fluid.setup(width, height, densityWidth, densityHeight, doFasterInternalFormat);
+    fluid.setup(flowWidth, flowHeight, width, height, doFasterInternalFormat);
     
     // Particles
-    particleFlow.setup(width, height, densityWidth, densityHeight);
+    particleFlow.setup(flowWidth, flowHeight, width, height);
     
     // Visualisation
-    displayScalar.allocate(densityWidth, densityHeight);
-    velocityField.allocate(densityWidth / 4, densityHeight / 4);
+    displayScalar.allocate(flowWidth, flowHeight);
+    velocityField.allocate(flowWidth / 4, flowHeight / 4);
 }
 
 void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour){
