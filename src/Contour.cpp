@@ -29,6 +29,11 @@ Contour::Contour()
     flowTimeBlurDecay   = 0.1;  // 0 ~ 1
     flowTimeBlurRadius  = 2.0;  // 0 ~ 10
     
+    // velocity mask settings
+    vMaskStrength       = 1.0;  // 0 ~ 10
+    vMaskBlurPasses     = 1;    // 0 ~ 10
+    vMaskBlurRadius     = 6.0;  // 0 ~ 10
+    
     // contour settings
     smoothingSize       = 0.0;
     scaleContour        = 1.0;
@@ -38,14 +43,16 @@ Contour::Contour()
     drawBoundingRect    = false;
     drawConvexHull      = false;
     drawConvexHullLine  = false;
+    drawContour         = false;
     drawContourLine     = false;
     drawQuads           = false;
     drawTangentLines    = false;
 
     // debug
-    drawDiff            = false;
     drawFlow            = false;
     drawFlowScalar      = false;
+    drawDiff            = false;
+    drawDiffImage       = false;
     drawVelocities      = false;
 }
 
@@ -107,7 +114,12 @@ void Contour::update(float dt, ofImage &depthImage){
         
         velocityMask.setDensity(depthImage.getTextureReference());
         velocityMask.setVelocity(opticalFlow.getOpticalFlow());
+        velocityMask.setStrength(vMaskStrength);
+        velocityMask.setBlurPasses(vMaskBlurPasses);
+        velocityMask.setBlurRadius(vMaskBlurRadius);
         velocityMask.update();
+        
+        velocityMask.getTextureReference().readToPixels(velocityMaskPixels);
     }
     
     // Contour Finder in the depth Image
@@ -115,9 +127,7 @@ void Contour::update(float dt, ofImage &depthImage){
 
     // Contour Finder in the depth diff Image
 //    contourFinderDiff.findContours(diff);
-    ofPixels pix;
-    velocityMask.getTextureReference().readToPixels(pix);
-    contourFinderDiff.findContours(pix);
+    contourFinderDiff.findContours(velocityMaskPixels);
     
     if(isActive){
         int n = contourFinder.size();
@@ -153,7 +163,6 @@ void Contour::update(float dt, ofImage &depthImage){
             quad = toOf(contourFinder.getFitQuad(i));
             quads[i] = quad;
         }
-
         
         for(int i = 0; i < m; i++){
             ofPolyline diffContour;
@@ -203,6 +212,19 @@ void Contour::draw(){
                 convexHulls[i].draw(); //if we only want the contour
             ofPopStyle();
         }
+        
+        if(drawContour){
+            ofPushStyle();
+            ofSetColor(ofColor(red, green, blue), opacity);
+            for(int i = 0; i < contours.size(); i++){
+                ofBeginShape();
+                for(int j = 0; j < contours[i].getVertices().size(); j++){
+                    ofVertex(contours[i].getVertices().at(j).x, contours[i].getVertices().at(j).y);
+                }
+                ofEndShape();
+            }
+            ofPopStyle();
+        }
 
         if(drawContourLine){
             ofPushStyle();
@@ -248,22 +270,7 @@ void Contour::draw(){
 //        ofPopMatrix();
     }
     
-        // DEBUGGING DRAWINGS
-
-    if(drawDiff){
-        ofPushStyle();
-        ofSetColor(255);
-//        diff.draw(0, 0);
-        ofSetColor(255, 0, 0);
-        ofSetLineWidth(2);
-        for(int i = 0; i < diffContours.size(); i++){
-            diffContours[i].draw();
-        }
-//        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
-//        velocityMask.draw(0, 0, width, height);
-        ofPopStyle();
-    }
-
+    // DEBUGGING DRAWINGS
     if(drawFlow){
         ofPushStyle();
 //        ofSetColor(255, 0, 0);
@@ -285,18 +292,32 @@ void Contour::draw(){
         velocityField.draw(0, 0, width, height);
         ofPopStyle();
     }
+    
+    if(drawDiff){
+        ofPushStyle();
+        ofSetColor(255);
+        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
+        if(drawDiffImage){
+            velocityMask.draw(0, 0, width, height);
+//            diff.draw(0, 0);
+        }
+        ofSetColor(255, 0, 0);
+        ofSetLineWidth(2);
+        for(int i = 0; i < diffContours.size(); i++){
+            diffContours[i].draw();
+        }
+        ofPopStyle();
+    }
 
     if(drawVelocities){
         ofPushStyle();
-        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
-        velocityMask.draw(0, 0, width, height);
-//        ofSetColor(255, 0, 0);
-//        ofSetLineWidth(1);
-//        for(int i = 0; i < contours.size(); i++){
-//            for(int p = 0; p < contours[i].size(); p++){
-//                ofLine(contours[i][p], contours[i][p] - getVelocityInPoint(contours[i][p]));
-//            }
-//        }
+        ofSetColor(255, 0, 0);
+        ofSetLineWidth(1);
+        for(int i = 0; i < contours.size(); i+=5){
+            for(int p = 0; p < contours[i].size(); p++){
+                ofLine(contours[i][p], contours[i][p] - getVelocityInPoint(contours[i][p]));
+            }
+        }
         ofPopStyle();
     }
         

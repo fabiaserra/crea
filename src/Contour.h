@@ -18,7 +18,12 @@ class Contour{
         ofPoint getAverageVelocity();
         ofPoint getVelocityInPoint(ofPoint curPoint);
     
-        ofTexture getFlowTexture() {return flowTexture;}
+        ofTexture& getOpticalFlowDecay() {return opticalFlow.getOpticalFlowDecay();}
+        ofTexture& getLuminanceMask() {return velocityMask.getLuminanceMask();}
+        ofTexture& getColorMask() {return velocityMask.getColorMask();}
+            
+        float getFlowWidth() {return flowWidth;}
+        float getFlowHeight() {return flowHeight;}
 
         void computeVelocities();
         void setMinAreaRadius(float minContourSize) {contourFinder.setMinAreaRadius(minContourSize);}
@@ -41,9 +46,6 @@ class Contour{
         float scaleFactor;  // scaling factor of the optical flow image
         float flowScale;    // scalar to multiply by the offset of flow
         //--------------------------------------------------------------
-        ftOpticalFlow opticalFlow;
-        ftVelocityMask velocityMask;
-        //--------------------------------------------------------------
         float flowStrength;
         int   flowOffset;
         float flowLambda;
@@ -53,6 +55,10 @@ class Contour{
         bool  flowTimeBlurActive;
         float flowTimeBlurDecay;
         float flowTimeBlurRadius;
+        //--------------------------------------------------------------
+        float vMaskStrength;
+        int vMaskBlurPasses;
+        float vMaskBlurRadius;
         //--------------------------------------------------------------
         ofImage previous;
         ofImage diff;
@@ -72,23 +78,30 @@ class Contour{
         bool drawBoundingRect;
         bool drawConvexHull;
         bool drawConvexHullLine;
+        bool drawContour;
         bool drawContourLine;
         bool drawQuads;
         bool drawTangentLines;
         //--------------------------------------------------------------
         bool drawDiff;
+        bool drawDiffImage;
         bool drawFlow;
         bool drawFlowScalar;
-        bool drawFlowField;
         bool drawVelocities;
-    
+        //--------------------------------------------------------------
+
     protected:
-    private:
+        ftOpticalFlow opticalFlow;
+        ftVelocityMask velocityMask;
+        //--------------------------------------------------------------
         ofxCv::ContourFinder contourFinder;
         ofxCv::ContourFinder contourFinderDiff;
+        //--------------------------------------------------------------
         ftDisplayScalar displayScalar;
         ftVelocityField velocityField;
+        //--------------------------------------------------------------
         ofRectangle rescaledRect;
         ofTexture flowTexture;
         ofFloatPixels flowPixels;
+        ofPixels velocityMaskPixels;
 };
