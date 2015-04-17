@@ -122,7 +122,6 @@ class ParticleSystem
         bool useContourArea;        // Use contour area to interact with particles?
         bool useContourVel;         // Use contour velocities to interact with particles?
 
-
 	protected:
 		// Helper functions
 		ofPoint randomVector();

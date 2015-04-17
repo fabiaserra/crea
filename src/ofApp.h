@@ -41,6 +41,7 @@ class ofApp : public ofBaseApp{
         void setupKinectGUI();
         void setupGesturesGUI();
         void setupCueListGUI();
+        void setupOpticalFlowGUI();
         void setupFluidSolverGUI();
         void setupContourGUI();
         void setupEmitterGUI();
@@ -50,6 +51,7 @@ class ofApp : public ofBaseApp{
 
         void saveGUISettings(const string path, const bool saveCues);
         void loadGUISettings(const string path, const bool interpolate, const bool loadCues);
+//        void resetGUISettings(vector<int> guiIndices);
         void interpolateWidgetValues();
 
         void guiEvent(ofxUIEventArgs &e);

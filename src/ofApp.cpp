@@ -737,6 +737,7 @@ void ofApp::setupGUI(){
     setupKinectGUI();
     setupGesturesGUI();
     setupCueListGUI();
+    setupOpticalFlowGUI();
     setupFluidSolverGUI();
     setupContourGUI();
     setupEmitterGUI();
@@ -918,14 +919,6 @@ void ofApp::setupKinectGUI(){
     guiKinect_2->addToggle("Show Markers", &drawMarkers);
     guiKinect_2->addToggle("Show Markers Path", &drawMarkersPath);
 
-    guiKinect_2->addSpacer();
-    guiKinect_2->addToggle("Compute Flow", &contour.doOpticalFlow);
-    guiKinect_2->addSpacer();
-    guiKinect_2->addToggle("Draw Optical Flow", &contour.drawFlow);
-    guiKinect_2->addToggle("Draw Difference", &contour.drawDiff);
-    guiKinect_2->addToggle("Draw Contour Velocities", &contour.drawVelocities);
-    guiKinect_2->addSpacer();
-
     guiKinect_2->autoSizeToFitWidgets();
     ofAddListener(guiKinect_2->newGUIEvent, this, &ofApp::guiEvent);
     guis.push_back(guiKinect_2);
@@ -1043,12 +1036,46 @@ void ofApp::setupCueListGUI(){
     guis.push_back(guiCueList);
 }
 
+void ofApp::setupOpticalFlowGUI(){
+    ofxUICanvas *guiFlow = new ofxUICanvas(guiWidth+guiMargin, 0, guiWidth, ofGetHeight());
+    guiFlow->addLabel("OPTICAL FLOW", OFX_UI_FONT_LARGE);
+    guiFlow->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
+    
+    guiFlow->addSpacer();
+    ofxUIImageToggle *active;
+    active = guiFlow->addImageToggle("Activate Flow", "icons/show.png", &contour.doOpticalFlow, dim, dim);
+    active->setColorBack(ofColor(150, 255));
+
+    guiFlow->addSlider("Strength", 0.0, 100.0, &contour.flowStrength);
+    guiFlow->addIntSlider("Offset", 1, 10, &contour.flowOffset);
+    guiFlow->addSlider("Lambda", 0.0, 0.1, &contour.flowLambda);
+    guiFlow->addSlider("Threshold", 0.0, 0.2, &contour.flowThreshold);
+    
+    guiFlow->addToggle("Inverse X", &contour.flowInverseX);
+    guiFlow->addToggle("Inverse Y", &contour.flowInverseY);
+    
+    guiFlow->addToggle("Time Blur Active", &contour.flowTimeBlurActive);
+
+    guiFlow->addSlider("Time Blur Decay", 0.0, 1.0, &contour.flowTimeBlurDecay);
+    guiFlow->addSlider("Time Blur Radius", 0.0, 10.0, &contour.flowTimeBlurRadius);
+    
+    guiFlow->addSpacer();
+    guiFlow->addToggle("Show Optical Flow", &contour.drawFlow);
+    guiFlow->addToggle("Show Scalar", &contour.drawFlowScalar);
+    guiFlow->addSpacer();
+    
+    guiFlow->autoSizeToFitWidgets();
+    guiFlow->setVisible(false);
+    ofAddListener(guiFlow->newGUIEvent, this, &ofApp::guiEvent);
+    guis.push_back(guiFlow);
+}
+
+
 //--------------------------------------------------------------
 void ofApp::setupFluidSolverGUI(){
-    ofxUICanvas *guiFluid = new ofxUICanvas(guiWidth+guiMargin, 0, guiWidth, ofGetHeight());
+    ofxUICanvas *guiFluid = new ofxUICanvas((guiWidth+guiMargin)*2, 0, guiWidth, ofGetHeight());
     guiFluid->addLabel("FLUID", OFX_UI_FONT_LARGE);
     guiFluid->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
-
     
 //    guiFluid->addSpacer();
 //    ofxUIImageToggle *active;
@@ -1096,7 +1123,7 @@ void ofApp::setupFluidSolverGUI(){
 
 //--------------------------------------------------------------
 void ofApp::setupContourGUI(){
-    ofxUICanvas *guiContour = new ofxUICanvas((guiWidth+guiMargin)*2, 0, guiWidth, ofGetHeight());
+    ofxUICanvas *guiContour = new ofxUICanvas((guiWidth+guiMargin)*3, 0, guiWidth, ofGetHeight());
     guiContour->addLabel("DEPTH CONTOUR", OFX_UI_FONT_LARGE);
     guiContour->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
     
@@ -1128,6 +1155,9 @@ void ofApp::setupContourGUI(){
     guiContour->addSlider("Line Width", 0.5, 10.0, &contour.lineWidth);
     guiContour->addSlider("Scale", 1.0, 1.6, &contour.scaleContour);
 
+    guiContour->addSpacer();
+    guiContour->addToggle("Show Difference", &contour.drawDiff);
+    guiContour->addToggle("Show Contour Velocities", &contour.drawVelocities);
     guiContour->addSpacer();
 
     guiContour->autoSizeToFitWidgets();
@@ -1403,14 +1433,15 @@ void ofApp::addParticlePhysicsGUI(ofxUICanvas* gui, ParticleSystem* ps){
 //  4: guiGestures_1
 //  5: guiGestures_2
 //  6: guiCueList
-//  7: guiFluid
-//  8: guiContour
-//  9: guiEmitter_1
-// 10: guiEmitter_2
-// 11: guiGrid
-// 12: guiBoids_1
-// 13: guiBoids_2
-// 14: guiAnimations
+//  7: guiFlow
+//  8: guiFluid
+//  9: guiContour
+// 10: guiEmitter_1
+// 11: guiEmitter_2
+// 12: guiGrid
+// 13: guiBoids_1
+// 14: guiBoids_2
+// 15: guiAnimations
 
 //--------------------------------------------------------------
 void ofApp::saveGUISettings(const string path, const bool isACue){
@@ -1675,7 +1706,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     if(e.getName() == "Save Settings"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if(button->getValue() == true){
-            ofFileDialogResult result = ofSystemSaveDialog("sequence.xml", "Save current settings");
+            ofFileDialogResult result = ofSystemSaveDialog("settings.xml", "Save current settings");
             if(result.bSuccess){
                 saveGUISettings(result.getPath(), false);
                 settingsFilename->setLabel(ofFilePath::getFileName(result.getPath()));
@@ -2197,7 +2228,7 @@ void ofApp::keyPressed(int key){
         else if(key == '3'){
             int idx = 0;
             for(vector<ofxUICanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
-                if(idx == 0 || idx == 7 || idx == 8) (*it)->setVisible(true);
+                if(idx == 0 || idx == 7 || idx == 8 || idx == 9) (*it)->setVisible(true);
                 else (*it)->setVisible(false);
                 idx++;
             }
@@ -2206,7 +2237,7 @@ void ofApp::keyPressed(int key){
             currentParticleSystem = 0;
             int idx = 0;
             for(vector<ofxUICanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
-                if(idx == 0 || idx == 9 || idx == 10) (*it)->setVisible(true);
+                if(idx == 0 || idx == 10 || idx == 11) (*it)->setVisible(true);
                 else (*it)->setVisible(false);
                 idx++;
             }
@@ -2215,7 +2246,7 @@ void ofApp::keyPressed(int key){
             currentParticleSystem = 1;
             int idx = 0;
             for(vector<ofxUICanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
-                if(idx == 0 || idx == 11) (*it)->setVisible(true);
+                if(idx == 0 || idx == 12) (*it)->setVisible(true);
                 else (*it)->setVisible(false);
                 idx++;
             }
@@ -2224,7 +2255,7 @@ void ofApp::keyPressed(int key){
             currentParticleSystem = 2;
             int idx = 0;
             for(vector<ofxUICanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
-                if(idx == 0 || idx == 12 || idx == 13) (*it)->setVisible(true);
+                if(idx == 0 || idx == 13 || idx == 14) (*it)->setVisible(true);
                 else (*it)->setVisible(false);
                 (*it)->autoSizeToFitWidgets();
                 idx++;
@@ -2234,7 +2265,7 @@ void ofApp::keyPressed(int key){
             currentParticleSystem = 3;
             int idx = 0;
             for(vector<ofxUICanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
-                if(idx == 0 || idx == 14) (*it)->setVisible(true);
+                if(idx == 0 || idx == 15) (*it)->setVisible(true);
                 else (*it)->setVisible(false);
                 idx++;
             }

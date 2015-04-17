@@ -18,11 +18,11 @@ class Contour{
         ofPoint getAverageVelocity();
         ofPoint getVelocityInPoint(ofPoint curPoint);
     
-        ofTexture getFlowTexture();
+        ofTexture getFlowTexture() {return flowTexture;}
 
         void computeVelocities();
-        void setMinAreaRadius(float minContourSize);
-        void setMaxAreaRadius(float maxContourSize);
+        void setMinAreaRadius(float minContourSize) {contourFinder.setMinAreaRadius(minContourSize);}
+        void setMaxAreaRadius(float maxContourSize) {contourFinder.setMaxAreaRadius(maxContourSize);}
 
         //--------------------------------------------------------------
         bool isActive;
@@ -41,13 +41,18 @@ class Contour{
         float scaleFactor;  // scaling factor of the optical flow image
         float flowScale;    // scalar to multiply by the offset of flow
         //--------------------------------------------------------------
-        float pyrScale;
-        int levels;
-        int winSize;
-        int iterations;
-        int polyN;
-        float polySigma;
-        bool gaussianMode;
+        ftOpticalFlow opticalFlow;
+        ftVelocityMask velocityMask;
+        //--------------------------------------------------------------
+        float flowStrength;
+        int   flowOffset;
+        float flowLambda;
+        float flowThreshold;
+        bool  flowInverseX;
+        bool  flowInverseY;
+        bool  flowTimeBlurActive;
+        float flowTimeBlurDecay;
+        float flowTimeBlurRadius;
         //--------------------------------------------------------------
         ofImage previous;
         ofImage diff;
@@ -76,19 +81,14 @@ class Contour{
         bool drawFlowScalar;
         bool drawFlowField;
         bool drawVelocities;
-        //--------------------------------------------------------------
-        ofTexture flowTexture;
-        ofFloatPixels flowPixels;
     
     protected:
     private:
-        ofRectangle rescaledRect;
         ofxCv::ContourFinder contourFinder;
         ofxCv::ContourFinder contourFinderDiff;
-    
-        ftOpticalFlow        opticalFlow;
-        ftVelocityMask		 velocityMask;
-    
-        ftDisplayScalar		 displayScalar;
-        ftVelocityField		 velocityField;
+        ftDisplayScalar displayScalar;
+        ftVelocityField velocityField;
+        ofRectangle rescaledRect;
+        ofTexture flowTexture;
+        ofFloatPixels flowPixels;
 };
