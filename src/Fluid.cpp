@@ -148,15 +148,15 @@ void Fluid::draw(){
     if(isActive){
         if(drawVelocity){
             ofPushStyle();
-            if (drawVelocityScalar){
-                ofEnableBlendMode(OF_BLENDMODE_DISABLED);
-                displayScalar.setSource(fluid.getVelocity());
-                displayScalar.draw(0, 0, width, height);
-            }
             ofEnableBlendMode(OF_BLENDMODE_ADD);
             velocityField.setSource(fluid.getVelocity());
             velocityField.draw(0, 0, width, height);
             ofPopStyle();
+        }
+        if(drawVelocityScalar){
+            ofEnableBlendMode(OF_BLENDMODE_DISABLED);
+            displayScalar.setSource(fluid.getVelocity());
+            displayScalar.draw(0, 0, width, height);
         }
         if(drawTemperature){
             ofPushStyle();

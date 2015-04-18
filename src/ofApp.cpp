@@ -1048,13 +1048,6 @@ void ofApp::setupOpticalFlowGUI(){
     guiFlow->addSlider("Blur Radius", 0.0, 10.0, &contour.vMaskBlurRadius);
     guiFlow->addSpacer();
     
-    guiFlow->addLabel("FLUID DEBUG", OFX_UI_FONT_LARGE);
-    guiFlow->addSpacer();
-    guiFlow->addToggle("Show Fluid Velocities", &fluid.drawVelocity);
-    guiFlow->addToggle("Show Fluid Velocities Scalar", &fluid.drawVelocityScalar);
-    guiFlow->addToggle("Show Temperature", &fluid.drawTemperature);
-    guiFlow->addSpacer();
-    
     guiFlow->autoSizeToFitWidgets();
     guiFlow->setVisible(false);
     ofAddListener(guiFlow->newGUIEvent, this, &ofApp::guiEvent);
@@ -1144,11 +1137,6 @@ void ofApp::setupFluidSolverGUI(){
     
     guiFluid_2->addLabel("PARTICLE FLOW", OFX_UI_FONT_LARGE);
     guiFluid_2->addSpacer();
-    ofxUIImageToggle *active_2;
-    active_2 = guiFluid_2->addImageToggle("Activate Particles", "icons/show.png", &fluid.isParticlesActive, dim, dim);
-    active_2->setColorBack(ofColor(150, 255));
-    
-    guiFluid_2->addSpacer();
     guiFluid_2->addSlider("Birth Chance", 0.0, 1.0, &fluid.particlesBirthChance);
     guiFluid_2->addSlider("Birth Velocity Chance", 0.0, 5.0, &fluid.particlesBirthVelocityChance);
     guiFluid_2->addSlider("Lifetime", 0.0, 10.0, &fluid.particlesLifetime);
@@ -1157,6 +1145,11 @@ void ofApp::setupFluidSolverGUI(){
     guiFluid_2->addSlider("Mass Random", 0.0, 1.0, &fluid.particlesMassRnd);
     guiFluid_2->addSlider("Size", 0.0, 10.0, &fluid.particlesSize);
     guiFluid_2->addSlider("Size Random", 0.0, 1.0, &fluid.particlesSizeRnd);
+    guiFluid_2->addSpacer();
+    guiFluid_2->addToggle("Show Fluid Velocities", &fluid.drawVelocity);
+    guiFluid_2->addToggle("Show Fluid Velocities Scalar", &fluid.drawVelocityScalar);
+    guiFluid_2->addToggle("Show Temperature", &fluid.drawTemperature);
+    guiFluid_2->addToggle("Show Particles", &fluid.drawParticles);
 
     guiFluid_2->autoSizeToFitWidgets();
     guiFluid_2->setVisible(false);
