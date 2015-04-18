@@ -1052,6 +1052,7 @@ void ofApp::setupOpticalFlowGUI(){
     guiFlow->addSpacer();
     guiFlow->addToggle("Show Fluid Velocities", &fluid.drawVelocity);
     guiFlow->addToggle("Show Fluid Velocities Scalar", &fluid.drawVelocityScalar);
+    guiFlow->addToggle("Show Temperature", &fluid.drawTemperature);
     guiFlow->addSpacer();
     
     guiFlow->autoSizeToFitWidgets();
@@ -1081,17 +1082,17 @@ void ofApp::setupFluidSolverGUI(){
     guiFluid_1->setWidgetSpacing(3);
     
     guiFluid_1->addSpacer();
-    ofxUISlider *redSlider = guiFluid_1->addSlider("Red", 0.0, 1.0, &fluid.red);
+    ofxUISlider *redSlider = guiFluid_1->addSlider("Red", 0.0, 255.0, &fluid.red);
     redSlider->setColorFill(ofColor(240, 30, 30));
     redSlider->setColorFillHighlight(ofColor(150, 30, 30));
-    ofxUISlider *greenSlider = guiFluid_1->addSlider("Green", 0.0, 1.0, &fluid.green);
+    ofxUISlider *greenSlider = guiFluid_1->addSlider("Green", 0.0, 255.0, &fluid.green);
     greenSlider->setColorFill(ofColor(30, 240, 30));
     greenSlider->setColorFillHighlight(ofColor(30, 150, 30));
-    ofxUISlider *blueSlider = guiFluid_1->addSlider("Blue", 0.0, 1.0, &fluid.blue);
+    ofxUISlider *blueSlider = guiFluid_1->addSlider("Blue", 0.0, 255.0, &fluid.blue);
     blueSlider->setColorFill(ofColor(30, 30, 240));
     blueSlider->setColorFillHighlight(ofColor(30, 30, 150));
 
-    guiFluid_1->addSlider("Opacity", 0.0, 1.0, &fluid.opacity);
+    guiFluid_1->addSlider("Opacity", 0.0, 255.0, &fluid.opacity);
     
     guiFluid_1->addSpacer();
     guiFluid_1->addLabel("Solver", OFX_UI_FONT_MEDIUM);
