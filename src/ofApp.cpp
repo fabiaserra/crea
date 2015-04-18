@@ -1066,6 +1066,12 @@ void ofApp::setupFluidSolverGUI(){
     active = guiFluid_1->addImageToggle("Activate Fluid", "icons/show.png", &fluid.isActive, dim, dim);
     active->setColorBack(ofColor(150, 255));
     
+    guiFluid_1->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    ofxUIImageButton *reset;
+    reset = guiFluid_1->addImageButton("Reset Fluid", "icons/reset.png", &fluid.doReset, dim, dim);
+    reset->setColorBack(ofColor(150, 255));
+    guiFluid_1->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    
     guiFluid_1->addSpacer();
     guiFluid_1->addToggle("Marker", &fluid.markersInput);
     guiFluid_1->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);

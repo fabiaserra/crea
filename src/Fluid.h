@@ -12,9 +12,13 @@ class Fluid{
         void update(float dt, vector<irMarker> &markers, Contour &contour);
         void updateDrawForces(float dt);
         void draw();
-        
+    
+        void reset();
+    
         //--------------------------------------------------------------
         bool isActive;          // Fluid active
+        //--------------------------------------------------------------
+        bool doReset;
         //--------------------------------------------------------------
         int width;              // Fluid boundaries
         int height;

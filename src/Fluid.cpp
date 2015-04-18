@@ -1,14 +1,14 @@
 #include "Fluid.h"
 
 Fluid::Fluid(){
-    isActive                     = false;        // Fluid simulator is active?
-    
-    opacity                      = 255.0;        // Opacity of the fluid
+    isActive                     = false; // Fluid simulator is active?
+    doReset                      = false; // Reset Fluid
     
     // General properties
     red                          = 255.0;
     green                        = 255.0;
     blue                         = 255.0;
+    opacity                      = 255.0; // Opacity of the fluid
     
     // Fluid parameters
     speed                        = 10.0;  // 0 ~ 100
@@ -141,6 +141,11 @@ void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour){
             particleFlow.addFluidVelocity(fluid.getVelocity());
         }
         particleFlow.update(dt);
+        
+        if(doReset){
+            reset();
+            doReset = false;
+        }
     }
 }
 
@@ -179,14 +184,15 @@ void Fluid::draw(){
 }
 
 void Fluid::updateDrawForces(float dt){
-    for (int i=0; i<numMarkerForces; i++) {
+    for (int i = 0; i < numMarkerForces; i++){
         markerForces[i].update();
-        if (markerForces[i].didChange()) {
+        if(markerForces[i].didChange()){
             // if a force is constant multiply by deltaTime
             float strength = markerForces[i].getStrength();
-            if (!markerForces[i].getIsTemporary())
+            if(!markerForces[i].getIsTemporary()){
                 strength *= dt;
-            switch (markerForces[i].getType()) {
+            }
+            switch (markerForces[i].getType()){
                 case FT_DENSITY:
                     fluid.addDensity(markerForces[i].getTextureReference(), strength);
                     break;
@@ -206,5 +212,12 @@ void Fluid::updateDrawForces(float dt){
                     break;
             }
         }
+    }
+}
+
+void Fluid::reset(){
+    fluid.reset();
+    for (int i = 0; i < numMarkerForces; i++){
+        markerForces[i].reset();
     }
 }
