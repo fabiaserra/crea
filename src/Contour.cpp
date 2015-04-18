@@ -85,6 +85,7 @@ void Contour::setup(int width, int height){
     // allocate flow texture
     flowTexture.allocate(flowWidth, flowHeight, GL_RGB32F);
     flowPixels.allocate(flowWidth, flowHeight, 3);
+    velocityMaskPixels.allocate(flowWidth, flowHeight, 4);
 }
 
 void Contour::update(float dt, ofImage &depthImage){
