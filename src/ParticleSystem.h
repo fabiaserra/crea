@@ -93,7 +93,7 @@ class ParticleSystem
 		//--------------------------------------------------------------
 		// Physics
 		float friction;        	    // Friction to velocity 0~100
-        float gravity;              // Makes particles fall down in a natural way
+        ofPoint gravity;            // Makes particles react to gravity
         float turbulence;           // Turbulence perlin noise
 		bool repulse;               // Repulse particles between each other?;
 		bool bounce;                // Particles bounce with the window margins?

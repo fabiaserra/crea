@@ -53,7 +53,7 @@ ParticleSystem::ParticleSystem(){
 
     // Physics
     friction            = 5.0;          // Friction to velocity 0~100
-    gravity             = 0.0f;         // Makes particles fall down in a natural way
+    gravity             = ofPoint(0, 0);// Makes particles react to gravity
     turbulence          = 0.0f;         // Turbulence perlin noise
     repulse             = false;        // Repulse particles between each other?
     bounce              = false;        // Bounce particles with the walls of the window?
@@ -152,7 +152,7 @@ void ParticleSystem::setup(ParticleMode particleMode, InputSource inputSource, i
         velocityRnd         = 30.0;
 
         turbulence          = 0.0;
-        gravity             = 1.5;
+        gravity             = ofVec2f(0, 1.5);
         friction            = 6.0;
 
         opacityAge          = true;
@@ -169,7 +169,7 @@ void ParticleSystem::setup(ParticleMode particleMode, InputSource inputSource, i
             immortal        = true;
             velocity        = 50.0;
             turbulence      = 8.0;
-            gravity         = 0.0;
+            gravity         = ofVec2f(0, 0.0);
             addParticles(1500);
         }
         else if(animation == EXPLOSION){
@@ -224,7 +224,7 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
                         if(repulseInteraction) particles[i]->addRepulsionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, 10.0);
                         if(attractInteraction) particles[i]->addAttractionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, 8.0);
                         if(gravityInteraction){
-                            particles[i]->addForce(ofPoint(0, 5.0*particles[i]->mass));
+                            particles[i]->addForce(gravity*particles[i]->mass);
                             particles[i]->isTouched = true;
                         }
                     }
@@ -242,7 +242,7 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
                             particles[i]->addAttractionForce(closestPointInContour.x, closestPointInContour.y, 8000, 15.0);
                         }
                         else if(gravityInteraction){
-                            particles[i]->addForce(ofPoint(0, 9.0*particles[i]->mass));
+                            particles[i]->addForce(gravity);
                             particles[i]->isTouched = true;
                         }
                     }
@@ -341,9 +341,7 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
 
         // ---------- (3) Add some general behavior and update the particles
         for(int i = 0; i < particles.size(); i++){
-            ofPoint gravityForce(0, gravity);
-//            ofPoint gravityForce(0, gravity);
-            particles[i]->addForce(gravityForce*particles[i]->mass);
+            particles[i]->addForce(gravity*particles[i]->mass);
 
             particles[i]->addNoise(15.0, turbulence, dt);
 
