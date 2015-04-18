@@ -14,7 +14,6 @@ class Fluid{
         
         //--------------------------------------------------------------
         bool isActive;          // Fluid active
-        bool particlesActive;   // Particles active
         //--------------------------------------------------------------
         int width;              // Fluid boundaries
         int height;
@@ -29,6 +28,40 @@ class Fluid{
         //--------------------------------------------------------------
         bool drawVelocity;
         bool drawVelocityScalar;
+        //--------------------------------------------------------------
+        // fluid parameters
+        float speed;
+        float cellSize;
+        int numJacobiIterations;
+        float viscosity;
+        float vorticity;
+        float dissipation;
+        float dissipationVelocityOffset;
+        float dissipationDensityOffset;
+        float dissipationTemperatureOffset;
+        float smokeSigma;
+        float smokeWeight;
+        float ambientTemperature;
+        ofPoint gravity;
+        float clampForce;
+        float maxVelocity;
+        float maxDensity;
+        float maxTemperature;
+        float densityFromVorticity;
+        float densityFromPressure;
+        //--------------------------------------------------------------
+        // particle flow parameters
+        bool isParticlesActive;   // Particle flow active
+        float particlesVelocity;
+        float particlesCellSize;
+        float particlesBirthChance;
+        float particlesBirthVelocityChance;
+        float particlesLifetime;
+        float particlesLifetimeRnd;
+        float particlesMass;
+        float particlesMassRnd;
+        float particlesSize;
+        float particlesSizeRnd;
 
     protected:
         ftFluidSimulation fluid;
