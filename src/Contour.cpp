@@ -130,46 +130,44 @@ void Contour::update(float dt, ofImage &depthImage){
 //    contourFinderDiff.findContours(diff);
     contourFinderDiff.findContours(velocityMaskPixels);
     
-    if(isActive){
-        int n = contourFinder.size();
-        int m = contourFinderDiff.size();
+    int n = contourFinder.size();
+    int m = contourFinderDiff.size();
+
+    // Clear vectors
+    boundingRects.clear();
+    convexHulls.clear();
+    contours.clear();
+    quads.clear();
+    diffContours.clear();
+
+    // Initialize vectors
+    boundingRects.resize(n);
+    convexHulls.resize(n);
+    contours.resize(n);
+    quads.resize(n);
+    diffContours.resize(m);
+
+    for(int i = 0; i < n; i++){
+        boundingRects[i] = toOf(contourFinder.getBoundingRect(i));
+
+        ofPolyline convexHull;
+        convexHull = toOf(contourFinder.getConvexHull(i));
+        convexHulls[i] = convexHull;
+
+        ofPolyline contour;
+        contour = contourFinder.getPolyline(i);
+        contour = contour.getSmoothed(smoothingSize, 0.5);
+        contours[i] = contour;
+
+        ofPolyline quad;
+        quad = toOf(contourFinder.getFitQuad(i));
+        quads[i] = quad;
+    }
     
-        // Clear vectors
-        boundingRects.clear();
-        convexHulls.clear();
-        contours.clear();
-        quads.clear();
-        diffContours.clear();
-
-        // Initialize vectors
-        boundingRects.resize(n);
-        convexHulls.resize(n);
-        contours.resize(n);
-        quads.resize(n);
-        diffContours.resize(m);
-
-        for(int i = 0; i < n; i++){
-            boundingRects[i] = toOf(contourFinder.getBoundingRect(i));
-
-            ofPolyline convexHull;
-            convexHull = toOf(contourFinder.getConvexHull(i));
-            convexHulls[i] = convexHull;
-
-            ofPolyline contour;
-            contour = contourFinder.getPolyline(i);
-            contour = contour.getSmoothed(smoothingSize, 0.5);
-            contours[i] = contour;
-
-            ofPolyline quad;
-            quad = toOf(contourFinder.getFitQuad(i));
-            quads[i] = quad;
-        }
-        
-        for(int i = 0; i < m; i++){
-            ofPolyline diffContour;
-            diffContour = contourFinderDiff.getPolyline(i);
-            diffContours[i] = diffContour;
-        }
+    for(int i = 0; i < m; i++){
+        ofPolyline diffContour;
+        diffContour = contourFinderDiff.getPolyline(i);
+        diffContours[i] = diffContour;
     }
 }
 
