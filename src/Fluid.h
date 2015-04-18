@@ -10,6 +10,7 @@ class Fluid{
 
         void setup(int flowWidth, int flowHeight, int drawWidth, int drawHeight, bool doFasterInternalFormat = false);
         void update(float dt, vector<irMarker> &markers, Contour &contour);
+        void updateDrawForces(float dt);
         void draw();
         
         //--------------------------------------------------------------
@@ -28,6 +29,11 @@ class Fluid{
         //--------------------------------------------------------------
         bool drawVelocity;
         bool drawVelocityScalar;
+        bool drawTemperature;
+        bool drawParticles;  
+        //--------------------------------------------------------------
+        int	numMarkerForces;
+        ftDrawForce* markerForces;
         //--------------------------------------------------------------
         // fluid parameters
         float speed;
@@ -51,7 +57,6 @@ class Fluid{
         float densityFromPressure;
         //--------------------------------------------------------------
         // particle flow parameters
-        bool isParticlesActive;   // Particle flow active
         float particlesVelocity;
         float particlesCellSize;
         float particlesBirthChance;
