@@ -7,32 +7,44 @@ Contour::Contour()
 {
     isActive            = false;
     
+    // Fading in/out
+    doFading            = false; // Do opacity fading?
+    isFadingIn          = false; // Opacity fading in?
+    isFadingOut         = false; // Opacity fading out?
+    startFadeIn         = false; // Fade in has started?
+    startFadeOut        = false; // Fade out has started?
+    elapsedFadeTime     = 0.0;   // Elapsed time of fade
+    fadeTime            = 2.0;   // Transition time of fade
+    
+    // Color
     red                 = 255.0;
     green               = 255.0;
     blue                = 255.0;
     
-    opacity             = 255.0;
+    // Opacity
+    opacity             = 0.0;   // Actual opacity of the particles
+    maxOpacity          = 255.0; // Maximum opacity of particles
     
-    doOpticalFlow       = true; // compute optical flow?
+    doOpticalFlow       = true;  // compute optical flow?
 
-    scaleFactor         = 4.0;  // scaling factor of the depth image to compute the optical flow in lower res.
-    flowScale           = 1.5;  // scalar of flow velocities
+    scaleFactor         = 4.0;   // scaling factor of the depth image to compute the optical flow in lower res.
+    flowScale           = 1.5;   // scalar of flow velocities
 
     // optical flow settings
-    flowStrength        = 1.0;  // 0 ~ 100
-    flowOffset          = 3.0;  // 1 ~ 10
-    flowLambda          = 0.01; // 0 ~ 0.1
-    flowThreshold       = 0.04; // 0 ~ 0.2
+    flowStrength        = 1.0;   // 0 ~ 100
+    flowOffset          = 3.0;   // 1 ~ 10
+    flowLambda          = 0.01;  // 0 ~ 0.1
+    flowThreshold       = 0.04;  // 0 ~ 0.2
     flowInverseX        = false;
     flowInverseY        = false;
     flowTimeBlurActive  = true;
-    flowTimeBlurDecay   = 0.1;  // 0 ~ 1
-    flowTimeBlurRadius  = 2.0;  // 0 ~ 10
+    flowTimeBlurDecay   = 0.1;   // 0 ~ 1
+    flowTimeBlurRadius  = 2.0;   // 0 ~ 10
     
     // velocity mask settings
-    vMaskStrength       = 1.0;  // 0 ~ 10
-    vMaskBlurPasses     = 1;    // 0 ~ 10
-    vMaskBlurRadius     = 6.0;  // 0 ~ 10
+    vMaskStrength       = 1.0;   // 0 ~ 10
+    vMaskBlurPasses     = 1;     // 0 ~ 10
+    vMaskBlurRadius     = 6.0;   // 0 ~ 10
     
     // contour settings
     smoothingSize       = 0.0;
@@ -169,10 +181,37 @@ void Contour::update(float dt, ofImage &depthImage){
         diffContour = contourFinderDiff.getPolyline(i);
         diffContours[i] = diffContour;
     }
+    
+    if(isActive || (doFading && isFadingOut)){
+        // if it is the first frame where isActive is true and we are not fading out (trick to fix a bug)
+        // start fadeIn and change activeStarted to true so we dont enter anymore
+        if(!activeStarted && !isFadingOut){
+            activeStarted = true;
+            isFadingIn = true;
+            isFadingOut = false;
+            startFadeIn = true;
+            startFadeOut = false;
+        }
+        
+        if(doFading){
+            if(isFadingIn) fadeIn(dt);
+            else if(isFadingOut) fadeOut(dt);
+            else opacity = maxOpacity;
+        }
+        else opacity = maxOpacity;
+    }
+    else if(activeStarted){
+        activeStarted = false;
+        isFadingIn = false;
+        isFadingOut = true;
+        startFadeIn = false;
+        startFadeOut = true;
+    }
 }
 
 void Contour::draw(){
-    if(isActive){
+    // if is active or we are fading out
+    if(isActive || (doFading && isFadingOut)){
 //        ofPushMatrix();
 //        ofTranslate(width/2.0, height/2.0);
 //        ofScale(scaleContour, scaleContour); // Scale it so we can see more contour on the projection
@@ -370,4 +409,36 @@ ofPoint Contour::getVelocityInPoint(ofPoint curPoint){
         }
     }
     return vel;
+}
+
+void Contour::fadeIn(float dt){
+    if(startFadeIn){
+        startFadeIn = false;
+        elapsedFadeTime = 0.0;
+        opacity = 0.0;
+    }
+    else{
+        opacity = ofMap(elapsedFadeTime, 0.0, fadeTime, 0.0, maxOpacity, true);
+        elapsedFadeTime += dt;
+        if(elapsedFadeTime > fadeTime){
+            isFadingIn = false;
+            opacity = maxOpacity;
+        }
+    }
+}
+
+void Contour::fadeOut(float dt){
+    if(startFadeOut){
+        startFadeOut = false;
+        elapsedFadeTime = 0.0;
+        opacity = maxOpacity;
+    }
+    else{
+        opacity = ofMap(elapsedFadeTime, 0.0, fadeTime, maxOpacity, 0.0, true);
+        elapsedFadeTime += dt;
+        if(elapsedFadeTime > fadeTime){
+            isFadingOut = false;
+            opacity = 0.0;
+        }
+    }
 }

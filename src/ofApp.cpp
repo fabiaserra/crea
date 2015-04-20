@@ -1195,7 +1195,7 @@ void ofApp::setupContourGUI(){
     blueSlider->setColorFill(ofColor(30, 30, 240));
     blueSlider->setColorFillHighlight(ofColor(30, 30, 150));
     guiContour->addSpacer();
-    guiContour->addSlider("Opacity", 0.0, 255.0, &contour.opacity);
+    guiContour->addSlider("Opacity", 0.0, 255.0, &contour.maxOpacity);
 
     guiContour->addSpacer();
     guiContour->addLabel("Contours", OFX_UI_FONT_MEDIUM);
@@ -1590,11 +1590,13 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
         for(int i = 0; i < particleSystems.size(); i++){
             particleSystems[i]->doFading = true;
         }
+        contour.doFading = true;
     }
     else{
         for(int i = 0; i < particleSystems.size(); i++){
             particleSystems[i]->doFading = false;
         }
+        contour.doFading = false;
     }
 
     int guiIndex = 0;

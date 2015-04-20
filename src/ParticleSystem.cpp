@@ -16,7 +16,8 @@ ParticleSystem::ParticleSystem(){
     startFadeOut        = false;        // Fade out has started?
     elapsedFadeTime     = 0.0;          // Elapsed time of fade
     fadeTime            = 2.0;          // Transition time of fade
-
+    
+    // Opacity
     opacity             = 0.0;          // Actual opacity of the particles
     maxOpacity          = 255.0;        // Maximum opacity of particles
 
@@ -202,9 +203,10 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
 }
 
 void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contour){
-
+    // if is active or we are fading out
     if(isActive || (doFading && isFadingOut)){
-        
+        // if it is the first frame where isActive is true and we are not fading out (trick to fix a bug)
+        // start fadeIn and change activeStarted to true so we dont enter anymore
         if(!activeStarted && !isFadingOut){
             activeStarted = true;
             isFadingIn = true;
@@ -213,7 +215,6 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
             startFadeOut = false;
             bornParticles();
         }
-        
         if(doFading){
             if(isFadingIn) fadeIn(dt);
             else if(isFadingOut) fadeOut(dt);
@@ -365,27 +366,12 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
     
     else if(activeStarted){
         activeStarted = false;
-//        desactivateStarted = true;
         isFadingIn = false;
         isFadingOut = true;
         startFadeIn = false;
         startFadeOut = true;
         killParticles();
     }
-    
-//    cout << "PS: " << particleMode << endl;
-//    cout << "isActive: " << isActive << endl;
-//    cout << "activeStarted: " << activeStarted << endl;
-//    cout << "isFadingIn: " << isFadingIn << endl;
-//    cout << "isFadingOut: " << isFadingOut << endl;
-//    cout << "doFading: " << doFading << endl;
-//    cout << "startFadeIn: " << startFadeIn << endl;
-//    cout << "startFadeOut: " << startFadeOut << endl;
-//
-//    cout << "elapsedFadeTime: " << elapsedFadeTime << endl;
-//    cout << "opacity: " << opacity << endl;
-//    cout << endl;
-
 }
 
 void ParticleSystem::draw(){
@@ -676,11 +662,15 @@ void ParticleSystem::fadeIn(float dt){
     if(startFadeIn){
         startFadeIn = false;
         elapsedFadeTime = 0.0;
+        opacity = 0.0;
     }
     else{
-        elapsedFadeTime += dt;
         opacity = ofMap(elapsedFadeTime, 0.0, fadeTime, 0.0, maxOpacity, true);
-        if(elapsedFadeTime > fadeTime) isFadingIn = false;
+        elapsedFadeTime += dt;
+        if(elapsedFadeTime > fadeTime){
+            isFadingIn = false;
+            opacity = maxOpacity;
+        }
     }
 }
 
@@ -688,10 +678,14 @@ void ParticleSystem::fadeOut(float dt){
     if(startFadeOut){
         startFadeOut = false;
         elapsedFadeTime = 0.0;
+        opacity = maxOpacity;
     }
     else{
-        elapsedFadeTime += dt;
         opacity = ofMap(elapsedFadeTime, 0.0, fadeTime, maxOpacity, 0.0, true);
-        if(elapsedFadeTime > fadeTime) isFadingOut = false;
+        elapsedFadeTime += dt;
+        if(elapsedFadeTime > fadeTime){
+            isFadingOut = false;
+            opacity = 0.0;
+        }
     }
 }

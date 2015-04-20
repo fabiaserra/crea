@@ -32,6 +32,15 @@ class Contour{
         //--------------------------------------------------------------
         bool isActive;
         //--------------------------------------------------------------
+        bool doFading;          // Do opacity fading?
+        bool activeStarted;     // Active has started?
+        bool isFadingIn;        // Opacity fading in?
+        bool isFadingOut;       // Opacity fading out?
+        bool startFadeIn;       // Fade in has started?
+        bool startFadeOut;      // Fade out has started?
+        float elapsedFadeTime;  // Elapsed time of fade
+        float fadeTime;         // Transition time of fade
+        //--------------------------------------------------------------
         int width;
         int height;
         //--------------------------------------------------------------
@@ -39,6 +48,7 @@ class Contour{
         int flowHeight;
         //--------------------------------------------------------------
         float opacity;
+        float maxOpacity;
         //--------------------------------------------------------------
         float red, green, blue;     // Color of the contour
         //--------------------------------------------------------------
@@ -104,4 +114,7 @@ class Contour{
         ofTexture flowTexture;
         ofFloatPixels flowPixels;
         ofPixels velocityMaskPixels;
+        //--------------------------------------------------------------
+        void fadeIn(float dt);
+        void fadeOut(float dt);
 };
