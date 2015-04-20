@@ -14,7 +14,7 @@ class ParticleSystem
 		ParticleSystem();
 		~ParticleSystem();
 
-		void setup(ParticleMode particleMode, InputSource inputSource, int width, int height);
+		void setup(ParticleMode particleMode, int width, int height);
 		void update(float dt, vector<irMarker> &markers, Contour &contour);
 		void draw();
 
@@ -26,21 +26,32 @@ class ParticleSystem
         void createParticleGrid(int width, int height);
 
 		void removeParticles(int n);
-
-		void killParticles();
+    
+        void activate();
+        void desactivate();
+    
+        void killParticles();
         void bornParticles();
-		void repulseParticles();
-		void flockParticles();
 
         void setAnimation(Animation animation);
 
 		//--------------------------------------------------------------
 		bool isActive;          // Particle system active
+        //--------------------------------------------------------------
+        bool doFading;          // Do opacity fading?
+        bool activeStarted;     // Active has started?
+        bool isFadingIn;        // Opacity fading in?
+        bool isFadingOut;       // Opacity fading out?
+        bool startFadeIn;       // Fade in has started?
+        bool startFadeOut;      // Fade out has started?
+        float elapsedFadeTime;  // Elapsed time of fade
+        float fadeTime;         // Transition time of fade
 		//--------------------------------------------------------------
         int width;              // Particle system boundaries
         int height;
 		//--------------------------------------------------------------
         float opacity;
+        float maxOpacity;   
         //--------------------------------------------------------------
 		vector<Particle *> particles;
 		//--------------------------------------------------------------
@@ -90,16 +101,18 @@ class ParticleSystem
 		bool isEmpty;               // Particles are empty inside, only draw the contour?
 		bool drawLine;              // Draw a line instead of a circle for the particle?
         bool drawConnections;       // Draw a connecting line between close particles?
+        float connectDist;          // Maximum distance to connect particles with line
 		//--------------------------------------------------------------
 		// Physics
 		float friction;        	    // Friction to velocity 0~100
         ofPoint gravity;            // Makes particles react to gravity
         float turbulence;           // Turbulence perlin noise
-		bool repulse;               // Repulse particles between each other?;
 		bool bounce;                // Particles bounce with the window margins?
 		bool steer;                 // Particles steer direction with the window margins?
 		bool infiniteWalls;         // Infinite walls?
         bool bounceDamping;         // Decrease velocity when particle bounces walls?
+        bool repulse;               // Repulse particles between each other?
+        float repulseDist;          // Repulse particle-particle distance
         //--------------------------------------------------------------
         // Behavior
         bool interact;              // Can we interact with the particles?
@@ -129,4 +142,10 @@ class ParticleSystem
 		ofPoint getClosestMarker(const Particle &particle, const vector<irMarker> &markers, float markerRadius);
 //		irMarker getClosestMarker(const Particle &particle, const vector<irMarker> &markers, float markerRadius);
 		ofPoint getClosestPointInContour(const Particle &particle, const Contour &contour);
+    
+        void fadeIn(float dt);
+        void fadeOut(float dt);
+    
+        void repulseParticles();
+        void flockParticles();
 };

@@ -36,7 +36,6 @@ class ofApp : public ofBaseApp{
         void setup();
         void update();
         void draw();
-//        void drawGui(ofEventArgs & args);   
     
         void setupGUI();    
         void setupHelperGUI();
