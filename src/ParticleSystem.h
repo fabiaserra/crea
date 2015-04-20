@@ -26,10 +26,6 @@ class ParticleSystem
         void createParticleGrid(int width, int height);
 
 		void removeParticles(int n);
-    
-        void activate();
-        void desactivate();
-    
         void killParticles();
         void bornParticles();
 

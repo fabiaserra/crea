@@ -79,7 +79,7 @@ void ofApp::setup(){
 
     // BACKGROUND COLOR
     red = 0; green = 0; blue = 0;
-    bgGradient = true;
+    bgGradient = false;
 
     // ALLOCATE IMAGES
     depthImage.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);

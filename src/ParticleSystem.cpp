@@ -567,29 +567,6 @@ void ParticleSystem::removeParticles(int n){
     }
 }
 
-//void ParticleSystem::activate(){
-//    isActive = true;
-//    isFirstActiveFrame = true;
-//
-//    isFadingIn = true;
-//    isFadingOut = false;
-//    startFadeIn = true;
-//    startFadeOut = false;
-//    
-//    bornParticles();
-//}
-
-//void ParticleSystem::desactivate(){
-//    isActive = false;
-//    
-//    isFadingIn = false;
-//    isFadingOut = true;
-//    startFadeIn = false;
-//    startFadeOut = true;
-//    
-//    killParticles();
-//}
-
 void ParticleSystem::killParticles(){
     for(int i = 0; i < particles.size(); i++){
         particles[i]->immortal = false;
