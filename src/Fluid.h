@@ -9,17 +9,18 @@ class Fluid{
         Fluid();
 
         void setup(int flowWidth, int flowHeight, int drawWidth, int drawHeight, bool doFasterInternalFormat = false);
-        void update(float dt, vector<irMarker> &markers, Contour &contour);
+        void update(float dt, vector<irMarker> &markers, Contour &contour, float mouseX, float mouseY);
         void updateDrawForces(float dt);
         void draw();
     
         void reset();
+        void resetDrawForces();
+    
+        ofVec2f				lastMouse;
     
         //--------------------------------------------------------------
         bool isActive;          // Fluid active
         bool particlesActive;   // Particle flow active
-        //--------------------------------------------------------------
-        bool doReset;
         //--------------------------------------------------------------
         int width;              // Fluid boundaries
         int height;
@@ -71,6 +72,13 @@ class Fluid{
         float particlesMassRnd;
         float particlesSize;
         float particlesSizeRnd;
+        //--------------------------------------------------------------
+        // marker forces parameters
+        vector<int> markerForceTypes;
+        vector<float> markerForceStrengths;
+        vector<float> markerForceRadiuses;
+        vector<float> markerForceEdges;
+    
 
     protected:
         ftFluidSimulation fluid;

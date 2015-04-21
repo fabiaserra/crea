@@ -20,7 +20,7 @@ class Contour{
     
         ofTexture& getOpticalFlowDecay() {return opticalFlow.getOpticalFlowDecay();}
         ofTexture& getLuminanceMask() {return velocityMask.getLuminanceMask();}
-        ofTexture& getColorMask() {return velocityMask.getColorMask();}
+        ofTexture& getColorMask() {return velocityMask.getColorMask();} // the same than luminance since we dont have any color in depth img
             
         float getFlowWidth() {return flowWidth;}
         float getFlowHeight() {return flowHeight;}

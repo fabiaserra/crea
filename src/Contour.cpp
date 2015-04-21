@@ -139,7 +139,6 @@ void Contour::update(float dt, ofImage &depthImage){
     contourFinder.findContours(depthImage);
 
     // Contour Finder in the depth diff Image
-//    contourFinderDiff.findContours(diff);
     contourFinderDiff.findContours(velocityMaskPixels);
     
     int n = contourFinder.size();
@@ -327,12 +326,13 @@ void Contour::draw(){
     }
     if(drawFlowScalar){
         ofPushStyle();
-        ofEnableBlendMode(OF_BLENDMODE_ADD);
+        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
         displayScalar.setSource(opticalFlow.getOpticalFlowDecay());
         displayScalar.draw(0, 0, width, height);
         ofPopStyle();
     }
     if(drawDiff){
+        ofPushStyle();
         ofSetColor(255, 0, 0);
         ofEnableBlendMode(OF_BLENDMODE_DISABLED);
         ofSetLineWidth(2.5);
@@ -343,11 +343,8 @@ void Contour::draw(){
     }
     if(drawDiffImage){
         ofPushStyle();
-        ofSetColor(255);
-//        ofEnableBlendMode(OF_BLENDMODE_ADD);
-//        velocityMask.draw(0, 0, width, height);
         ofEnableBlendMode(OF_BLENDMODE_DISABLED);
-        velocityMask.getColorMask().draw(0, 0, width, height);
+        velocityMask.draw(0, 0, width, height);
         ofPopStyle();
     }
     if(drawVelocities){
@@ -361,7 +358,6 @@ void Contour::draw(){
         }
         ofPopStyle();
     }
-        
     prevContours = contours; // Save actual contour to do difference with next one
 }
 

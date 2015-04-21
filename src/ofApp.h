@@ -23,13 +23,13 @@
 #include "helper.h"
 
 // comment this to use the recorded images
-#define KINECT_CONNECTED
+//#define KINECT_CONNECTED
 
 // Uncomment this to use an xml sequence file for the tracking
 //#define KINECT_SEQUENCE
 
 // Uncomment this to use two windows
-#define SECOND_WINDOW
+//#define SECOND_WINDOW
 
 class ofApp : public ofBaseApp{
     public:
@@ -45,7 +45,7 @@ class ofApp : public ofBaseApp{
         void setupCueListGUI();
         void setupOpticalFlowGUI();
         void setupFluidSolverGUI();
-        void setupFluidSimulatorGUI();
+        void setupFluidExtrasGUI();
         void setupContourGUI();
         void setupEmitterGUI();
         void setupGridGUI();
@@ -117,8 +117,6 @@ class ofApp : public ofBaseApp{
         Contour contour;        // User silhouette contour
         //--------------------------------------------------------------
         Fluid fluid;
-//        ftFluidSimulation	fluid;
-//        ftParticleFlow		particleFlow;
         //--------------------------------------------------------------
         ParticleSystem *emitterParticles;
         ParticleSystem *gridParticles;

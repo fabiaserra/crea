@@ -3,7 +3,6 @@
 Fluid::Fluid(){
     isActive                     = false; // Fluid simulator is active?
     particlesActive              = false; // Particle flow is active?
-    doReset                      = false; // Reset Fluid
     
     // General properties
     red                          = 255.0;
@@ -42,8 +41,6 @@ Fluid::Fluid(){
     particlesSize                = 1.0;   // 0 ~ 10
     particlesSizeRnd             = 0.0;   // 0 ~ 1
     
-    // Marker forces
-    
     // Input
     markersInput                 = false; // Input are the IR markers?
     contourInput                 = false; // Input is the depth contour?
@@ -65,7 +62,7 @@ void Fluid::setup(int flowWidth, int flowHeight, int drawWidth, int drawHeight, 
     // Particles
     particleFlow.setup(flowWidth, flowHeight, drawWidth, drawHeight);
     
-    // Marker temporal Forces
+    // Marker drawing temporal Forces
     numMarkerForces = 3;
     markerForces = new ftDrawForce[numMarkerForces];
     markerForces[0].setup(drawWidth, drawHeight, FT_DENSITY, true);
@@ -75,12 +72,44 @@ void Fluid::setup(int flowWidth, int flowHeight, int drawWidth, int drawHeight, 
     markerForces[2].setup(flowWidth, flowHeight, FT_TEMPERATURE, true);
     markerForces[2].setName("draw flow res 2");
     
+    // Initialize marker drawing forces
+    markerForceTypes.resize(numMarkerForces);
+    markerForceStrengths.resize(numMarkerForces);
+    markerForceRadiuses.resize(numMarkerForces);
+    markerForceEdges.resize(numMarkerForces);
+    
+    for (int i = 0; i < numMarkerForces; i++){
+        switch (markerForces[i].getType()){
+            case FT_DENSITY:
+                markerForceTypes[i] = FT_DENSITY;
+                break;
+            case FT_VELOCITY:
+                markerForceTypes[i] = FT_VELOCITY;
+                break;
+            case FT_TEMPERATURE:
+                markerForceTypes[i] = FT_TEMPERATURE;
+                break;
+            case FT_PRESSURE:
+                markerForceTypes[i] = FT_PRESSURE;
+                break;
+            case FT_OBSTACLE:
+                markerForceTypes[i] = FT_OBSTACLE;
+            default:
+                break;
+        }
+        markerForceStrengths[i] = markerForces[i].getStrength();
+        markerForceRadiuses[i] = markerForces[i].getRadius();
+        markerForceEdges[i] = markerForces[i].getEdge();
+    }
+    
     // Visualisation
     displayScalar.allocate(flowWidth, flowHeight);
     velocityField.allocate(flowWidth / 4, flowHeight / 4);
+    
+    lastMouse.set(0,0);
 }
 
-void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour){
+void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour, float mouseX, float mouseY){
     
     if(isActive){
         // set fluid parameters
@@ -103,25 +132,39 @@ void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour){
         fluid.setMaxTemperature(maxTemperature);
         fluid.setDensityFromVorticity(densityFromVorticity);
         fluid.setDensityFromPressure(densityFromPressure);
-
-        if(markersInput){
-            for(unsigned int i = 0; i < markers.size(); i++){
-                if (!markers[i].hasDisappeared){
-                    for (int i=0; i<numMarkerForces; i++) {
-                        if (markerForces[i].getType() == FT_VELOCITY)
-                            markerForces[i].setForce(markers[i].velocity);
-                        markerForces[i].applyForce(markers[i].smoothPos);
-                    }
-                }
-            }
-            updateDrawForces(dt);
-        }
-        if(contourInput){
+        
+//        if(contourInput){
             fluid.addVelocity(contour.getOpticalFlowDecay());
             fluid.addDensity(contour.getColorMask());
             fluid.addTemperature(contour.getLuminanceMask());
-        }
+//        }
         
+        ofVec2f mouse;
+        mouse.set(mouseX/ (float)ofGetWindowWidth(), mouseY/(float)ofGetWindowHeight());
+        ofVec2f velocity = mouse - lastMouse;
+        cout << "vel: " << velocity << endl;
+        for (int i=0; i<3; i++) {
+            if (markerForces[i].getType() == FT_VELOCITY)
+                markerForces[i].setForce(velocity);
+            markerForces[i].applyForce(mouse);
+            cout << "force: " << markerForces[i].getForce() << endl;
+        }
+        lastMouse.set(mouse.x, mouse.y);
+//        
+//        if(markersInput){
+//            for(unsigned int markerIdx = 0; markerIdx < markers.size(); markerIdx++){
+//                if (!markers[markerIdx].hasDisappeared){
+//                    for (int i=0; i<numMarkerForces; i++) {
+//                        if (markerForces[i].getType() == FT_VELOCITY){
+//                            markerForces[i].setForce(markers[markerIdx].velocity);
+//                        }
+//                        markerForces[i].applyForce(markers[markerIdx].smoothPos);
+//                    }
+//                }
+//            }
+//            updateDrawForces(dt);
+//        }
+
         fluid.update(dt);
         
         if((markersInput || contourInput) && particlesActive){
@@ -141,11 +184,6 @@ void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour){
             particleFlow.addFluidVelocity(fluid.getVelocity());
         }
         particleFlow.update(dt);
-        
-        if(doReset){
-            reset();
-            doReset = false;
-        }
     }
 }
 
@@ -159,9 +197,11 @@ void Fluid::draw(){
             ofPopStyle();
         }
         if(drawVelocityScalar){
+            ofPushStyle();
             ofEnableBlendMode(OF_BLENDMODE_DISABLED);
             displayScalar.setSource(fluid.getVelocity());
             displayScalar.draw(0, 0, width, height);
+            ofPopStyle();
         }
         if(drawTemperature){
             ofPushStyle();
@@ -174,7 +214,6 @@ void Fluid::draw(){
         ofEnableBlendMode(OF_BLENDMODE_ADD);
         ofSetColor(red, green, blue, opacity);
         fluid.draw(0, 0, width, height);
-        
         ofEnableBlendMode(OF_BLENDMODE_ADD);
         if (particlesActive){
             particleFlow.draw(0, 0, width, height);
@@ -184,6 +223,33 @@ void Fluid::draw(){
 }
 
 void Fluid::updateDrawForces(float dt){
+    
+    // Update marker drawing forces
+    for (int i = 0; i < numMarkerForces; i++){
+        switch (markerForceTypes[i]){
+            case 0:
+                markerForces[i].setType(FT_DENSITY);
+                break;
+            case FT_VELOCITY:
+                markerForces[i].setType(FT_VELOCITY);
+                break;
+            case FT_TEMPERATURE:
+                markerForces[i].setType(FT_TEMPERATURE);
+                break;
+            case FT_PRESSURE:
+                markerForces[i].setType(FT_PRESSURE);
+                break;
+            case FT_OBSTACLE:
+                markerForces[i].setType(FT_OBSTACLE);
+            default:
+                break;
+        }
+        markerForces[i].setForce(ofFloatColor(1.0, 0.0, 0.0));
+        markerForces[i].setStrength(markerForceStrengths[i]);
+        markerForces[i].setRadius(markerForceRadiuses[i]);
+        markerForces[i].setEdge(markerForceEdges[i]);
+    }
+    
     for (int i = 0; i < numMarkerForces; i++){
         markerForces[i].update();
         if(markerForces[i].didChange()){
@@ -217,6 +283,9 @@ void Fluid::updateDrawForces(float dt){
 
 void Fluid::reset(){
     fluid.reset();
+}
+
+void Fluid::resetDrawForces(){
     for (int i = 0; i < numMarkerForces; i++){
         markerForces[i].reset();
     }
