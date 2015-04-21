@@ -2060,7 +2060,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     if(e.getName() == "Cue Name"){
         ofxUITextInput *ti = (ofxUITextInput *) e.widget;
         if(ti->getInputTriggerType() == OFX_UI_TEXTINPUT_ON_UNFOCUS || ti->getInputTriggerType() == OFX_UI_TEXTINPUT_ON_ENTER){
-            string cuePath = "cueList/"+cueName->getTextString()+".xml";
+            string cuePath = "cues/"+cueName->getTextString()+".xml";
             cueList[currentCueIndex] = cuePath;
             cueSliders[currentCueIndex].first->setLabel(ofFilePath::getBaseName(cuePath));
         }
