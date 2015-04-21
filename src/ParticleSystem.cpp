@@ -459,7 +459,7 @@ void ParticleSystem::addParticles(int n){
 void ParticleSystem::addParticles(int n, const irMarker &marker){
     for(int i = 0; i < n; i++){
         ofPoint pos;
-        if(emitAllTimeInside){
+        if(emitAllTimeInside || emitInMovement){
             pos = marker.smoothPos + randomVector()*ofRandom(0, emitterSize);
         }
         else if(emitAllTimeContour){
@@ -484,7 +484,7 @@ void ParticleSystem::addParticles(int n, const ofPolyline &contour, Contour &flo
         ofPoint pos, vel;
 
         // Create random particles inside contour polyline
-        if(emitAllTimeInside){
+        if(emitAllTimeInside || emitInMovement){
             ofRectangle box = contour.getBoundingBox();
             ofPoint center = box.getCenter();
             pos.x = center.x + (ofRandom(1.0f) - 0.5f) * box.getWidth();
