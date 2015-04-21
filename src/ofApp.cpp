@@ -753,11 +753,11 @@ void ofApp::setupHelperGUI(){
     guiHelper->addSpacer();
 
     guiHelper->addSpacer();
-    guiHelper->addLabel("3. FLOW + FLUID", OFX_UI_FONT_MEDIUM);
+    guiHelper->addLabel("3. FLOW + FLUIDSOLVER", OFX_UI_FONT_MEDIUM);
     guiHelper->addSpacer();
     
     guiHelper->addSpacer();
-    guiHelper->addLabel("4. DEPTH CONTOUR", OFX_UI_FONT_MEDIUM);
+    guiHelper->addLabel("4. FLUIDSIM + CONTOUR", OFX_UI_FONT_MEDIUM);
     guiHelper->addSpacer();
     
     guiHelper->addSpacer();
@@ -1055,6 +1055,7 @@ void ofApp::setupOpticalFlowGUI(){
     guiFlow->addSpacer();
     
     guiFlow->addLabel("Debug", OFX_UI_FONT_MEDIUM);
+    guiFlow->addSpacer();
     guiFlow->addToggle("Show difference contour", &contour.drawDiff);
     guiFlow->addToggle("Show difference", &contour.drawDiffImage);
     guiFlow->addSpacer();
@@ -1069,7 +1070,7 @@ void ofApp::setupOpticalFlowGUI(){
 //--------------------------------------------------------------
 void ofApp::setupFluidSolverGUI(){
     ofxUICanvas *guiFluid_1 = new ofxUICanvas((guiWidth+guiMargin)*2, 0, guiWidth, ofGetHeight());
-    guiFluid_1->addLabel("FLUID", OFX_UI_FONT_LARGE);
+    guiFluid_1->addLabel("FLUID SOLVER", OFX_UI_FONT_LARGE);
     guiFluid_1->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
     
     guiFluid_1->addSpacer();
@@ -1106,6 +1107,8 @@ void ofApp::setupFluidSolverGUI(){
     guiFluid_1->addSlider("Sigma", 0.0, 1.0, &fluid.smokeSigma);
     guiFluid_1->addSlider("Weight", 0.0, 1.0, &fluid.smokeWeight);
     guiFluid_1->addSlider("Ambient temperature", 0.0, 1.0, &fluid.ambientTemperature);
+    guiFluid_1->addSlider("Gravity X", -10.0, 10.0, &fluid.gravity.x);
+    guiFluid_1->addSlider("Gravity Y", -10.0, 10.0, &fluid.gravity.y);
     
     guiFluid_1->autoSizeToFitWidgets();
     guiFluid_1->setVisible(false);
@@ -1114,9 +1117,6 @@ void ofApp::setupFluidSolverGUI(){
     
     ofxUICanvas *guiFluid_2 = new ofxUICanvas((guiWidth+guiMargin)*3, 0, guiWidth, ofGetHeight());
     guiFluid_2->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
-    
-    guiFluid_2->addSlider("Gravity X", -10.0, 10.0, &fluid.gravity.x);
-    guiFluid_2->addSlider("Gravity Y", -10.0, 10.0, &fluid.gravity.y);
 
     guiFluid_2->addSpacer();
     guiFluid_2->addLabel("Maximum", OFX_UI_FONT_MEDIUM);
@@ -1146,7 +1146,7 @@ void ofApp::setupFluidSolverGUI(){
 void ofApp::setupFluidSimulatorGUI(){
     ofxUICanvas *guiFluidSim = new ofxUICanvas(guiWidth+guiMargin, 0, guiWidth, ofGetHeight());
     guiFluidSim->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
-    guiFluidSim->addLabel("PARTICLE FLOW", OFX_UI_FONT_LARGE);
+    guiFluidSim->addLabel("PARTICLE FLUID", OFX_UI_FONT_LARGE);
     
     guiFluidSim->addSpacer();
     ofxUIImageToggle *active;
@@ -1173,6 +1173,8 @@ void ofApp::setupFluidSimulatorGUI(){
     guiFluidSim->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     guiFluidSim->setWidgetSpacing(3);
     
+    guiFluidSim->addSpacer();
+    guiFluidSim->addLabel("Particle", OFX_UI_FONT_MEDIUM);
     guiFluidSim->addSpacer();
     guiFluidSim->addSlider("Birth Chance", 0.0, 1.0, &fluid.particlesBirthChance);
     guiFluidSim->addSlider("Birth Velocity Chance", 0.0, 5.0, &fluid.particlesBirthVelocityChance);
@@ -1437,13 +1439,13 @@ void ofApp::addParticleBasicsGUI(ofxUICanvas* gui, ParticleSystem* ps){
     gui->addSlider("Opacity", 0.0, 255.0, &ps->maxOpacity);
     gui->addSpacer();
     
-    gui->addSpacer();
     gui->addToggle("Marker", &ps->markersInput);
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui->setWidgetSpacing(35);
     gui->addToggle("Contour", &ps->contourInput);
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui->setWidgetSpacing(3);
+    gui->addSpacer();
 }
 
 //--------------------------------------------------------------
