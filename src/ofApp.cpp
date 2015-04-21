@@ -897,6 +897,7 @@ void ofApp::setupKinectGUI(){
     guiKinect_2->addSpacer();
     guiKinect_2->addToggle("Show Markers", &drawMarkers);
     guiKinect_2->addToggle("Show Markers Path", &drawMarkersPath);
+    guiKinect_2->addSpacer();
 
     guiKinect_2->autoSizeToFitWidgets();
     ofAddListener(guiKinect_2->newGUIEvent, this, &ofApp::guiEvent);
@@ -1056,8 +1057,9 @@ void ofApp::setupOpticalFlowGUI(){
     
     guiFlow->addLabel("Debug", OFX_UI_FONT_MEDIUM);
     guiFlow->addSpacer();
-    guiFlow->addToggle("Show difference contour", &contour.drawDiff);
     guiFlow->addToggle("Show difference", &contour.drawDiffImage);
+    guiFlow->addToggle("Show difference contour", &contour.drawDiff);
+    guiFlow->addToggle("Show velocities from contour", &contour.drawVelocities);
     guiFlow->addSpacer();
     
     guiFlow->autoSizeToFitWidgets();
@@ -1264,7 +1266,8 @@ void ofApp::setupEmitterGUI(){
     emitters.push_back("Emit all time");
     emitters.push_back("Emit all time on contour");
     emitters.push_back("Emit only if movement");
-    gui8Emitter_1->addRadio("Emitters", emitters, OFX_UI_ORIENTATION_VERTICAL)->activateToggle("Emit all time");
+    gui8Emitter_1->addRadio("Emitters", emitters, OFX_UI_ORIENTATION_VERTICAL)->setTriggerType(OFX_UI_TRIGGER_ALL);//->activateToggle("Emit all time");
+    
     gui8Emitter_1->addSpacer();
 
     gui8Emitter_1->autoSizeToFitWidgets();
@@ -1310,8 +1313,6 @@ void ofApp::setupGridGUI(){
     gui8Grid->addSpacer();
     gui8Grid->addSlider("Radius", 0.1, 25.0, &gridParticles->radius);
     gui8Grid->addIntSlider("Resolution", 1, 20, &gridParticles->gridRes)->setStickyValue(1.0);
-
-//    addParticleInteractionGUI(gui8Grid, gridParticles);
     
     gui8Grid->addSpacer();
     gui8Grid->addLabel("Interaction", OFX_UI_FONT_MEDIUM);
@@ -1356,7 +1357,6 @@ void ofApp::setupBoidsGUI(){
     gui8Boids_1->addSpacer();
     gui8Boids_1->addToggle("Interact", &boidsParticles->interact);
     gui8Boids_1->addSlider("Marker interaction radius", 5.0, 150.0, &boidsParticles->markerRadius);
-    gui8Boids_1->addToggle("Repulse particle/particle", &boidsParticles->repulse);
     gui8Boids_1->addSpacer();
     
     gui8Boids_1->autoSizeToFitWidgets();
@@ -1461,11 +1461,6 @@ void ofApp::addParticleInteractionGUI(ofxUICanvas* gui, ParticleSystem* ps){
 //    interactions.push_back("Attraction");
 //    interactions.push_back("Gravity");
 //    gui->addRadio("Interactions", interactions, OFX_UI_ORIENTATION_VERTICAL)->activateToggle("Repulsion");
-    gui->addSpacer();
-    gui->addToggle("Contour Optical Flow", &ps->useFlow);
-    gui->addToggle("Contour Optical Flow Average", &ps->useFlowRegion);
-    gui->addToggle("Contour Velocities", &ps->useContourVel);
-    gui->addToggle("Contour Area", &ps->useContourArea);
     gui->addSpacer();
 }
 
@@ -2186,15 +2181,6 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     //-------------------------------------------------------------
     // PARTICLES
     //-------------------------------------------------------------
-//    if(e.getName() == "Activate Particles"){
-//        ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
-//        if(toggle->getValue() == true){
-//            particleSystems[currentParticleSystem]->activate();
-//        }
-//        else{
-//            particleSystems[currentParticleSystem]->desactivate();
-//        }
-//    }
 //    if(e.getName() == "Interactions"){
 //        ofxUIRadio *radio = (ofxUIRadio *) e.widget;
 //        if(radio->getActiveName() == "Repulsion"){
@@ -2211,20 +2197,26 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
 //        }
 //    }
     // EMITTER SPECIFIC
-    if(e.getName() == "Emitters"){
-        ofxUIRadio *radio = (ofxUIRadio *) e.widget;
-        if(radio->getActiveName() == "Emit all time"){
+    if(e.getName() == "Emit all time"){
+        ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
+        if(toggle->getValue() == true){
             emitterParticles->emitAllTimeInside     = true;
             emitterParticles->emitAllTimeContour    = false;
             emitterParticles->emitInMovement        = false;
         }
-        else if(radio->getActiveName() == "Emit all time on contour"){
+    }
+    if(e.getName() == "Emit all time only in contour"){
+        ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
+        if(toggle->getValue() == true){
             emitterParticles->emitAllTimeInside     = false;
             emitterParticles->emitAllTimeContour    = true;
             emitterParticles->emitInMovement        = false;
         }
-        else if(radio->getActiveName() == "Emit only if movement"){
-            emitterParticles->emitAllTimeInside     = true;
+    }
+    if(e.getName() == "Emit only if movement"){
+        ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
+        if(toggle->getValue() == true){
+            emitterParticles->emitAllTimeInside     = false;
             emitterParticles->emitAllTimeContour    = false;
             emitterParticles->emitInMovement        = true;
         }
@@ -2238,21 +2230,30 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         }
     }
     // ANIMATIONS SPECIFIC
-    if(e.getName() == "Animations"){
-        ofxUIRadio *radio = (ofxUIRadio *) e.widget;
-        if(radio->getActiveName() == "Rain"){
+    if(e.getName() == "Rain"){
+        ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
+        if(toggle->getValue() == true){
             animationsParticles->setAnimation(RAIN);
             animationsParticles->bornParticles();
         }
-        else if(radio->getActiveName() == "Snow"){
+    }
+    if(e.getName() == "Snow"){
+        ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
+        if(toggle->getValue() == true){
             animationsParticles->setAnimation(SNOW);
             animationsParticles->bornParticles();
         }
-        else if(radio->getActiveName() == "Wind"){
+    }
+    if(e.getName() == "Wind"){
+        ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
+        if(toggle->getValue() == true){
             animationsParticles->setAnimation(WIND);
             animationsParticles->bornParticles();
         }
-        else if(radio->getActiveName() == "Explosion"){
+    }
+    if(e.getName() == "Explosion"){
+        ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
+        if(toggle->getValue() == true){
             animationsParticles->setAnimation(EXPLOSION);
             animationsParticles->bornParticles();
         }
