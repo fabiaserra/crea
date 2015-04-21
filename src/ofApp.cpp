@@ -428,8 +428,8 @@ void ofApp::update(){
     // Update particles
     emitterParticles->update(dt, markers, contour);
     gridParticles->update(dt, markers, contour);
-//    boidsParticles->update(dt, markers, contour);
-//    animationsParticles->update(dt, markers, contour);
+    boidsParticles->update(dt, markers, contour);
+    animationsParticles->update(dt, markers, contour);
 
     #ifdef KINECT_SEQUENCE
 
@@ -757,7 +757,7 @@ void ofApp::setupHelperGUI(){
     guiHelper->addSpacer();
     
     guiHelper->addSpacer();
-    guiHelper->addLabel("4. FLUID EXTRA + CONTOUR", OFX_UI_FONT_MEDIUM);
+    guiHelper->addLabel("4. FLUID 2 + CONTOUR", OFX_UI_FONT_MEDIUM);
     guiHelper->addSpacer();
     
     guiHelper->addSpacer();
@@ -1072,7 +1072,7 @@ void ofApp::setupOpticalFlowGUI(){
 //--------------------------------------------------------------
 void ofApp::setupFluidSolverGUI(){
     ofxUICanvas *guiFluid_1 = new ofxUICanvas((guiWidth+guiMargin)*2, 0, guiWidth, ofGetHeight());
-    guiFluid_1->addLabel("FLUID", OFX_UI_FONT_LARGE);
+    guiFluid_1->addLabel("FLUID SOLVER", OFX_UI_FONT_LARGE);
     guiFluid_1->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
     
     guiFluid_1->addSpacer();
@@ -1086,7 +1086,6 @@ void ofApp::setupFluidSolverGUI(){
     reset->setColorBack(ofColor(150, 255));
     guiFluid_1->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     
-    guiFluid_1->addSpacer();
     ofxUISlider *redSlider = guiFluid_1->addSlider("Red", 0.0, 255.0, &fluid.red);
     redSlider->setColorFill(ofColor(240, 30, 30));
     redSlider->setColorFillHighlight(ofColor(150, 30, 30));
@@ -1153,6 +1152,14 @@ void ofApp::setupFluidSolverGUI(){
     guiFluid_2->addToggle("Show Fluid Velocities Scalar", &fluid.drawVelocityScalar);
     guiFluid_2->addToggle("Show Temperature", &fluid.drawTemperature);
     
+    guiFluid_2->addSpacer();
+    guiFluid_2->addLabel("FLUID CONTOUR", OFX_UI_FONT_LARGE);
+    guiFluid_2->addSpacer();
+    ofxUIImageToggle *activeContour;
+    activeContour = guiFluid_2->addImageToggle("Activate Fluid", "icons/show.png", &fluid.contourInput, dim, dim);
+    activeContour->setColorBack(ofColor(150, 255));
+    guiFluid_2->addSpacer();
+    
     guiFluid_2->autoSizeToFitWidgets();
     guiFluid_2->setVisible(false);
     ofAddListener(guiFluid_2->newGUIEvent, this, &ofApp::guiEvent);
@@ -1175,30 +1182,43 @@ void ofApp::setupFluidExtrasGUI(){
     guiFluidMarkers->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     
     guiFluidMarkers->addSpacer();
-    guiFluidMarkers->addLabel("Force 1", OFX_UI_FONT_MEDIUM);
+    guiFluidMarkers->addLabel("Force 1: Density", OFX_UI_FONT_MEDIUM);
     guiFluidMarkers->addSpacer();
-    guiFluidMarkers->addIntSlider("F1 Type", 0, 5, &fluid.markerForceTypes[0]);
-    guiFluidMarkers->addSlider("F1 Strength", 0.0, 5.0, &fluid.markerForceStrengths[0]);
-    guiFluidMarkers->addSlider("F1 Radius", 0.0, 0.1, &fluid.markerForceRadiuses[0])->setLabelPrecision(2);
-    guiFluidMarkers->addSlider("F1 Edge", 0.0, 1.0, &fluid.markerForceEdges[0]);
+    ofxUISlider *redSlider = guiFluidMarkers->addSlider("Red", 0.0, 1.0, &fluid.markerForceForces[0].x);
+    redSlider->setColorFill(ofColor(240, 30, 30));
+    redSlider->setColorFillHighlight(ofColor(150, 30, 30));
+    ofxUISlider *greenSlider = guiFluidMarkers->addSlider("Green", 0.0, 1.0, &fluid.markerForceForces[0].y);
+    greenSlider->setColorFill(ofColor(30, 240, 30));
+    greenSlider->setColorFillHighlight(ofColor(30, 150, 30));
+    ofxUISlider *blueSlider = guiFluidMarkers->addSlider("Blue", 0.0, 1.0, &fluid.markerForceForces[0].z);
+    blueSlider->setColorFill(ofColor(30, 30, 240));
+    blueSlider->setColorFillHighlight(ofColor(30, 30, 150));
+    guiFluidMarkers->addSlider("Opacity", 0.0, 1.0, &fluid.markerForceForces[0].w);
     guiFluidMarkers->addSpacer();
-    guiFluidMarkers->addSpacer();
-    guiFluidMarkers->addLabel("Force 2", OFX_UI_FONT_MEDIUM);
-    guiFluidMarkers->addSpacer();
-    guiFluidMarkers->addIntSlider("F2 Type", 0, 5, &fluid.markerForceTypes[1]);
-    guiFluidMarkers->addSlider("F2 Strength", 0.0, 5.0, &fluid.markerForceStrengths[1]);
-    guiFluidMarkers->addSlider("F2 Radius", 0.0, 0.1, &fluid.markerForceRadiuses[1])->setLabelPrecision(2);
-    guiFluidMarkers->addSlider("F2 Edge", 0.0, 1.0, &fluid.markerForceEdges[1]);
-    guiFluidMarkers->addSpacer();
-    guiFluidMarkers->addSpacer();
-    guiFluidMarkers->addLabel("Force 3", OFX_UI_FONT_MEDIUM);
-    guiFluidMarkers->addSpacer();
-    guiFluidMarkers->addIntSlider("F3 Type", 0, 5, &fluid.markerForceTypes[2]);
-    guiFluidMarkers->addSlider("F3 Strength", 0.0, 5.0, &fluid.markerForceStrengths[2]);
-    guiFluidMarkers->addSlider("F3 Radius", 0.0, 0.1, &fluid.markerForceRadiuses[2])->setLabelPrecision(2);
-    guiFluidMarkers->addSlider("F3 Edge", 0.0, 1.0, &fluid.markerForceEdges[2]);
-    guiFluidMarkers->addSpacer();
+    guiFluidMarkers->addSlider("Density Strength", 0.0, 5.0, &fluid.markerForceStrengths[0]);
+    guiFluidMarkers->addSlider("Density Radius", 0.0, 0.1, &fluid.markerForceRadiuses[0])->setLabelPrecision(2);
+    guiFluidMarkers->addSlider("Density Edge", 0.0, 1.0, &fluid.markerForceEdges[0]);
     
+    guiFluidMarkers->addSpacer();
+    guiFluidMarkers->addLabel("Force 2: Velocity", OFX_UI_FONT_MEDIUM);
+    guiFluidMarkers->addSpacer();
+    guiFluidMarkers->addSlider("x", -1.0, 1.0, &fluid.markerForceForces[1].x);
+    guiFluidMarkers->addSlider("y", -1.0, 1.0, &fluid.markerForceForces[1].y);
+    guiFluidMarkers->addSpacer();
+    guiFluidMarkers->addSlider("Velocity Strength", 0.0, 5.0, &fluid.markerForceStrengths[1]);
+    guiFluidMarkers->addSlider("Velocity Radius", 0.0, 0.1, &fluid.markerForceRadiuses[1])->setLabelPrecision(2);
+    guiFluidMarkers->addSlider("Velocity Edge", 0.0, 1.0, &fluid.markerForceEdges[1]);
+    
+    guiFluidMarkers->addSpacer();
+    guiFluidMarkers->addLabel("Force 3: Temperature", OFX_UI_FONT_MEDIUM);
+    guiFluidMarkers->addSpacer();
+    guiFluidMarkers->addSlider("temp", -1.0, 1.0, &fluid.markerForceForces[2].x);
+    guiFluidMarkers->addSpacer();
+    guiFluidMarkers->addSlider("Temperature Strength", 0.0, 5.0, &fluid.markerForceStrengths[2]);
+    guiFluidMarkers->addSlider("Temperature Radius", 0.0, 0.1, &fluid.markerForceRadiuses[2])->setLabelPrecision(2);
+    guiFluidMarkers->addSlider("Temperature Edge", 0.0, 1.0, &fluid.markerForceEdges[2]);
+    guiFluidMarkers->addSpacer();
+
     guiFluidMarkers->autoSizeToFitWidgets();
     guiFluidMarkers->setVisible(false);
     ofAddListener(guiFluidMarkers->newGUIEvent, this, &ofApp::guiEvent);
@@ -1206,21 +1226,13 @@ void ofApp::setupFluidExtrasGUI(){
     
     ofxUICanvas *guiFluidParticles = new ofxUICanvas((guiWidth+guiMargin)*2, 0, guiWidth, ofGetHeight());
     guiFluidParticles->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
+
     guiFluidParticles->addLabel("FLUID PARTICLES", OFX_UI_FONT_LARGE);
-    
     guiFluidParticles->addSpacer();
     ofxUIImageToggle *active;
     active = guiFluidParticles->addImageToggle("Activate Particles", "icons/show.png",  &fluid.particlesActive, dim, dim);
     active->setColorBack(ofColor(150, 255));
-    
-    guiFluidParticles->addSpacer();
-    guiFluidParticles->addToggle("Marker", &fluid.markersInput);
-    guiFluidParticles->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    guiFluidParticles->setWidgetSpacing(35);
-    guiFluidParticles->addToggle("Contour", &fluid.contourInput);
-    guiFluidParticles->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    guiFluidParticles->setWidgetSpacing(3);
-    
+
     guiFluidParticles->addSpacer();
     guiFluidParticles->addLabel("Particle", OFX_UI_FONT_MEDIUM);
     guiFluidParticles->addSpacer();

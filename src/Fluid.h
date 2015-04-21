@@ -16,8 +16,6 @@ class Fluid{
         void reset();
         void resetDrawForces();
     
-        ofVec2f				lastMouse;
-    
         //--------------------------------------------------------------
         bool isActive;          // Fluid active
         bool particlesActive;   // Particle flow active
@@ -74,11 +72,11 @@ class Fluid{
         float particlesSizeRnd;
         //--------------------------------------------------------------
         // marker forces parameters
+        vector<ofVec4f> markerForceForces;
         vector<int> markerForceTypes;
         vector<float> markerForceStrengths;
         vector<float> markerForceRadiuses;
         vector<float> markerForceEdges;
-    
 
     protected:
         ftFluidSimulation fluid;

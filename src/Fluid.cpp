@@ -67,13 +67,23 @@ void Fluid::setup(int flowWidth, int flowHeight, int drawWidth, int drawHeight, 
     markerForces = new ftDrawForce[numMarkerForces];
     markerForces[0].setup(drawWidth, drawHeight, FT_DENSITY, true);
     markerForces[0].setName("draw full res");
+    markerForces[0].setForce(ofVec4f(0.2668, 0.59625, 1, 0.57007));
+    markerForces[0].setRadius(0.0140983);
+    markerForces[0].setStrength(2.42295);
+
     markerForces[1].setup(flowWidth, flowHeight, FT_VELOCITY, true);
     markerForces[1].setName("draw flow res 1");
+    markerForces[1].setRadius(0.0146189);
+    markerForces[1].setStrength(0.96523);
+   
     markerForces[2].setup(flowWidth, flowHeight, FT_TEMPERATURE, true);
     markerForces[2].setName("draw flow res 2");
+    markerForces[2].setForce(ofVec4f(1, 0, 0, 1));
+    markerForces[2].setRadius(0.02451);
     
     // Initialize marker drawing forces
     markerForceTypes.resize(numMarkerForces);
+    markerForceForces.resize(numMarkerForces);
     markerForceStrengths.resize(numMarkerForces);
     markerForceRadiuses.resize(numMarkerForces);
     markerForceEdges.resize(numMarkerForces);
@@ -97,6 +107,7 @@ void Fluid::setup(int flowWidth, int flowHeight, int drawWidth, int drawHeight, 
             default:
                 break;
         }
+        markerForceForces[i] = markerForces[i].getForce();
         markerForceStrengths[i] = markerForces[i].getStrength();
         markerForceRadiuses[i] = markerForces[i].getRadius();
         markerForceEdges[i] = markerForces[i].getEdge();
@@ -105,8 +116,6 @@ void Fluid::setup(int flowWidth, int flowHeight, int drawWidth, int drawHeight, 
     // Visualisation
     displayScalar.allocate(flowWidth, flowHeight);
     velocityField.allocate(flowWidth / 4, flowHeight / 4);
-    
-    lastMouse.set(0,0);
 }
 
 void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour, float mouseX, float mouseY){
@@ -125,7 +134,7 @@ void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour, float 
         fluid.setSmokeSigma(smokeSigma);
         fluid.setSmokeWeight(smokeWeight);
         fluid.setAmbientTemperature(ambientTemperature);
-        fluid.setGravity(gravity);
+        fluid.setGravity(-1*gravity); // * -1 so is robust with particleSystem gravity
         fluid.setClampForce(clampForce);
         fluid.setMaxVelocity(maxVelocity);
         fluid.setMaxDensity(maxDensity);
@@ -133,37 +142,27 @@ void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour, float 
         fluid.setDensityFromVorticity(densityFromVorticity);
         fluid.setDensityFromPressure(densityFromPressure);
         
-//        if(contourInput){
+        if(contourInput){
             fluid.addVelocity(contour.getOpticalFlowDecay());
             fluid.addDensity(contour.getColorMask());
             fluid.addTemperature(contour.getLuminanceMask());
-//        }
-        
-        ofVec2f mouse;
-        mouse.set(mouseX/ (float)ofGetWindowWidth(), mouseY/(float)ofGetWindowHeight());
-        ofVec2f velocity = mouse - lastMouse;
-        cout << "vel: " << velocity << endl;
-        for (int i=0; i<3; i++) {
-            if (markerForces[i].getType() == FT_VELOCITY)
-                markerForces[i].setForce(velocity);
-            markerForces[i].applyForce(mouse);
-            cout << "force: " << markerForces[i].getForce() << endl;
         }
-        lastMouse.set(mouse.x, mouse.y);
-//        
-//        if(markersInput){
-//            for(unsigned int markerIdx = 0; markerIdx < markers.size(); markerIdx++){
-//                if (!markers[markerIdx].hasDisappeared){
-//                    for (int i=0; i<numMarkerForces; i++) {
-//                        if (markerForces[i].getType() == FT_VELOCITY){
-//                            markerForces[i].setForce(markers[markerIdx].velocity);
-//                        }
-//                        markerForces[i].applyForce(markers[markerIdx].smoothPos);
-//                    }
-//                }
-//            }
-//            updateDrawForces(dt);
-//        }
+        
+        if(markersInput){
+            for(unsigned int markerIdx = 0; markerIdx < markers.size(); markerIdx++){
+                if (!markers[markerIdx].hasDisappeared){
+                    for (int i=0; i<numMarkerForces; i++) {
+                        if (markerForces[i].getType() == FT_VELOCITY){
+                            ofVec2f velNormalized = ofVec2f(markers[markerIdx].velocity.x / width, markers[markerIdx].velocity.y / height);
+                            markerForces[i].setForce(velNormalized);
+                        }
+                        ofVec2f posNormalized = ofVec2f(markers[markerIdx].smoothPos.x / width, markers[markerIdx].smoothPos.y / height);
+                        markerForces[i].applyForce(posNormalized);
+                    }
+                }
+            }
+            updateDrawForces(dt);
+        }
 
         fluid.update(dt);
         
@@ -218,6 +217,7 @@ void Fluid::draw(){
         if (particlesActive){
             particleFlow.draw(0, 0, width, height);
         }
+        
         ofPopStyle();
     }
 }
@@ -244,7 +244,7 @@ void Fluid::updateDrawForces(float dt){
             default:
                 break;
         }
-        markerForces[i].setForce(ofFloatColor(1.0, 0.0, 0.0));
+        markerForces[i].setForce(markerForceForces[i]);
         markerForces[i].setStrength(markerForceStrengths[i]);
         markerForces[i].setRadius(markerForceRadiuses[i]);
         markerForces[i].setEdge(markerForceEdges[i]);
@@ -286,6 +286,7 @@ void Fluid::reset(){
 }
 
 void Fluid::resetDrawForces(){
+    // reset temporal drawing forces
     for (int i = 0; i < numMarkerForces; i++){
         markerForces[i].reset();
     }
