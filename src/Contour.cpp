@@ -31,7 +31,7 @@ Contour::Contour()
     flowScale           = 1.5;   // scalar of flow velocities
 
     // optical flow settings
-    flowStrength        = 1.0;   // 0 ~ 100
+    flowStrength        = 10.0;  // 0 ~ 100
     flowOffset          = 3.0;   // 1 ~ 10
     flowLambda          = 0.01;  // 0 ~ 0.1
     flowThreshold       = 0.04;  // 0 ~ 0.2
@@ -42,9 +42,9 @@ Contour::Contour()
     flowTimeBlurRadius  = 2.0;   // 0 ~ 10
     
     // velocity mask settings
-    vMaskStrength       = 1.0;   // 0 ~ 10
+    vMaskStrength       = 10.0;  // 0 ~ 10
     vMaskBlurPasses     = 1;     // 0 ~ 10
-    vMaskBlurRadius     = 6.0;   // 0 ~ 10
+    vMaskBlurRadius     = 5.0;   // 0 ~ 10
     
     // contour settings
     smoothingSize       = 0.0;
@@ -320,38 +320,41 @@ void Contour::draw(){
 //                ofLine(ofVec2f(i, j), ofVec2f(i, j)+vel);
 //            }
 //        }
-        if(drawFlowScalar){
-            ofEnableBlendMode(OF_BLENDMODE_DISABLED);
-            displayScalar.setSource(opticalFlow.getOpticalFlowDecay());
-            displayScalar.draw(0, 0, width, height);
-        }
         ofEnableBlendMode(OF_BLENDMODE_ADD);
         velocityField.setSource(opticalFlow.getOpticalFlowDecay());
         velocityField.draw(0, 0, width, height);
         ofPopStyle();
     }
-    
-    if(drawDiff){
+    if(drawFlowScalar){
         ofPushStyle();
-        ofSetColor(255);
-        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
-        if(drawDiffImage){
-            velocityMask.draw(0, 0, width, height);
-//            diff.draw(0, 0);
-        }
+        ofEnableBlendMode(OF_BLENDMODE_ADD);
+        displayScalar.setSource(opticalFlow.getOpticalFlowDecay());
+        displayScalar.draw(0, 0, width, height);
+        ofPopStyle();
+    }
+    if(drawDiff){
         ofSetColor(255, 0, 0);
-        ofSetLineWidth(2);
+        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
+        ofSetLineWidth(2.5);
         for(int i = 0; i < diffContours.size(); i++){
             diffContours[i].draw();
         }
         ofPopStyle();
     }
-
+    if(drawDiffImage){
+        ofPushStyle();
+        ofSetColor(255);
+//        ofEnableBlendMode(OF_BLENDMODE_ADD);
+//        velocityMask.draw(0, 0, width, height);
+        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
+        velocityMask.getColorMask().draw(0, 0, width, height);
+        ofPopStyle();
+    }
     if(drawVelocities){
         ofPushStyle();
         ofSetColor(255, 0, 0);
-        ofSetLineWidth(1);
-        for(int i = 0; i < contours.size(); i+=5){
+        ofSetLineWidth(2);
+        for(int i = 0; i < contours.size(); i+=6){
             for(int p = 0; p < contours[i].size(); p++){
                 ofLine(contours[i][p], contours[i][p] - getVelocityInPoint(contours[i][p]));
             }
