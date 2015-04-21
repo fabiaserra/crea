@@ -712,6 +712,7 @@ void ofApp::setupGUI(){
     setupCueListGUI();
     setupOpticalFlowGUI();
     setupFluidSolverGUI();
+    setupFluidSimulatorGUI();
     setupContourGUI();
     setupEmitterGUI();
     setupGridGUI();
@@ -1053,6 +1054,11 @@ void ofApp::setupOpticalFlowGUI(){
     guiFlow->addSlider("Blur Radius", 0.0, 10.0, &contour.vMaskBlurRadius);
     guiFlow->addSpacer();
     
+    guiFlow->addLabel("Debug", OFX_UI_FONT_MEDIUM);
+    guiFlow->addToggle("Show difference contour", &contour.drawDiff);
+    guiFlow->addToggle("Show difference", &contour.drawDiffImage);
+    guiFlow->addSpacer();
+    
     guiFlow->autoSizeToFitWidgets();
     guiFlow->setVisible(false);
     ofAddListener(guiFlow->newGUIEvent, this, &ofApp::guiEvent);
@@ -1076,28 +1082,6 @@ void ofApp::setupFluidSolverGUI(){
     reset = guiFluid_1->addImageButton("Reset Fluid", "icons/reset.png", &fluid.doReset, dim, dim);
     reset->setColorBack(ofColor(150, 255));
     guiFluid_1->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    
-    guiFluid_1->addSpacer();
-    guiFluid_1->addToggle("Marker", &fluid.markersInput);
-    guiFluid_1->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    guiFluid_1->setWidgetSpacing(15);
-    guiFluid_1->addToggle("Contour", &fluid.contourInput);
-    guiFluid_1->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    guiFluid_1->setWidgetSpacing(3);
-    
-    guiFluid_1->addSpacer();
-    ofxUISlider *redSlider = guiFluid_1->addSlider("Red", 0.0, 255.0, &fluid.red);
-    redSlider->setColorFill(ofColor(240, 30, 30));
-    redSlider->setColorFillHighlight(ofColor(150, 30, 30));
-    ofxUISlider *greenSlider = guiFluid_1->addSlider("Green", 0.0, 255.0, &fluid.green);
-    greenSlider->setColorFill(ofColor(30, 240, 30));
-    greenSlider->setColorFillHighlight(ofColor(30, 150, 30));
-    ofxUISlider *blueSlider = guiFluid_1->addSlider("Blue", 0.0, 255.0, &fluid.blue);
-    blueSlider->setColorFill(ofColor(30, 30, 240));
-    blueSlider->setColorFillHighlight(ofColor(30, 30, 150));
-    
-    guiFluid_1->addSpacer();
-    guiFluid_1->addSlider("Opacity", 0.0, 255.0, &fluid.opacity);
     
     guiFluid_1->addSpacer();
     guiFluid_1->addLabel("Solver", OFX_UI_FONT_MEDIUM);
@@ -1131,7 +1115,6 @@ void ofApp::setupFluidSolverGUI(){
     ofxUICanvas *guiFluid_2 = new ofxUICanvas((guiWidth+guiMargin)*3, 0, guiWidth, ofGetHeight());
     guiFluid_2->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
     
-//    guiFluid_2->add2DPad("Gravity", ofPoint(-1, 1), ofPoint(-1, 1), &fluid.gravity, 60, 60);
     guiFluid_2->addSlider("Gravity X", -10.0, 10.0, &fluid.gravity.x);
     guiFluid_2->addSlider("Gravity Y", -10.0, 10.0, &fluid.gravity.y);
 
@@ -1146,18 +1129,6 @@ void ofApp::setupFluidSolverGUI(){
     guiFluid_2->addSpacer();
     guiFluid_2->addSlider("Density from Pressure", -0.1, 0.1, &fluid.densityFromPressure);
     guiFluid_2->addSlider("Density from Vorticity", -0.5, 0.5, &fluid.densityFromVorticity);
-    
-    guiFluid_2->addSpacer();
-    guiFluid_2->addLabel("PARTICLE FLOW", OFX_UI_FONT_LARGE);
-    guiFluid_2->addSpacer();
-    guiFluid_2->addSlider("Birth Chance", 0.0, 1.0, &fluid.particlesBirthChance);
-    guiFluid_2->addSlider("Birth Velocity Chance", 0.0, 5.0, &fluid.particlesBirthVelocityChance);
-    guiFluid_2->addSlider("Lifetime", 0.0, 10.0, &fluid.particlesLifetime);
-    guiFluid_2->addSlider("Lifetime Random", 0.0, 1.0, &fluid.particlesLifetimeRnd);
-    guiFluid_2->addSlider("Mass", 0.0, 2.0, &fluid.particlesMass);
-    guiFluid_2->addSlider("Mass Random", 0.0, 1.0, &fluid.particlesMassRnd);
-    guiFluid_2->addSlider("Size", 0.0, 10.0, &fluid.particlesSize);
-    guiFluid_2->addSlider("Size Random", 0.0, 1.0, &fluid.particlesSizeRnd);
     guiFluid_2->addSpacer();
     
     guiFluid_2->addLabel("Debug", OFX_UI_FONT_MEDIUM);
@@ -1165,17 +1136,64 @@ void ofApp::setupFluidSolverGUI(){
     guiFluid_2->addToggle("Show Fluid Velocities", &fluid.drawVelocity);
     guiFluid_2->addToggle("Show Fluid Velocities Scalar", &fluid.drawVelocityScalar);
     guiFluid_2->addToggle("Show Temperature", &fluid.drawTemperature);
-    guiFluid_2->addToggle("Show Particles", &fluid.drawParticles);
-
+    
     guiFluid_2->autoSizeToFitWidgets();
     guiFluid_2->setVisible(false);
     ofAddListener(guiFluid_2->newGUIEvent, this, &ofApp::guiEvent);
     guis.push_back(guiFluid_2);
 }
 
+void ofApp::setupFluidSimulatorGUI(){
+    ofxUICanvas *guiFluidSim = new ofxUICanvas(guiWidth+guiMargin, 0, guiWidth, ofGetHeight());
+    guiFluidSim->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
+    guiFluidSim->addLabel("PARTICLE FLOW", OFX_UI_FONT_LARGE);
+    
+    guiFluidSim->addSpacer();
+    ofxUIImageToggle *active;
+    active = guiFluidSim->addImageToggle("Activate Particles", "icons/show.png",  &fluid.particlesActive, dim, dim);
+    active->setColorBack(ofColor(150, 255));
+    
+    guiFluidSim->addSpacer();
+    ofxUISlider *redSlider = guiFluidSim->addSlider("Red", 0.0, 255.0, &fluid.red);
+    redSlider->setColorFill(ofColor(240, 30, 30));
+    redSlider->setColorFillHighlight(ofColor(150, 30, 30));
+    ofxUISlider *greenSlider = guiFluidSim->addSlider("Green", 0.0, 255.0, &fluid.green);
+    greenSlider->setColorFill(ofColor(30, 240, 30));
+    greenSlider->setColorFillHighlight(ofColor(30, 150, 30));
+    ofxUISlider *blueSlider = guiFluidSim->addSlider("Blue", 0.0, 255.0, &fluid.blue);
+    blueSlider->setColorFill(ofColor(30, 30, 240));
+    blueSlider->setColorFillHighlight(ofColor(30, 30, 150));
+    guiFluidSim->addSlider("Opacity", 0.0, 255.0, &fluid.opacity);
+    
+    guiFluidSim->addSpacer();
+    guiFluidSim->addToggle("Marker", &fluid.markersInput);
+    guiFluidSim->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    guiFluidSim->setWidgetSpacing(35);
+    guiFluidSim->addToggle("Contour", &fluid.contourInput);
+    guiFluidSim->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    guiFluidSim->setWidgetSpacing(3);
+    
+    guiFluidSim->addSpacer();
+    guiFluidSim->addSlider("Birth Chance", 0.0, 1.0, &fluid.particlesBirthChance);
+    guiFluidSim->addSlider("Birth Velocity Chance", 0.0, 5.0, &fluid.particlesBirthVelocityChance);
+    guiFluidSim->addSlider("Lifetime", 0.0, 10.0, &fluid.particlesLifetime);
+    guiFluidSim->addSlider("Lifetime Random", 0.0, 1.0, &fluid.particlesLifetimeRnd);
+    guiFluidSim->addSlider("Mass", 0.0, 2.0, &fluid.particlesMass);
+    guiFluidSim->addSlider("Mass Random", 0.0, 1.0, &fluid.particlesMassRnd);
+    guiFluidSim->addSlider("Size", 0.0, 10.0, &fluid.particlesSize);
+    guiFluidSim->addSlider("Size Random", 0.0, 1.0, &fluid.particlesSizeRnd);
+    guiFluidSim->addSpacer();
+    
+    guiFluidSim->autoSizeToFitWidgets();
+    guiFluidSim->setVisible(false);
+    ofAddListener(guiFluidSim->newGUIEvent, this, &ofApp::guiEvent);
+    guis.push_back(guiFluidSim);
+
+}
+
 //--------------------------------------------------------------
 void ofApp::setupContourGUI(){
-    ofxUICanvas *guiContour = new ofxUICanvas(guiWidth+guiMargin, 0, guiWidth, ofGetHeight());
+    ofxUICanvas *guiContour = new ofxUICanvas((guiWidth+guiMargin)*2, 0, guiWidth, ofGetHeight());
     guiContour->addLabel("DEPTH CONTOUR", OFX_UI_FONT_LARGE);
     guiContour->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
     
@@ -1194,7 +1212,6 @@ void ofApp::setupContourGUI(){
     ofxUISlider *blueSlider = guiContour->addSlider("Blue", 0.0, 255.0, &contour.blue);
     blueSlider->setColorFill(ofColor(30, 30, 240));
     blueSlider->setColorFillHighlight(ofColor(30, 30, 150));
-    guiContour->addSpacer();
     guiContour->addSlider("Opacity", 0.0, 255.0, &contour.maxOpacity);
 
     guiContour->addSpacer();
@@ -1408,14 +1425,6 @@ void ofApp::addParticleBasicsGUI(ofxUICanvas* gui, ParticleSystem* ps){
     active->setColorBack(ofColor(150, 255));
     
     gui->addSpacer();
-    gui->addToggle("Marker", &ps->markersInput);
-    gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui->setWidgetSpacing(15);
-    gui->addToggle("Contour", &ps->contourInput);
-    gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui->setWidgetSpacing(3);
-    
-    gui->addSpacer();
     ofxUISlider *redSlider = gui->addSlider("Red", 0.0, 255.0, &ps->red);
     redSlider->setColorFill(ofColor(240, 30, 30));
     redSlider->setColorFillHighlight(ofColor(150, 30, 30));
@@ -1425,10 +1434,16 @@ void ofApp::addParticleBasicsGUI(ofxUICanvas* gui, ParticleSystem* ps){
     ofxUISlider *blueSlider = gui->addSlider("Blue", 0.0, 255.0, &ps->blue);
     blueSlider->setColorFill(ofColor(30, 30, 240));
     blueSlider->setColorFillHighlight(ofColor(30, 30, 150));
-
-    gui->addSpacer();
     gui->addSlider("Opacity", 0.0, 255.0, &ps->maxOpacity);
     gui->addSpacer();
+    
+    gui->addSpacer();
+    gui->addToggle("Marker", &ps->markersInput);
+    gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui->setWidgetSpacing(35);
+    gui->addToggle("Contour", &ps->contourInput);
+    gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui->setWidgetSpacing(3);
 }
 
 //--------------------------------------------------------------
@@ -1506,14 +1521,15 @@ void ofApp::addParticlePhysicsGUI(ofxUICanvas* gui, ParticleSystem* ps){
 //  7: guiFlow
 //  8: guiFluid_1
 //  9: guiFluid_2
-// 10: guiContour
-// 11: guiEmitter_1
-// 12: guiEmitter_2
-// 13: guiGrid
-// 14: guiBoids_1
-// 15: guiBoids_2
-// 16: guiAnimations_1
-// 17: guiAnimations_2
+// 10: guiFluidSim
+// 11: guiContour
+// 12: guiEmitter_1
+// 13: guiEmitter_2
+// 14: guiGrid
+// 15: guiBoids_1
+// 16: guiBoids_2
+// 17: guiAnimations_1
+// 18: guiAnimations_2
 
 //--------------------------------------------------------------
 void ofApp::saveGUISettings(const string path, const bool isACue){
@@ -2317,7 +2333,7 @@ void ofApp::keyPressed(int key){
         else if(key == '4'){
             int idx = 0;
             for(vector<ofxUICanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
-                if(idx == 0 || idx == 10) (*it)->setVisible(true);
+                if(idx == 0 || idx == 10 || idx == 11) (*it)->setVisible(true);
                 else (*it)->setVisible(false);
                 idx++;
             }
@@ -2326,7 +2342,7 @@ void ofApp::keyPressed(int key){
             currentParticleSystem = 0;
             int idx = 0;
             for(vector<ofxUICanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
-                if(idx == 0 || idx == 11 || idx == 12) (*it)->setVisible(true);
+                if(idx == 0 || idx == 12 || idx == 13) (*it)->setVisible(true);
                 else (*it)->setVisible(false);
                 idx++;
             }
@@ -2335,7 +2351,7 @@ void ofApp::keyPressed(int key){
             currentParticleSystem = 1;
             int idx = 0;
             for(vector<ofxUICanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
-                if(idx == 0 || idx == 13) (*it)->setVisible(true);
+                if(idx == 0 || idx == 14) (*it)->setVisible(true);
                 else (*it)->setVisible(false);
                 idx++;
             }
@@ -2344,9 +2360,8 @@ void ofApp::keyPressed(int key){
             currentParticleSystem = 2;
             int idx = 0;
             for(vector<ofxUICanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
-                if(idx == 0 || idx == 14 || idx == 15) (*it)->setVisible(true);
+                if(idx == 0 || idx == 15 || idx == 16) (*it)->setVisible(true);
                 else (*it)->setVisible(false);
-                (*it)->autoSizeToFitWidgets();
                 idx++;
             }
         }
@@ -2354,7 +2369,7 @@ void ofApp::keyPressed(int key){
             currentParticleSystem = 3;
             int idx = 0;
             for(vector<ofxUICanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
-                if(idx == 0 || idx == 16 || idx == 17) (*it)->setVisible(true);
+                if(idx == 0 || idx == 17 || idx == 18) (*it)->setVisible(true);
                 else (*it)->setVisible(false);
                 idx++;
             }

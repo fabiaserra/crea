@@ -17,6 +17,7 @@ class Fluid{
     
         //--------------------------------------------------------------
         bool isActive;          // Fluid active
+        bool particlesActive;   // Particle flow active
         //--------------------------------------------------------------
         bool doReset;
         //--------------------------------------------------------------
@@ -34,7 +35,6 @@ class Fluid{
         bool drawVelocity;
         bool drawVelocityScalar;
         bool drawTemperature;
-        bool drawParticles;  
         //--------------------------------------------------------------
         int	numMarkerForces;
         ftDrawForce* markerForces;

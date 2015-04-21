@@ -2,6 +2,7 @@
 
 Fluid::Fluid(){
     isActive                     = false; // Fluid simulator is active?
+    particlesActive              = false; // Particle flow is active?
     doReset                      = false; // Reset Fluid
     
     // General properties
@@ -49,7 +50,6 @@ Fluid::Fluid(){
     markerRadius                 = 50.0;  // Radius of interaction of the markers
     
     // Output
-    drawParticles                = true;
     drawVelocity                 = false;
     drawVelocityScalar           = false;
     drawTemperature              = false;
@@ -124,7 +124,7 @@ void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour){
         
         fluid.update(dt);
         
-        if((markersInput || contourInput) && drawParticles){
+        if((markersInput || contourInput) && particlesActive){
             // set particle flow parameters
             particleFlow.setSpeed(fluid.getSpeed());
             particleFlow.setCellSize(fluid.getCellSize());
@@ -176,7 +176,7 @@ void Fluid::draw(){
         fluid.draw(0, 0, width, height);
         
         ofEnableBlendMode(OF_BLENDMODE_ADD);
-        if (drawParticles){
+        if (particlesActive){
             particleFlow.draw(0, 0, width, height);
         }
         ofPopStyle();

@@ -27,6 +27,4 @@ class irMarker : public ofxCv::RectFollower{
         float timeDead;
         //--------------------------------------------------------------
         bool hasDisappeared;
-        //--------------------------------------------------------------
-        float bornRate;
 };

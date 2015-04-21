@@ -6,7 +6,6 @@ using namespace cv;
 irMarker::irMarker(){
     startedDying    = 0;
     dyingTime       = 3;
-    bornRate        = 3;
     hasDisappeared  = true;
 }
 

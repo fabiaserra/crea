@@ -315,10 +315,15 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
         if(emit){ // Born new particles
             if(markersInput){
                 for(unsigned int i = 0; i < markers.size(); i++){
-//                    if (markers[i].hasDisappeared) bornRate -= 1.0;
-//                    else markers[i].bornRate = bornRate;
-//                    addParticles(markers[i].bornRate, markers[i]);
-                    if (!markers[i].hasDisappeared) addParticles(ofRandom(bornRate-3.0, bornRate+3.0), markers[i]);
+                    if (!markers[i].hasDisappeared){
+                        if(emitInMovement){
+                            float n = ofMap(markers[i].velocity.lengthSquared(), 0.5, 400.0, 0.0, bornRate);
+                            addParticles(n, markers[i]);
+                        }
+                        else{
+                            addParticles(ofRandom(bornRate-3.0, bornRate+3.0), markers[i]);
+                        }
+                    }
                 }
             }
             if(contourInput){
@@ -463,7 +468,7 @@ void ParticleSystem::addParticles(int n, const irMarker &marker){
         ofPoint vel = randomVector()*(velocity+5.0*randomRange(velocityRnd, velocity));
         vel += marker.velocity*(velocityMotion/100)*5.0;
 
-        if(emitInMovement && marker.velocity.lengthSquared() < 25.0) break;
+//        if(emitInMovement && marker.velocity.lengthSquared() < 25.0) break;
 
         float initialRadius = radius + randomRange(radiusRnd, radius);
         float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
@@ -508,13 +513,7 @@ void ParticleSystem::addParticles(int n, const ofPolyline &contour, Contour &flo
             ofPoint motionVel = flow.getFlowOffset(pos);
             vel += motionVel*(velocityMotion/100);
         }
-        else if(useFlowRegion){
-            float dimRegion = 5.0;
-            ofRectangle flowRegion(pos.x-dimRegion/2.0, pos.y-dimRegion/2.0, dimRegion, dimRegion);
-            ofPoint motionVel = flow.getAverageFlowInRegion(flowRegion);
-            vel += motionVel*(velocityMotion/100)*150;
-        }
-        if(useContourVel){
+        else if(useContourVel){
             ofPoint motionVel = flow.getVelocityInPoint(pos);
             vel += motionVel*(velocityMotion/100)*6;
         }
