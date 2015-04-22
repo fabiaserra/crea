@@ -29,7 +29,9 @@
 //#define KINECT_SEQUENCE
 
 // Uncomment this to use two windows
-//#define SECOND_WINDOW
+#define SECOND_WINDOW
+#define PROJECTOR_RESOLUTION_X 1280
+#define PROJECTOR_RESOLUTION_Y 800
 
 class ofApp : public ofBaseApp{
     public:
