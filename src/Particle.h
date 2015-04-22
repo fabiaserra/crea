@@ -63,6 +63,7 @@ class Particle
         bool colorAge;          // Particle changes color with age?
         bool isEmpty;           // Draw only contour of the particle?
         bool drawLine;          // Draw particle as a line from prevPos to pos?
+        bool drawStroke;        // Draw stroke line around particle?
 
         bool limitSpeed;        // Limit the speed of the particle?
         bool bounceDamping;     // Decrease velocity when particle bounces?

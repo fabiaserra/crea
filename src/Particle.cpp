@@ -19,6 +19,7 @@ Particle::Particle(){
     flickersAge     = false;
     isEmpty         = false;
     drawLine        = false;
+    drawStroke      = false;
 
     limitSpeed      = false;
     bounceDamping   = true;
@@ -114,6 +115,14 @@ void Particle::draw(){
             int resolution = ofMap(fabs(radius), 0, 10, 6, 22, true);
             ofSetCircleResolution(resolution);
             ofCircle(pos, radius);
+            if(drawStroke){
+                ofPushStyle();
+                ofNoFill();
+                ofSetLineWidth(1.3);
+                ofSetColor(0, opacityTmp);
+                ofCircle(pos, radius);
+                ofPopStyle();
+            }
         }
         else{
 //            if(pos.squareDistance(prevPos) >= 25) ofLine(pos, pos-vel.getNormalized()*5);
@@ -122,17 +131,6 @@ void Particle::draw(){
             ofSetLineWidth(ofMap(radius, 0, 15, 1, 5, true));
             ofLine(pos, pos-vel.getNormalized()*radius);
         }
-
-        // // Draw arrows
-        // if (markerDist == 0){
-        //     ofDrawCircle(pos, 2);
-        // }
-        // else{
-        //     float length = 15.0f;
-        //     ofPoint p1(pos);
-        //     ofPoint p2(pos + dir*length);
-        //     ofDrawLine(p1, p2);
-        // }
 
         ofPopStyle();
     }
