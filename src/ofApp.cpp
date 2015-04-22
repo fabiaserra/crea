@@ -592,7 +592,6 @@ void ofApp::draw(){
     kinectRect.scaleTo(canvasRect, OF_SCALEMODE_FIT);
     ofTranslate(kinectRect.x, kinectRect.y);
     ofScale(reScale, reScale);
-    
 //    ofScale(reScale.x, reScale.y);
 
 //    // Kinect images
@@ -629,35 +628,9 @@ void ofApp::draw(){
         gridParticles->draw();
         boidsParticles->draw();
         animationsParticles->draw();
-
-//        ofTexture& flowTexture = contour.getFlowTexture();
-//        int w = flowTexture.getWidth();
-//        int h = flowTexture.getHeight();
-//        
-//        ofSetColor(255, 255, 255);
-//        if(flowTexture.isAllocated())
-//            flowTexture.draw(0, 0);
-//        
-//        ofFloatPixels flowPixels;
-//        flowTexture.readToPixels(flowPixels);
-//        
-//        ofSetLineWidth(1.5);
-//        ofSetColor(255, 0, 0);
-//        
-//        // color pixels, use w and h to control red and green
-//        for (int i = 0; i < w; i+=5){
-//            for (int j = 0; j < h; j+=5){
-//                ofVec2f vel;
-//                vel.x = flowPixels[(j*w+i)*3 + 0]; // r
-//                vel.y = flowPixels[(j*w+i)*3 + 1]; // g
-//                ofLine(ofVec2f(i, j), ofVec2f(i, j)+vel);
-//            }
-//        }
-        
     }
 
     if(drawMarkers || drawMarkersPath){
-//        irMarkerFinder.draw();
         vector<irMarker>& markers = tracker.getFollowers();
         // Draw identified IR markers
         for (int i = 0; i < markers.size(); i++){
@@ -1095,7 +1068,7 @@ void ofApp::setupFluidSolverGUI(){
     ofxUISlider *blueSlider = guiFluid_1->addSlider("Blue", 0.0, 255.0, &fluid.blue);
     blueSlider->setColorFill(ofColor(30, 30, 240));
     blueSlider->setColorFillHighlight(ofColor(30, 30, 150));
-    guiFluid_1->addSlider("Opacity", 0.0, 255.0, &fluid.opacity);
+    guiFluid_1->addSlider("Opacity", 0.0, 255.0, &fluid.maxOpacity);
     
     guiFluid_1->addSpacer();
     guiFluid_1->addLabel("Solver", OFX_UI_FONT_MEDIUM);
@@ -1130,13 +1103,13 @@ void ofApp::setupFluidSolverGUI(){
     guiFluid_2->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
     
     guiFluid_2->addSpacer();
-    guiFluid_2->addSlider("Gravity X", -10.0, 10.0, &fluid.gravity.x);
-    guiFluid_2->addSlider("Gravity Y", -10.0, 10.0, &fluid.gravity.y);
+    guiFluid_2->addSlider("Gravity X", -1.0, 1.0, &fluid.gravity.x)->setLabelPrecision(3);
+    guiFluid_2->addSlider("Gravity Y", -1.0, 1.0, &fluid.gravity.y)->setLabelPrecision(3);
     
     guiFluid_2->addSpacer();
     guiFluid_2->addLabel("Maximum", OFX_UI_FONT_MEDIUM);
     guiFluid_2->addSpacer();
-    guiFluid_2->addSlider("Clamp Force", 0.0, 0.1, &fluid.clampForce)->setLabelPrecision(2);
+    guiFluid_2->addSlider("Clamp Force", 0.0, 0.1, &fluid.clampForce)->setLabelPrecision(3);
     guiFluid_2->addSlider("Density", 0.0, 5.0, &fluid.maxDensity);
     guiFluid_2->addSlider("Velocity", 0.0, 10.0, &fluid.maxVelocity);
     guiFluid_2->addSlider("Temperature", 0.0, 5.0, &fluid.maxTemperature);
@@ -1230,8 +1203,17 @@ void ofApp::setupFluidExtrasGUI(){
     guiFluidParticles->addLabel("FLUID PARTICLES", OFX_UI_FONT_LARGE);
     guiFluidParticles->addSpacer();
     ofxUIImageToggle *active;
-    active = guiFluidParticles->addImageToggle("Activate Particles", "icons/show.png",  &fluid.particlesActive, dim, dim);
+    active = guiFluidParticles->addImageToggle("Activate Particle Flow", "icons/show.png",  &fluid.particlesActive, dim, dim);
     active->setColorBack(ofColor(150, 255));
+    
+    guiFluidParticles->addSpacer();
+    guiFluidParticles->addToggle("Marker", &fluid.markersInputParticles);
+    guiFluidParticles->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    guiFluidParticles->setWidgetSpacing(35);
+    guiFluidParticles->addToggle("Contour", &fluid.contourInputParticles);
+    guiFluidParticles->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    guiFluidParticles->setWidgetSpacing(3);
+    guiFluidParticles->addSpacer();
 
     guiFluidParticles->addSpacer();
     guiFluidParticles->addLabel("Particle", OFX_UI_FONT_MEDIUM);
@@ -1369,9 +1351,22 @@ void ofApp::setupGridGUI(){
     gui8Grid->addLabel("Grid", OFX_UI_FONT_MEDIUM);
     gui8Grid->addSpacer();
     gui8Grid->addSlider("Radius", 0.1, 25.0, &gridParticles->radius);
-    gui8Grid->addIntSlider("Resolution", 1, 20, &gridParticles->gridRes)->setStickyValue(1.0);
+    gui8Grid->addIntSlider("Resolution", 1, 20, &gridParticles->gridRes);
     
     gui8Grid->addSpacer();
+    gui8Grid->addLabel("Particle", OFX_UI_FONT_MEDIUM);
+    gui8Grid->addSpacer();
+    gui8Grid->addToggle("Empty", &gridParticles->isEmpty);
+    gui8Grid->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui8Grid->setWidgetSpacing(10);
+    gui8Grid->addToggle("Line", &gridParticles->drawLine);
+    gui8Grid->addToggle("Stroke", &gridParticles->drawStroke);
+    gui8Grid->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui8Grid->setWidgetSpacing(3);
+    gui8Grid->addToggle("Connected", &gridParticles->drawConnections);
+    gui8Grid->addSlider("Connect Dist", 5.0, 100.0, &gridParticles->connectDist);
+    gui8Grid->addSpacer();
+    
     gui8Grid->addLabel("Interaction", OFX_UI_FONT_MEDIUM);
     gui8Grid->addSpacer();
     gui8Grid->addToggle("Interact", &gridParticles->interact);
@@ -1381,7 +1376,10 @@ void ofApp::setupGridGUI(){
     gui8Grid->addToggle("Attract Interaction", &gridParticles->attractInteraction);
     gui8Grid->addSpacer();
 
-    addParticlePhysicsGUI(gui8Grid, gridParticles);
+//    addParticlePhysicsGUI(gui8Grid, gridParticles);
+    gui8Grid->addToggle("Repulse", &gridParticles->repulse);
+    gui8Grid->addSlider("Repulse Dist", 1.0, 50.0, &gridParticles->repulseDist);
+    gui8Grid->addSpacer();
 
     gui8Grid->autoSizeToFitWidgets();
     gui8Grid->setVisible(false);
@@ -1529,9 +1527,10 @@ void ofApp::addParticlePropertiesGUI(ofxUICanvas* gui, ParticleSystem* ps){
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui->setWidgetSpacing(10);
     gui->addToggle("Line", &ps->drawLine);
-    gui->addToggle("Connected", &ps->drawConnections);
+    gui->addToggle("Stroke", &ps->drawStroke);
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui->setWidgetSpacing(3);
+    gui->addToggle("Connected", &ps->drawConnections);
     gui->addSlider("Connect Dist", 5.0, 100.0, &ps->connectDist);
     gui->addSpacer();
     gui->addToggle("Immortal", &ps->immortal);
@@ -1657,18 +1656,18 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
     widgetsToUpdate.clear();
     
     // if interpolate we do opacity fading in graphics
-    if(interpolate){
-        for(int i = 0; i < particleSystems.size(); i++){
-            particleSystems[i]->doFading = true;
-        }
-        contour.doFading = true;
-    }
-    else{
-        for(int i = 0; i < particleSystems.size(); i++){
-            particleSystems[i]->doFading = false;
-        }
-        contour.doFading = false;
-    }
+//    if(interpolate){
+//        for(int i = 0; i < particleSystems.size(); i++){
+//            particleSystems[i]->doFading = true;
+//        }
+//        contour.doFading = true;
+//    }
+//    else{
+//        for(int i = 0; i < particleSystems.size(); i++){
+//            particleSystems[i]->doFading = false;
+//        }
+//        contour.doFading = false;
+//    }
 
     int guiIndex = 0;
     for(vector<ofxUICanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
@@ -2248,8 +2247,19 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         }
     }
     //-------------------------------------------------------------
+    // CONTOUR
+    //-------------------------------------------------------------
+//    if(e.getName() == "Activate Contour"){
+//        contour.doFading = true;
+//    }
+    //-------------------------------------------------------------
     // PARTICLES
     //-------------------------------------------------------------
+//    if(e.getName() == "Activate Particles"){
+//        for(int i = 0; i < particleSystems.size(); i++){
+//            particleSystems[i]->doFading = true;
+//        }
+//    }
 //    if(e.getName() == "Interactions"){
 //        ofxUIRadio *radio = (ofxUIRadio *) e.widget;
 //        if(radio->getActiveName() == "Repulsion"){
