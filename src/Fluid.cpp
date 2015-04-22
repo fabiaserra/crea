@@ -5,12 +5,12 @@ Fluid::Fluid(){
     particlesActive              = false; // Particle flow is active?
     
     // Fading in/out
-    isFadingIn          = false; // Opacity fading in?
-    isFadingOut         = false; // Opacity fading out?
-    startFadeIn         = false; // Fade in has started?
-    startFadeOut        = false; // Fade out has started?
-    elapsedFadeTime     = 0.0;   // Elapsed time of fade
-    fadeTime            = 2.0;   // Transition time of fade
+    isFadingIn                   = false; // Opacity fading in?
+    isFadingOut                  = false; // Opacity fading out?
+    startFadeIn                  = false; // Fade in has started?
+    startFadeOut                 = false; // Fade out has started?
+    elapsedFadeTime              = 0.0;   // Elapsed time of fade
+    fadeTime                     = 2.0;   // Transition time of fade
     
     // Color properties
     red                          = 255.0;
@@ -72,7 +72,7 @@ void Fluid::setup(int flowWidth, int flowHeight, int drawWidth, int drawHeight, 
     // Particles
     particleFlow.setup(flowWidth, flowHeight, drawWidth, drawHeight);
     
-    // Marker drawing temporal Forces
+    // Setup marker drawing temporal Forces with default values
     numMarkerForces = 3;
     markerForces = new ftDrawForce[numMarkerForces];
     markerForces[0].setup(drawWidth, drawHeight, FT_DENSITY, true);
@@ -123,7 +123,7 @@ void Fluid::setup(int flowWidth, int flowHeight, int drawWidth, int drawHeight, 
         markerForceEdges[i] = markerForces[i].getEdge();
     }
     
-    // Visualisation
+    // Allocate visualisation classes
     displayScalar.allocate(flowWidth, flowHeight);
     velocityField.allocate(flowWidth / 4, flowHeight / 4);
 }

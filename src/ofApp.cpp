@@ -706,7 +706,7 @@ void ofApp::setupHelperGUI(){
     guiHelper->addLabel("MENU", OFX_UI_FONT_LARGE);
 
     guiHelper->addSpacer();
-    guiHelper->addLabel("Press number 1 to 7 to", OFX_UI_FONT_SMALL);
+    guiHelper->addLabel("Press number 1 to 8 to", OFX_UI_FONT_SMALL);
     guiHelper->addLabel("switch between GUI panels", OFX_UI_FONT_SMALL);
     
     guiHelper->addSpacer();
@@ -927,7 +927,7 @@ void ofApp::setupGesturesGUI(){
     guiGestures_2->addSlider("Slide", 1.0, 30.0, &slide);
     guiGestures_2->addSpacer();
     guiGestures_2->addToggle("Show patterns inside sequence", &drawSequencePatterns);
-    guiGestures_2->addToggle("Show patterns in the side", &drawSequencePatternsSeparate);
+    guiGestures_2->addToggle("Show patterns", &drawSequencePatternsSeparate);
 
     guiGestures_2->addSpacer();
     

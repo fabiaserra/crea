@@ -246,20 +246,21 @@ void Sequence::drawPattern(const int patternPosition, const int patternIdx, floa
     float height = 480.0;
     float scale = 5.5;
     float margin = 40.0;
-    float guiHeight = 1550;
+    float guiWidth = 1330;
+    float guiHeight = 1430;
 
     ofPushMatrix();
     ofPushStyle();
 
     ofScale(1.0/scale, 1.0/scale);
-    ofTranslate(0, guiHeight);
+    ofTranslate(guiWidth, guiHeight);
 
     // Position window pattern in the screen
     if(patternPosition%2 == 0){
-        ofTranslate(width+margin, (patternPosition/2 - 1) * (height+margin));
+        ofTranslate(guiWidth+width+margin, (patternPosition/2 - 1) * (height+margin));
     }
     else{
-        ofTranslate(0, ((patternPosition+1)/2 - 1) * (height+margin));
+        ofTranslate(guiWidth, ((patternPosition+1)/2 - 1) * (height+margin));
     }
 
     int opacity = 60;
