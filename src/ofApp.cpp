@@ -18,7 +18,7 @@ void ofApp::setup(){
         // monitor or projector. this is a good way to set up a fullscreen display, while
         // retaining a control window in the primary monitor.
         
-        secondWindow.setup("second window", ofGetScreenWidth()+100, -50, 1280, 720, true);
+        secondWindow.setup("second window", ofGetScreenWidth(), 0, PROJECTOR_RESOLUTION_X, PROJECTOR_RESOLUTION_Y, true);
         // secondWindow.setup("second window", 0, 0, 1024, 768, true);
         // secondWindow.setup("second window", ofGetScreenWidth(), 0, 1024, 768, false);
     #endif
@@ -1103,23 +1103,23 @@ void ofApp::setupFluidSolverGUI(){
     guiFluid_1->addSlider("Speed", 0.0, 100.0, &fluid.speed);
     guiFluid_1->addSlider("Cell Size", 0.0, 2.0, &fluid.cellSize);
     guiFluid_1->addIntSlider("Num Jacobi Iterations", 1, 100., &fluid.numJacobiIterations);
-    guiFluid_1->addSlider("Viscosity", 0.0, 1.0, &fluid.viscosity);
-    guiFluid_1->addSlider("Vorticity", 0.0, 1.0, &fluid.vorticity);
-    guiFluid_1->addSlider("Dissipation", 0.0, 0.02, &fluid.dissipation)->setLabelPrecision(2);
+    guiFluid_1->addSlider("Viscosity", 0.0, 1.0, &fluid.viscosity)->setLabelPrecision(5);
+    guiFluid_1->addSlider("Vorticity", 0.0, 1.0, &fluid.vorticity)->setLabelPrecision(5);
+    guiFluid_1->addSlider("Dissipation", 0.0, 0.02, &fluid.dissipation)->setLabelPrecision(5);
     
     guiFluid_1->addSpacer();
     guiFluid_1->addLabel("Advanced dissipation", OFX_UI_FONT_MEDIUM);
     guiFluid_1->addSpacer();
-    guiFluid_1->addSlider("Velocity offset", -0.01, 0.01, &fluid.dissipationVelocityOffset)->setLabelPrecision(3);
-    guiFluid_1->addSlider("Density offset", -0.01, 0.01, &fluid.dissipationDensityOffset)->setLabelPrecision(3);
-    guiFluid_1->addSlider("Temperature offset", -0.01, 0.01, &fluid.dissipationTemperatureOffset)->setLabelPrecision(3);
+    guiFluid_1->addSlider("Velocity offset", -0.01, 0.01, &fluid.dissipationVelocityOffset)->setLabelPrecision(5);
+    guiFluid_1->addSlider("Density offset", -0.01, 0.01, &fluid.dissipationDensityOffset)->setLabelPrecision(5);
+    guiFluid_1->addSlider("Temperature offset", -0.01, 0.01, &fluid.dissipationTemperatureOffset)->setLabelPrecision(5);
     
     guiFluid_1->addSpacer();
     guiFluid_1->addLabel("Smoke buoyancy", OFX_UI_FONT_MEDIUM);
     guiFluid_1->addSpacer();
-    guiFluid_1->addSlider("Sigma", 0.0, 1.0, &fluid.smokeSigma);
-    guiFluid_1->addSlider("Weight", 0.0, 1.0, &fluid.smokeWeight);
-    guiFluid_1->addSlider("Ambient temperature", 0.0, 1.0, &fluid.ambientTemperature);
+    guiFluid_1->addSlider("Sigma", 0.0, 1.0, &fluid.smokeSigma)->setLabelPrecision(5);
+    guiFluid_1->addSlider("Weight", 0.0, 1.0, &fluid.smokeWeight)->setLabelPrecision(5);
+    guiFluid_1->addSlider("Ambient temperature", 0.0, 1.0, &fluid.ambientTemperature)->setLabelPrecision(5);
     
     guiFluid_1->autoSizeToFitWidgets();
     guiFluid_1->setVisible(false);
@@ -1212,7 +1212,7 @@ void ofApp::setupFluidExtrasGUI(){
     guiFluidMarkers->addSpacer();
     guiFluidMarkers->addLabel("Force 3: Temperature", OFX_UI_FONT_MEDIUM);
     guiFluidMarkers->addSpacer();
-    guiFluidMarkers->addSlider("temp", -1.0, 1.0, &fluid.markerForceForces[2].x);
+    guiFluidMarkers->addSlider("temp", 0.0, 1.0, &fluid.markerForceForces[2].x);
     guiFluidMarkers->addSpacer();
     guiFluidMarkers->addSlider("Temperature Strength", 0.0, 5.0, &fluid.markerForceStrengths[2]);
     guiFluidMarkers->addSlider("Temperature Radius", 0.0, 0.1, &fluid.markerForceRadiuses[2])->setLabelPrecision(2);

@@ -114,6 +114,7 @@ class Contour{
         ofTexture flowTexture;
         ofFloatPixels flowPixels;
         ofPixels velocityMaskPixels;
+        ofFbo coloredDepthFbo;
         //--------------------------------------------------------------
         void fadeIn(float dt);
         void fadeOut(float dt);

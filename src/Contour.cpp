@@ -82,6 +82,7 @@ void Contour::setup(int width, int height){
     
     displayScalar.allocate(flowWidth, flowHeight);
     velocityField.allocate(flowWidth / 4, flowHeight / 4);
+//    velocityField.setLineSmooth(true);
     
     rescaledRect.set(0, 0, flowWidth, flowHeight);
     
@@ -98,6 +99,13 @@ void Contour::setup(int width, int height){
     flowTexture.allocate(flowWidth, flowHeight, GL_RGB32F);
     flowPixels.allocate(flowWidth, flowHeight, 3);
     velocityMaskPixels.allocate(flowWidth, flowHeight, 4);
+    
+    // allocate FBO
+//    coloredDepthFbo.allocate(width, height, GL_RGBA32F);
+//    
+//    coloredDepthFbo.begin();
+//    ofClear(255,255,255, 0);
+//    coloredDepthFbo.end();
 }
 
 void Contour::update(float dt, ofImage &depthImage){
@@ -125,6 +133,12 @@ void Contour::update(float dt, ofImage &depthImage){
         flowTexture = opticalFlow.getOpticalFlowDecay();
         flowTexture.readToPixels(flowPixels);
         
+//        coloredDepthFbo.begin();
+//            ofSetColor(red, green, blue, opacity);
+//            depthImage.draw(0, 0, width, height);
+//        coloredDepthFbo.end();
+        
+//        velocityMask.setDensity(coloredDepthFbo.getTextureReference());
         velocityMask.setDensity(depthImage.getTextureReference());
         velocityMask.setVelocity(opticalFlow.getOpticalFlow());
         velocityMask.setStrength(vMaskStrength);
@@ -137,7 +151,7 @@ void Contour::update(float dt, ofImage &depthImage){
     
     // Contour Finder in the depth Image
     contourFinder.findContours(depthImage);
-
+    
     // Contour Finder in the depth diff Image
     contourFinderDiff.findContours(velocityMaskPixels);
     
@@ -220,10 +234,11 @@ void Contour::draw(){
         
         if(drawBoundingRect){
             ofPushStyle();
-            ofFill();
-            ofSetColor(ofColor(red, green, blue), opacity);
-            for(int i = 0; i < boundingRects.size(); i++)
-                ofRect(boundingRects[i]);
+            coloredDepthFbo.draw(0, 0);
+//            ofFill();
+//            ofSetColor(ofColor(red, green, blue), opacity);
+//            for(int i = 0; i < boundingRects.size(); i++)
+//                ofRect(boundingRects[i]);
             ofPopStyle();
         }
 
@@ -334,7 +349,6 @@ void Contour::draw(){
     if(drawDiff){
         ofPushStyle();
         ofSetColor(255, 0, 0);
-        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
         ofSetLineWidth(2.5);
         for(int i = 0; i < diffContours.size(); i++){
             diffContours[i].draw();
