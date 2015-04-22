@@ -61,6 +61,7 @@ ParticleSystem::ParticleSystem(){
     flickersAge         = false;        // Particle flickers opacity when about to die?
     isEmpty             = false;        // Draw only contours of the particles?
     drawLine            = false;        // Draw a line instead of a circle for the particle?
+    drawStroke          = false;        // Draw stroke line around particle?
     drawConnections     = false;        // Draw a connecting line between close particles?
     connectDist         = 15.0;         // Maximum distance to connect particles with line
 
@@ -203,9 +204,19 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
 }
 
 void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contour){
-    // if is active or we are fading out
-    if(isActive || (doFading && isFadingOut)){
-        // if it is the first frame where isActive is true and we are not fading out (trick to fix a bug)
+//    cout << "isActive:" << isActive << endl;
+//    cout << "activeStarted:" << activeStarted << endl;
+//    cout << "doFading:" << doFading << endl;
+//    cout << "isFadingIn:" << isFadingIn << endl;
+//    cout << "isFadingOut:" << isFadingOut << endl;
+//    cout << "startFadeIn:" << startFadeIn << endl;
+//    cout << "startFadeOut:" << startFadeOut << endl;
+//    cout << "opacity:" << opacity << endl;
+//    cout << "--------------" << endl;
+    
+    // if is active or we are fading out, update particles
+    if(isActive || isFadingOut){
+        // if it is the first frame where isActive is true and we are not fading out (hack to fix switching all time)
         // start fadeIn and change activeStarted to true so we dont enter anymore
         if(!activeStarted && !isFadingOut){
             activeStarted = true;
@@ -213,13 +224,15 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
             isFadingOut = false;
             startFadeIn = true;
             startFadeOut = false;
+            opacity = 0.0;
             bornParticles();
         }
-        if(doFading){
+        
+//        if(doFading){
             if(isFadingIn) fadeIn(dt);
-            else if(isFadingOut) fadeOut(dt);
-            else opacity = maxOpacity;
-        }
+            else if(isFadingOut && !isActive) fadeOut(dt); // if it is not active and it is fading out, fade out
+//            else opacity = maxOpacity;
+//        }
         else opacity = maxOpacity;
         
         // sort particles so it is more effective to do particle/particle interactions
@@ -249,7 +262,7 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
                     // dir = closestMarker.smoothPos - particles[i]->pos;
                     // dir.normalize();
 
-                    if(closestMarker != ofPoint(-1, -1)){
+                    if(closestMarker != ofPoint(-1, -1) || (gravityInteraction && particles[i]->isTouched)){
                         if(repulseInteraction) particles[i]->addRepulsionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, 10.0);
                         if(attractInteraction) particles[i]->addAttractionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, 8.0);
                         if(gravityInteraction){
@@ -357,19 +370,27 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
             particles[i]->addForce(gravity*particles[i]->mass);
             particles[i]->addNoise(15.0, turbulence, dt);
 
-            particles[i]->immortal = immortal;
-            particles[i]->opacity = opacity;
-            particles[i]->friction = 1-friction/1000;
-            particles[i]->bounces = bounce;
-            particles[i]->bounceDamping = bounceDamping;
-            particles[i]->steers = steer;
-            particles[i]->infiniteWalls = infiniteWalls;
+            particles[i]->immortal          = immortal;
+            particles[i]->opacity           = opacity;
+            particles[i]->friction          = 1-friction/1000;
+            particles[i]->bounces           = bounce;
+            particles[i]->bounceDamping     = bounceDamping;
+            particles[i]->steers            = steer;
+            particles[i]->infiniteWalls     = infiniteWalls;
+            
+            // update also immortal particle systems like GRID and BOIDS
+            if(particleMode == GRID || particleMode == BOIDS){
+                particles[i]->radius        = radius;
+                particles[i]->color         = ofColor(red, green, blue);
+                particles[i]->isEmpty       = isEmpty;
+                particles[i]->drawLine      = drawLine;
+                particles[i]->drawStroke    = drawStroke;
+            }
 
             particles[i]->update(dt);
         }
     }
-    
-    else if(activeStarted){
+    else if(activeStarted){ //&& doFading){
         activeStarted = false;
         isFadingIn = false;
         isFadingOut = true;
@@ -377,6 +398,16 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
         startFadeOut = true;
         killParticles();
     }
+    
+//    cout << "isActive:" << isActive << endl;
+//    cout << "activeStarted:" << activeStarted << endl;
+//    cout << "doFading:" << doFading << endl;
+//    cout << "isFadingIn:" << isFadingIn << endl;
+//    cout << "isFadingOut:" << isFadingOut << endl;
+//    cout << "startFadeIn:" << startFadeIn << endl;
+//    cout << "startFadeOut:" << startFadeOut << endl;
+//    cout << "opacity:" << opacity << endl;
+//    cout << endl << endl;
 }
 
 void ParticleSystem::draw(){
@@ -388,6 +419,7 @@ void ParticleSystem::draw(){
 
         //Draw lines between near points
         if(drawConnections){
+            ofPushStyle();
             float connectDistSqrd = connectDist*connectDist;
             ofSetColor(ofColor(red, green, blue), opacity);
             for(int i = 0; i < particles.size(); i++){
@@ -398,6 +430,7 @@ void ParticleSystem::draw(){
                     }
                 }
             }
+            ofPopStyle();
         }
         ofPopStyle();
     }
@@ -417,6 +450,7 @@ void ParticleSystem::addParticle(ofPoint pos, ofPoint vel, ofColor color, float 
     newParticle->colorAge       = colorAge;
     newParticle->isEmpty        = isEmpty;
     newParticle->drawLine       = drawLine;
+    newParticle->drawStroke     = drawStroke;
 
     newParticle->width = width;
     newParticle->height = height;

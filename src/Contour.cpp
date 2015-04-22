@@ -8,7 +8,7 @@ Contour::Contour()
     isActive            = false;
     
     // Fading in/out
-    doFading            = false; // Do opacity fading?
+//    doFading            = false; // Do opacity fading?
     isFadingIn          = false; // Opacity fading in?
     isFadingOut         = false; // Opacity fading out?
     startFadeIn         = false; // Fade in has started?
@@ -195,7 +195,7 @@ void Contour::update(float dt, ofImage &depthImage){
         diffContours[i] = diffContour;
     }
     
-    if(isActive || (doFading && isFadingOut)){
+    if(isActive || isFadingOut){
         // if it is the first frame where isActive is true and we are not fading out (trick to fix a bug)
         // start fadeIn and change activeStarted to true so we dont enter anymore
         if(!activeStarted && !isFadingOut){
@@ -204,13 +204,10 @@ void Contour::update(float dt, ofImage &depthImage){
             isFadingOut = false;
             startFadeIn = true;
             startFadeOut = false;
+            opacity = 0.0;
         }
-        
-        if(doFading){
-            if(isFadingIn) fadeIn(dt);
-            else if(isFadingOut) fadeOut(dt);
-            else opacity = maxOpacity;
-        }
+        if(isFadingIn) fadeIn(dt);
+        else if(isFadingOut && !isActive) fadeOut(dt);
         else opacity = maxOpacity;
     }
     else if(activeStarted){
