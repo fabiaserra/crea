@@ -4,11 +4,20 @@ Fluid::Fluid(){
     isActive                     = false; // Fluid simulator is active?
     particlesActive              = false; // Particle flow is active?
     
-    // General properties
+    // Fading in/out
+    isFadingIn          = false; // Opacity fading in?
+    isFadingOut         = false; // Opacity fading out?
+    startFadeIn         = false; // Fade in has started?
+    startFadeOut        = false; // Fade out has started?
+    elapsedFadeTime     = 0.0;   // Elapsed time of fade
+    fadeTime            = 2.0;   // Transition time of fade
+    
+    // Color properties
     red                          = 255.0;
     green                        = 255.0;
     blue                         = 255.0;
-    opacity                      = 255.0; // Opacity of the fluid
+    opacity                      = 0.0;   // Actual general opacity of the fluid
+    maxOpacity                   = 255.0; // Maximum general opacity of the fluid
     
     // Fluid parameters
     speed                        = 10.0;  // 0 ~ 100
@@ -42,9 +51,10 @@ Fluid::Fluid(){
     particlesSizeRnd             = 0.0;   // 0 ~ 1
     
     // Input
-    markersInput                 = false; // Input are the IR markers?
-    contourInput                 = false; // Input is the depth contour?
-    markerRadius                 = 50.0;  // Radius of interaction of the markers
+    markersInput                 = false; // Fluid input are the IR markers?
+    contourInput                 = false; // Fluid input is the depth contour?
+    markersInputParticles        = false; // Particles flow input is the IR markers?
+    contourInputParticles        = false; // Particles flow input is the depth contour?
     
     // Output
     drawVelocity                 = false;
@@ -120,7 +130,21 @@ void Fluid::setup(int flowWidth, int flowHeight, int drawWidth, int drawHeight, 
 
 void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour, float mouseX, float mouseY){
     
-    if(isActive){
+    if(isActive || isFadingOut){
+        // if it is the first frame where isActive is true and we are not fading out (trick to fix a bug)
+        // start fadeIn and change activeStarted to true so we dont enter anymore
+        if(!activeStarted && !isFadingOut){
+            activeStarted = true;
+            isFadingIn = true;
+            isFadingOut = false;
+            startFadeIn = true;
+            startFadeOut = false;
+            opacity = 0.0;
+        }
+        if(isFadingIn) fadeIn(dt);
+        else if(isFadingOut && !isActive) fadeOut(dt);
+        else opacity = maxOpacity;
+        
         // set fluid parameters
         fluid.setSpeed(speed);
         fluid.setCellSize(cellSize);
@@ -134,7 +158,7 @@ void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour, float 
         fluid.setSmokeSigma(smokeSigma);
         fluid.setSmokeWeight(smokeWeight);
         fluid.setAmbientTemperature(ambientTemperature);
-        fluid.setGravity(-1*gravity); // * -1 so is robust with particleSystem gravity
+        fluid.setGravity(gravity);
         fluid.setClampForce(clampForce);
         fluid.setMaxVelocity(maxVelocity);
         fluid.setMaxDensity(maxDensity);
@@ -166,7 +190,7 @@ void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour, float 
 
         fluid.update(dt);
         
-        if((markersInput || contourInput) && particlesActive){
+        if((markersInputParticles || contourInputParticles) && particlesActive){
             // set particle flow parameters
             particleFlow.setSpeed(fluid.getSpeed());
             particleFlow.setCellSize(fluid.getCellSize());
@@ -179,10 +203,17 @@ void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour, float 
             particleFlow.setSize(particlesSize);
             particleFlow.setSizeSpread(particlesSizeRnd);
             
-            if(contourInput) particleFlow.addFlowVelocity(contour.getOpticalFlowDecay());
+            if(contourInputParticles) particleFlow.addFlowVelocity(contour.getOpticalFlowDecay());
             particleFlow.addFluidVelocity(fluid.getVelocity());
         }
         particleFlow.update(dt);
+    }
+    else if(activeStarted){
+        activeStarted = false;
+        isFadingIn = false;
+        isFadingOut = true;
+        startFadeIn = false;
+        startFadeOut = true;
     }
 }
 
@@ -289,5 +320,37 @@ void Fluid::resetDrawForces(){
     // reset temporal drawing forces
     for (int i = 0; i < numMarkerForces; i++){
         markerForces[i].reset();
+    }
+}
+
+void Fluid::fadeIn(float dt){
+    if(startFadeIn){
+        startFadeIn = false;
+        elapsedFadeTime = 0.0;
+        opacity = 0.0;
+    }
+    else{
+        opacity = ofMap(elapsedFadeTime, 0.0, fadeTime, 0.0, maxOpacity, true);
+        elapsedFadeTime += dt;
+        if(elapsedFadeTime > fadeTime){
+            isFadingIn = false;
+            opacity = maxOpacity;
+        }
+    }
+}
+
+void Fluid::fadeOut(float dt){
+    if(startFadeOut){
+        startFadeOut = false;
+        elapsedFadeTime = 0.0;
+        opacity = maxOpacity;
+    }
+    else{
+        opacity = ofMap(elapsedFadeTime, 0.0, fadeTime, maxOpacity, 0.0, true);
+        elapsedFadeTime += dt;
+        if(elapsedFadeTime > fadeTime){
+            isFadingOut = false;
+            opacity = 0.0;
+        }
     }
 }

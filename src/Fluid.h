@@ -20,16 +20,26 @@ class Fluid{
         bool isActive;          // Fluid active
         bool particlesActive;   // Particle flow active
         //--------------------------------------------------------------
+        bool activeStarted;     // Active has started?
+        bool isFadingIn;        // Opacity fading in?
+        bool isFadingOut;       // Opacity fading out?
+        bool startFadeIn;       // Fade in has started?
+        bool startFadeOut;      // Fade out has started?
+        float elapsedFadeTime;  // Elapsed time of fade
+        float fadeTime;         // Transition time of fade
+        //--------------------------------------------------------------
         int width;              // Fluid boundaries
         int height;
         //--------------------------------------------------------------
         float red, green, blue;
         //--------------------------------------------------------------
         float opacity;
+        float maxOpacity;
         //--------------------------------------------------------------
-        bool markersInput;          // Input are the IR markers?
-        bool contourInput;          // Input is the depth contour?
-        float markerRadius;         // Radius of interaction of the markers
+        bool markersInput;          // Fluid input are the IR markers?
+        bool contourInput;          // Fluid input is the depth contour?
+        bool markersInputParticles; // Particles flow input is the IR markers?
+        bool contourInputParticles; // Particles flow input is the depth contour?
         //--------------------------------------------------------------
         bool drawVelocity;
         bool drawVelocityScalar;
@@ -81,7 +91,10 @@ class Fluid{
     protected:
         ftFluidSimulation fluid;
         ftParticleFlow particleFlow;
-    
+        //--------------------------------------------------------------
         ftDisplayScalar displayScalar;
         ftVelocityField	velocityField;
+        //--------------------------------------------------------------
+        void fadeIn(float dt);
+        void fadeOut(float dt);
 };
