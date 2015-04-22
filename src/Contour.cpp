@@ -221,7 +221,7 @@ void Contour::update(float dt, ofImage &depthImage){
 
 void Contour::draw(){
     // if is active or we are fading out
-    if(isActive || (doFading && isFadingOut)){
+    if(isActive || isFadingOut){
 //        ofPushMatrix();
 //        ofTranslate(width/2.0, height/2.0);
 //        ofScale(scaleContour, scaleContour); // Scale it so we can see more contour on the projection

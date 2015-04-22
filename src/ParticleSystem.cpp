@@ -411,7 +411,7 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
 }
 
 void ParticleSystem::draw(){
-    if(isActive || (doFading && isFadingOut)){
+    if(isActive || isFadingOut){
         ofPushStyle();
         for(int i = 0; i < particles.size(); i++){
             particles[i]->draw();

@@ -218,7 +218,7 @@ void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour, float 
 }
 
 void Fluid::draw(){
-    if(isActive){
+    if(isActive || isFadingOut){
         if(drawVelocity){
             ofPushStyle();
             ofEnableBlendMode(OF_BLENDMODE_ADD);
