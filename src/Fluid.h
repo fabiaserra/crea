@@ -32,8 +32,6 @@ class Fluid{
         int height;
         //--------------------------------------------------------------
         float red, green, blue;
-        ofColor color;
-        bool randomColors;
         //--------------------------------------------------------------
         float opacity;
         float maxOpacity;
@@ -84,8 +82,11 @@ class Fluid{
         float particlesSizeRnd;
         //--------------------------------------------------------------
         // marker forces parameters
+        float markerRed, markerGreen, markerBlue;
+        float markerOpacity;
+        ofFloatColor markerColor;
+        bool markerRandomColor;
         vector<ofVec4f> markerForceForces;
-        vector<int> markerForceTypes;
         vector<float> markerForceStrengths;
         vector<float> markerForceRadiuses;
         vector<float> markerForceEdges;

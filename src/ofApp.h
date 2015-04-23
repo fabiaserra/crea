@@ -23,15 +23,15 @@
 #include "helper.h"
 
 // comment this to use the recorded images
-#define KINECT_CONNECTED
+//#define KINECT_CONNECTED
 
 // Uncomment this to use an xml sequence file for the tracking
 //#define KINECT_SEQUENCE
 
 // Uncomment this to use two windows
-#define SECOND_WINDOW
-#define PROJECTOR_RESOLUTION_X 1280
-#define PROJECTOR_RESOLUTION_Y 800
+//#define SECOND_WINDOW
+#define PROJECTOR_RESOLUTION_X 1024
+#define PROJECTOR_RESOLUTION_Y 768
 
 class ofApp : public ofBaseApp{
     public:

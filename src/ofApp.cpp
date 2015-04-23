@@ -1059,17 +1059,16 @@ void ofApp::setupFluidSolverGUI(){
     reset->setColorBack(ofColor(150, 255));
     guiFluid_1->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     
-    ofxUISlider *redSlider = guiFluid_1->addSlider("Red", 0.0, 255.0, &fluid.red);
+    ofxUISlider *redSlider = guiFluid_1->addSlider("General red", 0.0, 255.0, &fluid.red);
     redSlider->setColorFill(ofColor(240, 30, 30));
     redSlider->setColorFillHighlight(ofColor(150, 30, 30));
-    ofxUISlider *greenSlider = guiFluid_1->addSlider("Green", 0.0, 255.0, &fluid.green);
+    ofxUISlider *greenSlider = guiFluid_1->addSlider("General green", 0.0, 255.0, &fluid.green);
     greenSlider->setColorFill(ofColor(30, 240, 30));
     greenSlider->setColorFillHighlight(ofColor(30, 150, 30));
-    ofxUISlider *blueSlider = guiFluid_1->addSlider("Blue", 0.0, 255.0, &fluid.blue);
+    ofxUISlider *blueSlider = guiFluid_1->addSlider("General blue", 0.0, 255.0, &fluid.blue);
     blueSlider->setColorFill(ofColor(30, 30, 240));
     blueSlider->setColorFillHighlight(ofColor(30, 30, 150));
-    guiFluid_1->addSlider("Opacity", 0.0, 255.0, &fluid.maxOpacity);
-    guiFluid_1->addToggle("Random colors", &fluid.randomColors);
+    guiFluid_1->addSlider("General opacity", 0.0, 255.0, &fluid.maxOpacity);
 
     guiFluid_1->addSpacer();
     guiFluid_1->addLabel("Solver", OFX_UI_FONT_MEDIUM);
@@ -1104,8 +1103,8 @@ void ofApp::setupFluidSolverGUI(){
     guiFluid_2->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
     
     guiFluid_2->addSpacer();
-    guiFluid_2->addSlider("Gravity X", -1.0, 1.0, &fluid.gravity.x)->setLabelPrecision(3);
-    guiFluid_2->addSlider("Gravity Y", -1.0, 1.0, &fluid.gravity.y)->setLabelPrecision(3);
+    guiFluid_2->addSlider("Gravity X", -0.3, 0.3, &fluid.gravity.x)->setLabelPrecision(4);
+    guiFluid_2->addSlider("Gravity Y", -0.3, 0.3, &fluid.gravity.y)->setLabelPrecision(4);
     
     guiFluid_2->addSpacer();
     guiFluid_2->addLabel("Maximum", OFX_UI_FONT_MEDIUM);
@@ -1133,6 +1132,17 @@ void ofApp::setupFluidSolverGUI(){
     activeContour = guiFluid_2->addImageToggle("Activate Fluid", "icons/show.png", &fluid.contourInput, dim, dim);
     activeContour->setColorBack(ofColor(150, 255));
     guiFluid_2->addSpacer();
+    ofxUISlider *vMaskRedSlider = guiFluid_2->addSlider("Red", 0.0, 255.0, &contour.vMaskRed);
+    vMaskRedSlider->setColorFill(ofColor(240, 30, 30));
+    vMaskRedSlider->setColorFillHighlight(ofColor(150, 30, 30));
+    ofxUISlider *vMaskGreenSlider = guiFluid_2->addSlider("Green", 0.0, 255.0, &contour.vMaskGreen);
+    vMaskGreenSlider->setColorFill(ofColor(30, 240, 30));
+    vMaskGreenSlider->setColorFillHighlight(ofColor(30, 150, 30));
+    ofxUISlider *vMaskBlueSlider = guiFluid_2->addSlider("Blue", 0.0, 255.0, &contour.vMaskBlue);
+    vMaskBlueSlider->setColorFill(ofColor(30, 30, 240));
+    vMaskBlueSlider->setColorFillHighlight(ofColor(30, 30, 150));
+    guiFluid_2->addSlider("Opacity", 0.0, 255.0, &contour.vMaskOpacity);
+    guiFluid_2->addToggle("Random colors", &contour.vMaskRandomColor);
     
     guiFluid_2->autoSizeToFitWidgets();
     guiFluid_2->setVisible(false);
@@ -1158,16 +1168,17 @@ void ofApp::setupFluidExtrasGUI(){
     guiFluidMarkers->addSpacer();
     guiFluidMarkers->addLabel("Force 1: Density", OFX_UI_FONT_MEDIUM);
     guiFluidMarkers->addSpacer();
-    ofxUISlider *redSlider = guiFluidMarkers->addSlider("Red", 0.0, 1.0, &fluid.markerForceForces[0].x);
+    ofxUISlider *redSlider = guiFluidMarkers->addSlider("Red", 0.0, 1.0, &fluid.markerRed);
     redSlider->setColorFill(ofColor(240, 30, 30));
     redSlider->setColorFillHighlight(ofColor(150, 30, 30));
-    ofxUISlider *greenSlider = guiFluidMarkers->addSlider("Green", 0.0, 1.0, &fluid.markerForceForces[0].y);
+    ofxUISlider *greenSlider = guiFluidMarkers->addSlider("Green", 0.0, 1.0, &fluid.markerGreen);
     greenSlider->setColorFill(ofColor(30, 240, 30));
     greenSlider->setColorFillHighlight(ofColor(30, 150, 30));
-    ofxUISlider *blueSlider = guiFluidMarkers->addSlider("Blue", 0.0, 1.0, &fluid.markerForceForces[0].z);
+    ofxUISlider *blueSlider = guiFluidMarkers->addSlider("Blue", 0.0, 1.0, &fluid.markerBlue);
     blueSlider->setColorFill(ofColor(30, 30, 240));
     blueSlider->setColorFillHighlight(ofColor(30, 30, 150));
-    guiFluidMarkers->addSlider("Opacity", 0.0, 1.0, &fluid.markerForceForces[0].w);
+    guiFluidMarkers->addSlider("Opacity", 0.0, 1.0, &fluid.markerOpacity);
+    guiFluidMarkers->addToggle("Random color", &fluid.markerRandomColor);
     guiFluidMarkers->addSpacer();
     guiFluidMarkers->addSlider("Density Strength", 0.0, 5.0, &fluid.markerForceStrengths[0]);
     guiFluidMarkers->addSlider("Density Radius", 0.0, 0.1, &fluid.markerForceRadiuses[0])->setLabelPrecision(2);

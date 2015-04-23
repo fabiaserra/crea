@@ -17,9 +17,7 @@ Fluid::Fluid(){
     green                        = 255.0;
     blue                         = 255.0;
     opacity                      = 0.0;   // Actual general opacity of the fluid
-    color                        = ofColor(red, green, blue, opacity);
     maxOpacity                   = 255.0; // Maximum general opacity of the fluid
-    randomColors                 = false; // Make fluid colors change randomly with time
     
     // Fluid parameters
     speed                        = 10.0;  // 0 ~ 100
@@ -52,6 +50,14 @@ Fluid::Fluid(){
     particlesSize                = 1.0;   // 0 ~ 10
     particlesSizeRnd             = 0.0;   // 0 ~ 1
     
+    // Marker drawing forces
+    markerRed                    = 0.28;
+    markerGreen                  = 0.59;
+    markerBlue                   = 1.0;
+    markerOpacity                = 0.57;
+    markerColor                  = ofFloatColor(markerRed, markerGreen, markerBlue);
+    markerRandomColor            = false;
+    
     // Input
     markersInput                 = false; // Fluid input are the IR markers?
     contourInput                 = false; // Fluid input is the depth contour?
@@ -79,7 +85,7 @@ void Fluid::setup(int flowWidth, int flowHeight, int drawWidth, int drawHeight, 
     markerForces = new ftDrawForce[numMarkerForces];
     markerForces[0].setup(drawWidth, drawHeight, FT_DENSITY, true);
     markerForces[0].setName("draw full res");
-    markerForces[0].setForce(ofVec4f(0.2668, 0.59625, 1, 0.57007));
+    markerForces[0].setForce(ofVec4f(markerRed, markerGreen, markerBlue, markerOpacity));
     markerForces[0].setRadius(0.0140983);
     markerForces[0].setStrength(2.42295);
 
@@ -94,31 +100,12 @@ void Fluid::setup(int flowWidth, int flowHeight, int drawWidth, int drawHeight, 
     markerForces[2].setRadius(0.02451);
     
     // Initialize marker drawing forces
-    markerForceTypes.resize(numMarkerForces);
     markerForceForces.resize(numMarkerForces);
     markerForceStrengths.resize(numMarkerForces);
     markerForceRadiuses.resize(numMarkerForces);
     markerForceEdges.resize(numMarkerForces);
     
     for (int i = 0; i < numMarkerForces; i++){
-        switch (markerForces[i].getType()){
-            case FT_DENSITY:
-                markerForceTypes[i] = FT_DENSITY;
-                break;
-            case FT_VELOCITY:
-                markerForceTypes[i] = FT_VELOCITY;
-                break;
-            case FT_TEMPERATURE:
-                markerForceTypes[i] = FT_TEMPERATURE;
-                break;
-            case FT_PRESSURE:
-                markerForceTypes[i] = FT_PRESSURE;
-                break;
-            case FT_OBSTACLE:
-                markerForceTypes[i] = FT_OBSTACLE;
-            default:
-                break;
-        }
         markerForceForces[i] = markerForces[i].getForce();
         markerForceStrengths[i] = markerForces[i].getStrength();
         markerForceRadiuses[i] = markerForces[i].getRadius();
@@ -168,14 +155,6 @@ void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour, float 
         fluid.setDensityFromVorticity(densityFromVorticity);
         fluid.setDensityFromPressure(densityFromPressure);
         
-        // update color
-        if(randomColors){
-            color.setHsb(fmodf(ofGetElapsedTimef()*2, 255), 255, 255);
-//            color.setHsb((ofGetFrameNum() % 255), 255, 255);
-//            cout << ofNoise(ofGetElapsedTimef()) << endl;
-        }
-        else color.set(red, green, blue, opacity);
-        
         if(contourInput){
             fluid.addVelocity(contour.getOpticalFlowDecay());
             fluid.addDensity(contour.getColorMask());
@@ -183,6 +162,7 @@ void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour, float 
         }
         
         if(markersInput){
+            // apply marker velocity and position forces
             for(unsigned int markerIdx = 0; markerIdx < markers.size(); markerIdx++){
                 if (!markers[markerIdx].hasDisappeared){
                     for (int i=0; i<numMarkerForces; i++) {
@@ -195,6 +175,17 @@ void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour, float 
                     }
                 }
             }
+            
+            if(markerRandomColor){
+//                color.setHsb((ofGetFrameNum() % 255), 255, 255);
+                markerColor.setHsb(ofMap(ofNoise(ofGetElapsedTimef()*0.3), 0.1, 0.9, 0.0, 1.0, true), 1.0, 1.0);
+                markerRed   = markerColor.r;
+                markerGreen = markerColor.g;
+                markerBlue  = markerColor.b;
+                cout << markerColor << endl;
+            }
+            markerColor.set(markerRed, markerGreen, markerBlue, markerOpacity);
+            
             updateDrawForces(dt);
         }
 
@@ -250,9 +241,10 @@ void Fluid::draw(){
             displayScalar.draw(0, 0, width, height);
             ofPopStyle();
         }
+        
         ofPushStyle();
         ofEnableBlendMode(OF_BLENDMODE_ADD);
-        ofSetColor(color, opacity);
+        ofSetColor(red, green, blue, opacity);
         fluid.draw(0, 0, width, height);
         ofPopStyle();
         
@@ -276,25 +268,8 @@ void Fluid::updateDrawForces(float dt){
     
     // Update marker drawing forces
     for (int i = 0; i < numMarkerForces; i++){
-        switch (markerForceTypes[i]){
-            case 0:
-                markerForces[i].setType(FT_DENSITY);
-                break;
-            case FT_VELOCITY:
-                markerForces[i].setType(FT_VELOCITY);
-                break;
-            case FT_TEMPERATURE:
-                markerForces[i].setType(FT_TEMPERATURE);
-                break;
-            case FT_PRESSURE:
-                markerForces[i].setType(FT_PRESSURE);
-                break;
-            case FT_OBSTACLE:
-                markerForces[i].setType(FT_OBSTACLE);
-            default:
-                break;
-        }
-        markerForces[i].setForce(markerForceForces[i]);
+        if(i == 0) markerForces[i].setForce(markerColor);
+        else markerForces[i].setForce(markerForceForces[i]);
         markerForces[i].setStrength(markerForceStrengths[i]);
         markerForces[i].setRadius(markerForceRadiuses[i]);
         markerForces[i].setEdge(markerForceEdges[i]);
