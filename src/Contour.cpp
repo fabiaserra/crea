@@ -45,6 +45,12 @@ Contour::Contour()
     vMaskStrength       = 10.0;  // 0 ~ 10
     vMaskBlurPasses     = 1;     // 0 ~ 10
     vMaskBlurRadius     = 5.0;   // 0 ~ 10
+    vMaskRed            = 255.0;
+    vMaskGreen          = 255.0;
+    vMaskBlue           = 255.0;
+    vMaskOpacity        = 255.0;
+    vMaskColor          = ofColor(vMaskRed, vMaskGreen, vMaskBlue);
+    vMaskRandomColor    = false;
     
     // contour settings
     smoothingSize       = 0.0;
@@ -101,11 +107,11 @@ void Contour::setup(int width, int height){
     velocityMaskPixels.allocate(flowWidth, flowHeight, 4);
     
     // allocate FBO
-//    coloredDepthFbo.allocate(width, height, GL_RGBA32F);
-//    
-//    coloredDepthFbo.begin();
-//    ofClear(255,255,255, 0);
-//    coloredDepthFbo.end();
+    coloredDepthFbo.allocate(width, height, GL_RGBA32F);
+    
+    coloredDepthFbo.begin();
+    ofClear(255,255,255, 0);
+    coloredDepthFbo.end();
 }
 
 void Contour::update(float dt, ofImage &depthImage){
@@ -133,15 +139,22 @@ void Contour::update(float dt, ofImage &depthImage){
         flowTexture = opticalFlow.getOpticalFlowDecay();
         flowTexture.readToPixels(flowPixels);
         
-//        coloredDepthFbo.begin();
-//            ofColor color;
-//            color.setHsb((ofGetFrameNum() % 255), 255, 255);
-//            ofSetColor(color);
-//            depthImage.draw(0, 0, width, height);
-//        coloredDepthFbo.end();
+        coloredDepthFbo.begin();
+            ofClear(255, 255, 255, 0);
+            if(vMaskRandomColor){
+//                color.setHsb((ofGetFrameNum() % 255), 255, 255);
+                vMaskColor.setHsb(ofMap(ofNoise(ofGetElapsedTimef()*0.3), 0.1, 0.9, 0, 255, true), 255, 255);
+                vMaskRed = vMaskColor.r;
+                vMaskGreen = vMaskColor.g;
+                vMaskBlue = vMaskColor.b;
+            }
+            vMaskColor.set(vMaskRed, vMaskGreen, vMaskBlue, vMaskOpacity);
+            ofSetColor(vMaskColor);
+            depthImage.draw(0, 0, width, height);
+        coloredDepthFbo.end();
         
-//        velocityMask.setDensity(coloredDepthFbo.getTextureReference()); // to change mask color
-        velocityMask.setDensity(depthImage.getTextureReference());
+        velocityMask.setDensity(coloredDepthFbo.getTextureReference()); // to change mask color
+//        velocityMask.setDensity(depthImage.getTextureReference());
         velocityMask.setVelocity(opticalFlow.getOpticalFlow());
         velocityMask.setStrength(vMaskStrength);
         velocityMask.setBlurPasses(vMaskBlurPasses);

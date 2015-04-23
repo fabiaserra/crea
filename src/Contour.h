@@ -52,9 +52,9 @@ class Contour{
         //--------------------------------------------------------------
         float red, green, blue;     // Color of the contour
         //--------------------------------------------------------------
-        bool doOpticalFlow;   // compute optical flow?
-        float scaleFactor;  // scaling factor of the optical flow image
-        float flowScale;    // scalar to multiply by the offset of flow
+        bool doOpticalFlow;     // compute optical flow?
+        float scaleFactor;      // scaling factor of the optical flow image
+        float flowScale;        // scalar to multiply by the offset of flow
         //--------------------------------------------------------------
         float flowStrength;
         int   flowOffset;
@@ -69,6 +69,10 @@ class Contour{
         float vMaskStrength;
         int vMaskBlurPasses;
         float vMaskBlurRadius;
+        float vMaskRed, vMaskGreen, vMaskBlue;
+        float vMaskOpacity;
+        ofColor vMaskColor;
+        bool vMaskRandomColor;
         //--------------------------------------------------------------
         ofImage previous;
         ofImage diff;
