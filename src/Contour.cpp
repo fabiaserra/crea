@@ -134,11 +134,13 @@ void Contour::update(float dt, ofImage &depthImage){
         flowTexture.readToPixels(flowPixels);
         
 //        coloredDepthFbo.begin();
-//            ofSetColor(red, green, blue, opacity);
+//            ofColor color;
+//            color.setHsb((ofGetFrameNum() % 255), 255, 255);
+//            ofSetColor(color);
 //            depthImage.draw(0, 0, width, height);
 //        coloredDepthFbo.end();
         
-//        velocityMask.setDensity(coloredDepthFbo.getTextureReference());
+//        velocityMask.setDensity(coloredDepthFbo.getTextureReference()); // to change mask color
         velocityMask.setDensity(depthImage.getTextureReference());
         velocityMask.setVelocity(opticalFlow.getOpticalFlow());
         velocityMask.setStrength(vMaskStrength);

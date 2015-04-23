@@ -32,6 +32,8 @@ class Fluid{
         int height;
         //--------------------------------------------------------------
         float red, green, blue;
+        ofColor color;
+        bool randomColors;
         //--------------------------------------------------------------
         float opacity;
         float maxOpacity;

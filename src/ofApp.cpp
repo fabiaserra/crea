@@ -1069,7 +1069,8 @@ void ofApp::setupFluidSolverGUI(){
     blueSlider->setColorFill(ofColor(30, 30, 240));
     blueSlider->setColorFillHighlight(ofColor(30, 30, 150));
     guiFluid_1->addSlider("Opacity", 0.0, 255.0, &fluid.maxOpacity);
-    
+    guiFluid_1->addToggle("Random colors", &fluid.randomColors);
+
     guiFluid_1->addSpacer();
     guiFluid_1->addLabel("Solver", OFX_UI_FONT_MEDIUM);
     guiFluid_1->addSpacer();
@@ -1273,9 +1274,9 @@ void ofApp::setupContourGUI(){
     guiContour->addSpacer();
     guiContour->addLabel("Debug", OFX_UI_FONT_MEDIUM);
     guiContour->addSpacer();
-    guiContour->addToggle("Show Difference", &contour.drawDiff);
-    guiContour->addToggle("Show Difference Image", &contour.drawDiffImage);
-    guiContour->addToggle("Show Contour Velocities", &contour.drawVelocities);
+    guiContour->addToggle("Show difference contours", &contour.drawDiff);
+    guiContour->addToggle("Show difference image", &contour.drawDiffImage);
+    guiContour->addToggle("Show contour velocities", &contour.drawVelocities);
     guiContour->addSpacer();
 
     guiContour->autoSizeToFitWidgets();

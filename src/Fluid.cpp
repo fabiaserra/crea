@@ -17,7 +17,9 @@ Fluid::Fluid(){
     green                        = 255.0;
     blue                         = 255.0;
     opacity                      = 0.0;   // Actual general opacity of the fluid
+    color                        = ofColor(red, green, blue, opacity);
     maxOpacity                   = 255.0; // Maximum general opacity of the fluid
+    randomColors                 = false; // Make fluid colors change randomly with time
     
     // Fluid parameters
     speed                        = 10.0;  // 0 ~ 100
@@ -166,6 +168,14 @@ void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour, float 
         fluid.setDensityFromVorticity(densityFromVorticity);
         fluid.setDensityFromPressure(densityFromPressure);
         
+        // update color
+        if(randomColors){
+            color.setHsb(fmodf(ofGetElapsedTimef()*2, 255), 255, 255);
+//            color.setHsb((ofGetFrameNum() % 255), 255, 255);
+//            cout << ofNoise(ofGetElapsedTimef()) << endl;
+        }
+        else color.set(red, green, blue, opacity);
+        
         if(contourInput){
             fluid.addVelocity(contour.getOpticalFlowDecay());
             fluid.addDensity(contour.getColorMask());
@@ -242,18 +252,27 @@ void Fluid::draw(){
         }
         ofPushStyle();
         ofEnableBlendMode(OF_BLENDMODE_ADD);
-        ofSetColor(red, green, blue, opacity);
+        ofSetColor(color, opacity);
         fluid.draw(0, 0, width, height);
-        ofEnableBlendMode(OF_BLENDMODE_ADD);
-        if (particlesActive){
-            particleFlow.draw(0, 0, width, height);
-        }
-        
         ofPopStyle();
+        
+        if(particlesActive){
+            ofPushStyle();
+            ofEnableBlendMode(OF_BLENDMODE_ADD);
+            particleFlow.draw(0, 0, width, height);
+            ofPopStyle();
+        }
     }
 }
 
 void Fluid::updateDrawForces(float dt){
+    
+//    ofPoint m = ofPoint(mouseX,mouseY);
+//    ofPoint d = (m - oldM);
+//    oldM = m;
+//    ofPoint c = ofPoint(640*0.5, 480*0.5) - m;
+//    c.normalize();
+//    //    fluid.addTemporalForce(m, d, ofFloatColor(c.x,c.y,0.5)*sin(ofGetElapsedTimef()),3.0f);
     
     // Update marker drawing forces
     for (int i = 0; i < numMarkerForces; i++){
