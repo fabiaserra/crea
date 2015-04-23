@@ -1,4 +1,5 @@
-bin/zuzor_debug
+bin/creaDebug
+bin/crea
 
 # Compiled Object files
 *.slo
@@ -107,11 +108,11 @@ openFrameworks-Info.plist
 
 Project.xcconfig
 
-zuzor.xcodeproj/project.pbxproj
+crea.xcodeproj/project.pbxproj
 
-zuzor.xcodeproj/xcshareddata/xcschemes/zuzor Debug.xcscheme
+crea.xcodeproj/xcshareddata/xcschemes/crea Debug.xcscheme
 
-zuzor.xcodeproj/xcshareddata/xcschemes/zuzor Release.xcscheme
+crea.xcodeproj/xcshareddata/xcschemes/crea Release.xcscheme
 
 *.jpg
 
