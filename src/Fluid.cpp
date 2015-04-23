@@ -182,7 +182,6 @@ void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour, float 
                 markerRed   = markerColor.r;
                 markerGreen = markerColor.g;
                 markerBlue  = markerColor.b;
-                cout << markerColor << endl;
             }
             markerColor.set(markerRed, markerGreen, markerBlue, markerOpacity);
             

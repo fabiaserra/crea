@@ -3,7 +3,6 @@ ofxOpenCv
 ofxCv
 ofxUI
 ofxFX
-ofxFluid
 ofxFlowTools
 ofxXmlSettings
 ofxSecondWindow
