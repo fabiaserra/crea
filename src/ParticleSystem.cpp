@@ -62,8 +62,10 @@ ParticleSystem::ParticleSystem(){
     isEmpty             = false;        // Draw only contours of the particles?
     drawLine            = false;        // Draw a line instead of a circle for the particle?
     drawStroke          = false;        // Draw stroke line around particle?
+    strokeWidth         = 1.2;          // Stroke line width
     drawConnections     = false;        // Draw a connecting line between close particles?
     connectDist         = 15.0;         // Maximum distance to connect particles with line
+    connectWidth        = 1.0;          // Connected line width
 
     // Physics
     friction            = 5.0;          // Friction to velocity 0~100
@@ -385,6 +387,7 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
                 particles[i]->isEmpty       = isEmpty;
                 particles[i]->drawLine      = drawLine;
                 particles[i]->drawStroke    = drawStroke;
+                particles[i]->strokeWidth   = strokeWidth;
             }
 
             particles[i]->update(dt);
@@ -413,15 +416,12 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
 void ParticleSystem::draw(){
     if(isActive || isFadingOut){
         ofPushStyle();
-        for(int i = 0; i < particles.size(); i++){
-            particles[i]->draw();
-        }
-
         //Draw lines between near points
         if(drawConnections){
             ofPushStyle();
             float connectDistSqrd = connectDist*connectDist;
             ofSetColor(ofColor(red, green, blue), opacity);
+            ofSetLineWidth(connectWidth);
             for(int i = 0; i < particles.size(); i++){
                 for(int j = i-1; j >= 0; j--){
                     if (fabs(particles[j]->pos.x - particles[i]->pos.x) > connectDist*2) break; // to speed the loop
@@ -431,6 +431,10 @@ void ParticleSystem::draw(){
                 }
             }
             ofPopStyle();
+        }
+        // Draw particles
+        for(int i = 0; i < particles.size(); i++){
+            particles[i]->draw();
         }
         ofPopStyle();
     }
@@ -451,6 +455,7 @@ void ParticleSystem::addParticle(ofPoint pos, ofPoint vel, ofColor color, float 
     newParticle->isEmpty        = isEmpty;
     newParticle->drawLine       = drawLine;
     newParticle->drawStroke     = drawStroke;
+    newParticle->strokeWidth    = strokeWidth;
 
     newParticle->width = width;
     newParticle->height = height;

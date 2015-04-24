@@ -1375,8 +1375,10 @@ void ofApp::setupGridGUI(){
     gui8Grid->addToggle("Stroke", &gridParticles->drawStroke);
     gui8Grid->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui8Grid->setWidgetSpacing(3);
+    gui8Grid->addSlider("Stroke Line Width", 1.0, 5.0, &gridParticles->strokeWidth);
     gui8Grid->addToggle("Connected", &gridParticles->drawConnections);
     gui8Grid->addSlider("Connect Dist", 5.0, 100.0, &gridParticles->connectDist);
+    gui8Grid->addSlider("Connect Line Width", 1.0, 5.0, &gridParticles->connectWidth);
     gui8Grid->addSpacer();
     
     gui8Grid->addLabel("Interaction", OFX_UI_FONT_MEDIUM);
@@ -1542,8 +1544,10 @@ void ofApp::addParticlePropertiesGUI(ofxUICanvas* gui, ParticleSystem* ps){
     gui->addToggle("Stroke", &ps->drawStroke);
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui->setWidgetSpacing(3);
+    gui->addSlider("Stroke Line Width", 1.0, 5.0, &ps->strokeWidth);
     gui->addToggle("Connected", &ps->drawConnections);
     gui->addSlider("Connect Dist", 5.0, 100.0, &ps->connectDist);
+    gui->addSlider("Connect Line Width", 1.0, 5.0, &ps->connectWidth);
     gui->addSpacer();
     gui->addToggle("Immortal", &ps->immortal);
     gui->addSlider("Lifetime", 0.1, 20.0, &ps->lifetime);

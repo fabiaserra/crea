@@ -20,6 +20,7 @@ Particle::Particle(){
     isEmpty         = false;
     drawLine        = false;
     drawStroke      = false;
+    strokeWidth     = 1.2;
 
     limitSpeed      = false;
     bounceDamping   = true;
@@ -118,7 +119,7 @@ void Particle::draw(){
             if(drawStroke){
                 ofPushStyle();
                 ofNoFill();
-                ofSetLineWidth(1.3);
+                ofSetLineWidth(strokeWidth);
                 ofSetColor(0, opacityTmp);
                 ofCircle(pos, radius);
                 ofPopStyle();

@@ -97,8 +97,10 @@ class ParticleSystem
 		bool isEmpty;               // Particles are empty inside, only draw the contour?
 		bool drawLine;              // Draw a line instead of a circle for the particle?
         bool drawStroke;            // Draw stroke line around particle?
+        float strokeWidth;          // Stroke line width
         bool drawConnections;       // Draw a connecting line between close particles?
         float connectDist;          // Maximum distance to connect particles with line
+        float connectWidth;         // Connected line width
 		//--------------------------------------------------------------
 		// Physics
 		float friction;        	    // Friction to velocity 0~100
