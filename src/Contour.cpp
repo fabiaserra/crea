@@ -8,7 +8,6 @@ Contour::Contour()
     isActive            = false;
     
     // Fading in/out
-//    doFading            = false; // Do opacity fading?
     isFadingIn          = false; // Opacity fading in?
     isFadingOut         = false; // Opacity fading out?
     startFadeIn         = false; // Fade in has started?
@@ -140,9 +139,9 @@ void Contour::update(float dt, ofImage &depthImage){
         flowTexture.readToPixels(flowPixels);
         
         coloredDepthFbo.begin();
+            ofPushStyle();
             ofClear(255, 255, 255, 0);
             if(vMaskRandomColor){
-//                color.setHsb((ofGetFrameNum() % 255), 255, 255);
                 vMaskColor.setHsb(ofMap(ofNoise(ofGetElapsedTimef()*0.3), 0.1, 0.9, 0, 255, true), 255, 255);
                 vMaskRed = vMaskColor.r;
                 vMaskGreen = vMaskColor.g;
@@ -151,6 +150,7 @@ void Contour::update(float dt, ofImage &depthImage){
             vMaskColor.set(vMaskRed, vMaskGreen, vMaskBlue, vMaskOpacity);
             ofSetColor(vMaskColor);
             depthImage.draw(0, 0, width, height);
+            ofPopStyle();
         coloredDepthFbo.end();
         
         velocityMask.setDensity(coloredDepthFbo.getTextureReference()); // to change mask color
@@ -237,20 +237,19 @@ void Contour::update(float dt, ofImage &depthImage){
 void Contour::draw(){
     // if is active or we are fading out
     if(isActive || isFadingOut){
-//        ofPushMatrix();
-//        ofTranslate(width/2.0, height/2.0);
-//        ofScale(scaleContour, scaleContour); // Scale it so we can see more contour on the projection
-//        
-//        ofPushMatrix();
-//        ofTranslate(-width/2.0, -height/2.0);
+        ofPushMatrix();
+        ofTranslate(width/2.0, height/2.0);
+        ofScale(scaleContour, scaleContour); // Scale it so we can see more contour on the projection
+        
+        ofPushMatrix();
+        ofTranslate(-width/2.0, -height/2.0);
         
         if(drawBoundingRect){
             ofPushStyle();
-            coloredDepthFbo.draw(0, 0);
-//            ofFill();
-//            ofSetColor(ofColor(red, green, blue), opacity);
-//            for(int i = 0; i < boundingRects.size(); i++)
-//                ofRect(boundingRects[i]);
+            ofFill();
+            ofSetColor(ofColor(red, green, blue), opacity);
+            for(int i = 0; i < boundingRects.size(); i++)
+                ofRect(boundingRects[i]);
             ofPopStyle();
         }
 
@@ -330,8 +329,8 @@ void Contour::draw(){
             ofPopStyle();
         }
         
-//        ofPopMatrix();
-//        ofPopMatrix();
+        ofPopMatrix();
+        ofPopMatrix();
     }
     
     // DEBUGGING DRAWINGS
