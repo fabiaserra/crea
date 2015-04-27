@@ -85,11 +85,11 @@ void Particle::update(float dt){
 
         // Bounce particle with the window margins
         if(bounces){
-        	bounceParticle();
+        	marginsBounce();
         }
 
         else if(steers){
-            steerParticle();
+            marginsSteer();
         }
 
         else if(infiniteWalls){
@@ -146,8 +146,9 @@ void Particle::addNoise(float angle, float turbulence, float dt){
     // Perlin noise
 	float noise = ofNoise(pos.x * 0.005f,  pos.y * 0.005f, dt * 0.1f) * angle;
     ofPoint noiseVector(cos(noise), sin(noise));
-    if(!immortal) frc += noiseVector * turbulence * age * 0.1; // if immortal this doesn't affect, age == 0
-    else frc += noiseVector * turbulence * 0.1;
+//    if(!immortal) frc += noiseVector * turbulence * age * 0.1; // if immortal this doesn't affect, age == 0
+//    else
+        frc += noiseVector * turbulence * 0.1;
 }
 
 void Particle::addRepulsionForce(Particle &p, float radiusSqrd, float scale){
@@ -351,7 +352,7 @@ void Particle::seek(ofPoint target, float radiusSqrd){
     frc += steer;
 }
 
-void Particle::bounceParticle(){
+void Particle::marginsBounce(){
     bool isBouncing = false;
 
     if(pos.x > width-radius){
@@ -379,7 +380,7 @@ void Particle::bounceParticle(){
     }
 }
 
-void Particle::steerParticle(){
+void Particle::marginsSteer(){
     float margin = radius*10;
 
     if(pos.x > width-margin){
@@ -410,6 +411,18 @@ void Particle::marginsWrap(){
     }
     else if(pos.y+radius < 0.0){
         pos.y = height;
+    }
+}
+
+void Particle::contourBounce(ofPolyline contour){
+    unsigned int index;
+    if(contour.inside(pos)){
+    ofPoint contactPoint = contour.getClosestPoint(pos, &index);
+//    if(contactPoint.squareDistance(pos) < 30){
+        ofVec2f normal = contour.getNormalAtIndex(index);
+        vel = -2*vel.dot(normal)*normal + vel;
+        if(bounceDamping) vel *= damping;
+//        age += 1.0;
     }
 }
 

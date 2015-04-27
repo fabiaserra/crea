@@ -25,9 +25,11 @@ class Particle
         void pullToCenter();
         void limitVelocity();
 
-        void bounceParticle();
-        void steerParticle();
+        void marginsBounce();
+        void marginsSteer();
         void marginsWrap();
+    
+        void contourBounce(ofPolyline contour);
 
         void kill();
 //--------------------------------------------------------------

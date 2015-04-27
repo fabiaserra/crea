@@ -15,13 +15,13 @@ class ParticleSystem
 		~ParticleSystem();
 
 		void setup(ParticleMode particleMode, int width, int height);
-		void update(float dt, vector<irMarker> &markers, Contour &contour);
+		void update(float dt, vector<irMarker>& markers, Contour& contour);
 		void draw();
 
         void addParticle(ofPoint pos, ofPoint vel, ofColor color, float radius, float lifetime);
 		void addParticles(int n);
-		void addParticles(int n, const irMarker &marker);
-		void addParticles(int n, const ofPolyline &contour, Contour &flow);
+		void addParticles(int n, const irMarker& marker);
+		void addParticles(int n, const ofPolyline& contour, Contour& flow);
 
         void createParticleGrid(int width, int height);
 
@@ -67,7 +67,7 @@ class ParticleSystem
         float red, green, blue;     // Color of the particles
         //--------------------------------------------------------------
         // Specific properties
-        float nParticles;           // Number of particles born in the beginning
+        int nParticles;             // Number of particles born in the beginning
         float bornRate;             // Number of particles born per frame
         //--------------------------------------------------------------
         // Emitter
@@ -117,9 +117,11 @@ class ParticleSystem
         bool interact;              // Can we interact with the particles?
         bool emit;                  // Born new particles in each frame?
         bool flock;                 // Particles have flocking behavior?
+        bool flowInteraction;       // Interact with particles using optical flow?
         bool repulseInteraction;    // Repulse particles from input?
         bool attractInteraction;    // Attract particles to input?
         bool gravityInteraction;    // Apply gravity force to particles touched with input?
+        bool bounceInteraction;     // Bounce particles with depth contour?
         bool returnToOrigin;        // Make particles return to their born position?
         //--------------------------------------------------------------
         // Input
@@ -138,9 +140,9 @@ class ParticleSystem
 		// Helper functions
 		ofPoint randomVector();
 		float randomRange(float percentage, float value);
-		ofPoint getClosestMarker(const Particle &particle, const vector<irMarker> &markers, float markerRadius);
+		ofPoint getClosestMarker(const Particle& particle, const vector<irMarker>& markers, float markerRadius);
 //		irMarker getClosestMarker(const Particle &particle, const vector<irMarker> &markers, float markerRadius);
-		ofPoint getClosestPointInContour(const Particle &particle, const Contour &contour);
+		ofPoint getClosestPointInContour(const Particle& particle, const Contour& contour, unsigned int* contourIdx = NULL);
     
         void fadeIn(float dt);
         void fadeOut(float dt);

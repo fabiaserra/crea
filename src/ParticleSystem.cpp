@@ -22,7 +22,7 @@ ParticleSystem::ParticleSystem(){
     maxOpacity          = 255.0;        // Maximum opacity of particles
 
     // General properties
-    immortal            = false;        // Can particles die?
+    immortal            = false;        // Are particles immortal?
     velocity            = 0.0;          // Initial velocity magnitude of newborn particles
     radius              = 3.0;          // Radius of the particles
     lifetime            = 5.0;          // Lifetime of particles
@@ -32,7 +32,7 @@ ParticleSystem::ParticleSystem(){
     color               = ofColor(red, green, blue); // Color of the particles
     
     // Specific properties
-    nParticles          = 600;          // Number of particles born in the beginning
+    nParticles          = 1300;         // Number of particles born in the beginning
     bornRate            = 5.0;          // Number of particles born per frame
 
     // Emitter
@@ -82,9 +82,11 @@ ParticleSystem::ParticleSystem(){
     emit                = false;        // Born new particles in each frame?
     interact            = false;        // Can we interact with the particles?
     flock               = false;        // Particles have flocking behavior?
+    flowInteraction     = false;        // Interact with particles using optical flow?
     repulseInteraction  = false;        // Repulse particles from input?
     attractInteraction  = false;        // Attract particles to input?
     gravityInteraction  = false;        // Apply gravity force to particles touched with input?
+    bounceInteraction   = false;        // Bounce particles with depth contour?
     returnToOrigin      = false;        // Make particles return to their born position?
 
     // Input
@@ -149,11 +151,8 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
         flock               = true;
         interact            = true;
         markerRadius        = 600;
-        radiusRnd           = 0;
-        attractInteraction  = true;
-//        repulseInteraction  = true;
         bounceDamping       = false;
-        bounce              = true;
+        steer               = true;
         immortal            = true;
         addParticles(nParticles);
     }
@@ -172,6 +171,8 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
 
         opacityAge          = true;
         flickersAge         = false;
+        
+        infiniteWalls       = false;
 
         if(animation == SNOW){
             lifetime        = 6.0;
@@ -182,39 +183,31 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
         }
         else if(animation == WIND){
             immortal        = true;
+            opacityAge      = false;
             velocity        = 50.0;
             turbulence      = 8.0;
             gravity         = ofVec2f(0, 0.0);
-            addParticles(1500);
+            infiniteWalls   = true;
+            addParticles(nParticles);
         }
         else if(animation == EXPLOSION){
-            radius          = 6.0;
-            radiusRnd       = 30.0;
+            radius          = 4.0;
+            radiusRnd       = 50.0;
 
-            velocityRnd     = 0.0;
-
-            friction        = 70.0;
+            friction        = 27.0;
+            turbulence      = 5.0;
 
             lifetime        = 3.0;
-            lifetimeRnd     = 20.0;
+            lifetimeRnd     = 40.0;
 
             flickersAge     = true;
             opacityAge      = false;
-            addParticles(1200);
+            addParticles(nParticles);
         }
     }
 }
 
-void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contour){
-//    cout << "isActive:" << isActive << endl;
-//    cout << "activeStarted:" << activeStarted << endl;
-//    cout << "doFading:" << doFading << endl;
-//    cout << "isFadingIn:" << isFadingIn << endl;
-//    cout << "isFadingOut:" << isFadingOut << endl;
-//    cout << "startFadeIn:" << startFadeIn << endl;
-//    cout << "startFadeOut:" << startFadeOut << endl;
-//    cout << "opacity:" << opacity << endl;
-//    cout << "--------------" << endl;
+void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contour){
     
     // if is active or we are fading out, update particles
     if(isActive || isFadingOut){
@@ -230,11 +223,8 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
             bornParticles();
         }
         
-//        if(doFading){
-            if(isFadingIn) fadeIn(dt);
-            else if(isFadingOut && !isActive) fadeOut(dt); // if it is not active and it is fading out, fade out
-//            else opacity = maxOpacity;
-//        }
+        if(isFadingIn) fadeIn(dt);
+        else if(isFadingOut && !isActive) fadeOut(dt); // if it is not active and it is fading out, fade out
         else opacity = maxOpacity;
         
         // sort particles so it is more effective to do particle/particle interactions
@@ -274,9 +264,13 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
                     }
                 }
                 if(contourInput){
-                    ofPoint closestPointInContour = getClosestPointInContour(*particles[i], contour);
-                    ofPoint frc = contour.getFlowOffset(particles[i]->pos);
-                    particles[i]->addForce(frc);
+                    unsigned int contourIdx = -1;
+                    ofPoint closestPointInContour = getClosestPointInContour(*particles[i], contour, &contourIdx);
+                    
+                    if(flowInteraction){
+                        ofPoint frc = contour.getFlowOffset(particles[i]->pos);
+                        particles[i]->addForce(frc);
+                    }
 
                     if(closestPointInContour != ofPoint(-1, -1) || (gravityInteraction && particles[i]->isTouched)){
 //                        ofPoint frc = contour.getFlowOffset(particles[i]->pos);
@@ -289,6 +283,12 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
                             particles[i]->addForce(ofPoint(0, 9.8)*particles[i]->mass);
                             particles[i]->isTouched = true;
                         }
+                        else if(bounceInteraction){
+                            if(contourIdx != -1) particles[i]->contourBounce(contour.contours[contourIdx]);
+                        }
+//                        else if(repulseInteraction){
+//                            particles[i]->addRepulsionForce(closestPointInContour.x, closestPointInContour.y, 8000, 85.0);
+//                        }
                     }
 //                    else if(useContourVel){
 //                        ofPoint frc = -contour.getVelocityInPoint(particles[i]->pos) * 0.1;
@@ -336,7 +336,7 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
                             addParticles(n, markers[i]);
                         }
                         else{
-                            addParticles(ofRandom(bornRate-3.0, bornRate+3.0), markers[i]);
+                            if(bornRate > 0.1) addParticles(ofRandom(bornRate-2.0, bornRate+2.0), markers[i]);
                         }
                     }
                 }
@@ -371,8 +371,7 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
         for(int i = 0; i < particles.size(); i++){
             particles[i]->addForce(gravity*particles[i]->mass);
             particles[i]->addNoise(15.0, turbulence, dt);
-
-            particles[i]->immortal          = immortal;
+            
             particles[i]->opacity           = opacity;
             particles[i]->friction          = 1-friction/1000;
             particles[i]->bounces           = bounce;
@@ -381,7 +380,7 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
             particles[i]->infiniteWalls     = infiniteWalls;
             
             // update also immortal particle systems like GRID and BOIDS
-            if(particleMode == GRID || particleMode == BOIDS){
+            if(immortal){
                 particles[i]->radius        = radius;
                 particles[i]->color         = ofColor(red, green, blue);
                 particles[i]->isEmpty       = isEmpty;
@@ -401,16 +400,6 @@ void ParticleSystem::update(float dt, vector<irMarker> &markers, Contour& contou
         startFadeOut = true;
         killParticles();
     }
-    
-//    cout << "isActive:" << isActive << endl;
-//    cout << "activeStarted:" << activeStarted << endl;
-//    cout << "doFading:" << doFading << endl;
-//    cout << "isFadingIn:" << isFadingIn << endl;
-//    cout << "isFadingOut:" << isFadingOut << endl;
-//    cout << "startFadeIn:" << startFadeIn << endl;
-//    cout << "startFadeOut:" << startFadeOut << endl;
-//    cout << "opacity:" << opacity << endl;
-//    cout << endl << endl;
 }
 
 void ParticleSystem::draw(){
@@ -443,10 +432,6 @@ void ParticleSystem::draw(){
 void ParticleSystem::addParticle(ofPoint pos, ofPoint vel, ofColor color, float radius, float lifetime){
     Particle * newParticle = new Particle();
     float id = totalParticlesCreated;
-    
-//    float initialRadius = radius + randomRange(radiusRnd, radius);
-//    float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
-//    ofColor color(red, green, blue);
 
     newParticle->sizeAge        = sizeAge;
     newParticle->opacityAge     = opacityAge;
@@ -460,7 +445,18 @@ void ParticleSystem::addParticle(ofPoint pos, ofPoint vel, ofColor color, float 
     newParticle->width = width;
     newParticle->height = height;
 
-    if(particleMode == BOIDS) newParticle->limitSpeed = true;
+    if(particleMode == BOIDS){
+        newParticle->limitSpeed = true;
+        newParticle->immortal = true;
+    }
+    else if(particleMode == ANIMATIONS && animation != EXPLOSION){
+        if(animation == WIND){
+            newParticle->immortal = true;
+            newParticle->damping = 0.9;
+        }
+        else if (animation == RAIN) newParticle->damping = 0.8;
+        else newParticle->damping = 0.3;
+    }
 
     newParticle->setup(id, pos, vel, color, radius, lifetime);
     particles.push_back(newParticle);
@@ -484,8 +480,8 @@ void ParticleSystem::addParticles(int n){
             vel.y = fabs(vel.y) * 6.0; // make particles all be going down when born
         }
         else if(particleMode == ANIMATIONS && animation == EXPLOSION){
-            pos = ofPoint(ofRandom(width), ofRandom(height+radius, height+radius*50));
-            vel = ofPoint(0, -velocity*ofRandom(80, 180)); // make particles all be going up when born
+            pos = ofPoint(ofRandom(width), ofRandom(height+radius, height+radius*40));
+            vel = ofPoint(0, -velocity*ofRandom(18, 75)); // make particles all be going up when born
         }
 
         float initialRadius = radius + randomRange(radiusRnd, radius);
@@ -495,7 +491,7 @@ void ParticleSystem::addParticles(int n){
     }
 }
 
-void ParticleSystem::addParticles(int n, const irMarker &marker){
+void ParticleSystem::addParticles(int n, const irMarker& marker){
     for(int i = 0; i < n; i++){
         ofPoint pos;
         if(emitAllTimeInside || emitInMovement){
@@ -507,8 +503,6 @@ void ParticleSystem::addParticles(int n, const irMarker &marker){
         ofPoint vel = randomVector()*(velocity+5.0*randomRange(velocityRnd, velocity));
         vel += marker.velocity*(velocityMotion/100)*5.0;
 
-//        if(emitInMovement && marker.velocity.lengthSquared() < 25.0) break;
-
         float initialRadius = radius + randomRange(radiusRnd, radius);
         float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
 
@@ -517,7 +511,7 @@ void ParticleSystem::addParticles(int n, const irMarker &marker){
     }
 }
 
-void ParticleSystem::addParticles(int n, const ofPolyline &contour, Contour &flow){
+void ParticleSystem::addParticles(int n, const ofPolyline& contour, Contour& flow){
     for(int i = 0; i < n; i++){
 
         ofPoint pos, vel;
@@ -547,7 +541,6 @@ void ParticleSystem::addParticles(int n, const ofPolyline &contour, Contour &flo
             vel = contour.getNormalAtIndexInterpolated(indexInterpolated)*(velocity+2*randomRange(velocityRnd, velocity))*-1;
         }
 
-//        if(useFlow){
         if(true){
             ofPoint motionVel = flow.getFlowOffset(pos);
             vel += motionVel*(velocityMotion/100);
@@ -610,7 +603,6 @@ void ParticleSystem::bornParticles(){
 //    if(particleMode == GRID){
 //        createParticleGrid(width, height);
 //    }
-//
 //    else if(particleMode == RANDOM || particleMode == BOIDS || particleMode == ANIMATIONS){
 //        addParticles(nParticles);
 //    }
@@ -683,13 +675,14 @@ ofPoint ParticleSystem::getClosestMarker(const Particle &particle, const vector<
 //    return closestMarker;
 //}
 
-ofPoint ParticleSystem::getClosestPointInContour(const Particle &particle, const Contour &contour){
+ofPoint ParticleSystem::getClosestPointInContour(const Particle& particle, const Contour& contour, unsigned int* contourIdx){
     ofPoint closestPoint(-1, -1);
 
     // Get closest point in the contour to particle
     for(unsigned int i = 0; i < contour.contours.size(); i++){
         if(contour.contours[i].inside(particle.pos)){
             closestPoint = contour.contours[i].getClosestPoint(particle.pos);
+            if(contourIdx != NULL) *contourIdx = i;
         }
     }
 
