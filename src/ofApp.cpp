@@ -1377,14 +1377,7 @@ void ofApp::setupGridGUI(){
     gui8Grid->addSlider("Connect Line Width", 1.0, 5.0, &gridParticles->connectWidth);
     gui8Grid->addSpacer();
     
-    gui8Grid->addLabel("Interaction", OFX_UI_FONT_MEDIUM);
-    gui8Grid->addSpacer();
-    gui8Grid->addToggle("Interact", &gridParticles->interact);
-    gui8Grid->addSpacer();
-    gui8Grid->addSlider("Marker interaction radius", 5.0, 150.0, &gridParticles->markerRadius);
-    gui8Grid->addToggle("Gravity Interaction", &gridParticles->gravityInteraction);
-    gui8Grid->addToggle("Attract Interaction", &gridParticles->attractInteraction);
-    gui8Grid->addSpacer();
+    addParticleInteractionGUI(gui8Grid, gridParticles);
 
 //    addParticlePhysicsGUI(gui8Grid, gridParticles);
     gui8Grid->addToggle("Repulse", &gridParticles->repulse);
@@ -1418,11 +1411,7 @@ void ofApp::setupBoidsGUI(){
     gui8Boids_1->addSlider("Alignment Strength", 0.001, 0.1, &boidsParticles->alignmentStrength)->setLabelPrecision(3);
     
     gui8Boids_1->addSpacer();
-    gui8Boids_1->addLabel("Interaction", OFX_UI_FONT_MEDIUM);
-    gui8Boids_1->addSpacer();
-    gui8Boids_1->addToggle("Interact", &boidsParticles->interact);
-    gui8Boids_1->addSlider("Marker interaction radius", 5.0, 150.0, &boidsParticles->markerRadius);
-    gui8Boids_1->addSpacer();
+    addParticleInteractionGUI(gui8Boids_1, boidsParticles);
     
     gui8Boids_1->autoSizeToFitWidgets();
     gui8Boids_1->setVisible(false);
@@ -1458,14 +1447,7 @@ void ofApp::setupAnimationsGUI(){
 	animations.push_back("Explosion");
 	gui8Animations_1->addRadio("Animations", animations, OFX_UI_ORIENTATION_HORIZONTAL);
     
-    gui8Animations_1->addSpacer();
-    gui8Animations_1->addLabel("Interaction", OFX_UI_FONT_MEDIUM);
-    gui8Animations_1->addSpacer();
-    gui8Animations_1->addToggle("Interact", &animationsParticles->interact);
-    gui8Animations_1->addSpacer();
-    gui8Animations_1->addSlider("Marker interaction radius", 5.0, 150.0, &animationsParticles->markerRadius);
-    
-    gui8Animations_1->addSpacer();
+    addParticleInteractionGUI(gui8Animations_1, animationsParticles);
     addParticlePropertiesGUI(gui8Animations_1, animationsParticles);
     
     gui8Animations_1->autoSizeToFitWidgets();
@@ -1479,6 +1461,15 @@ void ofApp::setupAnimationsGUI(){
     gui8Animations_2->addSpacer();
     addParticlePhysicsGUI(gui8Animations_2, animationsParticles);
     
+    gui8Animations_2->addLabel("Wind and Explosion", OFX_UI_FONT_MEDIUM);
+    gui8Animations_2->addSpacer();
+    gui8Animations_2->addIntSlider("Number of particles born", 100, 2000, &animationsParticles->nParticles);
+    
+    gui8Animations_2->addSpacer();
+    gui8Animations_2->addSlider("Velocity", 0.0, 100.0, &animationsParticles->velocity);
+    gui8Animations_2->addSlider("Velocity Random[%]", 0.0, 100.0, &animationsParticles->velocityRnd);
+    gui8Animations_2->addSpacer();
+
     gui8Animations_2->autoSizeToFitWidgets();
     gui8Animations_2->setVisible(false);
     ofAddListener(gui8Animations_2->newGUIEvent, this, &ofApp::guiEvent);
@@ -1517,15 +1508,13 @@ void ofApp::addParticleBasicsGUI(ofxUICanvas* gui, ParticleSystem* ps){
 void ofApp::addParticleInteractionGUI(ofxUICanvas* gui, ParticleSystem* ps){
     gui->addLabel("Interaction", OFX_UI_FONT_MEDIUM);
     gui->addSpacer();
-
     gui->addToggle("Interact", &ps->interact);
     gui->addSlider("Marker interaction radius", 5.0, 150.0, &ps->markerRadius);
-
-//    vector<string> interactions;
-//    interactions.push_back("Repulsion");
-//    interactions.push_back("Attraction");
-//    interactions.push_back("Gravity");
-//    gui->addRadio("Interactions", interactions, OFX_UI_ORIENTATION_VERTICAL)->activateToggle("Repulsion");
+    gui->addSpacer();
+    gui->addToggle("Flow Interaction", &ps->flowInteraction);
+    gui->addToggle("Gravity Interaction", &ps->gravityInteraction);
+    gui->addToggle("Attract Interaction", &ps->attractInteraction);
+    gui->addToggle("Bounce Interaction", &ps->bounceInteraction);
     gui->addSpacer();
 }
 
@@ -1545,8 +1534,7 @@ void ofApp::addParticlePropertiesGUI(ofxUICanvas* gui, ParticleSystem* ps){
     gui->addSlider("Connect Dist", 5.0, 100.0, &ps->connectDist);
     gui->addSlider("Connect Line Width", 1.0, 5.0, &ps->connectWidth);
     gui->addSpacer();
-    gui->addToggle("Immortal", &ps->immortal);
-    gui->addSlider("Lifetime", 0.1, 20.0, &ps->lifetime);
+    gui->addSlider("Lifetime", 0.1, 40.0, &ps->lifetime);
     gui->addSlider("Life Random[%]", 0.0, 100.0, &ps->lifetimeRnd);
     gui->addSpacer();
     gui->addSlider("Radius", 0.1, 25.0, &ps->radius);
@@ -2076,7 +2064,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         if(ti->getInputTriggerType() == OFX_UI_TEXTINPUT_ON_UNFOCUS || ti->getInputTriggerType() == OFX_UI_TEXTINPUT_ON_ENTER){
             string cuePath = "cues/"+cueName->getTextString()+".xml";
             cueList[currentCueIndex] = cuePath;
-            cueSliders[currentCueIndex].first->setLabel(ofFilePath::getBaseName(cuePath));
+            cueSliders[currentCueIndex].first->setLabel(ofToString(currentCueIndex) + ". " + ofFilePath::getBaseName(cuePath));
         }
     }
     if(e.getName() == "New Cue"){
@@ -2214,26 +2202,6 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     //-------------------------------------------------------------
     // PARTICLES
     //-------------------------------------------------------------
-//    if(e.getName() == "Activate Particles"){
-//        for(int i = 0; i < particleSystems.size(); i++){
-//            particleSystems[i]->doFading = true;
-//        }
-//    }
-//    if(e.getName() == "Interactions"){
-//        ofxUIRadio *radio = (ofxUIRadio *) e.widget;
-//        if(radio->getActiveName() == "Repulsion"){
-//            gridParticles->repulseInteraction    = true;
-//            gridParticles->attractInteraction    = false;
-//            gridParticles->gravityInteraction    = false;
-//            gridParticles->friction              = 40.0;
-//        }
-//        else if(radio->getActiveName() == "Gravity"){
-//            gridParticles->repulseInteraction    = false;
-//            gridParticles->attractInteraction    = false;
-//            gridParticles->gravityInteraction    = true;
-//            gridParticles->friction              = 5.0;
-//        }
-//    }
     // EMITTER SPECIFIC
     if(e.getName() == "Emit all time"){
         ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
