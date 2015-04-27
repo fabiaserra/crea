@@ -891,7 +891,6 @@ void ofApp::setupGesturesGUI(){
     guiGestures_1->addImageButton("Load Sequence", "icons/open.png", false, dim, dim)->setColorBack(ofColor(150, 255));
     guiGestures_1->addImageToggle("Play Sequence", "icons/play.png", &drawSequence, dim, dim)->setColorBack(ofColor(150, 255));
     guiGestures_1->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-//    guiGestures_1->addIntSlider("Number of markers", 1, 4, &numMarkers);
 
     guiGestures_1->addSpacer();
     sequenceFilename = guiGestures_1->addLabel("Filename: "+sequence.filename, OFX_UI_FONT_SMALL);
@@ -965,12 +964,10 @@ void ofApp::setupCueListGUI(){
 
     ofxUIButton *previous;
     previous = guiCueList->addImageButton("Previous Cue", "icons/previous.png", false, dim, dim);
-//    previous->bindToKey(OF_KEY_LEFT);
     previous->setColorBack(ofColor(150, 255));
 
     ofxUIButton *next;
     next = guiCueList->addImageButton("Next Cue", "icons/play.png", false, dim, dim);
-//    next->bindToKey(OF_KEY_RIGHT);
     next->setColorBack(ofColor(150, 255));
 
     guiCueList->addImageButton("Load Cue", "icons/open.png", false, dim, dim)->setColorBack(ofColor(150, 255));
@@ -979,7 +976,6 @@ void ofApp::setupCueListGUI(){
     guiCueList->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN, OFX_UI_ALIGN_CENTER);
 
     guiCueList->addSpacer();
-//    guiCueList->addLabelButton("GO", false, 230, 40)->bindToKey(' ');
     guiCueList->addLabelButton("GO", false, 230, 40);
 
     guiCueList->addSpacer();
@@ -1670,20 +1666,6 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
     }
 
     widgetsToUpdate.clear();
-    
-    // if interpolate we do opacity fading in graphics
-//    if(interpolate){
-//        for(int i = 0; i < particleSystems.size(); i++){
-//            particleSystems[i]->doFading = true;
-//        }
-//        contour.doFading = true;
-//    }
-//    else{
-//        for(int i = 0; i < particleSystems.size(); i++){
-//            particleSystems[i]->doFading = false;
-//        }
-//        contour.doFading = false;
-//    }
 
     int guiIndex = 0;
     for(vector<ofxUICanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
@@ -1779,30 +1761,7 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
             cueName->setVisible(true);
             loadGUISettings(cueList[currentCueIndex], false, true);
             
-            vector<ofxUICanvas *>::iterator it = guis.begin();
-            ofxUICanvas *guiGestures_1 = *(it+4);
-
-            // Delete all existing sequence segmentation cueSliders
-            for(int cueIdx = 0; cueIdx < cueSliders.size(); cueIdx++){
-                guiGestures_1->removeWidget(cueSliders.at(cueIdx).first);
-                guiGestures_1->removeWidget(cueSliders.at(cueIdx).second);
-            }
-            cueSliders.erase(cueSliders.begin(), cueSliders.end());
-
-            // Create sequence segmentation range sliders
-            float n = cueList.size();
-            for(int i = 0; i < cueList.size(); i++){
-                ofxUILabel *label;
-                label = guiGestures_1->addLabel(ofFilePath::getBaseName(cueList[i]));
-                string cueName = "Sequence percent";
-                float low = (float)i/n*100;
-                float high = ((float)i+1.0)/n*100;
-                ofxUIRangeSlider *slider;
-                slider = guiGestures_1->addRangeSlider(cueName, 0, 100, low, high);
-                pair<ofxUILabel *, ofxUIRangeSlider*> cue(label, slider);
-                cueSliders.push_back(cue);
-            }
-            guiGestures_1->autoSizeToFitWidgets();
+            resetCueSliders();
         }
         else currentCueIndex = -1;
     }
@@ -1868,6 +1827,34 @@ void ofApp::interpolateWidgetValues(){
     }
 
     if(widgetsToUpdate.empty()) interpolatingWidgets = false;
+}
+
+void ofApp::resetCueSliders(){
+    // Get guiGestures gui panel reference
+    vector<ofxUICanvas *>::iterator it = guis.begin();
+    ofxUICanvas *guiGestures_1 = *(it+4);
+
+    // Delete all existing sequence segmentation cueSliders widgets...
+    for(int cueIdx = 0; cueIdx < cueSliders.size(); cueIdx++){
+        guiGestures_1->removeWidget(cueSliders.at(cueIdx).first);
+        guiGestures_1->removeWidget(cueSliders.at(cueIdx).second);
+    }
+    cueSliders.erase(cueSliders.begin(), cueSliders.end());
+
+    // ...and create them all again
+    float n = cueList.size();
+    for(int i = 0; i < cueList.size(); i++){
+        ofxUILabel *label;
+        label = guiGestures_1->addLabel(ofToString(i) + ". " + ofFilePath::getBaseName(cueList[i]));
+        string cueName = "Sequence percent";
+        float low = (float)i/n*100;
+        float high = ((float)i+1.0)/n*100;
+        ofxUIRangeSlider *slider;
+        slider = guiGestures_1->addRangeSlider(cueName, 0, 100, low, high);
+        pair<ofxUILabel *, ofxUIRangeSlider*> cue(label, slider);
+        cueSliders.push_back(cue);
+    }
+    guiGestures_1->autoSizeToFitWidgets();
 }
 
 //--------------------------------------------------------------
@@ -2108,30 +2095,9 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             cueName->setTextString(cueFileName);
             cueName->setVisible(true);
             
-            vector<ofxUICanvas *>::iterator it = guis.begin();
-            ofxUICanvas *guiGestures_1 = *(it+4);
-            
-            // Delete all existing sequence segmentation cueSliders widgets...
-            for(int cueIdx = 0; cueIdx < cueSliders.size(); cueIdx++){
-                guiGestures_1->removeWidget(cueSliders.at(cueIdx).first);
-                guiGestures_1->removeWidget(cueSliders.at(cueIdx).second);
-            }
-            cueSliders.erase(cueSliders.begin(), cueSliders.end());
+            // Reset cue slider widgets
+            resetCueSliders();
 
-            // ...and create them all again
-            float n = cueList.size();
-            for(int i = 0; i < cueList.size(); i++){
-                ofxUILabel *label;
-                label = guiGestures_1->addLabel(ofFilePath::getBaseName(cueList[i]));
-                string cueName = "Sequence percent";
-                float low = (float)i/n*100;
-                float high = ((float)i+1.0)/n*100;
-                ofxUIRangeSlider *slider;
-                slider = guiGestures_1->addRangeSlider(cueName, 0, 100, low, high);
-                pair<ofxUILabel *, ofxUIRangeSlider*> cue(label, slider);
-                cueSliders.push_back(cue);
-            }
-            guiGestures_1->autoSizeToFitWidgets();
         }
     }
     if(e.getName() == "Save Cue"){
@@ -2207,31 +2173,8 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
                 cueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
                 cueName->setTextString(cueFileName);
             }
-            
-            vector<ofxUICanvas *>::iterator it = guis.begin();
-            ofxUICanvas *guiGestures_1 = *(it+4);
-            
-            // Delete all existing sequence segmentation cueSliders widgets...
-            for(int cueIdx = 0; cueIdx < cueSliders.size(); cueIdx++){
-                guiGestures_1->removeWidget(cueSliders.at(cueIdx).first);
-                guiGestures_1->removeWidget(cueSliders.at(cueIdx).second);
-            }
-            cueSliders.erase(cueSliders.begin(), cueSliders.end());
-
-            // ...and create them all again
-            float n = cueList.size();
-            for(int i = 0; i < cueList.size(); i++){
-                ofxUILabel *label;
-                label = guiGestures_1->addLabel(ofFilePath::getBaseName(cueList[i]));
-                string cueName = "Sequence percent";
-                float low = (float)i/n*100;
-                float high = ((float)i+1.0)/n*100;
-                ofxUIRangeSlider *slider;
-                slider = guiGestures_1->addRangeSlider(cueName, 0, 100, low, high);
-                pair<ofxUILabel *, ofxUIRangeSlider*> cue(label, slider);
-                cueSliders.push_back(cue);
-            }
-            guiGestures_1->autoSizeToFitWidgets();
+    
+            resetCueSliders();
         }
     }
     if(e.getName() == "GO"){

@@ -56,7 +56,6 @@ class ofApp : public ofBaseApp{
 
         void saveGUISettings(const string path, const bool saveCues);
         void loadGUISettings(const string path, const bool interpolate, const bool loadCues);
-//        void resetGUISettings(vector<int> guiIndices);
         void interpolateWidgetValues();
 
         void guiEvent(ofxUIEventArgs &e);
@@ -77,6 +76,8 @@ class ofApp : public ofBaseApp{
         void addParticleInteractionGUI(ofxUICanvas* gui, ParticleSystem* ps);
         void addParticlePropertiesGUI(ofxUICanvas* gui, ParticleSystem* ps);
         void addParticlePhysicsGUI(ofxUICanvas* gui, ParticleSystem* ps);
+    
+        void resetCueSliders();
     
         //--------------------------------------------------------------
         float time0;            // Time value for computing dt
@@ -152,7 +153,6 @@ class ofApp : public ofBaseApp{
         //--------------------------------------------------------------
         ofxSecondWindow secondWindow;
         //--------------------------------------------------------------
-//        vector< vector<ofxUICanvas *> > particleGuis;
         vector<ofxUICanvas *> guis;
         //--------------------------------------------------------------
         ofColor uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo;
@@ -169,6 +169,7 @@ class ofApp : public ofBaseApp{
         ofxUITextInput *cueName;              // Name of the cue
         ofxUISlider *lowThresh;               // Flocking lower threshold
         ofxUISlider *highThresh;              // Flocking higher threshold
+//        ofxUISortableList *cueSortableList;   // Sortable list to see all the cues and be able to reorder them
         vector< pair<ofxUILabel *, ofxUIRangeSlider*> > cueSliders; // Cue sliders to assign to long sequence
         //--------------------------------------------------------------
         float dim;                            // Size of GUI elements
