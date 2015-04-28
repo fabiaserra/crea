@@ -83,6 +83,7 @@ ParticleSystem::ParticleSystem(){
     interact            = false;        // Can we interact with the particles?
     flock               = false;        // Particles have flocking behavior?
     flowInteraction     = false;        // Interact with particles using optical flow?
+    fluidInteraction    = false;        // Interact with the fluid velocities?
     repulseInteraction  = false;        // Repulse particles from input?
     attractInteraction  = false;        // Attract particles to input?
     seekInteraction     = false;        // Make particles seek target (markers)?
@@ -132,7 +133,6 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
     else if(particleMode == GRID){
         interact            = true;
         returnToOrigin      = true;
-        repulseInteraction  = true;
         immortal            = true;
         velocity            = 0.0;
         velocityRnd         = 0.0;
@@ -205,7 +205,7 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
     }
 }
 
-void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contour){
+void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contour, Fluid& fluid){
     
     // if is active or we are fading out, update particles
     if(isActive || isFadingOut){
@@ -255,15 +255,13 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
                     // dir.normalize();
 
                     if(closestMarker != ofPoint(-1, -1) || (gravityInteraction && particles[i]->isTouched)){
-//                        if(repulseInteraction) particles[i]->addRepulsionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, 10.0);
-//                        else if(attractInteraction) particles[i]->addAttractionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, 8.0);
-//                        else if(seekInteraction) particles[i]->seek(closestMarker, 8000);
-//                        else if(gravityInteraction){
-//                            particles[i]->addForce(ofPoint(0, 9.8)*particles[i]->mass);
-//                            particles[i]->isTouched = true;
-//                        }
-                        particles[i]->seek(closestMarker, markerRadius*markerRadius);
-//                        particles[i]->seek(closestMarker);
+                        if(repulseInteraction) particles[i]->addRepulsionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, 10.0);
+                        else if(attractInteraction) particles[i]->addAttractionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, 10.0);
+                        else if(seekInteraction) particles[i]->seek(closestMarker, markerRadius*markerRadius);
+                        else if(gravityInteraction){
+                            particles[i]->addForce(ofPoint(0, 9.8)*particles[i]->mass);
+                            particles[i]->isTouched = true;
+                        }
                     }
                 }
                 if(contourInput){
@@ -276,18 +274,18 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
                     }
 
                     if(closestPointInContour != ofPoint(-1, -1) || (gravityInteraction && particles[i]->isTouched)){
-//                        ofPoint frc = contour.getFlowOffset(particles[i]->pos);
-//                        particles[i]->addForce(frc);
-
-                        if(attractInteraction){
+                        if(repulseInteraction){ // it is an attractForce but result is more logical saying repulse
                             particles[i]->addAttractionForce(closestPointInContour.x, closestPointInContour.y, 8000, 15.0);
+                        }
+                        else if(attractInteraction){
+                            particles[i]->addRepulsionForce(closestPointInContour.x, closestPointInContour.y, 8000, 15.0);
+                        }
+                        else if(bounceInteraction){
+                            if(contourIdx != -1) particles[i]->contourBounce(contour.contours[contourIdx]);
                         }
                         else if(gravityInteraction){
                             particles[i]->addForce(ofPoint(0, 9.8)*particles[i]->mass);
                             particles[i]->isTouched = true;
-                        }
-                        else if(bounceInteraction){
-                            if(contourIdx != -1) particles[i]->contourBounce(contour.contours[contourIdx]);
                         }
 //                        else if(repulseInteraction){
 //                            particles[i]->addRepulsionForce(closestPointInContour.x, closestPointInContour.y, 8000, 85.0);
@@ -297,6 +295,10 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
 //                        ofPoint frc = -contour.getVelocityInPoint(particles[i]->pos) * 0.1;
 //                        particles[i]->addForce(frc);
 //                    }
+                }
+                if(fluidInteraction){
+                    ofPoint frc = fluid.getFluidOffset(particles[i]->pos);
+                    particles[i]->addForce(frc);
                 }
             }
 

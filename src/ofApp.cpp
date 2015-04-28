@@ -142,14 +142,17 @@ void ofApp::setup(){
     particleSystems.push_back(boidsParticles);
     particleSystems.push_back(animationsParticles);
     currentParticleSystem = 0;
-
+    
+    // SCALE FACTOR TO DO FLOW AND FLUID COMPUTATIONS
+    float scaleFactor = 4.0;
+    
     // DEPTH CONTOUR
-    contour.setup(kinect.width, kinect.height);
+    contour.setup(kinect.width, kinect.height, scaleFactor);
     contour.setMinAreaRadius(minContourSize);
     contour.setMaxAreaRadius(maxContourSize);
     
     // FLUID
-    fluid.setup(kinect.width, kinect.height);
+    fluid.setup(kinect.width, kinect.height, scaleFactor);
     
     // Adding constant forces
 //    fluid.addConstantForce(ofPoint(kinect.width*0.5,kinect.height*0.85), ofPoint(0,-2), ofFloatColor(fluidRed,fluidGreen,fluidBlue)*fluidOpacity, fluidRadius);
@@ -426,10 +429,10 @@ void ofApp::update(){
     fluid.update(dt, markers, contour, mouseX, mouseY);
 
     // Update particles
-    emitterParticles->update(dt, markers, contour);
-    gridParticles->update(dt, markers, contour);
-    boidsParticles->update(dt, markers, contour);
-    animationsParticles->update(dt, markers, contour);
+    emitterParticles->update(dt, markers, contour, fluid);
+    gridParticles->update(dt, markers, contour, fluid);
+    boidsParticles->update(dt, markers, contour, fluid);
+    animationsParticles->update(dt, markers, contour, fluid);
 
     #ifdef KINECT_SEQUENCE
 
@@ -1089,7 +1092,8 @@ void ofApp::setupFluidSolverGUI(){
     guiFluid_1->addSlider("Sigma", 0.0, 1.0, &fluid.smokeSigma)->setLabelPrecision(5);
     guiFluid_1->addSlider("Weight", 0.0, 1.0, &fluid.smokeWeight)->setLabelPrecision(5);
     guiFluid_1->addSlider("Ambient temperature", 0.0, 1.0, &fluid.ambientTemperature)->setLabelPrecision(5);
-    
+    guiFluid_1->addSpacer();
+
     guiFluid_1->autoSizeToFitWidgets();
     guiFluid_1->setVisible(false);
     ofAddListener(guiFluid_1->newGUIEvent, this, &ofApp::guiEvent);
@@ -1139,6 +1143,7 @@ void ofApp::setupFluidSolverGUI(){
     vMaskBlueSlider->setColorFillHighlight(ofColor(30, 30, 150));
     guiFluid_2->addSlider("Opacity", 0.0, 255.0, &contour.vMaskOpacity);
     guiFluid_2->addToggle("Random colors", &contour.vMaskRandomColor);
+    guiFluid_2->addSpacer();
     
     guiFluid_2->autoSizeToFitWidgets();
     guiFluid_2->setVisible(false);
@@ -1294,192 +1299,211 @@ void ofApp::setupContourGUI(){
 
 //--------------------------------------------------------------
 void ofApp::setupEmitterGUI(){    
-    ofxUICanvas *gui8Emitter_1 = new ofxUICanvas(guiWidth+guiMargin, 0, guiWidth, ofGetHeight());
-    gui8Emitter_1->addLabel("PARTICLE EMITTER", OFX_UI_FONT_LARGE);
-    gui8Emitter_1->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
+    ofxUICanvas *guiEmitter_1 = new ofxUICanvas(guiWidth+guiMargin, 0, guiWidth, ofGetHeight());
+    guiEmitter_1->addLabel("PARTICLE EMITTER", OFX_UI_FONT_LARGE);
+    guiEmitter_1->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
-    addParticleBasicsGUI(gui8Emitter_1, emitterParticles);
-    addParticleInteractionGUI(gui8Emitter_1, emitterParticles);
+    addParticleBasicsGUI(guiEmitter_1, emitterParticles);
+    addParticleInteractionGUI(guiEmitter_1, emitterParticles);
 
-    gui8Emitter_1->addLabel("Emitter", OFX_UI_FONT_MEDIUM);
-    gui8Emitter_1->addSpacer();
-    gui8Emitter_1->addSlider("Particles/sec", 0.0, 150.0, &emitterParticles->bornRate);
-    gui8Emitter_1->addSlider("Velocity", 0.0, 100.0, &emitterParticles->velocity);
-    gui8Emitter_1->addSlider("Velocity Random[%]", 0.0, 100.0, &emitterParticles->velocityRnd);
-    gui8Emitter_1->addSlider("Velocity from Motion[%]", 0.0, 100.0, &emitterParticles->velocityMotion);
-    gui8Emitter_1->addSlider("Emitter size", 0.0, 60.0, &emitterParticles->emitterSize);
-    gui8Emitter_1->addSpacer();
+    guiEmitter_1->addLabel("Emitter", OFX_UI_FONT_MEDIUM);
+    guiEmitter_1->addSpacer();
+    guiEmitter_1->addSlider("Particles/sec", 0.0, 150.0, &emitterParticles->bornRate);
+    guiEmitter_1->addSlider("Velocity", 0.0, 100.0, &emitterParticles->velocity);
+    guiEmitter_1->addSlider("Velocity Random[%]", 0.0, 100.0, &emitterParticles->velocityRnd);
+    guiEmitter_1->addSlider("Velocity from Motion[%]", 0.0, 100.0, &emitterParticles->velocityMotion);
+    guiEmitter_1->addSlider("Emitter size", 0.0, 60.0, &emitterParticles->emitterSize);
+    guiEmitter_1->addSpacer();
     vector<string> emitters;
     emitters.push_back("Emit all time");
     emitters.push_back("Emit all time on contour");
     emitters.push_back("Emit only if movement");
-    gui8Emitter_1->addRadio("Emitters", emitters, OFX_UI_ORIENTATION_VERTICAL)->setTriggerType(OFX_UI_TRIGGER_ALL);//->activateToggle("Emit all time");
+    guiEmitter_1->addRadio("Emitters", emitters, OFX_UI_ORIENTATION_VERTICAL)->setTriggerType(OFX_UI_TRIGGER_ALL);//->activateToggle("Emit all time");
     
-    gui8Emitter_1->addSpacer();
+    guiEmitter_1->addSpacer();
 
-    gui8Emitter_1->autoSizeToFitWidgets();
-    gui8Emitter_1->setVisible(false);
-    ofAddListener(gui8Emitter_1->newGUIEvent, this, &ofApp::guiEvent);
-    guis.push_back(gui8Emitter_1);
+    guiEmitter_1->autoSizeToFitWidgets();
+    guiEmitter_1->setVisible(false);
+    ofAddListener(guiEmitter_1->newGUIEvent, this, &ofApp::guiEvent);
+    guis.push_back(guiEmitter_1);
     
-    ofxUICanvas *gui8Emitter_2 = new ofxUICanvas((guiWidth+guiMargin)*2, 0, guiWidth, ofGetHeight());
-    gui8Emitter_2->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
-    gui8Emitter_2->addSpacer();
-    addParticlePropertiesGUI(gui8Emitter_2, emitterParticles);
+    ofxUICanvas *guiEmitter_2 = new ofxUICanvas((guiWidth+guiMargin)*2, 0, guiWidth, ofGetHeight());
+    guiEmitter_2->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
+    guiEmitter_2->addSpacer();
+    addParticlePropertiesGUI(guiEmitter_2, emitterParticles);
 
-    gui8Emitter_2->addLabel("Time behavior", OFX_UI_FONT_MEDIUM);
-    gui8Emitter_2->addSpacer();
-    gui8Emitter_2->addToggle("Size", &emitterParticles->sizeAge);
-    gui8Emitter_2->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui8Emitter_2->setWidgetSpacing(10);
-    gui8Emitter_2->addToggle("Alpha", &emitterParticles->opacityAge);
-    gui8Emitter_2->addToggle("Flickers", &emitterParticles->flickersAge);
-    gui8Emitter_2->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui8Emitter_2->setWidgetSpacing(3);
-    gui8Emitter_2->addToggle("Color", &emitterParticles->colorAge);
-    gui8Emitter_2->addSpacer();
+    guiEmitter_2->addLabel("Time behavior", OFX_UI_FONT_MEDIUM);
+    guiEmitter_2->addSpacer();
+    guiEmitter_2->addToggle("Size", &emitterParticles->sizeAge);
+    guiEmitter_2->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    guiEmitter_2->setWidgetSpacing(10);
+    guiEmitter_2->addToggle("Alpha", &emitterParticles->opacityAge);
+    guiEmitter_2->addToggle("Flickers", &emitterParticles->flickersAge);
+    guiEmitter_2->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    guiEmitter_2->setWidgetSpacing(3);
+    guiEmitter_2->addToggle("Color", &emitterParticles->colorAge);
+    guiEmitter_2->addSpacer();
 
-    addParticlePhysicsGUI(gui8Emitter_2, emitterParticles);
+    addParticlePhysicsGUI(guiEmitter_2, emitterParticles);
 
-    gui8Emitter_2->autoSizeToFitWidgets();
-    gui8Emitter_2->setVisible(false);
-    ofAddListener(gui8Emitter_2->newGUIEvent, this, &ofApp::guiEvent);
-    guis.push_back(gui8Emitter_2);
+    guiEmitter_2->autoSizeToFitWidgets();
+    guiEmitter_2->setVisible(false);
+    ofAddListener(guiEmitter_2->newGUIEvent, this, &ofApp::guiEvent);
+    guis.push_back(guiEmitter_2);
 }
 
 //--------------------------------------------------------------
 void ofApp::setupGridGUI(){
-//    gui8Grid = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
-    ofxUICanvas *gui8Grid = new ofxUICanvas(guiWidth+guiMargin, 0, guiWidth, ofGetHeight());
-    gui8Grid->addLabel("PARTICLE GRID", OFX_UI_FONT_LARGE);
-    gui8Grid->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
+    ofxUICanvas *guiGrid_1 = new ofxUICanvas(guiWidth+guiMargin, 0, guiWidth, ofGetHeight());
+    guiGrid_1->addLabel("PARTICLE GRID", OFX_UI_FONT_LARGE);
+    guiGrid_1->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
-    addParticleBasicsGUI(gui8Grid, gridParticles);
+    addParticleBasicsGUI(guiGrid_1, gridParticles);
     
-    gui8Grid->addLabel("Grid", OFX_UI_FONT_MEDIUM);
-    gui8Grid->addSpacer();
-    gui8Grid->addSlider("Radius", 0.1, 25.0, &gridParticles->radius);
-    gui8Grid->addIntSlider("Resolution", 1, 20, &gridParticles->gridRes);
+    guiGrid_1->addLabel("Grid", OFX_UI_FONT_MEDIUM);
+    guiGrid_1->addSpacer();
+    guiGrid_1->addSlider("Radius", 0.1, 25.0, &gridParticles->radius);
+    guiGrid_1->addIntSlider("Resolution", 1, 20, &gridParticles->gridRes);
     
-    gui8Grid->addSpacer();
-    gui8Grid->addLabel("Particle", OFX_UI_FONT_MEDIUM);
-    gui8Grid->addSpacer();
-    gui8Grid->addToggle("Empty", &gridParticles->isEmpty);
-    gui8Grid->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui8Grid->setWidgetSpacing(10);
-    gui8Grid->addToggle("Line", &gridParticles->drawLine);
-    gui8Grid->addToggle("Stroke", &gridParticles->drawStroke);
-    gui8Grid->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui8Grid->setWidgetSpacing(3);
-    gui8Grid->addSlider("Stroke Line Width", 1.0, 5.0, &gridParticles->strokeWidth);
-    gui8Grid->addToggle("Connected", &gridParticles->drawConnections);
-    gui8Grid->addSlider("Connect Dist", 5.0, 100.0, &gridParticles->connectDist);
-    gui8Grid->addSlider("Connect Line Width", 1.0, 5.0, &gridParticles->connectWidth);
-    gui8Grid->addSpacer();
+    guiGrid_1->addSpacer();
+    guiGrid_1->addLabel("Particle", OFX_UI_FONT_MEDIUM);
+    guiGrid_1->addSpacer();
+    guiGrid_1->addToggle("Empty", &gridParticles->isEmpty);
+    guiGrid_1->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    guiGrid_1->setWidgetSpacing(10);
+    guiGrid_1->addToggle("Line", &gridParticles->drawLine);
+    guiGrid_1->addToggle("Stroke", &gridParticles->drawStroke);
+    guiGrid_1->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    guiGrid_1->setWidgetSpacing(3);
+    guiGrid_1->addSlider("Stroke Line Width", 1.0, 5.0, &gridParticles->strokeWidth);
+    guiGrid_1->addToggle("Connected", &gridParticles->drawConnections);
+    guiGrid_1->addSlider("Connect Dist", 5.0, 100.0, &gridParticles->connectDist);
+    guiGrid_1->addSlider("Connect Line Width", 1.0, 5.0, &gridParticles->connectWidth);
+    guiGrid_1->addSpacer();
     
-    addParticleInteractionGUI(gui8Grid, gridParticles);
+    guiGrid_1->autoSizeToFitWidgets();
+    guiGrid_1->setVisible(false);
+    ofAddListener(guiGrid_1->newGUIEvent, this, &ofApp::guiEvent);
+    guis.push_back(guiGrid_1);
+    
+    ofxUICanvas *guiGrid_2 = new ofxUICanvas((guiWidth+guiMargin)*2, 0, guiWidth, ofGetHeight());
+    guiGrid_2->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
+    
+    guiGrid_2->addSpacer();
+    addParticleInteractionGUI(guiGrid_2, gridParticles);
 
-//    addParticlePhysicsGUI(gui8Grid, gridParticles);
-    gui8Grid->addToggle("Repulse", &gridParticles->repulse);
-    gui8Grid->addSlider("Repulse Dist", 1.0, 50.0, &gridParticles->repulseDist);
-    gui8Grid->addSpacer();
-
-    gui8Grid->autoSizeToFitWidgets();
-    gui8Grid->setVisible(false);
-    ofAddListener(gui8Grid->newGUIEvent, this, &ofApp::guiEvent);
-    guis.push_back(gui8Grid);
+    guiGrid_2->addToggle("Repulse", &gridParticles->repulse);
+    guiGrid_2->addSlider("Repulse Dist", 1.0, 50.0, &gridParticles->repulseDist);
+    guiGrid_2->addSpacer();
+    
+    guiGrid_2->autoSizeToFitWidgets();
+    guiGrid_2->setVisible(false);
+    ofAddListener(guiGrid_2->newGUIEvent, this, &ofApp::guiEvent);
+    guis.push_back(guiGrid_2);
 }
 
 //--------------------------------------------------------------
 void ofApp::setupBoidsGUI(){
-    ofxUICanvas *gui8Boids_1 = new ofxUICanvas(guiWidth+guiMargin, 0, guiWidth, ofGetHeight());
-    gui8Boids_1->addLabel("PARTICLE BOIDS", OFX_UI_FONT_LARGE);
-    gui8Boids_1->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
+    ofxUICanvas *guiBoids_1 = new ofxUICanvas(guiWidth+guiMargin, 0, guiWidth, ofGetHeight());
+    guiBoids_1->addLabel("PARTICLE BOIDS", OFX_UI_FONT_LARGE);
+    guiBoids_1->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
-    addParticleBasicsGUI(gui8Boids_1, boidsParticles);
+    addParticleBasicsGUI(guiBoids_1, boidsParticles);
 
-    gui8Boids_1->addLabel("Flocking", OFX_UI_FONT_MEDIUM);
-    gui8Boids_1->addSpacer();
-    gui8Boids_1->addIntSlider("Number of particles", 100, 2000, &boidsParticles->nParticles);
-    gui8Boids_1->addSlider("Flocking Radius", 10.0, 100.0, &boidsParticles->flockingRadius);
-    lowThresh = gui8Boids_1->addSlider("Lower Threshold", 0.025, 1.0, &boidsParticles->lowThresh);
+    guiBoids_1->addLabel("Flocking", OFX_UI_FONT_MEDIUM);
+    guiBoids_1->addSpacer();
+    guiBoids_1->addIntSlider("Number of particles", 100, 2000, &boidsParticles->nParticles);
+    guiBoids_1->addSlider("Flocking Radius", 10.0, 100.0, &boidsParticles->flockingRadius);
+    lowThresh = guiBoids_1->addSlider("Lower Threshold", 0.025, 1.0, &boidsParticles->lowThresh);
     lowThresh->setLabelPrecision(3);
-    highThresh = gui8Boids_1->addSlider("Higher Threshold", 0.025, 1.0, &boidsParticles->highThresh);
+    highThresh = guiBoids_1->addSlider("Higher Threshold", 0.025, 1.0, &boidsParticles->highThresh);
     highThresh->setLabelPrecision(3);
-    gui8Boids_1->addSlider("Max speed", 1.0, 600.0, &boidsParticles->maxSpeed);
-    gui8Boids_1->addSlider("Separation Strength", 0.001, 0.1, &boidsParticles->separationStrength)->setLabelPrecision(3);
-    gui8Boids_1->addSlider("Attraction Strength", 0.001, 0.1, &boidsParticles->attractionStrength)->setLabelPrecision(3);
-    gui8Boids_1->addSlider("Alignment Strength", 0.001, 0.1, &boidsParticles->alignmentStrength)->setLabelPrecision(3);
+    guiBoids_1->addSlider("Max speed", 1.0, 600.0, &boidsParticles->maxSpeed);
+    guiBoids_1->addSlider("Separation Strength", 0.001, 0.1, &boidsParticles->separationStrength)->setLabelPrecision(3);
+    guiBoids_1->addSlider("Attraction Strength", 0.001, 0.1, &boidsParticles->attractionStrength)->setLabelPrecision(3);
+    guiBoids_1->addSlider("Alignment Strength", 0.001, 0.1, &boidsParticles->alignmentStrength)->setLabelPrecision(3);
     
-    gui8Boids_1->addSpacer();
-    addParticleInteractionGUI(gui8Boids_1, boidsParticles);
+    guiBoids_1->addSpacer();
+//    addParticleInteractionGUI(guiBoids_1, boidsParticles);
+    guiBoids_1->addLabel("Interaction", OFX_UI_FONT_MEDIUM);
+    guiBoids_1->addSpacer();
+    guiBoids_1->addToggle("Interact", &boidsParticles->interact);
+    guiBoids_1->addSlider("Marker interaction radius", 5.0, 150.0, &boidsParticles->markerRadius);
+    guiBoids_1->addSpacer();
+    guiBoids_1->addToggle("Flow Interaction", &boidsParticles->flowInteraction);
+    guiBoids_1->addToggle("Fluid Interaction", &boidsParticles->fluidInteraction);
+    guiBoids_1->addToggle("Seek Interaction", &boidsParticles->seekInteraction);
+    guiBoids_1->addToggle("Gravity Interaction", &boidsParticles->gravityInteraction);
+    guiBoids_1->addToggle("Attract Interaction", &boidsParticles->attractInteraction);
+    guiBoids_1->addToggle("Repulse Interaction", &boidsParticles->repulseInteraction);
+    guiBoids_1->addSpacer();
     
-    gui8Boids_1->autoSizeToFitWidgets();
-    gui8Boids_1->setVisible(false);
-    ofAddListener(gui8Boids_1->newGUIEvent, this, &ofApp::guiEvent);
-    guis.push_back(gui8Boids_1);
+    guiBoids_1->autoSizeToFitWidgets();
+    guiBoids_1->setVisible(false);
+    ofAddListener(guiBoids_1->newGUIEvent, this, &ofApp::guiEvent);
+    guis.push_back(guiBoids_1);
 
-    ofxUICanvas *gui8Boids_2 = new ofxUICanvas((guiWidth+guiMargin)*2, 0, guiWidth, ofGetHeight());
-    gui8Boids_2->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
-    gui8Boids_2->addSpacer();
+    ofxUICanvas *guiBoids_2 = new ofxUICanvas((guiWidth+guiMargin)*2, 0, guiWidth, ofGetHeight());
+    guiBoids_2->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
+    guiBoids_2->addSpacer();
+    guiBoids_2->addToggle("Bounce Interaction", &boidsParticles->bounceInteraction);
+    guiBoids_2->addSpacer();
 
-    addParticlePropertiesGUI(gui8Boids_2, boidsParticles);
-    addParticlePhysicsGUI(gui8Boids_2, boidsParticles);
+    addParticlePropertiesGUI(guiBoids_2, boidsParticles);
+    addParticlePhysicsGUI(guiBoids_2, boidsParticles);
 
-    gui8Boids_2->autoSizeToFitWidgets();
-    gui8Boids_2->setVisible(false);
-    ofAddListener(gui8Boids_2->newGUIEvent, this, &ofApp::guiEvent);
-    guis.push_back(gui8Boids_2);
+    guiBoids_2->autoSizeToFitWidgets();
+    guiBoids_2->setVisible(false);
+    ofAddListener(guiBoids_2->newGUIEvent, this, &ofApp::guiEvent);
+    guis.push_back(guiBoids_2);
 }
 
 //--------------------------------------------------------------
 void ofApp::setupAnimationsGUI(){
-//    gui8Animations = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
-    ofxUICanvas *gui8Animations_1 = new ofxUICanvas(guiWidth+guiMargin, 0, guiWidth, ofGetHeight());
-    gui8Animations_1->addLabel("PARTICLE ANIMATION", OFX_UI_FONT_LARGE);
-    gui8Animations_1->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
+//    guiAnimations = new ofxUISuperCanvas("8: PARTICLES", 0, 0, guiWidth, ofGetHeight());
+    ofxUICanvas *guiAnimations_1 = new ofxUICanvas(guiWidth+guiMargin, 0, guiWidth, ofGetHeight());
+    guiAnimations_1->addLabel("PARTICLE ANIMATION", OFX_UI_FONT_LARGE);
+    guiAnimations_1->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
-    addParticleBasicsGUI(gui8Animations_1, animationsParticles);
+    addParticleBasicsGUI(guiAnimations_1, animationsParticles);
 
     vector<string> animations;
 	animations.push_back("Rain");
 	animations.push_back("Snow");
 	animations.push_back("Wind");
 	animations.push_back("Explosion");
-	gui8Animations_1->addRadio("Animations", animations, OFX_UI_ORIENTATION_HORIZONTAL);
+	guiAnimations_1->addRadio("Animations", animations, OFX_UI_ORIENTATION_HORIZONTAL);
     
-    addParticleInteractionGUI(gui8Animations_1, animationsParticles);
-    addParticlePropertiesGUI(gui8Animations_1, animationsParticles);
+    addParticleInteractionGUI(guiAnimations_1, animationsParticles);
+    guiAnimations_1->addLabel("Rain and Snow", OFX_UI_FONT_MEDIUM);
+    guiAnimations_1->addSpacer();
+    guiAnimations_1->addSlider("Particles/sec", 0.0, 60.0, &animationsParticles->bornRate);
+    guiAnimations_1->addSpacer();
     
-    gui8Animations_1->autoSizeToFitWidgets();
-    gui8Animations_1->setVisible(false);
-    ofAddListener(gui8Animations_1->newGUIEvent, this, &ofApp::guiEvent);
-    guis.push_back(gui8Animations_1);
+    guiAnimations_1->addLabel("Wind and Explosion", OFX_UI_FONT_MEDIUM);
+    guiAnimations_1->addSpacer();
+    guiAnimations_1->addIntSlider("Number of particles", 100, 2000, &animationsParticles->nParticles);
+    guiAnimations_1->addSpacer();
     
-    ofxUICanvas *gui8Animations_2 = new ofxUICanvas((guiWidth+guiMargin)*2, 0, guiWidth, ofGetHeight());
-    gui8Animations_2->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
+    guiAnimations_1->addSlider("Velocity", 0.0, 100.0, &animationsParticles->velocity);
+    guiAnimations_1->addSlider("Velocity Random[%]", 0.0, 100.0, &animationsParticles->velocityRnd);
+    guiAnimations_1->addSpacer();
     
-    gui8Animations_2->addSpacer();
-    addParticlePhysicsGUI(gui8Animations_2, animationsParticles);
+    guiAnimations_1->autoSizeToFitWidgets();
+    guiAnimations_1->setVisible(false);
+    ofAddListener(guiAnimations_1->newGUIEvent, this, &ofApp::guiEvent);
+    guis.push_back(guiAnimations_1);
     
-    gui8Animations_2->addLabel("Rain and Snow", OFX_UI_FONT_MEDIUM);
-    gui8Animations_2->addSpacer();
-    gui8Animations_2->addSlider("Particles/sec", 0.0, 60.0, &animationsParticles->bornRate);
-    gui8Animations_2->addSpacer();
-    
-    gui8Animations_2->addLabel("Wind and Explosion", OFX_UI_FONT_MEDIUM);
-    gui8Animations_2->addSpacer();
-    gui8Animations_2->addIntSlider("Number of particles", 100, 2000, &animationsParticles->nParticles);
-    gui8Animations_2->addSpacer();
+    ofxUICanvas *guiAnimations_2 = new ofxUICanvas((guiWidth+guiMargin)*2, 0, guiWidth, ofGetHeight());
+    guiAnimations_2->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
+    guiAnimations_2->addSpacer();
+    addParticlePropertiesGUI(guiAnimations_2, animationsParticles);
+    addParticlePhysicsGUI(guiAnimations_2, animationsParticles);
 
-    gui8Animations_2->addSlider("Velocity", 0.0, 100.0, &animationsParticles->velocity);
-    gui8Animations_2->addSlider("Velocity Random[%]", 0.0, 100.0, &animationsParticles->velocityRnd);
-    gui8Animations_2->addSpacer();
-
-    gui8Animations_2->autoSizeToFitWidgets();
-    gui8Animations_2->setVisible(false);
-    ofAddListener(gui8Animations_2->newGUIEvent, this, &ofApp::guiEvent);
-    guis.push_back(gui8Animations_2);
+    guiAnimations_2->autoSizeToFitWidgets();
+    guiAnimations_2->setVisible(false);
+    ofAddListener(guiAnimations_2->newGUIEvent, this, &ofApp::guiEvent);
+    guis.push_back(guiAnimations_2);
 }
 
 void ofApp::addParticleBasicsGUI(ofxUICanvas* gui, ParticleSystem* ps){
@@ -1518,8 +1542,11 @@ void ofApp::addParticleInteractionGUI(ofxUICanvas* gui, ParticleSystem* ps){
     gui->addSlider("Marker interaction radius", 5.0, 150.0, &ps->markerRadius);
     gui->addSpacer();
     gui->addToggle("Flow Interaction", &ps->flowInteraction);
+    gui->addToggle("Fluid Interaction", &ps->fluidInteraction);
+    gui->addToggle("Seek Interaction", &ps->seekInteraction);
     gui->addToggle("Gravity Interaction", &ps->gravityInteraction);
     gui->addToggle("Attract Interaction", &ps->attractInteraction);
+    gui->addToggle("Repulse Interaction", &ps->repulseInteraction);
     gui->addToggle("Bounce Interaction", &ps->bounceInteraction);
     gui->addSpacer();
 }
@@ -1585,11 +1612,12 @@ void ofApp::addParticlePhysicsGUI(ofxUICanvas* gui, ParticleSystem* ps){
 // 12: guiContour
 // 13: guiEmitter_1
 // 14: guiEmitter_2
-// 15: guiGrid
-// 16: guiBoids_1
-// 17: guiBoids_2
-// 18: guiAnimations_1
-// 19: guiAnimations_2
+// 15: guiGrid_1
+// 16: guiGrid_2
+// 17: guiBoids_1
+// 18: guiBoids_2
+// 19: guiAnimations_1
+// 20: guiAnimations_2
 
 //--------------------------------------------------------------
 void ofApp::saveGUISettings(const string path, const bool isACue){
@@ -2366,7 +2394,7 @@ void ofApp::keyPressed(int key){
             currentParticleSystem = 1;
             int idx = 0;
             for(vector<ofxUICanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
-                if(idx == 0 || idx == 15) (*it)->setVisible(true);
+                if(idx == 0 || idx == 15 || idx == 16) (*it)->setVisible(true);
                 else (*it)->setVisible(false);
                 idx++;
             }
@@ -2375,7 +2403,7 @@ void ofApp::keyPressed(int key){
             currentParticleSystem = 2;
             int idx = 0;
             for(vector<ofxUICanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
-                if(idx == 0 || idx == 16 || idx == 17) (*it)->setVisible(true);
+                if(idx == 0 || idx == 17 || idx == 18) (*it)->setVisible(true);
                 else (*it)->setVisible(false);
                 idx++;
             }
@@ -2384,7 +2412,7 @@ void ofApp::keyPressed(int key){
             currentParticleSystem = 3;
             int idx = 0;
             for(vector<ofxUICanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
-                if(idx == 0 || idx == 18 || idx == 19) (*it)->setVisible(true);
+                if(idx == 0 || idx == 19 || idx == 20) (*it)->setVisible(true);
                 else (*it)->setVisible(false);
                 idx++;
             }

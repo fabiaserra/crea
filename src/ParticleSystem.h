@@ -3,6 +3,7 @@
 #include "Particle.h"
 #include "irMarker.h"
 #include "Contour.h"
+#include "Fluid.h"
 
 enum ParticleMode {EMITTER, BOIDS, GRID, RANDOM, ANIMATIONS};
 enum InputSource {MARKERS, CONTOUR};
@@ -15,7 +16,7 @@ class ParticleSystem
 		~ParticleSystem();
 
 		void setup(ParticleMode particleMode, int width, int height);
-		void update(float dt, vector<irMarker>& markers, Contour& contour);
+		void update(float dt, vector<irMarker>& markers, Contour& contour, Fluid& fluid);
 		void draw();
 
         void addParticle(ofPoint pos, ofPoint vel, ofColor color, float radius, float lifetime);
@@ -118,6 +119,7 @@ class ParticleSystem
         bool emit;                  // Born new particles in each frame?
         bool flock;                 // Particles have flocking behavior?
         bool flowInteraction;       // Interact with particles using optical flow?
+        bool fluidInteraction;      // Interact with the fluid velocities?
         bool repulseInteraction;    // Repulse particles from input?
         bool attractInteraction;    // Attract particles to input?
         bool seekInteraction;       // Make particles seek target (markers)?
