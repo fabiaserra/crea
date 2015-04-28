@@ -149,7 +149,7 @@ void ofApp::setup(){
     contour.setMaxAreaRadius(maxContourSize);
     
     // FLUID
-    fluid.setup(contour.getFlowWidth(), contour.getFlowHeight(), kinect.width, kinect.height);
+    fluid.setup(kinect.width, kinect.height);
     
     // Adding constant forces
 //    fluid.addConstantForce(ofPoint(kinect.width*0.5,kinect.height*0.85), ofPoint(0,-2), ofFloatColor(fluidRed,fluidGreen,fluidBlue)*fluidOpacity, fluidRadius);
@@ -1400,12 +1400,13 @@ void ofApp::setupBoidsGUI(){
 
     gui8Boids_1->addLabel("Flocking", OFX_UI_FONT_MEDIUM);
     gui8Boids_1->addSpacer();
+    gui8Boids_1->addIntSlider("Number of particles", 100, 2000, &boidsParticles->nParticles);
     gui8Boids_1->addSlider("Flocking Radius", 10.0, 100.0, &boidsParticles->flockingRadius);
     lowThresh = gui8Boids_1->addSlider("Lower Threshold", 0.025, 1.0, &boidsParticles->lowThresh);
     lowThresh->setLabelPrecision(3);
     highThresh = gui8Boids_1->addSlider("Higher Threshold", 0.025, 1.0, &boidsParticles->highThresh);
     highThresh->setLabelPrecision(3);
-    gui8Boids_1->addSlider("Max speed", 1.0, 100.0, &boidsParticles->maxSpeed);
+    gui8Boids_1->addSlider("Max speed", 1.0, 600.0, &boidsParticles->maxSpeed);
     gui8Boids_1->addSlider("Separation Strength", 0.001, 0.1, &boidsParticles->separationStrength)->setLabelPrecision(3);
     gui8Boids_1->addSlider("Attraction Strength", 0.001, 0.1, &boidsParticles->attractionStrength)->setLabelPrecision(3);
     gui8Boids_1->addSlider("Alignment Strength", 0.001, 0.1, &boidsParticles->alignmentStrength)->setLabelPrecision(3);
@@ -1461,11 +1462,16 @@ void ofApp::setupAnimationsGUI(){
     gui8Animations_2->addSpacer();
     addParticlePhysicsGUI(gui8Animations_2, animationsParticles);
     
+    gui8Animations_2->addLabel("Rain and Snow", OFX_UI_FONT_MEDIUM);
+    gui8Animations_2->addSpacer();
+    gui8Animations_2->addSlider("Particles/sec", 0.0, 60.0, &animationsParticles->bornRate);
+    gui8Animations_2->addSpacer();
+    
     gui8Animations_2->addLabel("Wind and Explosion", OFX_UI_FONT_MEDIUM);
     gui8Animations_2->addSpacer();
-    gui8Animations_2->addIntSlider("Number of particles born", 100, 2000, &animationsParticles->nParticles);
-    
+    gui8Animations_2->addIntSlider("Number of particles", 100, 2000, &animationsParticles->nParticles);
     gui8Animations_2->addSpacer();
+
     gui8Animations_2->addSlider("Velocity", 0.0, 100.0, &animationsParticles->velocity);
     gui8Animations_2->addSlider("Velocity Random[%]", 0.0, 100.0, &animationsParticles->velocityRnd);
     gui8Animations_2->addSpacer();

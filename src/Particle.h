@@ -22,6 +22,7 @@ class Particle
 
         void addFlockingForces(Particle &p);
         void seek(ofPoint target, float radiusSqrd);
+        void seek(ofPoint target);
         void pullToCenter();
         void limitVelocity();
 

@@ -120,6 +120,7 @@ class ParticleSystem
         bool flowInteraction;       // Interact with particles using optical flow?
         bool repulseInteraction;    // Repulse particles from input?
         bool attractInteraction;    // Attract particles to input?
+        bool seekInteraction;       // Make particles seek target (markers)?
         bool gravityInteraction;    // Apply gravity force to particles touched with input?
         bool bounceInteraction;     // Bounce particles with depth contour?
         bool returnToOrigin;        // Make particles return to their born position?
@@ -141,8 +142,8 @@ class ParticleSystem
 		ofPoint randomVector();
 		float randomRange(float percentage, float value);
 		ofPoint getClosestMarker(const Particle& particle, const vector<irMarker>& markers, float markerRadius);
-//		irMarker getClosestMarker(const Particle &particle, const vector<irMarker> &markers, float markerRadius);
-		ofPoint getClosestPointInContour(const Particle& particle, const Contour& contour, unsigned int* contourIdx = NULL);
+        ofPoint getClosestMarker(const Particle &particle, const vector<irMarker> &markers);
+        ofPoint getClosestPointInContour(const Particle& particle, const Contour& contour, unsigned int* contourIdx = NULL);
     
         void fadeIn(float dt);
         void fadeOut(float dt);

@@ -342,15 +342,27 @@ void Particle::seek(ofPoint target, float radiusSqrd){
     dirToTarget.normalize();
     float distSqrd = pos.squareDistance(target);
     if(distSqrd < radiusSqrd){
-        float F = ofMap(distSqrd, 0, radiusSqrd, 0, 400);
+        float F = ofMap(distSqrd, 0, radiusSqrd, 0, 40);
         dirToTarget *= F;
     }
     else{
-        dirToTarget *= 400;
+        dirToTarget *= 40.0;
     }
-    ofPoint steer = dirToTarget - vel;
-    frc += steer;
+    frc += dirToTarget;
 }
+
+void Particle::seek(ofPoint target){
+    ofPoint dirToTarget = target - pos;
+    dirToTarget.normalize();
+//    float distSqrd = pos.squareDistance(target);
+//    float F = ofMap(distSqrd, 0, 1, 0, 400);
+    dirToTarget *= ofRandom(15, 30);
+    vel += dirToTarget;
+//    dirToTarget *= 400;
+//    ofPoint steer = dirToTarget - vel;
+//    frc += steer;
+}
+
 
 void Particle::marginsBounce(){
     bool isBouncing = false;
