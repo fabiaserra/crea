@@ -9,7 +9,7 @@ class Contour{
     public:
         Contour();
 
-        void setup(int width, int height);
+        void setup(int width, int height, float scaleFactor = 4.0);
         void update(float dt, ofImage &depthImage);
         void draw();
 
@@ -54,7 +54,6 @@ class Contour{
         //--------------------------------------------------------------
         bool doOpticalFlow;     // compute optical flow?
         float scaleFactor;      // scaling factor of the optical flow image
-        float flowScale;        // scalar to multiply by the offset of flow
         //--------------------------------------------------------------
         float flowStrength;
         int   flowOffset;

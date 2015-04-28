@@ -25,9 +25,6 @@ Contour::Contour()
     maxOpacity          = 255.0; // Maximum opacity of particles
     
     doOpticalFlow       = true;  // compute optical flow?
-    
-    scaleFactor         = 4.0;   // scaling factor of the depth image to compute the optical flow in lower res.
-    flowScale           = 1.5;   // scalar of flow velocities
 
     // optical flow settings
     flowStrength        = 10.0;  // 0 ~ 100
@@ -73,9 +70,11 @@ Contour::Contour()
     drawVelocities      = false;
 }
 
-void Contour::setup(int width, int height){
+void Contour::setup(int width, int height, float scaleFactor){
     this->width     = width;
     this->height    = height;
+    
+    this->scaleFactor = scaleFactor; // scaling factor of the depth image to compute the optical flow in lower res.
     
     this->flowWidth = width/scaleFactor;
     this->flowHeight = height/scaleFactor;
@@ -402,7 +401,7 @@ ofVec2f Contour::getFlowOffset(ofPoint p){
         offset.y = flowPixels[(y*flowWidth+x)*3 + 1]; // g
     }
 
-    return offset*flowScale;
+    return offset;
 }
 
 void Contour::computeVelocities(){
