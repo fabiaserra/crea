@@ -19,6 +19,9 @@ Fluid::Fluid(){
     opacity                      = 0.0;   // Actual general opacity of the fluid
     maxOpacity                   = 255.0; // Maximum general opacity of the fluid
     
+    scaleFactor                  = 4.0;   // scaling factor to compute fluid in lower res.
+    fluidScale                   = 1.5;   // scalar of fluid velocities
+    
     // Fluid parameters
     speed                        = 10.0;  // 0 ~ 100
     cellSize                     = 1.25;  // 0 ~ 2
@@ -70,20 +73,26 @@ Fluid::Fluid(){
     drawTemperature              = false;
 }
 
-void Fluid::setup(int flowWidth, int flowHeight, int drawWidth, int drawHeight, bool doFasterInternalFormat){
-    this->width = drawWidth;
-    this->height = drawHeight;
+void Fluid::setup(int width, int height, bool doFasterInternalFormat){
+    this->width = width;
+    this->height = height;
+    
+    this->flowWidth = width/scaleFactor;
+    this->flowHeight = height/scaleFactor;
     
     // Fluid
-    fluid.setup(flowWidth, flowHeight, drawWidth, drawHeight, doFasterInternalFormat);
+    fluid.setup(flowWidth, flowHeight, width, height, doFasterInternalFormat);
     
     // Particles
-    particleFlow.setup(flowWidth, flowHeight, drawWidth, drawHeight);
+    particleFlow.setup(flowWidth, flowHeight, width, height);
+    
+    // Create rectangle with flow size
+    rescaledRect.set(0, 0, flowWidth, flowHeight);
     
     // Setup marker drawing temporal Forces with default values
     numMarkerForces = 3;
     markerForces = new ftDrawForce[numMarkerForces];
-    markerForces[0].setup(drawWidth, drawHeight, FT_DENSITY, true);
+    markerForces[0].setup(width, height, FT_DENSITY, true);
     markerForces[0].setName("draw full res");
     markerForces[0].setForce(ofVec4f(markerRed, markerGreen, markerBlue, markerOpacity));
     markerForces[0].setRadius(0.0140983);
@@ -114,7 +123,11 @@ void Fluid::setup(int flowWidth, int flowHeight, int drawWidth, int drawHeight, 
     
     // Allocate visualisation classes
     displayScalar.allocate(flowWidth, flowHeight);
-    velocityField.allocate(flowWidth / 4, flowHeight / 4);
+    velocityField.allocate(flowWidth/4, flowHeight/4);
+    
+    // Allocate fluid pixels
+    fluidTexture.allocate(flowWidth, flowHeight, GL_RGB32F);
+    fluidPixels.allocate(flowWidth, flowHeight, 3);
 }
 
 void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour, float mouseX, float mouseY){
@@ -190,6 +203,10 @@ void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour, float 
 
         fluid.update(dt);
         
+        // Get fluid texture and save to pixels so we can operate with it
+        fluidTexture = fluid.getVelocity();
+        fluidTexture.readToPixels(fluidPixels);
+        
         if((markersInputParticles || contourInputParticles) && particlesActive){
             // set particle flow parameters
             particleFlow.setSpeed(fluid.getSpeed());
@@ -258,13 +275,6 @@ void Fluid::draw(){
 
 void Fluid::updateDrawForces(float dt){
     
-//    ofPoint m = ofPoint(mouseX,mouseY);
-//    ofPoint d = (m - oldM);
-//    oldM = m;
-//    ofPoint c = ofPoint(640*0.5, 480*0.5) - m;
-//    c.normalize();
-//    //    fluid.addTemporalForce(m, d, ofFloatColor(c.x,c.y,0.5)*sin(ofGetElapsedTimef()),3.0f);
-    
     // Update marker drawing forces
     for (int i = 0; i < numMarkerForces; i++){
         if(i == 0) markerForces[i].setForce(markerColor);
@@ -303,6 +313,21 @@ void Fluid::updateDrawForces(float dt){
             }
         }
     }
+}
+
+ofVec2f Fluid::getFluidOffset(ofPoint p){
+    ofPoint p_ = p/scaleFactor;
+    ofVec2f offset(0,0);
+    
+    if(rescaledRect.inside(p_)){
+        int x = p_.x;
+        int y = p_.y;
+        
+        offset.x = fluidPixels[(y*flowWidth+x)*3 + 0]; // r
+        offset.y = fluidPixels[(y*flowWidth+x)*3 + 1]; // g
+    }
+    
+    return offset;
 }
 
 void Fluid::reset(){

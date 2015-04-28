@@ -8,10 +8,12 @@ class Fluid{
     public:
         Fluid();
 
-        void setup(int flowWidth, int flowHeight, int drawWidth, int drawHeight, bool doFasterInternalFormat = false);
+        void setup(int width, int height, bool doFasterInternalFormat = false);
         void update(float dt, vector<irMarker> &markers, Contour &contour, float mouseX, float mouseY);
         void updateDrawForces(float dt);
         void draw();
+    
+        ofVec2f getFluidOffset(ofPoint p);
     
         void reset();
         void resetDrawForces();
@@ -28,13 +30,19 @@ class Fluid{
         float elapsedFadeTime;  // Elapsed time of fade
         float fadeTime;         // Transition time of fade
         //--------------------------------------------------------------
-        int width;              // Fluid boundaries
+        int width;              // Fluid drawing boundaries
         int height;
+        //--------------------------------------------------------------
+        int flowWidth;          // Fluid computing boundaries
+        int flowHeight;
         //--------------------------------------------------------------
         float red, green, blue;
         //--------------------------------------------------------------
         float opacity;
         float maxOpacity;
+        //--------------------------------------------------------------
+        float scaleFactor;          // scaling factor of the optical flow image
+        float fluidScale;           // scalar to multiply by the offset of fluid
         //--------------------------------------------------------------
         bool markersInput;          // Fluid input are the IR markers?
         bool contourInput;          // Fluid input is the depth contour?
@@ -97,6 +105,11 @@ class Fluid{
         //--------------------------------------------------------------
         ftDisplayScalar displayScalar;
         ftVelocityField	velocityField;
+        //--------------------------------------------------------------
+        ofTexture fluidTexture;
+        ofFloatPixels fluidPixels;
+        //--------------------------------------------------------------
+        ofRectangle rescaledRect;
         //--------------------------------------------------------------
         void fadeIn(float dt);
         void fadeOut(float dt);

@@ -25,7 +25,7 @@ Contour::Contour()
     maxOpacity          = 255.0; // Maximum opacity of particles
     
     doOpticalFlow       = true;  // compute optical flow?
-
+    
     scaleFactor         = 4.0;   // scaling factor of the depth image to compute the optical flow in lower res.
     flowScale           = 1.5;   // scalar of flow velocities
 
@@ -77,10 +77,10 @@ void Contour::setup(int width, int height){
     this->width     = width;
     this->height    = height;
     
-    flowWidth = width/scaleFactor;
-    flowHeight = height/scaleFactor;
+    this->flowWidth = width/scaleFactor;
+    this->flowHeight = height/scaleFactor;
     
-    // Flow & Mask
+    // Allocate Flow & Mask
     opticalFlow.setup(flowWidth, flowHeight);
     opticalFlow.setStrength(100.0);
     velocityMask.setup(width, height);
@@ -89,6 +89,7 @@ void Contour::setup(int width, int height){
     velocityField.allocate(flowWidth / 4, flowHeight / 4);
 //    velocityField.setLineSmooth(true);
     
+    // Create rectangle with flow size
     rescaledRect.set(0, 0, flowWidth, flowHeight);
     
     contourFinder.setSortBySize(true);  // sort contours by size
@@ -103,6 +104,8 @@ void Contour::setup(int width, int height){
     // allocate flow texture
     flowTexture.allocate(flowWidth, flowHeight, GL_RGB32F);
     flowPixels.allocate(flowWidth, flowHeight, 3);
+    
+    // velocity mask pixels
     velocityMaskPixels.allocate(flowWidth, flowHeight, 4);
     
     // allocate FBO
@@ -135,6 +138,7 @@ void Contour::update(float dt, ofImage &depthImage){
         opticalFlow.setTimeBlurDecay(flowTimeBlurDecay);
         opticalFlow.update(dt);
         
+        // Save opt flow texture and save to pixels to operate with them and get velocities
         flowTexture = opticalFlow.getOpticalFlowDecay();
         flowTexture.readToPixels(flowPixels);
         
