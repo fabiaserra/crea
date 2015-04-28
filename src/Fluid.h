@@ -8,7 +8,7 @@ class Fluid{
     public:
         Fluid();
 
-        void setup(int width, int height, bool doFasterInternalFormat = false);
+        void setup(int width, int height, float scaleFactor = 4.0, bool doFasterInternalFormat = false);
         void update(float dt, vector<irMarker> &markers, Contour &contour, float mouseX, float mouseY);
         void updateDrawForces(float dt);
         void draw();
@@ -42,7 +42,6 @@ class Fluid{
         float maxOpacity;
         //--------------------------------------------------------------
         float scaleFactor;          // scaling factor of the optical flow image
-        float fluidScale;           // scalar to multiply by the offset of fluid
         //--------------------------------------------------------------
         bool markersInput;          // Fluid input are the IR markers?
         bool contourInput;          // Fluid input is the depth contour?

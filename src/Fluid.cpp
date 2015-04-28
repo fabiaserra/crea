@@ -19,9 +19,6 @@ Fluid::Fluid(){
     opacity                      = 0.0;   // Actual general opacity of the fluid
     maxOpacity                   = 255.0; // Maximum general opacity of the fluid
     
-    scaleFactor                  = 4.0;   // scaling factor to compute fluid in lower res.
-    fluidScale                   = 1.5;   // scalar of fluid velocities
-    
     // Fluid parameters
     speed                        = 10.0;  // 0 ~ 100
     cellSize                     = 1.25;  // 0 ~ 2
@@ -73,9 +70,11 @@ Fluid::Fluid(){
     drawTemperature              = false;
 }
 
-void Fluid::setup(int width, int height, bool doFasterInternalFormat){
+void Fluid::setup(int width, int height, float scaleFactor, bool doFasterInternalFormat){
     this->width = width;
     this->height = height;
+    
+    this->scaleFactor = scaleFactor;
     
     this->flowWidth = width/scaleFactor;
     this->flowHeight = height/scaleFactor;
@@ -127,7 +126,7 @@ void Fluid::setup(int width, int height, bool doFasterInternalFormat){
     
     // Allocate fluid pixels
     fluidTexture.allocate(flowWidth, flowHeight, GL_RGB32F);
-    fluidPixels.allocate(flowWidth, flowHeight, 3);
+    fluidPixels.allocate(flowWidth, flowHeight, 4);
 }
 
 void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour, float mouseX, float mouseY){
@@ -322,9 +321,8 @@ ofVec2f Fluid::getFluidOffset(ofPoint p){
     if(rescaledRect.inside(p_)){
         int x = p_.x;
         int y = p_.y;
-        
-        offset.x = fluidPixels[(y*flowWidth+x)*3 + 0]; // r
-        offset.y = fluidPixels[(y*flowWidth+x)*3 + 1]; // g
+        offset.x = fluidPixels[(y*flowWidth+x)*4 + 0]; // r
+        offset.y = fluidPixels[(y*flowWidth+x)*4 + 1]; // g
     }
     
     return offset;
