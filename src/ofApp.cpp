@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2015 Fabia Serra Arrizabalaga
+ *
+ * This file is part of Crea
+ *
+ * Crea is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation (FSF), either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the Affero GNU General Public License
+ * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
+ */
+
 #include "ofApp.h"
 
 using namespace ofxCv;
@@ -88,14 +107,25 @@ void ofApp::setup(){
     grayThreshFar.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
     irImage.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
     irOriginal.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
-
-    croppingMask = Mat::ones(kinect.height, kinect.width, CV_8UC1);
-    leftMask = 0; rightMask = kinect.width; topMask = 0; bottomMask = kinect.height;
+    
+    // ALLOCATE CROPPING MASKS
+    depthCroppingMask = Mat::ones(kinect.height, kinect.width, CV_8UC1);
+    irCroppingMask    = Mat::ones(kinect.height, kinect.width, CV_8UC1);
+    
+    depthLeftMask   = irLeftMask    = 0;
+    depthRightMask  = irRightMask   = kinect.width;
+    depthTopMask    = irTopMask     = 0;
+    depthBottomMask = irBottomMask  = kinect.height;
 
     // FILTER PARAMETERS DEPTH IMAGE
-    numDilates = 4;
-    numErodes = 2;
-    blurValue = 7;
+    depthNumDilates = 4;
+    depthNumErodes  = 2;
+    depthBlurValue  = 7;
+    
+    // FILTER PARAMETERS IR IMAGE
+    irNumDilates    = 3;
+    irNumErodes     = 1;
+    irBlurValue     = 21;
 
     // KINECT PARAMETERS
     flipKinect      = false;
@@ -153,10 +183,7 @@ void ofApp::setup(){
     
     // FLUID
     fluid.setup(kinect.width, kinect.height, scaleFactor);
-    
-    // Adding constant forces
-//    fluid.addConstantForce(ofPoint(kinect.width*0.5,kinect.height*0.85), ofPoint(0,-2), ofFloatColor(fluidRed,fluidGreen,fluidBlue)*fluidOpacity, fluidRadius);
-
+ 
     // SEQUENCE
     sequence.setup(numMarkers);
     sequence.load("sequences/sequenceT2.xml");
@@ -368,36 +395,38 @@ void ofApp::update(){
     copy(depthOriginal, grayThreshNear);
     copy(depthOriginal, grayThreshFar);
 
-    // Filter the IR image
-    erode(irImage); // delete small white dots
-    dilate(irImage);
-    dilate(irImage);
-    dilate(irImage);
-    blur(irImage, 21);
+    // Filter and then threshold the IR image
+    for(int i = 0; i < irNumErodes; i++){
+        erode(irImage); // delete small white dots
+    }
+    for(int i = 0; i < irNumDilates; i++){
+        dilate(irImage);
+    }
+    blur(irImage, irBlurValue);
     threshold(irImage, irThreshold);
 
     // Treshold and filter depth image
     threshold(grayThreshNear, nearThreshold, true);
     threshold(grayThreshFar, farThreshold);
     bitwise_and(grayThreshNear, grayThreshFar, depthImage);
-    for(int i = 0; i < numDilates; i++){
-        dilate(depthImage);
-    }
-    for(int i = 0; i < numErodes; i++){
+    for(int i = 0; i < depthNumErodes; i++){
         erode(depthImage);
     }
-    blur(depthImage, blurValue);
+    for(int i = 0; i < depthNumDilates; i++){
+        dilate(depthImage);
+    }
+    blur(depthImage, depthBlurValue);
 
-    // Crop images
+    // Crop depth image
     Mat depthMat = toCv(depthImage);
-    Mat irMat = toCv(irImage);
     Mat depthCropped = Mat::zeros(kinect.height, kinect.width, CV_8UC1);
-    Mat irCropped = Mat::zeros(kinect.height, kinect.width, CV_8UC1);
-
-    depthCropped = depthMat.mul(croppingMask);
-    irCropped = irMat.mul(croppingMask);
-
+    depthCropped = depthMat.mul(depthCroppingMask);
     copy(depthCropped, depthImage);
+    
+    // Crop IR image
+    Mat irMat = toCv(irImage);
+    Mat irCropped = Mat::zeros(kinect.height, kinect.width, CV_8UC1);
+    irCropped = irMat.mul(irCroppingMask);
     copy(irCropped, irImage);
 
     // Update images
@@ -836,18 +865,21 @@ void ofApp::setupKinectGUI(){
     guiKinect_1->addRangeSlider("Clipping range", 500, 5000, &nearClipping, &farClipping);
     guiKinect_1->addRangeSlider("Threshold range", 0.0, 255.0, &farThreshold, &nearThreshold);
     guiKinect_1->addRangeSlider("Contour size", 0.0, 400.0, &minContourSize, &maxContourSize);
-
-    guiKinect_1->addRangeSlider("Left/Right Crop", 0.0, 640.0, &leftMask, &rightMask);
-    guiKinect_1->addRangeSlider("Top/Bottom Crop", 0.0, 480.0, &topMask, &bottomMask);
-
+    
+    guiKinect_1->addSpacer();
+    guiKinect_1->addRangeSlider("Depth Left/Right Crop", 0.0, 640.0, &depthLeftMask, &depthRightMask);
+    guiKinect_1->addRangeSlider("Depth Top/Bottom Crop", 0.0, 480.0, &depthTopMask, &depthBottomMask);
+    
+    guiKinect_1->addSpacer();
+    guiKinect_1->addIntSlider("Depth Number of Erosions", 0, 8, &depthNumErodes);
+    guiKinect_1->addIntSlider("Depth Number of Dilations", 0, 8, &depthNumDilates);
+    guiKinect_1->addIntSlider("Depth Blur Size", 0, 41, &depthBlurValue);
+    
+    guiKinect_1->addSpacer();
     guiKinect_1->addImage("Depth original", &depthOriginal, kinect.width/6, kinect.height/6, true);
     guiKinect_1->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     guiKinect_1->addImage("Depth filtered", &depthImage, kinect.width/6, kinect.height/6, true);
     guiKinect_1->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    
-    guiKinect_1->addIntSlider("Erode", 0, 8, &numErodes);
-    guiKinect_1->addIntSlider("Dilate", 0, 8, &numDilates);
-    guiKinect_1->addIntSlider("Blur", 0, 41, &blurValue);
     guiKinect_1->addSpacer();
 
     guiKinect_1->autoSizeToFitWidgets();
@@ -861,8 +893,21 @@ void ofApp::setupKinectGUI(){
     guiKinect_2->addSpacer();
     guiKinect_2->addSlider("IR Threshold", 0.0, 255.0, &irThreshold);
     guiKinect_2->addRangeSlider("Markers size", 0.0, 150.0, &minMarkerSize, &maxMarkerSize);
+    
+    guiKinect_2->addSpacer();
     guiKinect_2->addSlider("Tracker persistence", 5.0, 500.0, &trackerPersistence);
     guiKinect_2->addSlider("Tracker max distance", 5.0, 500.0, &trackerMaxDistance);
+    
+    guiKinect_2->addSpacer();
+    guiKinect_2->addRangeSlider("IR Left/Right Crop", 0.0, 640.0, &irLeftMask, &irRightMask);
+    guiKinect_2->addRangeSlider("IR Top/Bottom Crop", 0.0, 480.0, &irTopMask, &irBottomMask);
+    
+    guiKinect_2->addSpacer();
+    guiKinect_2->addIntSlider("IR Number of Erosions", 0, 8, &irNumErodes);
+    guiKinect_2->addIntSlider("IR Number of Dilations", 0, 8, &irNumDilates);
+    guiKinect_2->addIntSlider("IR Blur Size", 0, 41, &irBlurValue);
+    
+    guiKinect_2->addSpacer();
     guiKinect_2->addImage("IR original", &irOriginal, kinect.width/6, kinect.height/6, true);
     guiKinect_2->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     guiKinect_2->addImage("IR filtered", &irImage, kinect.width/6, kinect.height/6, true);
@@ -1304,7 +1349,6 @@ void ofApp::setupEmitterGUI(){
     guiEmitter_1->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     addParticleBasicsGUI(guiEmitter_1, emitterParticles);
-    addParticleInteractionGUI(guiEmitter_1, emitterParticles);
 
     guiEmitter_1->addLabel("Emitter", OFX_UI_FONT_MEDIUM);
     guiEmitter_1->addSpacer();
@@ -1321,6 +1365,7 @@ void ofApp::setupEmitterGUI(){
     guiEmitter_1->addRadio("Emitters", emitters, OFX_UI_ORIENTATION_VERTICAL)->setTriggerType(OFX_UI_TRIGGER_ALL);//->activateToggle("Emit all time");
     
     guiEmitter_1->addSpacer();
+    addParticlePhysicsGUI(guiEmitter_1, emitterParticles);
 
     guiEmitter_1->autoSizeToFitWidgets();
     guiEmitter_1->setVisible(false);
@@ -1343,8 +1388,9 @@ void ofApp::setupEmitterGUI(){
     guiEmitter_2->setWidgetSpacing(3);
     guiEmitter_2->addToggle("Color", &emitterParticles->colorAge);
     guiEmitter_2->addSpacer();
+    
+    addParticleInteractionGUI(guiEmitter_2  , emitterParticles);
 
-    addParticlePhysicsGUI(guiEmitter_2, emitterParticles);
 
     guiEmitter_2->autoSizeToFitWidgets();
     guiEmitter_2->setVisible(false);
@@ -1953,26 +1999,26 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         contour.setMinAreaRadius(minContourSize);
         contour.setMaxAreaRadius(maxContourSize);
     }
-    if(e.getName() == "Left/Right Crop" || e.getName() == "Top/Bottom Crop"){
-        croppingMask = Mat::ones(480, 640, CV_8UC1);
-        for(int i = 0; i < (int)leftMask; i++){
-            for(int j = 0; j < croppingMask.rows; j++){
-                croppingMask.at<uchar>(cv::Point(i,j)) = 0;
+    if(e.getName() == "Depth Left/Right Crop" || e.getName() == "Depth Top/Bottom Crop"){
+        depthCroppingMask = Mat::ones(480, 640, CV_8UC1);
+        for(int i = 0; i < (int)depthLeftMask; i++){
+            for(int j = 0; j < depthCroppingMask.rows; j++){
+                depthCroppingMask.at<uchar>(cv::Point(i,j)) = 0;
             }
         }
-        for(int i = 0; i < croppingMask.cols; i++){
-            for(int j = 0; j < (int)topMask; j++){
-                croppingMask.at<uchar>(cv::Point(i,j)) = 0;
+        for(int i = 0; i < depthCroppingMask.cols; i++){
+            for(int j = 0; j < (int)depthTopMask; j++){
+                depthCroppingMask.at<uchar>(cv::Point(i,j)) = 0;
             }
         }
-        for(int i = (int)rightMask-1; i < croppingMask.cols; i++){
-            for(int j = 0; j < croppingMask.rows; j++){
-                croppingMask.at<uchar>(cv::Point(i,j)) = 0;
+        for(int i = (int)depthRightMask-1; i < depthCroppingMask.cols; i++){
+            for(int j = 0; j < depthCroppingMask.rows; j++){
+                depthCroppingMask.at<uchar>(cv::Point(i,j)) = 0;
             }
         }
-        for(int i = 0; i < croppingMask.cols; i++){
-            for(int j = (int)bottomMask-1; j < croppingMask.rows; j++){
-                croppingMask.at<uchar>(cv::Point(i,j)) = 0;
+        for(int i = 0; i < depthCroppingMask.cols; i++){
+            for(int j = (int)depthBottomMask-1; j < depthCroppingMask.rows; j++){
+                depthCroppingMask.at<uchar>(cv::Point(i,j)) = 0;
             }
         }
     }
@@ -1985,6 +2031,29 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     }
     if(e.getName() == "Tracker max distance"){
         tracker.setMaximumDistance(trackerMaxDistance); // an object can move up to 'trackerMaxDistance' pixels per frame
+    }
+    if(e.getName() == "IR Left/Right Crop" || e.getName() == "IR Top/Bottom Crop"){
+        irCroppingMask = Mat::ones(480, 640, CV_8UC1);
+        for(int i = 0; i < (int)irLeftMask; i++){
+            for(int j = 0; j < irCroppingMask.rows; j++){
+                irCroppingMask.at<uchar>(cv::Point(i,j)) = 0;
+            }
+        }
+        for(int i = 0; i < irCroppingMask.cols; i++){
+            for(int j = 0; j < (int)irTopMask; j++){
+                irCroppingMask.at<uchar>(cv::Point(i,j)) = 0;
+            }
+        }
+        for(int i = (int)irRightMask-1; i < irCroppingMask.cols; i++){
+            for(int j = 0; j < irCroppingMask.rows; j++){
+                irCroppingMask.at<uchar>(cv::Point(i,j)) = 0;
+            }
+        }
+        for(int i = 0; i < irCroppingMask.cols; i++){
+            for(int j = (int)irBottomMask-1; j < irCroppingMask.rows; j++){
+                irCroppingMask.at<uchar>(cv::Point(i,j)) = 0;
+            }
+        }
     }
     if(e.getName() == "Show Markers Path"){
         ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;

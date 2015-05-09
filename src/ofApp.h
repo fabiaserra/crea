@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2015 Fabia Serra Arrizabalaga
+ *
+ * This file is part of Crea
+ *
+ * Crea is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation (FSF), either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the Affero GNU General Public License
+ * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
+ */
+
 #pragma once
 
 // Addons
@@ -95,22 +114,28 @@ class ofApp : public ofBaseApp{
         bool  flipKinect;       // Flip kinect image
         bool  resetKinect;      // Reset kinect
         int   angle;            // Tilt angle of the kinect
-//        ofVec2f reScale;        // Ratios to scale the Image to full screen
         float reScale;          // Ratio to scale the Image to full screen
-        int numDilates;         // Number of dilates applied to depth image
-        int numErodes;          // Number of erodes applied to depth image
-        int blurValue;          // Size of the blur filter
+        //--------------------------------------------------------------
+        int depthNumDilates;    // Number of dilates applied to depth image
+        int depthNumErodes;     // Number of erodes applied to depth image
+        int depthBlurValue;     // Size of the blur filter to depth image
+        //--------------------------------------------------------------
+        int irNumDilates;       // Number of dilates applied to IR image
+        int irNumErodes;        // Number of erodes applied to IR image
+        int irBlurValue;        // Size of the blur filter to IR image
         //--------------------------------------------------------------
         ofImage irImage, irOriginal;
         ofImage depthImage, depthOriginal;
         ofImage grayThreshNear;
         ofImage grayThreshFar;
         //--------------------------------------------------------------
-        cv::Mat croppingMask;
-        float leftMask;
-        float rightMask;
-        float topMask;
-        float bottomMask;
+        cv::Mat depthCroppingMask;
+        float depthLeftMask, depthRightMask;
+        float depthTopMask, depthBottomMask;
+        //--------------------------------------------------------------
+        cv::Mat irCroppingMask;
+        float irLeftMask, irRightMask;
+        float irTopMask, irBottomMask;
         //--------------------------------------------------------------
         ofxCv::ContourFinder irMarkerFinder;
         ofxCv::RectTrackerFollower<irMarker> tracker;
