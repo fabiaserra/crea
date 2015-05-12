@@ -38,11 +38,14 @@
 
 // VMO files
 //-----------------------
+//#define GESTURE_TRACKER
+#ifdef GESTURE_TRACKER
 #include "vmo.h"
 #include "helper.h"
+#endif
 
 // comment this to use the recorded images
-#define KINECT_CONNECTED
+//#define KINECT_CONNECTED
 
 // Uncomment this to use an xml sequence file for the tracking
 //#define KINECT_SEQUENCE
@@ -215,10 +218,12 @@ class ofApp : public ofBaseApp{
         float trackerPersistence;
         float trackerMaxDistance;
         //------VMO Declaration-----------------------------------------
+        #ifdef GESTURE_TRACKER
         vmo seqVmo;
         vmo::pttr pttrList;
         vmo::belief currentBf;
         vmo::belief prevBf;
+        #endif
 
         // vector<ofPoint>& loadedFrames;
         int dimensions;

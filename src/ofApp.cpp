@@ -196,7 +196,8 @@ void ofApp::setup(){
 
     // SONG
     song.loadSound("songs/ASuitableEnsemble.mp3", true);
-
+    
+    #ifdef GESTURE_TRACKER
     // VMO SETUP
     dimensions = 2;
     slide = 1.0;
@@ -229,7 +230,6 @@ void ofApp::setup(){
 		float t = vmo::findThreshold(vmoObs, numElements, start, step, stop); // Temporary threshold range and step
 		int minLen = 10;
 
-		cout << t << endl;
 		seqVmo = vmo::buildOracle(vmoObs, numElements, t);
 		// 2.2 Output pattern list
 		pttrList = vmo::findPttr(seqVmo, minLen);
@@ -275,8 +275,6 @@ void ofApp::setup(){
         int minLen = 2;
         float t = 4.8; // for sequenceT2.xml
 
-		cout << t << endl;
-
 		seqVmo = vmo::buildOracle(savedObs, numElements, t);
 
 		// 2.2 Output pattern list
@@ -284,7 +282,6 @@ void ofApp::setup(){
 		sequence.loadPatterns(processPttr(seqVmo, savedObs, pttrList, numMarkers, dimensions));
 		drawSequencePatterns = false;
         drawSequencePatternsSeparate = false;
-		cout << sequence.patterns.size() << endl;
 	}
     pastObs.assign(numMarkers*dimensions, 0.0);
 //    pastFeatures.assign(numElements, 0.0);
@@ -293,14 +290,7 @@ void ofApp::setup(){
     currentBf = vmo::vmo::belief();
 //    prevBf = vmo::vmo::belief();
 //
-//    cout << "pattern size: "<<sequence.patterns.size() << endl;
-//    for (int i = 0; i < pttrList.size; i++) {
-//        cout << "pattern "<< i+1 << endl;
-//        for (int j = 0; j<pttrList.sfxPts[i].size(); j++){
-//            cout << "	begin: "<< pttrList.sfxPts[i][j] - pttrList.sfxLen[i]<< endl;
-//            cout << "	end  :"<< pttrList.sfxPts[i][j] << endl;
-//        }
-//    }
+    #endif
     
     // SETUP GUI
     setupGUI();
@@ -462,9 +452,9 @@ void ofApp::update(){
     gridParticles->update(dt, markers, contour, fluid);
     boidsParticles->update(dt, markers, contour, fluid);
     animationsParticles->update(dt, markers, contour, fluid);
-
+    
+    #ifdef GESTURE_TRACKER
     #ifdef KINECT_SEQUENCE
-
         if(isTracking){
             vector<float> obs(numMarkers*dimensions, 0.0); // Temporary code
             for(unsigned int i = 0; i < kinectSequence.getNumMarkers(); i++){
@@ -599,6 +589,7 @@ void ofApp::update(){
         }
 
     #endif // KINECT_SEQUENCE
+    #endif // GESTURE_TRACKER
 }
 
 //--------------------------------------------------------------
@@ -678,7 +669,10 @@ void ofApp::draw(){
     if(drawSequence) sequence.draw();
     if(drawSequenceSegments) sequence.drawSegments();
     if(drawSequencePatterns) sequence.drawPatterns(gestureUpdate);
-    if(isTracking) sequence.drawTracking(currentBf.currentIdx);
+    
+    #ifdef GESTURE_TRACKER
+        if(isTracking) sequence.drawTracking(currentBf.currentIdx);
+    #endif // GESTURE_TRACKER
     
     ofPopStyle();
     ofPopMatrix();
