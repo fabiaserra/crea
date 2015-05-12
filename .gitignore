@@ -103,7 +103,6 @@ Thumbs.db
 # Folder config file
 Desktop.ini
 
-
 openFrameworks-Info.plist
 
 Project.xcconfig
@@ -114,8 +113,19 @@ crea.xcodeproj/xcshareddata/xcschemes/crea Debug.xcscheme
 
 crea.xcodeproj/xcshareddata/xcschemes/crea Release.xcscheme
 
-*.jpg
-
 bin/data/cues
-
 bin/data/settings
+bin/data/kinect/depth2
+bin/data/kinect/depth3
+bin/data/kinect/depth4
+bin/data/kinect/ir2
+bin/data/kinect/ir3
+bin/data/kinect/ir4
+
+src/vmo.cpp
+
+src/helper.cpp
+
+src/helper.h
+
+src/vmo.h
