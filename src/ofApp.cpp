@@ -824,7 +824,7 @@ void ofApp::setupBasicsGUI(){
     guiBasics->addLabel("FBO", OFX_UI_FONT_MEDIUM);
     guiBasics->addSpacer();
     guiBasics->addToggle("Use FBO", &useFBO);
-    guiBasics->addIntSlider("FBO fade amount", 0, 50, &fadeAmount);
+    guiBasics->addIntSlider("FBO Fade Amount", 0, 50, &fadeAmount);
 
     guiBasics->addSpacer();
     guiBasics->addLabel("Music", OFX_UI_FONT_MEDIUM);
@@ -862,9 +862,9 @@ void ofApp::setupKinectGUI(){
     guiKinect_1->addSpacer();
     guiKinect_1->addLabel("Depth Image", OFX_UI_FONT_MEDIUM);
     guiKinect_1->addSpacer();
-    guiKinect_1->addRangeSlider("Clipping range", 500, 5000, &nearClipping, &farClipping);
-    guiKinect_1->addRangeSlider("Threshold range", 0.0, 255.0, &farThreshold, &nearThreshold);
-    guiKinect_1->addRangeSlider("Contour size", 0.0, 400.0, &minContourSize, &maxContourSize);
+    guiKinect_1->addRangeSlider("Clipping Range", 500, 5000, &nearClipping, &farClipping);
+    guiKinect_1->addRangeSlider("Threshold Range", 0.0, 255.0, &farThreshold, &nearThreshold);
+    guiKinect_1->addRangeSlider("Contour Size", 0.0, 400.0, &minContourSize, &maxContourSize);
     
     guiKinect_1->addSpacer();
     guiKinect_1->addRangeSlider("Depth Left/Right Crop", 0.0, 640.0, &depthLeftMask, &depthRightMask);
@@ -876,9 +876,9 @@ void ofApp::setupKinectGUI(){
     guiKinect_1->addIntSlider("Depth Blur Size", 0, 41, &depthBlurValue);
     
     guiKinect_1->addSpacer();
-    guiKinect_1->addImage("Depth original", &depthOriginal, kinect.width/6, kinect.height/6, true);
+    guiKinect_1->addImage("Depth Original", &depthOriginal, kinect.width/6, kinect.height/6, true);
     guiKinect_1->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    guiKinect_1->addImage("Depth filtered", &depthImage, kinect.width/6, kinect.height/6, true);
+    guiKinect_1->addImage("Depth Filtered", &depthImage, kinect.width/6, kinect.height/6, true);
     guiKinect_1->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     guiKinect_1->addSpacer();
 
@@ -892,11 +892,11 @@ void ofApp::setupKinectGUI(){
     guiKinect_2->addLabel("Infrared Image", OFX_UI_FONT_MEDIUM);
     guiKinect_2->addSpacer();
     guiKinect_2->addSlider("IR Threshold", 0.0, 255.0, &irThreshold);
-    guiKinect_2->addRangeSlider("Markers size", 0.0, 150.0, &minMarkerSize, &maxMarkerSize);
+    guiKinect_2->addRangeSlider("Markers Size", 0.0, 150.0, &minMarkerSize, &maxMarkerSize);
     
     guiKinect_2->addSpacer();
-    guiKinect_2->addSlider("Tracker persistence", 5.0, 500.0, &trackerPersistence);
-    guiKinect_2->addSlider("Tracker max distance", 5.0, 500.0, &trackerMaxDistance);
+    guiKinect_2->addSlider("Tracker Persistence", 5.0, 500.0, &trackerPersistence);
+    guiKinect_2->addSlider("Tracker Max Distance", 5.0, 500.0, &trackerMaxDistance);
     
     guiKinect_2->addSpacer();
     guiKinect_2->addRangeSlider("IR Left/Right Crop", 0.0, 640.0, &irLeftMask, &irRightMask);
@@ -908,9 +908,9 @@ void ofApp::setupKinectGUI(){
     guiKinect_2->addIntSlider("IR Blur Size", 0, 41, &irBlurValue);
     
     guiKinect_2->addSpacer();
-    guiKinect_2->addImage("IR original", &irOriginal, kinect.width/6, kinect.height/6, true);
+    guiKinect_2->addImage("IR Original", &irOriginal, kinect.width/6, kinect.height/6, true);
     guiKinect_2->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    guiKinect_2->addImage("IR filtered", &irImage, kinect.width/6, kinect.height/6, true);
+    guiKinect_2->addImage("IR Filtered", &irImage, kinect.width/6, kinect.height/6, true);
     guiKinect_2->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     
     guiKinect_2->addSpacer();
@@ -943,13 +943,13 @@ void ofApp::setupGesturesGUI(){
     guiGestures_1->addSpacer();
     sequenceFilename = guiGestures_1->addLabel("Filename: "+sequence.filename, OFX_UI_FONT_SMALL);
     sequenceDuration = guiGestures_1->addLabel("Duration: "+ofToString(sequence.duration, 2) + " s", OFX_UI_FONT_SMALL);
-    sequenceNumFrames = guiGestures_1->addLabel("Number of frames: "+ofToString(sequence.numFrames), OFX_UI_FONT_SMALL);
-    sequenceNumMarkers = guiGestures_1->addLabel("Number of markers: "+ofToString(sequence.getNumMarkers()), OFX_UI_FONT_SMALL);
+    sequenceNumFrames = guiGestures_1->addLabel("Number of Frames: "+ofToString(sequence.numFrames), OFX_UI_FONT_SMALL);
+    sequenceNumMarkers = guiGestures_1->addLabel("Number of Markers: "+ofToString(sequence.getNumMarkers()), OFX_UI_FONT_SMALL);
 
     guiGestures_1->addSpacer();
     guiGestures_1->addLabel("CUE MAPPING", OFX_UI_FONT_LARGE);
     guiGestures_1->addSpacer();
-    guiGestures_1->addToggle("Show sequence segmentation", &drawSequenceSegments);
+    guiGestures_1->addToggle("Show Sequence Segmentation", &drawSequenceSegments);
     guiGestures_1->addSpacer();
     
     guiGestures_1->autoSizeToFitWidgets();
@@ -1074,9 +1074,8 @@ void ofApp::setupOpticalFlowGUI(){
     
     guiFlow->addLabel("Debug", OFX_UI_FONT_MEDIUM);
     guiFlow->addSpacer();
-    guiFlow->addToggle("Show difference", &contour.drawDiffImage);
-    guiFlow->addToggle("Show difference contour", &contour.drawDiff);
-    guiFlow->addToggle("Show velocities from contour", &contour.drawVelocities);
+    guiFlow->addToggle("Show Velocity Mask", &contour.drawVelMask);
+    guiFlow->addToggle("Show Velocity Mask Contour", &contour.drawVelMaskContour);
     guiFlow->addSpacer();
     
     guiFlow->autoSizeToFitWidgets();
@@ -1103,16 +1102,16 @@ void ofApp::setupFluidSolverGUI(){
     reset->setColorBack(ofColor(150, 255));
     guiFluid_1->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     
-    ofxUISlider *redSlider = guiFluid_1->addSlider("General red", 0.0, 255.0, &fluid.red);
+    ofxUISlider *redSlider = guiFluid_1->addSlider("General Red", 0.0, 255.0, &fluid.red);
     redSlider->setColorFill(ofColor(240, 30, 30));
     redSlider->setColorFillHighlight(ofColor(150, 30, 30));
-    ofxUISlider *greenSlider = guiFluid_1->addSlider("General green", 0.0, 255.0, &fluid.green);
+    ofxUISlider *greenSlider = guiFluid_1->addSlider("General Green", 0.0, 255.0, &fluid.green);
     greenSlider->setColorFill(ofColor(30, 240, 30));
     greenSlider->setColorFillHighlight(ofColor(30, 150, 30));
-    ofxUISlider *blueSlider = guiFluid_1->addSlider("General blue", 0.0, 255.0, &fluid.blue);
+    ofxUISlider *blueSlider = guiFluid_1->addSlider("General Blue", 0.0, 255.0, &fluid.blue);
     blueSlider->setColorFill(ofColor(30, 30, 240));
     blueSlider->setColorFillHighlight(ofColor(30, 30, 150));
-    guiFluid_1->addSlider("General opacity", 0.0, 255.0, &fluid.maxOpacity);
+    guiFluid_1->addSlider("General Opacity", 0.0, 255.0, &fluid.maxOpacity);
 
     guiFluid_1->addSpacer();
     guiFluid_1->addLabel("Solver", OFX_UI_FONT_MEDIUM);
@@ -1125,18 +1124,18 @@ void ofApp::setupFluidSolverGUI(){
     guiFluid_1->addSlider("Dissipation", 0.0, 0.02, &fluid.dissipation)->setLabelPrecision(5);
     
     guiFluid_1->addSpacer();
-    guiFluid_1->addLabel("Advanced dissipation", OFX_UI_FONT_MEDIUM);
+    guiFluid_1->addLabel("Advanced Dissipation", OFX_UI_FONT_MEDIUM);
     guiFluid_1->addSpacer();
-    guiFluid_1->addSlider("Velocity offset", -0.01, 0.01, &fluid.dissipationVelocityOffset)->setLabelPrecision(5);
-    guiFluid_1->addSlider("Density offset", -0.01, 0.01, &fluid.dissipationDensityOffset)->setLabelPrecision(5);
-    guiFluid_1->addSlider("Temperature offset", -0.01, 0.01, &fluid.dissipationTemperatureOffset)->setLabelPrecision(5);
+    guiFluid_1->addSlider("Velocity Offset", -0.01, 0.01, &fluid.dissipationVelocityOffset)->setLabelPrecision(5);
+    guiFluid_1->addSlider("Density Offset", -0.01, 0.01, &fluid.dissipationDensityOffset)->setLabelPrecision(5);
+    guiFluid_1->addSlider("Temperature Offset", -0.01, 0.01, &fluid.dissipationTemperatureOffset)->setLabelPrecision(5);
     
     guiFluid_1->addSpacer();
-    guiFluid_1->addLabel("Smoke buoyancy", OFX_UI_FONT_MEDIUM);
+    guiFluid_1->addLabel("Smoke Buoyancy", OFX_UI_FONT_MEDIUM);
     guiFluid_1->addSpacer();
     guiFluid_1->addSlider("Sigma", 0.0, 1.0, &fluid.smokeSigma)->setLabelPrecision(5);
     guiFluid_1->addSlider("Weight", 0.0, 1.0, &fluid.smokeWeight)->setLabelPrecision(5);
-    guiFluid_1->addSlider("Ambient temperature", 0.0, 1.0, &fluid.ambientTemperature)->setLabelPrecision(5);
+    guiFluid_1->addSlider("Ambient Temperature", 0.0, 1.0, &fluid.ambientTemperature)->setLabelPrecision(5);
     guiFluid_1->addSpacer();
 
     guiFluid_1->autoSizeToFitWidgets();
@@ -1203,11 +1202,11 @@ void ofApp::setupFluidExtrasGUI(){
     
     guiFluidMarkers->addSpacer();
     ofxUIImageToggle *activeMarkers;
-    activeMarkers = guiFluidMarkers->addImageToggle("Activate marker forces", "icons/show.png",  &fluid.markersInput, dim, dim);
+    activeMarkers = guiFluidMarkers->addImageToggle("Activate Marker Forces", "icons/show.png",  &fluid.markersInput, dim, dim);
     activeMarkers->setColorBack(ofColor(150, 255));
     guiFluidMarkers->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     ofxUIImageButton *reset;
-    reset = guiFluidMarkers->addImageButton("Reset marker draw forces", "icons/reset.png", false, dim, dim);
+    reset = guiFluidMarkers->addImageButton("Reset Marker Draw Forces", "icons/reset.png", false, dim, dim);
     reset->setColorBack(ofColor(150, 255));
     guiFluidMarkers->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     
@@ -1271,7 +1270,6 @@ void ofApp::setupFluidExtrasGUI(){
     guiFluidParticles->addToggle("Contour", &fluid.contourInputParticles);
     guiFluidParticles->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     guiFluidParticles->setWidgetSpacing(3);
-    guiFluidParticles->addSpacer();
 
     guiFluidParticles->addSpacer();
     guiFluidParticles->addLabel("Particle", OFX_UI_FONT_MEDIUM);
@@ -1321,8 +1319,8 @@ void ofApp::setupContourGUI(){
     guiContour->addToggle("Bounding Rectangle", &contour.drawBoundingRect);
     guiContour->addToggle("Convex Hull", &contour.drawConvexHull);
     guiContour->addToggle("Convex Hull Line", &contour.drawConvexHullLine);
-    guiContour->addToggle("Contour", &contour.drawContour);
-    guiContour->addToggle("Contour Line", &contour.drawContourLine);
+    guiContour->addToggle("Silhouette", &contour.drawSilhouette);
+    guiContour->addToggle("Silhouette Line", &contour.drawSilhouetteLine);
     guiContour->addToggle("Quads Line", &contour.drawQuads);
     guiContour->addSlider("Smoothing Size", 0.0, 40.0, &contour.smoothingSize);
     guiContour->addSlider("Line Width", 0.5, 10.0, &contour.lineWidth);
@@ -1331,9 +1329,7 @@ void ofApp::setupContourGUI(){
     guiContour->addSpacer();
     guiContour->addLabel("Debug", OFX_UI_FONT_MEDIUM);
     guiContour->addSpacer();
-    guiContour->addToggle("Show difference contours", &contour.drawDiff);
-    guiContour->addToggle("Show difference image", &contour.drawDiffImage);
-    guiContour->addToggle("Show contour velocities", &contour.drawVelocities);
+    guiContour->addToggle("Show Contour Velocities", &contour.drawVelocities);
     guiContour->addSpacer();
 
     guiContour->autoSizeToFitWidgets();
@@ -1356,13 +1352,13 @@ void ofApp::setupEmitterGUI(){
     guiEmitter_1->addSlider("Velocity", 0.0, 100.0, &emitterParticles->velocity);
     guiEmitter_1->addSlider("Velocity Random[%]", 0.0, 100.0, &emitterParticles->velocityRnd);
     guiEmitter_1->addSlider("Velocity from Motion[%]", 0.0, 100.0, &emitterParticles->velocityMotion);
-    guiEmitter_1->addSlider("Emitter size", 0.0, 60.0, &emitterParticles->emitterSize);
+    guiEmitter_1->addSlider("Emitter Size", 0.0, 60.0, &emitterParticles->emitterSize);
     guiEmitter_1->addSpacer();
     vector<string> emitters;
     emitters.push_back("Emit all time");
     emitters.push_back("Emit all time on contour");
     emitters.push_back("Emit only if movement");
-    guiEmitter_1->addRadio("Emitters", emitters, OFX_UI_ORIENTATION_VERTICAL)->setTriggerType(OFX_UI_TRIGGER_ALL);//->activateToggle("Emit all time");
+    guiEmitter_1->addRadio("Emitters", emitters, OFX_UI_ORIENTATION_VERTICAL);
     
     guiEmitter_1->addSpacer();
     addParticlePhysicsGUI(guiEmitter_1, emitterParticles);
@@ -1377,7 +1373,7 @@ void ofApp::setupEmitterGUI(){
     guiEmitter_2->addSpacer();
     addParticlePropertiesGUI(guiEmitter_2, emitterParticles);
 
-    guiEmitter_2->addLabel("Time behavior", OFX_UI_FONT_MEDIUM);
+    guiEmitter_2->addLabel("Time Behavior", OFX_UI_FONT_MEDIUM);
     guiEmitter_2->addSpacer();
     guiEmitter_2->addToggle("Size", &emitterParticles->sizeAge);
     guiEmitter_2->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
@@ -1474,7 +1470,7 @@ void ofApp::setupBoidsGUI(){
     guiBoids_1->addLabel("Interaction", OFX_UI_FONT_MEDIUM);
     guiBoids_1->addSpacer();
     guiBoids_1->addToggle("Interact", &boidsParticles->interact);
-    guiBoids_1->addSlider("Marker interaction radius", 5.0, 150.0, &boidsParticles->markerRadius);
+    guiBoids_1->addSlider("Marker Interaction Radius", 5.0, 150.0, &boidsParticles->markerRadius);
     guiBoids_1->addSpacer();
     guiBoids_1->addToggle("Flow Interaction", &boidsParticles->flowInteraction);
     guiBoids_1->addToggle("Fluid Interaction", &boidsParticles->fluidInteraction);
@@ -1585,7 +1581,7 @@ void ofApp::addParticleInteractionGUI(ofxUICanvas* gui, ParticleSystem* ps){
     gui->addLabel("Interaction", OFX_UI_FONT_MEDIUM);
     gui->addSpacer();
     gui->addToggle("Interact", &ps->interact);
-    gui->addSlider("Marker interaction radius", 5.0, 150.0, &ps->markerRadius);
+    gui->addSlider("Marker Interaction Radius", 5.0, 150.0, &ps->markerRadius);
     gui->addSpacer();
     gui->addToggle("Flow Interaction", &ps->flowInteraction);
     gui->addToggle("Fluid Interaction", &ps->fluidInteraction);
@@ -1914,7 +1910,7 @@ void ofApp::resetCueSliders(){
     for(int i = 0; i < cueList.size(); i++){
         ofxUILabel *label;
         label = guiGestures_1->addLabel(ofToString(i) + ". " + ofFilePath::getBaseName(cueList[i]));
-        string cueName = "Sequence percent";
+        string cueName = "Sequence Percent";
         float low = (float)i/n*100;
         float high = ((float)i+1.0)/n*100;
         ofxUIRangeSlider *slider;
@@ -1992,10 +1988,10 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             kinect.open();
         }
     }
-    if(e.getName() == "Clipping range"){
+    if(e.getName() == "Clipping Range"){
         kinect.setDepthClipping(nearClipping, farClipping);
     }
-    if(e.getName() == "Contour size"){
+    if(e.getName() == "Contour Size"){
         contour.setMinAreaRadius(minContourSize);
         contour.setMaxAreaRadius(maxContourSize);
     }
@@ -2022,14 +2018,14 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             }
         }
     }
-    if(e.getName() == "Markers size"){
+    if(e.getName() == "Markers Size"){
         irMarkerFinder.setMinAreaRadius(minMarkerSize);
         irMarkerFinder.setMaxAreaRadius(maxMarkerSize);
     }
-    if(e.getName() == "Tracker persistence"){
+    if(e.getName() == "Tracker Persistence"){
         tracker.setPersistence(trackerPersistence); // wait for 'trackerPersistence' frames before forgetting something
     }
-    if(e.getName() == "Tracker max distance"){
+    if(e.getName() == "Tracker Max Distance"){
         tracker.setMaximumDistance(trackerMaxDistance); // an object can move up to 'trackerMaxDistance' pixels per frame
     }
     if(e.getName() == "IR Left/Right Crop" || e.getName() == "IR Top/Bottom Crop"){
@@ -2093,8 +2089,8 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
                 sequence.load(result.getPath());
                 sequenceFilename->setLabel("Filename: "+sequence.filename);
                 sequenceDuration->setLabel("Duration: "+ofToString(sequence.duration, 2) + " s");
-                sequenceNumFrames->setLabel("Number of frames: "+ofToString(sequence.numFrames));
-                sequenceNumMarkers->setLabel("Number of markers: "+ofToString(sequence.getNumMarkers()));
+                sequenceNumFrames->setLabel("Number of Frames: "+ofToString(sequence.numFrames));
+                sequenceNumMarkers->setLabel("Number of Markers: "+ofToString(sequence.getNumMarkers()));
                 numMarkers = sequence.getNumMarkers();
             }
         }
@@ -2110,7 +2106,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             drawSequence = false;
         }
     }
-    if(e.getName() == "Sequence percent"){
+    if(e.getName() == "Sequence Percent"){
         // Update segments polylines in sequence
         vector< pair<float, float> > segmentsPcts;
         for (int i = 0; i < cueSliders.size(); i++){
@@ -2124,7 +2120,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         }
         sequence.updateSegments(segmentsPcts);
     }
-    if(e.getName() == "Show sequence segmentation"){
+    if(e.getName() == "Show Sequence Segmentation"){
         ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
         // Update segments polylines in sequence
         if(toggle->getValue() == true){
@@ -2290,7 +2286,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             fluid.reset();
         }
     }
-    if(e.getName() == "Reset marker draw forces"){
+    if(e.getName() == "Reset Marker Draw Forces"){
         ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
         if(toggle->getValue() == true){
             fluid.resetDrawForces();

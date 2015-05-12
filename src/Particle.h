@@ -37,7 +37,7 @@ class Particle
         void addRepulsionForce(Particle &p, float radiusSqrd, float scale);
         void addAttractionForce(Particle &p, float radiusSqrd, float scale);
         void addRepulsionForce(Particle &p, float scale);
-        void xenoToOrigin(float spd);
+        void returnToOrigin(float spd);
 
         void addFlockingForces(Particle &p);
         void seek(ofPoint target, float radiusSqrd);

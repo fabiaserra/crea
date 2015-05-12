@@ -299,9 +299,7 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
                         else if(attractInteraction){
                             particles[i]->addRepulsionForce(closestPointInContour.x, closestPointInContour.y, 8000, 15.0);
                         }
-                        else if(bounceInteraction){
-                            if(contourIdx != -1) particles[i]->contourBounce(contour.contours[contourIdx]);
-                        }
+    
                         else if(gravityInteraction){
                             particles[i]->addForce(ofPoint(0, 9.8)*particles[i]->mass);
                             particles[i]->isTouched = true;
@@ -333,7 +331,7 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
                 particles[i]->maxSpeed              =   maxSpeed;
             }
 
-            if(returnToOrigin && particleMode == GRID && !gravityInteraction) particles[i]->xenoToOrigin(0.06);
+            if(returnToOrigin && particleMode == GRID && !gravityInteraction) particles[i]->returnToOrigin(0.06);
 
             if(particleMode == ANIMATIONS && (animation == SNOW || animation == WIND)){
                 ofPoint windForce(ofRandom(-0.1, 0.1), ofRandom(-0.08, 0.06));

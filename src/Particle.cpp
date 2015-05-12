@@ -11,7 +11,7 @@
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details.
+ * details.     
  *
  * You should have received a copy of the Affero GNU General Public License
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
@@ -287,7 +287,7 @@ void Particle::addAttractionForce(float x, float y, float radiusSqrd, float scal
 }
 
 //------------------------------------------------------------------
-void Particle::xenoToOrigin(float spd){
+void Particle::returnToOrigin(float spd){
     pos.x = spd * iniPos.x + (1-spd) * pos.x;
     pos.y = spd * iniPos.y + (1-spd) * pos.y;
 
@@ -305,7 +305,7 @@ void Particle::xenoToOrigin(float spd){
     // since pos.new and pos.b are analogous to pos.x
     // and pos.c is analogous to catchX
     // we can write pos.x = pos.x(1-.25) + catchX(.25)
-    // this equation is the same as Zachs simplified equation
+    // this equation is the same as Zachs Lieberman simplified equation
 }
 
 void Particle::addFlockingForces(Particle &p){
