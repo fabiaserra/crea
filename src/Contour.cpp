@@ -76,16 +76,16 @@ Contour::Contour()
     drawBoundingRect    = false;
     drawConvexHull      = false;
     drawConvexHullLine  = false;
-    drawContour         = false;
-    drawContourLine     = false;
+    drawSilhouette      = false;
+    drawSilhouetteLine  = false;
     drawQuads           = false;
     drawTangentLines    = false;
 
     // debug
     drawFlow            = false;
     drawFlowScalar      = false;
-    drawDiff            = false;
-    drawDiffImage       = false;
+    drawVelMask         = false;
+    drawVelMaskContour  = false;
     drawVelocities      = false;
 }
 
@@ -298,7 +298,7 @@ void Contour::draw(){
             ofPopStyle();
         }
         
-        if(drawContour){
+        if(drawSilhouette){
             ofPushStyle();
             ofSetColor(ofColor(red, green, blue), opacity);
             for(int i = 0; i < contours.size(); i++){
@@ -311,7 +311,7 @@ void Contour::draw(){
             ofPopStyle();
         }
 
-        if(drawContourLine){
+        if(drawSilhouetteLine){
             ofPushStyle();
             ofSetColor(ofColor(red, green, blue), opacity);
             ofSetLineWidth(lineWidth);
@@ -379,19 +379,19 @@ void Contour::draw(){
         displayScalar.draw(0, 0, width, height);
         ofPopStyle();
     }
-    if(drawDiff){
+    if(drawVelMaskContour){
+        ofPushStyle();
+        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
+        velocityMask.draw(0, 0, width, height);
+        ofPopStyle();
+    }
+    if(drawVelMaskContour){
         ofPushStyle();
         ofSetColor(255, 0, 0);
         ofSetLineWidth(2.5);
         for(int i = 0; i < diffContours.size(); i++){
             diffContours[i].draw();
-        }   
-        ofPopStyle();
-    }
-    if(drawDiffImage){
-        ofPushStyle();
-        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
-        velocityMask.draw(0, 0, width, height);
+        }
         ofPopStyle();
     }
     if(drawVelocities){

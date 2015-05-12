@@ -110,16 +110,16 @@ class Contour{
         bool drawBoundingRect;
         bool drawConvexHull;
         bool drawConvexHullLine;
-        bool drawContour;
-        bool drawContourLine;
+        bool drawSilhouette;
+        bool drawSilhouetteLine;
         bool drawQuads;
         bool drawTangentLines;
         //--------------------------------------------------------------
-        bool drawDiff;
-        bool drawDiffImage;
         bool drawFlow;
         bool drawFlowScalar;
         bool drawVelocities;
+        bool drawVelMask;
+        bool drawVelMaskContour;
         //--------------------------------------------------------------
 
     protected:
