@@ -68,25 +68,26 @@ Contour::Contour()
     vMaskRandomColor    = false;
     
     // contour settings
-    smoothingSize       = 0.0;
-    scaleContour        = 1.0;
-    lineWidth           = 1.5;
+    smoothingSize        = 0.0;
+    scaleContour         = 1.0;
+    lineWidth            = 1.5;
 
     // graphics output
-    drawBoundingRect    = false;
-    drawConvexHull      = false;
-    drawConvexHullLine  = false;
-    drawSilhouette      = false;
-    drawSilhouetteLine  = false;
-    drawQuads           = false;
-    drawTangentLines    = false;
+    drawBoundingRect     = false;
+    drawBoundingRectLine = false;
+    drawConvexHull       = false;
+    drawConvexHullLine   = false;
+    drawSilhouette       = false;
+    drawSilhouetteLine   = false;
+    drawQuads            = false;
+    drawTangentLines     = false;
 
     // debug
-    drawFlow            = false;
-    drawFlowScalar      = false;
-    drawVelMask         = false;
-    drawVelMaskContour  = false;
-    drawVelocities      = false;
+    drawFlow             = false;
+    drawFlowScalar       = false;
+    drawVelMask          = false;
+    drawVelMaskContour   = false;
+    drawVelocities       = false;
 }
 
 void Contour::setup(int width, int height, float scaleFactor){
@@ -114,6 +115,7 @@ void Contour::setup(int width, int height, float scaleFactor){
 
     contourFinderDiff.setMinAreaRadius(10);
     contourFinderDiff.setMaxAreaRadius(500);
+    contourFinderDiff.setAutoThreshold(true); // threshold velocity mask automatically
 
     // allocate images
     previous.allocate(width, height, OF_IMAGE_GRAYSCALE);
@@ -221,9 +223,9 @@ void Contour::update(float dt, ofImage &depthImage){
         contour = contour.getSmoothed(smoothingSize, 0.5);
         contours[i] = contour;
 
-        ofPolyline quad;
-        quad = toOf(contourFinder.getFitQuad(i));
-        quads[i] = quad;
+//        ofPolyline quad;
+//        quad = toOf(contourFinder.getFitQuad(i));
+//        quads[i] = quad;
     }
     
     for(int i = 0; i < m; i++){
@@ -266,15 +268,16 @@ void Contour::draw(){
         ofPushMatrix();
         ofTranslate(-width/2.0, -height/2.0);
         
-        if(drawBoundingRect){
+        if(drawBoundingRect||drawBoundingRectLine){
             ofPushStyle();
             ofFill();
             ofSetColor(ofColor(red, green, blue), opacity);
+            ofSetLineWidth(lineWidth);
+            if(drawBoundingRectLine) ofNoFill();
             for(int i = 0; i < boundingRects.size(); i++)
                 ofRect(boundingRects[i]);
             ofPopStyle();
         }
-
         if(drawConvexHull){
             ofPushStyle();
             ofFill();
@@ -324,15 +327,15 @@ void Contour::draw(){
             ofPopStyle();
         }
 
-        if(drawQuads){
-            ofPushStyle();
-            ofSetColor(ofColor(red, green, blue), opacity);
-            ofSetLineWidth(lineWidth);
-            for(int i = 0; i < quads.size(); i++){
-                quads[i].draw();
-            }
-            ofPopStyle();
-        }
+//        if(drawQuads){
+//            ofPushStyle();
+//            ofSetColor(ofColor(red, green, blue), opacity);
+//            ofSetLineWidth(lineWidth);
+//            for(int i = 0; i < quads.size(); i++){
+//                quads[i].draw();
+//            }
+//            ofPopStyle();
+//        }
         
         if(drawTangentLines){
             ofPushStyle();

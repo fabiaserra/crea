@@ -108,6 +108,7 @@ class Contour{
         vector< vector<ofPoint> > velocities;
         //--------------------------------------------------------------
         bool drawBoundingRect;
+        bool drawBoundingRectLine;
         bool drawConvexHull;
         bool drawConvexHullLine;
         bool drawSilhouette;
@@ -126,7 +127,7 @@ class Contour{
         ftOpticalFlow opticalFlow;
         ftVelocityMask velocityMask;
         //--------------------------------------------------------------
-        ofxCv::ContourFinder contourFinder;
+        ofxCv::ContourFinder contourFinder; 
         ofxCv::ContourFinder contourFinderDiff;
         //--------------------------------------------------------------
         ftDisplayScalar displayScalar;
