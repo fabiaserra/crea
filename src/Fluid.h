@@ -71,7 +71,7 @@ class Fluid{
         bool drawVelocityScalar;
         bool drawTemperature;
         //--------------------------------------------------------------
-        int	numMarkerForces;
+        int numMarkerForces;
         ftDrawForce* markerForces;
         //--------------------------------------------------------------
         // fluid parameters
@@ -122,7 +122,7 @@ class Fluid{
         ftParticleFlow particleFlow;
         //--------------------------------------------------------------
         ftDisplayScalar displayScalar;
-        ftVelocityField	velocityField;
+        ftVelocityField velocityField;
         //--------------------------------------------------------------
         ofTexture fluidTexture;
         ofFloatPixels fluidPixels;
