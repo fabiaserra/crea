@@ -51,7 +51,7 @@ ParticleSystem::ParticleSystem(){
     color               = ofColor(red, green, blue); // Color of the particles
     
     // Specific properties
-    nParticles          = 1300;         // Number of particles born in the beginning
+    nParticles          = 300;          // Number of particles born from the beginning
     bornRate            = 5.0;          // Number of particles born per frame
 
     // Emitter
@@ -156,15 +156,10 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
         velocity            = 0.0;
         velocityRnd         = 0.0;
         gravity             = ofPoint(0, 0);
-        friction            = 40;
+        friction            = 100;
         createParticleGrid(width, height);
     }
-    else if(particleMode == RANDOM){
-        interact            = true;
-        immortal            = true;
-        addParticles(nParticles);
-    }
-    else if(particleMode == BOIDS){ // TODO: BOIDS == RANDOM?
+    else if(particleMode == BOIDS){
         flock               = true;
         interact            = true;
         markersInput        = true;
@@ -176,47 +171,52 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
     else if(particleMode == ANIMATIONS){
         immortal            = false;
         
-        radius              = 2.0;
-        radiusRnd           = 50.0;
-
-        velocity            = 5.0;
-        velocityRnd         = 30.0;
-
+        bornRate            = 8.0;
+        nParticles          = 200.0;
+        friction            = 0.0;
         turbulence          = 0.0;
-        gravity             = ofPoint(0, 1.5);
-        friction            = 6.0;
-
+        bounce              = false;
         opacityAge          = true;
         flickersAge         = false;
         
-        infiniteWalls       = false;
-
-        if(animation == SNOW){
-            lifetime        = 6.0;
-        }
-        else if(animation == RAIN){
-            lifetime        = 2.5;
+        if(animation == RAIN){
             radius          = 0.8;
+            radiusRnd       = 10.0;
+            
+            velocity        = 60.0;
+            velocityRnd     = 10.0;
+            
+            lifetime        = 2.5;
+            lifetimeRnd     = 30.0;
+            
+            gravity         = ofPoint(0, 140);
+            bounce          = true;
         }
-        else if(animation == WIND){
-            immortal        = true;
-            opacityAge      = false;
-            velocity        = 50.0;
-            turbulence      = 8.0;
-            gravity         = ofVec2f(0, 0.0);
-            infiniteWalls   = true;
-            addParticles(nParticles);
+        else if(animation == SNOW){
+            radius          = 2.0;
+            radiusRnd       = 30.0;
+            
+            velocity        = 40.0;
+            velocityRnd     = 20.0;
+            
+            lifetime        = 3.0;
+            lifetimeRnd     = 30.0;
+            
+            gravity         = ofPoint(0, 15);
         }
         else if(animation == EXPLOSION){
-            radius          = 4.0;
+            radius          = 6.0;
             radiusRnd       = 50.0;
-
-            friction        = 27.0;
-            turbulence      = 5.0;
-
-            lifetime        = 3.0;
-            lifetimeRnd     = 40.0;
-
+            
+            velocity        = 800.0;
+            velocityRnd     = 18.0;
+            
+            lifetime        = 2.6;
+            lifetimeRnd     = 0.0;
+            
+            gravity         = ofPoint(0, 140);
+            friction        = 80.0;
+            turbulence      = 10.0;
             flickersAge     = true;
             opacityAge      = false;
             addParticles(nParticles);
@@ -274,11 +274,15 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
                     // dir.normalize();
 
                     if(closestMarker != ofPoint(-1, -1) || (gravityInteraction && particles[i]->isTouched)){
-                        if(repulseInteraction) particles[i]->addRepulsionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, 10.0);
-                        else if(attractInteraction) particles[i]->addAttractionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, 10.0);
+                        if(flowInteraction){
+                            ofPoint frc = contour.getFlowOffset(closestMarker);
+                            particles[i]->addForce(frc*30);
+                        }
+                        else if(repulseInteraction) particles[i]->addRepulsionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, 150.0);
+                        else if(attractInteraction) particles[i]->addAttractionForce(closestMarker.x, closestMarker.y, markerRadius*markerRadius, 150.0);
                         else if(seekInteraction) particles[i]->seek(closestMarker, markerRadius*markerRadius);
                         else if(gravityInteraction){
-                            particles[i]->addForce(ofPoint(0, 9.8)*particles[i]->mass);
+                            particles[i]->addForce(ofPoint(0, 120.0)*particles[i]->mass);
                             particles[i]->isTouched = true;
                         }
                     }
@@ -289,29 +293,22 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
                     
                     if(flowInteraction){
                         ofPoint frc = contour.getFlowOffset(particles[i]->pos);
-                        particles[i]->addForce(frc);
+                        particles[i]->addForce(frc*30);
                     }
 
                     if(closestPointInContour != ofPoint(-1, -1) || (gravityInteraction && particles[i]->isTouched)){
                         if(repulseInteraction){ // it is an attractForce but result is more logical saying repulse
-                            particles[i]->addAttractionForce(closestPointInContour.x, closestPointInContour.y, 8000, 15.0);
+                            particles[i]->addAttractionForce(closestPointInContour.x, closestPointInContour.y, 8000, 200.0);
                         }
                         else if(attractInteraction){
-                            particles[i]->addRepulsionForce(closestPointInContour.x, closestPointInContour.y, 8000, 15.0);
+                            particles[i]->addRepulsionForce(closestPointInContour.x, closestPointInContour.y, 8000, 200.0);
                         }
     
                         else if(gravityInteraction){
-                            particles[i]->addForce(ofPoint(0, 9.8)*particles[i]->mass);
+                            particles[i]->addForce(ofPoint(0.0, 120.0)*particles[i]->mass);
                             particles[i]->isTouched = true;
                         }
-//                        else if(repulseInteraction){
-//                            particles[i]->addRepulsionForce(closestPointInContour.x, closestPointInContour.y, 8000, 85.0);
-//                        }
                     }
-//                    else if(useContourVel){
-//                        ofPoint frc = -contour.getVelocityInPoint(particles[i]->pos) * 0.1;
-//                        particles[i]->addForce(frc);
-//                    }
                 }
                 if(fluidInteraction){
                     ofPoint frc = fluid.getFluidOffset(particles[i]->pos);
@@ -331,21 +328,14 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
                 particles[i]->maxSpeed              =   maxSpeed;
             }
 
-            if(returnToOrigin && particleMode == GRID && !gravityInteraction) particles[i]->returnToOrigin(0.06);
+            if(returnToOrigin && particleMode == GRID && !gravityInteraction) particles[i]->returnToOrigin(0.3);
 
-            if(particleMode == ANIMATIONS && (animation == SNOW || animation == WIND)){
-                ofPoint windForce(ofRandom(-0.1, 0.1), ofRandom(-0.08, 0.06));
-                particles[i]->addForce(windForce*particles[i]->mass);
-
-                float windX = ofSignedNoise(particles[i]->pos.x * 0.003, particles[i]->pos.y * 0.006, ofGetElapsedTimef() * 0.6) * 0.6;
+            if(particleMode == ANIMATIONS && animation == SNOW){
+                float windX = ofSignedNoise(particles[i]->pos.x * 0.003, particles[i]->pos.y * 0.006, ofGetElapsedTimef() * 0.1) * 3.0;
                 ofPoint frc;
-                frc.x = windX * 0.25 + ofSignedNoise(particles[i]->id, particles[i]->pos.y * 0.04) * 0.6;
-                if(animation == SNOW) frc.y = ofSignedNoise(particles[i]->id, particles[i]->pos.x * 0.006, ofGetElapsedTimef() * 0.2) * 0.1 + 0.25;
-                particles[i]->addForce(frc*particles[i]->mass/2.0);
-            }
-            else if(animation == RAIN){
-                ofPoint vel(0, ofSignedNoise(particles[i]->id, ofGetElapsedTimef() * 0.2)*0.3 + 1.2);
-                particles[i]->vel += vel;
+                frc.x = windX + ofSignedNoise(particles[i]->id, particles[i]->pos.y * 0.04) * 8.0;
+                frc.y = ofSignedNoise(particles[i]->id, particles[i]->pos.x * 0.006, ofGetElapsedTimef() * 0.2) * 3.0;
+                particles[i]->addForce(frc*particles[i]->mass);
             }
         }
 
@@ -358,7 +348,7 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
                             addParticles(n, markers[i]);
                         }
                         else{
-                            float range = ofMap(bornRate, 0, 150, 0, 40);
+                            float range = ofMap(bornRate, 0, 150, 0, 30);
                             if(bornRate > 0.1) addParticles(ofRandom(bornRate-range, bornRate+range), markers[i]);
                         }
                     }
@@ -383,9 +373,9 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
             }
         }
 
-        // Keep adding particles if it is an animation
-        if(particleMode == ANIMATIONS && animation != EXPLOSION && animation != WIND){
-            float range = ofMap(bornRate, 0, 60, 0, 20);
+        // Keep adding particles if it is an animation (unless it is an explosion)
+        if(particleMode == ANIMATIONS && animation != EXPLOSION){
+            float range = ofMap(bornRate, 0, 60, 0, 15);
             addParticles(ofRandom(bornRate-range, bornRate+range));
         }
 
@@ -477,13 +467,9 @@ void ParticleSystem::addParticle(ofPoint pos, ofPoint vel, ofColor color, float 
         newParticle->limitSpeed = true;
         newParticle->immortal = true;
     }
-    else if(particleMode == ANIMATIONS && animation != EXPLOSION){
-        if(animation == WIND){
-            newParticle->immortal = true;
-            newParticle->damping = 0.9;
-        }
-        else if (animation == RAIN) newParticle->damping = 0.8;
-        else newParticle->damping = 0.3;
+    else if(particleMode == ANIMATIONS){
+        if(animation == SNOW) newParticle->damping = 0.05;
+        else newParticle->damping = 0.15;
     }
 
     newParticle->setup(id, pos, vel, color, radius, lifetime);
@@ -498,18 +484,15 @@ void ParticleSystem::addParticles(int n){
         ofPoint pos = ofPoint(ofRandom(width), ofRandom(height));
         ofPoint vel = randomVector()*(velocity+randomRange(velocityRnd, velocity));
 
-        if(particleMode == ANIMATIONS && animation == RAIN){
-            pos = ofPoint(ofRandom(width), ofRandom(-2*radius, -20*radius));
+        if(particleMode == ANIMATIONS && (animation == RAIN || animation == SNOW)){
+            pos = ofPoint(ofRandom(width), ofRandom(-2*radius, -5*radius));
             vel.x = 0;
-            vel.y = fabs(vel.y) * 20.0; // make particles all be going down when born
-        }
-        else if(particleMode == ANIMATIONS && animation == SNOW){
-            pos = ofPoint(ofRandom(width), ofRandom(-2*radius, -20*radius));
-            vel.y = fabs(vel.y) * 6.0; // make particles all be going down when born
+            vel.y = velocity+randomRange(velocityRnd, velocity); // make particles all be going down when born
         }
         else if(particleMode == ANIMATIONS && animation == EXPLOSION){
-            pos = ofPoint(ofRandom(width), ofRandom(height+radius, height+radius*40));
-            vel = ofPoint(0, -velocity*ofRandom(18, 75)); // make particles all be going up when born
+            pos = ofPoint(ofRandom(width), ofRandom(height+radius, height+radius*10));
+            vel.x = 0;
+            vel.y = -velocity+randomRange(velocityRnd, velocity); // make particles all be going up when born
         }
 
         float initialRadius = radius + randomRange(radiusRnd, radius);
