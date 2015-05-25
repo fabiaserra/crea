@@ -45,15 +45,15 @@
 #endif
 
 // comment this to use the recorded images
-//#define KINECT_CONNECTED
+#define KINECT_CONNECTED
 
 // Uncomment this to use an xml sequence file for the tracking
 //#define KINECT_SEQUENCE
 
 // Uncomment this to use two windows
 #define SECOND_WINDOW
-#define PROJECTOR_RESOLUTION_X 1024
-#define PROJECTOR_RESOLUTION_Y 768
+#define PROJECTOR_RESOLUTION_X 1680
+#define PROJECTOR_RESOLUTION_Y 1050
 
 class ofApp : public ofBaseApp{
     public:

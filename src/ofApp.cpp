@@ -26,7 +26,7 @@ using namespace cv;
 void ofApp::setup(){
 
     ofSetFrameRate(60);
-//    ofSetVerticalSync(false);
+    // ofSetVerticalSync(false);
     
     #ifdef SECOND_WINDOW
         // the arguments for the second window are its initial x and y position,
@@ -36,10 +36,8 @@ void ofApp::setup(){
         // running the command below positions an undecorated window to display on a second
         // monitor or projector. this is a good way to set up a fullscreen display, while
         // retaining a control window in the primary monitor.
-        
         secondWindow.setup("second window", ofGetScreenWidth(), 0, PROJECTOR_RESOLUTION_X, PROJECTOR_RESOLUTION_Y, true);
-        // secondWindow.setup("second window", 0, 0, 1024, 768, true);
-        // secondWindow.setup("second window", ofGetScreenWidth(), 0, 1024, 768, false);
+//        secondWindow.setup("second window", 10, 0, PROJECTOR_RESOLUTION_X, PROJECTOR_RESOLUTION_Y, true);
     #endif
 
     ofHideCursor(); // trick to show the cursor icon (see mouseMoved())
@@ -208,52 +206,52 @@ void ofApp::setup(){
     isConv = false; //Don`t try this, too slow.
 
     if(isConv){
-		numElements = (numMarkers*dimensions+1)*(numMarkers*dimensions)/2;
-		savedObs.assign(sequence.numFrames, vector<float>(numMarkers*dimensions));
-		vmoObs.assign(sequence.numFrames, vector<float>(numElements));
-		for(int markerIndex = 0; markerIndex < numMarkers; markerIndex++){
-			for(int frameIndex = 0; frameIndex < sequence.numFrames; frameIndex++){
-				savedObs[frameIndex][markerIndex*dimensions] = sequence.markersPosition[markerIndex][frameIndex].x;
-				savedObs[frameIndex][markerIndex*dimensions+1] = sequence.markersPosition[markerIndex][frameIndex].y;
-			}
-		}
+        numElements = (numMarkers*dimensions+1)*(numMarkers*dimensions)/2;
+        savedObs.assign(sequence.numFrames, vector<float>(numMarkers*dimensions));
+        vmoObs.assign(sequence.numFrames, vector<float>(numElements));
+        for(int markerIndex = 0; markerIndex < numMarkers; markerIndex++){
+            for(int frameIndex = 0; frameIndex < sequence.numFrames; frameIndex++){
+                savedObs[frameIndex][markerIndex*dimensions] = sequence.markersPosition[markerIndex][frameIndex].x;
+                savedObs[frameIndex][markerIndex*dimensions+1] = sequence.markersPosition[markerIndex][frameIndex].y;
+            }
+        }
 
-		vmoObs = covarianceMat(savedObs, numMarkers, dimensions);
+        vmoObs = covarianceMat(savedObs, numMarkers, dimensions);
 
-		// 2. Processing
-		// 2.1 Load file into VMO
-		//    int minLen = 1; // Temporary setting
-		//    float start = 0.0, step = 0.05, stop = 10.0;
+        // 2. Processing
+        // 2.1 Load file into VMO
+        //    int minLen = 1; // Temporary setting
+        //    float start = 0.0, step = 0.05, stop = 10.0;
 
-		float start = 0.0, step = 0.05, stop = 5.0;
+        float start = 0.0, step = 0.05, stop = 5.0;
 
-		float t = vmo::findThreshold(vmoObs, numElements, start, step, stop); // Temporary threshold range and step
-		int minLen = 10;
+        float t = vmo::findThreshold(vmoObs, numElements, start, step, stop); // Temporary threshold range and step
+        int minLen = 10;
 
-		seqVmo = vmo::buildOracle(vmoObs, numElements, t);
-		// 2.2 Output pattern list
-		pttrList = vmo::findPttr(seqVmo, minLen);
-		sequence.loadPatterns(processPttr(seqVmo, savedObs, pttrList, numMarkers, dimensions));
-		drawSequencePatterns = false;
+        seqVmo = vmo::buildOracle(vmoObs, numElements, t);
+        // 2.2 Output pattern list
+        pttrList = vmo::findPttr(seqVmo, minLen);
+        sequence.loadPatterns(processPttr(seqVmo, savedObs, pttrList, numMarkers, dimensions));
+        drawSequencePatterns = false;
         drawSequencePatternsSeparate = false;
-		cout << sequence.patterns.size() << endl;
-	}
-	else{
-		numElements = numMarkers*dimensions;
-		savedObs.assign(sequence.numFrames, vector<float>(numElements));
-		for(int markerIndex = 0; markerIndex < numMarkers; markerIndex++){
-			for(int frameIndex = 0; frameIndex < sequence.numFrames; frameIndex++){
-				savedObs[frameIndex][markerIndex*dimensions] = sequence.markersPosition[markerIndex][frameIndex].x;
-				savedObs[frameIndex][markerIndex*dimensions+1] = sequence.markersPosition[markerIndex][frameIndex].y;
-			}
-		}
+        cout << sequence.patterns.size() << endl;
+    }
+    else{
+        numElements = numMarkers*dimensions;
+        savedObs.assign(sequence.numFrames, vector<float>(numElements));
+        for(int markerIndex = 0; markerIndex < numMarkers; markerIndex++){
+            for(int frameIndex = 0; frameIndex < sequence.numFrames; frameIndex++){
+                savedObs[frameIndex][markerIndex*dimensions] = sequence.markersPosition[markerIndex][frameIndex].x;
+                savedObs[frameIndex][markerIndex*dimensions+1] = sequence.markersPosition[markerIndex][frameIndex].y;
+            }
+        }
 
 //        // 2. Processing
 //        // 2.1 Load file into VMO
 //        int minLen = 1; // Temporary setting
 //        float start = 0.0, step = 0.05, stop = 10.0;
 
-		float start = 0.0, step = 0.01, stop = 10.0;
+        float start = 0.0, step = 0.01, stop = 10.0;
 
 //        float t = vmo::findThreshold(savedObs, numElements, start, step, stop); // Temporary threshold range and step
 //        float t = vmo::findThreshold(obs, dimensions, numMarkers, start, step, stop); // Temporary threshold range and step
@@ -275,14 +273,14 @@ void ofApp::setup(){
         int minLen = 2;
         float t = 4.8; // for sequenceT2.xml
 
-		seqVmo = vmo::buildOracle(savedObs, numElements, t);
+        seqVmo = vmo::buildOracle(savedObs, numElements, t);
 
-		// 2.2 Output pattern list
-		pttrList = vmo::findPttr(seqVmo, minLen);
-		sequence.loadPatterns(processPttr(seqVmo, savedObs, pttrList, numMarkers, dimensions));
-		drawSequencePatterns = false;
+        // 2.2 Output pattern list
+        pttrList = vmo::findPttr(seqVmo, minLen);
+        sequence.loadPatterns(processPttr(seqVmo, savedObs, pttrList, numMarkers, dimensions));
+        drawSequencePatterns = false;
         drawSequencePatternsSeparate = false;
-	}
+    }
     pastObs.assign(numMarkers*dimensions, 0.0);
 //    pastFeatures.assign(numElements, 0.0);
     currentFeatures.assign(numElements, 0.0);
@@ -399,6 +397,10 @@ void ofApp::update(){
     threshold(grayThreshNear, nearThreshold, true);
     threshold(grayThreshFar, farThreshold);
     bitwise_and(grayThreshNear, grayThreshFar, depthImage);
+    
+    grayThreshNear.update();
+    grayThreshFar.update();
+    
     for(int i = 0; i < depthNumErodes; i++){
         erode(depthImage);
     }
@@ -459,28 +461,28 @@ void ofApp::update(){
             vector<float> obs(numMarkers*dimensions, 0.0); // Temporary code
             for(unsigned int i = 0; i < kinectSequence.getNumMarkers(); i++){
                 ofPoint currentPoint = kinectSequence.getCurrentPoint(i);
-				// Use the lowpass here??
-				obs[i] = lowpass(currentPoint.x, pastObs[i], slide);
-				obs[i+1] = lowpass(currentPoint.y, pastObs[i+1], slide);
-				pastObs[i] = obs[i];
-				pastObs[i+1] = obs[i+1];
+                // Use the lowpass here??
+                obs[i] = lowpass(currentPoint.x, pastObs[i], slide);
+                obs[i+1] = lowpass(currentPoint.y, pastObs[i+1], slide);
+                pastObs[i] = obs[i];
+                pastObs[i+1] = obs[i+1];
 
                 //obs[i] = currentPoint.x;
                 //obs[i+1] = currentPoint.y;
             }
 
-			if (isConv) currentFeatures = cov_cal(pastObs, obs, numElements);
-			else currentFeatures = obs;
+            if (isConv) currentFeatures = cov_cal(pastObs, obs, numElements);
+            else currentFeatures = obs;
 
             if(initStatus){
-				pastObs = obs;
-//				pastFeatures.assign(numElements, 0.0);
+                pastObs = obs;
+//              pastFeatures.assign(numElements, 0.0);
                 currentBf = vmo::tracking_init(seqVmo, currentBf, pttrList, currentFeatures);
                 initStatus = false;
             }
             else{
-//				prevBf = currentBf;
-				currentBf = vmo::tracking(seqVmo, currentBf, pttrList, currentFeatures, decay);
+//              prevBf = currentBf;
+                currentBf = vmo::tracking(seqVmo, currentBf, pttrList, currentFeatures, decay);
                 cout << "current index: " << currentBf.currentIdx << endl;
                 currentPercent = sequence.getCurrentPercent(currentBf.currentIdx);
                 cout << "current percent: " << currentPercent << endl;
@@ -545,12 +547,12 @@ void ofApp::update(){
 
                 if(initStatus){
                     pastObs = obs;
-    //				pastFeatures.assign(numElements, 0.0);
+    //              pastFeatures.assign(numElements, 0.0);
                     currentBf = vmo::tracking_init(seqVmo, currentBf, pttrList, currentFeatures);
                     initStatus = false;
                 }
                 else{
-    //				prevBf = currentBf;
+    //              prevBf = currentBf;
                     currentBf = vmo::tracking(seqVmo, currentBf, pttrList, currentFeatures, decay);
                     cout << "current index: " << currentBf.currentIdx << endl;
                     currentPercent = sequence.getCurrentPercent(currentBf.currentIdx);
@@ -615,11 +617,28 @@ void ofApp::draw(){
     kinectRect.scaleTo(canvasRect, OF_SCALEMODE_FIT);
     ofTranslate(kinectRect.x, kinectRect.y);
     ofScale(reScale, reScale);
-//    ofScale(reScale.x, reScale.y);
 
 //    // Kinect images
-//    irImage.draw(0, 0);
-//    depthImage.draw(0, 0);
+//    depthOriginal.draw(0, 0, 160, 120);
+//    depthImage.draw(160, 0, 160, 120);
+//    
+//    irOriginal.draw(320, 0, 160, 120);
+//    irImage.draw(480, 0, 160, 120);
+//    
+//    grayThreshFar.draw(0, 120, 160, 120);
+//    grayThreshNear.draw(160, 120, 160, 120);
+//    
+//    ofPushMatrix();
+//    ofScale(0.25, 0.25);
+//    ofTranslate(640*2, 480);
+//    irMarkerFinder.draw();
+//    ofPopMatrix();
+//    
+//    ofPushMatrix();
+//    ofScale(0.25, 0.25);
+//    ofTranslate(0, 480*2);
+//    contour.draw();
+//    ofPopMatrix();
 
     if(useFBO){
         fbo.begin();
@@ -1041,7 +1060,7 @@ void ofApp::setupOpticalFlowGUI(){
     guiFlow->addSpacer();
     guiFlow->addSlider("Flow Strength", 0.0, 100.0, &contour.flowStrength);
     guiFlow->addIntSlider("Offset", 1, 10, &contour.flowOffset);
-    guiFlow->addSlider("Lambda", 0.0, 0.1, &contour.flowLambda);
+    guiFlow->addSlider("Lambda", 0.001, 0.1, &contour.flowLambda);
     guiFlow->addSlider("Threshold", 0.0, 0.2, &contour.flowThreshold);
     
     guiFlow->addToggle("Inverse X", &contour.flowInverseX);
@@ -1311,11 +1330,11 @@ void ofApp::setupContourGUI(){
     guiContour->addLabel("Contours", OFX_UI_FONT_MEDIUM);
     guiContour->addSpacer();
     guiContour->addToggle("Bounding Rectangle", &contour.drawBoundingRect);
+    guiContour->addToggle("Bounding Rectangle Line", &contour.drawBoundingRectLine);
     guiContour->addToggle("Convex Hull", &contour.drawConvexHull);
     guiContour->addToggle("Convex Hull Line", &contour.drawConvexHullLine);
     guiContour->addToggle("Silhouette", &contour.drawSilhouette);
     guiContour->addToggle("Silhouette Line", &contour.drawSilhouetteLine);
-    guiContour->addToggle("Quads Line", &contour.drawQuads);
     guiContour->addSlider("Smoothing Size", 0.0, 40.0, &contour.smoothingSize);
     guiContour->addSlider("Line Width", 0.5, 10.0, &contour.lineWidth);
     guiContour->addSlider("Scale", 1.0, 1.6, &contour.scaleContour);
@@ -1417,6 +1436,11 @@ void ofApp::setupGridGUI(){
     guiGrid_1->addSlider("Connect Line Width", 1.0, 5.0, &gridParticles->connectWidth);
     guiGrid_1->addSpacer();
     
+    guiGrid_1->addSlider("Friction", 0.0, 100.0, &gridParticles->friction);
+    guiGrid_1->addToggle("Return to Origin", &gridParticles->returnToOrigin);
+
+    guiGrid_1->addSpacer();
+    
     guiGrid_1->autoSizeToFitWidgets();
     guiGrid_1->setVisible(false);
     ofAddListener(guiGrid_1->newGUIEvent, this, &ofApp::guiEvent);
@@ -1426,7 +1450,18 @@ void ofApp::setupGridGUI(){
     guiGrid_2->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
     
     guiGrid_2->addSpacer();
-    addParticleInteractionGUI(guiGrid_2, gridParticles);
+    guiGrid_2->addLabel("Interaction", OFX_UI_FONT_MEDIUM);
+    guiGrid_2->addSpacer();
+    guiGrid_2->addToggle("Interact", &gridParticles->interact);
+    guiGrid_2->addSlider("Marker Interaction Radius", 5.0, 150.0, &gridParticles->markerRadius);
+    guiGrid_2->addSpacer();
+    guiGrid_2->addToggle("Flow Interaction", &gridParticles->flowInteraction);
+    guiGrid_2->addToggle("Fluid Interaction", &gridParticles->fluidInteraction);
+    guiGrid_2->addToggle("Seek Interaction", &gridParticles->seekInteraction);
+    guiGrid_2->addToggle("Gravity Interaction", &gridParticles->gravityInteraction);
+    guiGrid_2->addToggle("Attract Interaction", &gridParticles->attractInteraction);
+    guiGrid_2->addToggle("Repulse Interaction", &gridParticles->repulseInteraction);
+    guiGrid_2->addSpacer();
 
     guiGrid_2->addToggle("Repulse", &gridParticles->repulse);
     guiGrid_2->addSlider("Repulse Dist", 1.0, 50.0, &gridParticles->repulseDist);
@@ -1504,19 +1539,18 @@ void ofApp::setupAnimationsGUI(){
     addParticleBasicsGUI(guiAnimations_1, animationsParticles);
 
     vector<string> animations;
-	animations.push_back("Rain");
-	animations.push_back("Snow");
-	animations.push_back("Wind");
-	animations.push_back("Explosion");
-	guiAnimations_1->addRadio("Animations", animations, OFX_UI_ORIENTATION_HORIZONTAL);
+    animations.push_back("Rain");
+    animations.push_back("Snow");
+    animations.push_back("Explosion");
+    guiAnimations_1->addRadio("Animations", animations, OFX_UI_ORIENTATION_HORIZONTAL);
     
     addParticleInteractionGUI(guiAnimations_1, animationsParticles);
     guiAnimations_1->addLabel("Rain and Snow", OFX_UI_FONT_MEDIUM);
     guiAnimations_1->addSpacer();
-    guiAnimations_1->addSlider("Particles/sec", 0.0, 60.0, &animationsParticles->bornRate);
+    guiAnimations_1->addSlider("Particles/sec", 0.0, 20.0, &animationsParticles->bornRate);
     guiAnimations_1->addSpacer();
     
-    guiAnimations_1->addLabel("Wind and Explosion", OFX_UI_FONT_MEDIUM);
+    guiAnimations_1->addLabel("Explosion", OFX_UI_FONT_MEDIUM);
     guiAnimations_1->addSpacer();
     guiAnimations_1->addIntSlider("Number of particles", 100, 2000, &animationsParticles->nParticles);
     guiAnimations_1->addSpacer();
@@ -1616,9 +1650,9 @@ void ofApp::addParticlePhysicsGUI(ofxUICanvas* gui, ParticleSystem* ps){
     gui->addLabel("Physics", OFX_UI_FONT_MEDIUM);
     gui->addSpacer();
     gui->addSlider("Friction", 0, 100, &ps->friction);
-    gui->addSlider("Gravity X", -15.0, 15.0, &ps->gravity.x);
-    gui->addSlider("Gravity Y", -15.0, 15.0, &ps->gravity.y);
-    gui->addSlider("Turbulence", 0.0, 20.0, &ps->turbulence);
+    gui->addSlider("Gravity X", -160.0, 160.0, &ps->gravity.x);
+    gui->addSlider("Gravity Y", -160.0, 160.0, &ps->gravity.y);
+    gui->addSlider("Turbulence", 0.0, 40.0, &ps->turbulence);
     gui->addSpacer();
     gui->addToggle("Bounces", &ps->bounce);
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
@@ -2343,13 +2377,6 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             animationsParticles->bornParticles();
         }
     }
-    if(e.getName() == "Wind"){
-        ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
-        if(toggle->getValue() == true){
-            animationsParticles->setAnimation(WIND);
-            animationsParticles->bornParticles();
-        }
-    }
     if(e.getName() == "Explosion"){
         ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
         if(toggle->getValue() == true){
@@ -2486,13 +2513,13 @@ void ofApp::keyPressed(int key){
         }
         else if(key == OF_KEY_UP){
             angle++;
-			if(angle>30) angle=30;
-			kinect.setCameraTiltAngle(angle);
+            if(angle>30) angle=30;
+            kinect.setCameraTiltAngle(angle);
         }
         else if(key == OF_KEY_DOWN){
             angle--;
-			if(angle<-30) angle=-30;
-			kinect.setCameraTiltAngle(angle);
+            if(angle<-30) angle=-30;
+            kinect.setCameraTiltAngle(angle);
         }
         else if(key == OF_KEY_RIGHT){
             vector<ofxUICanvas *>::iterator it = guis.begin();
