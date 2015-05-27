@@ -54,7 +54,6 @@ class ParticleSystem
         //--------------------------------------------------------------
         bool isActive;          // Particle system active
         //--------------------------------------------------------------
-        bool doFading;          // Do opacity fading?
         bool activeStarted;     // Active has started?
         bool isFadingIn;        // Opacity fading in?
         bool isFadingOut;       // Opacity fading out?
@@ -83,7 +82,6 @@ class ParticleSystem
         float velocity;             // Initial velocity magnitude of newborn particles
         float radius;               // Radius of the particles
         float lifetime;             // Lifetime of particles
-        ofColor color;              // Color of the particles
         float red, green, blue;     // Color of the particles
         //--------------------------------------------------------------
         // Specific properties
@@ -162,8 +160,8 @@ class ParticleSystem
         // Helper functions
         ofPoint randomVector();
         float randomRange(float percentage, float value);
-        ofPoint getClosestMarker(const Particle& particle, const vector<irMarker>& markers, float markerRadius);
-        ofPoint getClosestMarker(const Particle &particle, const vector<irMarker> &markers);
+        irMarker* getClosestMarker(const Particle& particle, vector<irMarker>& markers, float markerRadius);
+        irMarker* getClosestMarker(const Particle &particle, vector<irMarker>& markers);
         ofPoint getClosestPointInContour(const Particle& particle, const Contour& contour, unsigned int* contourIdx = NULL);
     
         void fadeIn(float dt);
