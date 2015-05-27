@@ -69,12 +69,12 @@ void Particle::setup(float id, ofPoint pos, ofPoint vel, ofColor color, float in
 void Particle::update(float dt){
     if(isAlive){
         // Update position
-        acc = frc;
-        vel += acc*dt;
-        vel *= friction;
+        acc = frc/mass;     // Newton's second law F = m*a
+        vel += acc*dt;      // Euler's method
+        vel *= friction;    // Decay velocity
         if(limitSpeed) limitVelocity();
         pos += vel*dt;
-        frc.set(0, 0);
+        frc.set(0, 0);      // Restart force
 
         // Update age and check if particle has to die
         age += dt;
@@ -85,14 +85,13 @@ void Particle::update(float dt){
         if (sizeAge) radius = initialRadius * (1.0f - (age/lifetime));
 
         // Decrease particle opacity with age
-        opacityTmp = opacity;
-        if (opacityAge) opacityTmp *= (1.0f - (age/lifetime));
-        if (flickersAge && (age/lifetime) > 0.85f && ofRandomf() > 0.6) opacityTmp *= 0.2;
+        if (opacityAge) opacity *= (1.0f - (age/lifetime));
+        if (flickersAge && (age/lifetime) > 0.8 && ofRandomf() > 0.6) opacity *= 0.2;
 
         // Change particle color with age
         if (colorAge){
-//            color.setSaturation(ofMap(age, 0, lifetime, 255, 128));
-            color.setHue(ofMap(age, 0, lifetime, originalHue, originalHue-100));
+            color.setSaturation(ofMap(age, 0, lifetime, 255, 128));
+            color.setHue(ofMap(age, 0, lifetime, originalHue, originalHue-80));
         }
 
 //        // hackish way to make particles glitter when they slow down a lot
@@ -117,8 +116,7 @@ void Particle::update(float dt){
 void Particle::draw(){
     if(isAlive){
         ofPushStyle();
-
-        ofSetColor(color, opacityTmp);
+        ofSetColor(color, opacity);
 
         if(isEmpty){
             ofNoFill();
@@ -136,7 +134,7 @@ void Particle::draw(){
                 ofPushStyle();
                 ofNoFill();
                 ofSetLineWidth(strokeWidth);
-                ofSetColor(0, opacityTmp);
+                ofSetColor(0, opacity);
                 ofCircle(pos, radius);
                 ofPopStyle();
             }
@@ -154,7 +152,7 @@ void Particle::draw(){
 }
 
 void Particle::addForce(ofPoint force){
-    frc += force/mass;
+    frc += force;
 }
 
 void Particle::addNoise(float angle, float turbulence, float dt){
@@ -366,11 +364,11 @@ void Particle::seek(ofPoint target, float radiusSqrd){
     dirToTarget.normalize();
     float distSqrd = pos.squareDistance(target);
     if(distSqrd < radiusSqrd){
-        float F = ofMap(distSqrd, 0, radiusSqrd, 0, 40);
+        float F = ofMap(distSqrd, 0, radiusSqrd, 0, 70);
         dirToTarget *= F;
     }
     else{
-        dirToTarget *= 40.0;
+        dirToTarget *= 70.0;
     }
     frc += dirToTarget;
 }
@@ -378,7 +376,7 @@ void Particle::seek(ofPoint target, float radiusSqrd){
 void Particle::seek(ofPoint target){
     ofPoint dirToTarget = target - pos;
     dirToTarget.normalize();
-    dirToTarget *= ofRandom(15, 30);
+    dirToTarget *= ofRandom(15, 60);
     vel += dirToTarget;
 }
 
@@ -394,7 +392,6 @@ void Particle::marginsBounce(){
         pos.x = radius;
         vel.x *= -1.0;
     }
-
     if(pos.y > height-radius){
         pos.y = height-radius;
         vel.y *= -1.0;

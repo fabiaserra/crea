@@ -54,7 +54,6 @@ class Particle
         void kill();
 //--------------------------------------------------------------
         float opacity;
-        float opacityTmp;
 //--------------------------------------------------------------
         ofPoint pos;            // Position
         ofPoint prevPos;        // Previous position
