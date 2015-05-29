@@ -158,7 +158,7 @@ void Contour::update(float dt, ofImage &depthImage){
         opticalFlow.setTimeBlurDecay(flowTimeBlurDecay);
         opticalFlow.update(dt);
         
-        // Save opt flow texture and save to pixels to operate with them and get velocities
+        // Save flow texture and get its pixels to read velocities
         flowTexture = opticalFlow.getOpticalFlowDecay();
         flowTexture.readToPixels(flowPixels);
         
@@ -412,17 +412,14 @@ void Contour::draw(){
 }
 
 ofVec2f Contour::getFlowOffset(ofPoint p){
-    ofPoint p_ = p/scaleFactor;
+    ofPoint p_ = p/scaleFactor; // scale point to match flow texture
     ofVec2f offset(0,0);
     
-    if(rescaledRect.inside(p_)){
-        int x = p_.x;
-        int y = p_.y;
-
-        offset.x = flowPixels[(y*flowWidth+x)*3 + 0]; // r
-        offset.y = flowPixels[(y*flowWidth+x)*3 + 1]; // g
+    if(rescaledRect.inside(p_)){ // if point is inside flow texture size
+        offset.x = flowPixels[(p_.y*flowWidth+p_.x)*3 + 0]; // r
+        offset.y = flowPixels[(p_.y*flowWidth+p_.x)*3 + 1]; // g
     }
-
+    
     return offset;
 }
 

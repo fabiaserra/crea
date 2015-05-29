@@ -338,10 +338,8 @@ ofVec2f Fluid::getFluidOffset(ofPoint p){
     ofVec2f offset(0,0);
     
     if(rescaledRect.inside(p_)){
-        int x = p_.x;
-        int y = p_.y;
-        offset.x = fluidPixels[(y*flowWidth+x)*4 + 0]; // r
-        offset.y = fluidPixels[(y*flowWidth+x)*4 + 1]; // g
+        offset.x = fluidPixels[(p_.y*flowWidth+p_.x)*4 + 0]; // r
+        offset.y = fluidPixels[(p_.y*flowWidth+p_.x)*4 + 1]; // g
     }
     
     return offset;
