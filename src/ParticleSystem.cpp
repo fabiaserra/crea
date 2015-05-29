@@ -268,7 +268,7 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
                     else closestMarker = getClosestMarker(*particles[i], markers, markerRadius);
 
                     // Get direction vector to closest marker
-                    // dir = closestMarker - particles[i]->pos;
+                    // dir = closestMarker->smoothPos - particles[i]->pos;
                     // dir.normalize();
 
                     if(closestMarker != NULL){
@@ -277,12 +277,12 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
                         else if(attractInteraction) particles[i]->addAttractionForce(closestMarker->smoothPos.x, closestMarker->smoothPos.y, markerRadius*markerRadius, 150.0);
                         else if(seekInteraction) particles[i]->seek(closestMarker->smoothPos, markerRadius*markerRadius);
                         else if(gravityInteraction){
-                            particles[i]->addForce(ofPoint(0, 120.0)*particles[i]->mass);
+                            particles[i]->addForce(ofPoint(ofRandom(-100, 100), 600.0)*particles[i]->mass);
                             particles[i]->isTouched = true;
                         }
                     }
                     else if(gravityInteraction && particles[i]->isTouched){
-                        particles[i]->addForce(ofPoint(0, 120.0)*particles[i]->mass);
+                        particles[i]->addForce(ofPoint(0, 600.0)*particles[i]->mass);
                     }
                 }
                 if(contourInput){
@@ -294,21 +294,26 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
                         particles[i]->addForce(frc*30);
                     }
 
-                    if(closestPointInContour != ofPoint(-1, -1) || (gravityInteraction && particles[i]->isTouched)){
+                    if(closestPointInContour != ofPoint(-1, -1)){
                         if(repulseInteraction){ // it is an attractForce but result is more logical saying repulse
-                            particles[i]->addAttractionForce(closestPointInContour.x, closestPointInContour.y, 8000, 200.0);
+                            particles[i]->addAttractionForce(closestPointInContour.x, closestPointInContour.y, 12000, 100.0);
                         }
                         else if(attractInteraction){
-                            particles[i]->addRepulsionForce(closestPointInContour.x, closestPointInContour.y, 8000, 200.0);
+                            particles[i]->addRepulsionForce(closestPointInContour.x, closestPointInContour.y, 12000, 100.0);
                         }
-    
+                        else if(seekInteraction){
+                            particles[i]->seek(closestPointInContour, 10000);
+                        }
                         else if(gravityInteraction){
-                            particles[i]->addForce(ofPoint(0.0, 120.0)*particles[i]->mass);
+                            particles[i]->addForce(ofPoint(ofRandom(-100, 100), 600.0)*particles[i]->mass);
                             particles[i]->isTouched = true;
                         }
                         else if(bounceInteraction){
                             if(contourIdx != -1) particles[i]->contourBounce(contour.contours[contourIdx]);
                         }
+                    }
+                    else if(gravityInteraction && particles[i]->isTouched){
+                        particles[i]->addForce(ofPoint(0.0, 600.0)*particles[i]->mass);
                     }
                 }
                 if(fluidInteraction){
@@ -329,7 +334,7 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
                 particles[i]->maxSpeed              =   maxSpeed;
             }
 
-            if(returnToOrigin && particleMode == GRID && !gravityInteraction) particles[i]->returnToOrigin(0.3);
+            if(returnToOrigin && particleMode == GRID && !gravityInteraction) particles[i]->returnToOrigin(0.1);
 
             if(particleMode == ANIMATIONS && animation == SNOW){
                 float windX = ofSignedNoise(particles[i]->pos.x * 0.003, particles[i]->pos.y * 0.006, ofGetElapsedTimef() * 0.1) * 3.0;
@@ -404,6 +409,8 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
                 particles[i]->drawStroke    = drawStroke;
                 particles[i]->strokeWidth   = strokeWidth;
             }
+            
+            if(gravityInteraction) particles[i]->bounces = true;
 
             particles[i]->update(dt);
         }
@@ -469,8 +476,8 @@ void ParticleSystem::addParticle(ofPoint pos, ofPoint vel, ofColor color, float 
         newParticle->immortal = true;
     }
     else if(particleMode == ANIMATIONS){
-        if(animation == SNOW) newParticle->damping = 0.05;
-        else newParticle->damping = 0.15;
+        if(animation == SNOW) newParticle->damping = 0.1;
+        else newParticle->damping = 0.3;
     }
 
     newParticle->setup(id, pos, vel, color, radius, lifetime);
@@ -626,11 +633,11 @@ void ParticleSystem::setAnimation(Animation animation){
 
 void ParticleSystem::repulseParticles(){
     float repulseDistSqrd = repulseDist*repulseDist;
-    for(int i = 0; i < particles.size(); i++){
+    for(int i = 1; i < particles.size(); i++){
         for(int j = i-1; j >= 0; j--){
-            if (fabs(particles[j]->pos.x - particles[i]->pos.x) > repulseDist) break; // to speed the loop
-            particles[i]->addRepulsionForce( *particles[j], repulseDistSqrd, 100.0);
-//            particles[i]->addRepulsionForce( *particles[j], 100.0);
+            if (fabs(particles[i]->pos.x - particles[j]->pos.x) > repulseDist) break; // to speed the loop
+            particles[i]->addRepulsionForce( *particles[j], repulseDistSqrd, 30.0);
+//            particles[i]->addRepulsionForce( *particles[j], 30.0);
         }
     }
 }
@@ -653,43 +660,8 @@ float ParticleSystem::randomRange(float percentage, float value){
     return ofRandom(-(percentage/100)*value, (percentage/100)*value);
 }
 
-//ofPoint ParticleSystem::getClosestMarker(const Particle &particle, const vector<irMarker> &markers, float markerRadius){
-//    ofPoint closestMarker(-1, -1);
-//    float minDistSqrd = markerRadius*markerRadius;
-//
-//    // Get closest marker to particle
-//    for(int markerIndex = 0; markerIndex < markers.size(); markerIndex++){
-//        if (!markers[markerIndex].hasDisappeared){
-//            float markerDistSqrd = particle.pos.squareDistance(markers[markerIndex].smoothPos);
-//            if(markerDistSqrd < minDistSqrd){
-//                minDistSqrd = markerDistSqrd;
-//                closestMarker = markers[markerIndex].smoothPos;
-//            }
-//        }
-//    }
-//    return closestMarker;
-//}
-//
-//// Closest marker without distance limit
-//ofPoint ParticleSystem::getClosestMarker(const Particle &particle, const vector<irMarker> &markers){
-//    ofPoint closestMarker(-1, -1);
-//    float minDistSqrd = 99999999;
-//    
-//    // Get closest marker to particle
-//    for(int markerIndex = 0; markerIndex < markers.size(); markerIndex++){
-//        if (!markers[markerIndex].hasDisappeared){
-//            float markerDistSqrd = particle.pos.squareDistance(markers[markerIndex].smoothPos);
-//            if(markerDistSqrd < minDistSqrd){
-//                minDistSqrd = markerDistSqrd;
-//                closestMarker = markers[markerIndex].smoothPos;
-//            }
-//        }
-//    }
-//    return closestMarker;
-//}
-
 irMarker* ParticleSystem::getClosestMarker(const Particle &particle, vector<irMarker> &markers, float markerRadius){
-    irMarker* closestMarker;
+    irMarker* closestMarker = NULL;
     float minDistSqrd = markerRadius*markerRadius;
     
     // Get closest marker to particle
@@ -707,7 +679,7 @@ irMarker* ParticleSystem::getClosestMarker(const Particle &particle, vector<irMa
 
 // Closest marker without distance limit
 irMarker* ParticleSystem::getClosestMarker(const Particle &particle, vector<irMarker> &markers){
-    irMarker* closestMarker;
+    irMarker* closestMarker = NULL;
     float minDistSqrd = 99999999;
     
     // Get closest marker to particle
@@ -722,24 +694,6 @@ irMarker* ParticleSystem::getClosestMarker(const Particle &particle, vector<irMa
     }
     return closestMarker;
 }
-
-
-//irMarker ParticleSystem::getClosestMarker(const Particle &particle, const vector<irMarker> &markers, float markerRadius){
-//    irMarker closestMarker;
-//    float minDistSqrd = markerRadius*markerRadius;
-//
-//    // Get closest marker to particle
-//    for(int markerIndex = 0; markerIndex < markers.size(); markerIndex++){
-//        if (!markers[markerIndex].hasDisappeared){
-//            float markerDistSqrd = particle.pos.squareDistance(markers[markerIndex].smoothPos);
-//            if(markerDistSqrd < minDistSqrd){
-//                minDistSqrd = markerDistSqrd;
-//                closestMarker = markers[markerIndex];
-//            }
-//        }
-//    }
-//    return closestMarker;
-//}
 
 ofPoint ParticleSystem::getClosestPointInContour(const Particle& particle, const Contour& contour, unsigned int* contourIdx){
     ofPoint closestPoint(-1, -1);
