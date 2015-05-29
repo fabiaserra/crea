@@ -1435,9 +1435,11 @@ void ofApp::setupGridGUI(){
     guiGrid_1->addSlider("Connect Dist", 5.0, 100.0, &gridParticles->connectDist);
     guiGrid_1->addSlider("Connect Line Width", 1.0, 5.0, &gridParticles->connectWidth);
     guiGrid_1->addSpacer();
-    
+    guiGrid_1->addLabel("Physics", OFX_UI_FONT_MEDIUM);
+    guiGrid_1->addSpacer();
     guiGrid_1->addSlider("Friction", 0.0, 100.0, &gridParticles->friction);
     guiGrid_1->addToggle("Return to Origin", &gridParticles->returnToOrigin);
+    guiGrid_1->addSlider("Return to Origin Force", 0.0, 50.0, &gridParticles->returnToOriginForce);
 
     guiGrid_1->addSpacer();
     
@@ -1453,7 +1455,9 @@ void ofApp::setupGridGUI(){
     guiGrid_2->addLabel("Interaction", OFX_UI_FONT_MEDIUM);
     guiGrid_2->addSpacer();
     guiGrid_2->addToggle("Interact", &gridParticles->interact);
-    guiGrid_2->addSlider("Marker Interaction Radius", 5.0, 150.0, &gridParticles->markerRadius);
+    guiGrid_2->addSlider("Interaction Radius", 0.0, 150.0, &gridParticles->interactionRadius);
+    guiGrid_2->addSlider("Interaction Force", 0.0, 300.0, &gridParticles->interactionForce);
+
     guiGrid_2->addSpacer();
     guiGrid_2->addToggle("Flow Interaction", &gridParticles->flowInteraction);
     guiGrid_2->addToggle("Fluid Interaction", &gridParticles->fluidInteraction);
@@ -1495,18 +1499,20 @@ void ofApp::setupBoidsGUI(){
     guiBoids_1->addSlider("Alignment Strength", 0.001, 0.1, &boidsParticles->alignmentStrength)->setLabelPrecision(3);
     
     guiBoids_1->addSpacer();
-//    addParticleInteractionGUI(guiBoids_1, boidsParticles);
-    guiBoids_1->addLabel("Interaction", OFX_UI_FONT_MEDIUM);
+    guiBoids_1->addLabel("Physics", OFX_UI_FONT_MEDIUM);
     guiBoids_1->addSpacer();
-    guiBoids_1->addToggle("Interact", &boidsParticles->interact);
-    guiBoids_1->addSlider("Marker Interaction Radius", 5.0, 150.0, &boidsParticles->markerRadius);
+    guiBoids_1->addSlider("Friction", 0, 100, &boidsParticles->friction);
+    guiBoids_1->addSlider("Gravity X", -160.0, 160.0, &boidsParticles->gravity.x);
+    guiBoids_1->addSlider("Gravity Y", -160.0, 160.0, &boidsParticles->gravity.y);
+    guiBoids_1->addSlider("Turbulence", 0.0, 40.0, &boidsParticles->turbulence);
     guiBoids_1->addSpacer();
-    guiBoids_1->addToggle("Flow Interaction", &boidsParticles->flowInteraction);
-    guiBoids_1->addToggle("Fluid Interaction", &boidsParticles->fluidInteraction);
-    guiBoids_1->addToggle("Seek Interaction", &boidsParticles->seekInteraction);
-    guiBoids_1->addToggle("Gravity Interaction", &boidsParticles->gravityInteraction);
-    guiBoids_1->addToggle("Attract Interaction", &boidsParticles->attractInteraction);
-    guiBoids_1->addToggle("Repulse Interaction", &boidsParticles->repulseInteraction);
+    guiBoids_1->addToggle("Bounces", &boidsParticles->bounce);
+    guiBoids_1->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    guiBoids_1->setWidgetSpacing(10);
+    guiBoids_1->addToggle("Steers", &boidsParticles->steer);
+    guiBoids_1->addToggle("Infinite", &boidsParticles->infiniteWalls);
+    guiBoids_1->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    guiBoids_1->setWidgetSpacing(3);
     guiBoids_1->addSpacer();
     
     guiBoids_1->autoSizeToFitWidgets();
@@ -1517,11 +1523,9 @@ void ofApp::setupBoidsGUI(){
     ofxUICanvas *guiBoids_2 = new ofxUICanvas((guiWidth+guiMargin)*2, 0, guiWidth, ofGetHeight());
     guiBoids_2->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
     guiBoids_2->addSpacer();
-    guiBoids_2->addToggle("Bounce Interaction", &boidsParticles->bounceInteraction);
-    guiBoids_2->addSpacer();
 
     addParticlePropertiesGUI(guiBoids_2, boidsParticles);
-    addParticlePhysicsGUI(guiBoids_2, boidsParticles);
+    addParticleInteractionGUI(guiBoids_2, boidsParticles);
 
     guiBoids_2->autoSizeToFitWidgets();
     guiBoids_2->setVisible(false);
@@ -1609,7 +1613,8 @@ void ofApp::addParticleInteractionGUI(ofxUICanvas* gui, ParticleSystem* ps){
     gui->addLabel("Interaction", OFX_UI_FONT_MEDIUM);
     gui->addSpacer();
     gui->addToggle("Interact", &ps->interact);
-    gui->addSlider("Marker Interaction Radius", 5.0, 150.0, &ps->markerRadius);
+    gui->addSlider("Interaction Radius", 0.0, 150.0, &ps->interactionRadius);
+    gui->addSlider("Interaction Force", 0.0, 300.0, &ps->interactionForce);
     gui->addSpacer();
     gui->addToggle("Flow Interaction", &ps->flowInteraction);
     gui->addToggle("Fluid Interaction", &ps->fluidInteraction);

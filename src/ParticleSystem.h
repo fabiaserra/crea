@@ -130,6 +130,7 @@ class ParticleSystem
         bool bounceDamping;         // Decrease velocity when particle bounces walls?
         bool repulse;               // Repulse particles between each other?
         float repulseDist;          // Repulse particle-particle distance
+        float returnToOriginForce;  // How fast particle returns to its position
         //--------------------------------------------------------------
         // Behavior
         bool interact;              // Can we interact with the particles?
@@ -147,7 +148,8 @@ class ParticleSystem
         // Input
         bool markersInput;          // Input are the IR markers?
         bool contourInput;          // Input is the depth contour?
-        float markerRadius;         // Radius of interaction of the markers
+        float interactionForce;     // Force of interaction
+        float interactionRadius;    // Radius of interaction
         bool emitInMovement;        // Emit particles only in regions that there has been some movement?
         bool emitAllTimeInside;     // Emit particles every frame inside all the defined area?
         bool emitAllTimeContour;    // Emit particles every frame only on the contour of the defined area?
@@ -160,7 +162,7 @@ class ParticleSystem
         // Helper functions
         ofPoint randomVector();
         float randomRange(float percentage, float value);
-        irMarker* getClosestMarker(const Particle& particle, vector<irMarker>& markers, float markerRadius);
+        irMarker* getClosestMarker(const Particle& particle, vector<irMarker>& markers, float interactionRadiusSqrd);
         irMarker* getClosestMarker(const Particle &particle, vector<irMarker>& markers);
         ofPoint getClosestPointInContour(const Particle& particle, const Contour& contour, unsigned int* contourIdx = NULL);
     

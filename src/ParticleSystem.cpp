@@ -94,6 +94,8 @@ ParticleSystem::ParticleSystem(){
     infiniteWalls       = false;        // Infinite walls?
     bounceDamping       = true;         // Decrease velocity when particle bounces walls?
     repulseDist         = 5.0*radius;   // Repulse particle-particle distance
+    
+    returnToOriginForce = 10.0;         // How fast particle returns to its position
 
     // Behavior
     emit                = false;        // Born new particles in each frame?
@@ -111,8 +113,9 @@ ParticleSystem::ParticleSystem(){
     // Input
     markersInput        = false;        // Input are the IR markers?
     contourInput        = false;        // Input is the depth contour?
-    markerRadius        = 50.0;         // Radius of interaction of the markers
-
+    interactionForce    = 100.0;        // Force of interaction
+    interactionRadius   = 80.0;         // Radius of interaction
+    
     emitAllTimeInside   = true;         // Emit particles every frame inside all the defined area?
     emitAllTimeContour  = false;        // Emit particles every frame only on the contour of the defined area?
     emitInMovement      = false;        // Emit particles only in regions that there has been some movement?
@@ -181,13 +184,13 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
             radius          = 0.8;
             radiusRnd       = 10.0;
             
-            velocity        = 60.0;
-            velocityRnd     = 10.0;
+            velocity        = 80.0;
+            velocityRnd     = 20.0;
             
-            lifetime        = 2.5;
+            lifetime        = 3.0;
             lifetimeRnd     = 30.0;
             
-            gravity         = ofPoint(0, 140);
+            gravity         = ofPoint(0, 100);
             bounce          = true;
         }
         else if(animation == SNOW){
@@ -197,10 +200,11 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
             velocity        = 40.0;
             velocityRnd     = 20.0;
             
-            lifetime        = 3.0;
+            lifetime        = 7.0;
             lifetimeRnd     = 30.0;
             
             gravity         = ofPoint(0, 15);
+            bounce          = true;
         }
         else if(animation == EXPLOSION){
             radius          = 6.0;
@@ -214,7 +218,7 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
             
             gravity         = ofPoint(0, 140);
             friction        = 80.0;
-            turbulence      = 10.0;
+            turbulence      = 5.0;
             flickersAge     = true;
             opacityAge      = false;
             addParticles(nParticles);
@@ -244,6 +248,10 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
         
         // sort particles so it is more effective to do particle/particle interactions
         sort(particles.begin(), particles.end(), comparisonFunction);
+        
+        // compute radius squareds so we just do it once
+        float interactionRadiusSqrd = interactionRadius*interactionRadius;
+        float flockingRadiusSqrd = flockingRadius * flockingRadius;
 
         // ---------- (1) Delete inactive particles
         int i = 0;
@@ -265,7 +273,7 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
                     // Get closest marker to particle
                     irMarker* closestMarker;
                     if(particleMode == BOIDS) closestMarker = getClosestMarker(*particles[i], markers);
-                    else closestMarker = getClosestMarker(*particles[i], markers, markerRadius);
+                    else closestMarker = getClosestMarker(*particles[i], markers, interactionRadiusSqrd);
 
                     // Get direction vector to closest marker
                     // dir = closestMarker->smoothPos - particles[i]->pos;
@@ -273,9 +281,11 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
 
                     if(closestMarker != NULL){
                         if(flowInteraction) particles[i]->addForce(closestMarker->velocity);
-                        else if(repulseInteraction) particles[i]->addRepulsionForce(closestMarker->smoothPos.x, closestMarker->smoothPos.y, markerRadius*markerRadius, 150.0);
-                        else if(attractInteraction) particles[i]->addAttractionForce(closestMarker->smoothPos.x, closestMarker->smoothPos.y, markerRadius*markerRadius, 150.0);
-                        else if(seekInteraction) particles[i]->seek(closestMarker->smoothPos, markerRadius*markerRadius);
+                        else if(repulseInteraction) particles[i]->addRepulsionForce(closestMarker->smoothPos, interactionRadiusSqrd, interactionForce);
+                        else if(attractInteraction) particles[i]->addAttractionForce(closestMarker->smoothPos, interactionRadiusSqrd, interactionForce);
+                        else if(seekInteraction){
+                            particles[i]->seek(closestMarker->smoothPos, interactionRadiusSqrd, interactionForce);
+                        }
                         else if(gravityInteraction){
                             particles[i]->addForce(ofPoint(ofRandom(-100, 100), 600.0)*particles[i]->mass);
                             particles[i]->isTouched = true;
@@ -296,13 +306,13 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
 
                     if(closestPointInContour != ofPoint(-1, -1)){
                         if(repulseInteraction){ // it is an attractForce but result is more logical saying repulse
-                            particles[i]->addAttractionForce(closestPointInContour.x, closestPointInContour.y, 12000, 100.0);
+                            particles[i]->addAttractionForce(closestPointInContour, interactionRadiusSqrd, interactionForce);
                         }
                         else if(attractInteraction){
-                            particles[i]->addRepulsionForce(closestPointInContour.x, closestPointInContour.y, 12000, 100.0);
+                            particles[i]->addRepulsionForce(closestPointInContour, interactionRadiusSqrd, interactionForce);
                         }
                         else if(seekInteraction){
-                            particles[i]->seek(closestPointInContour, 10000);
+                            particles[i]->seek(closestPointInContour, interactionRadiusSqrd, interactionForce);
                         }
                         else if(gravityInteraction){
                             particles[i]->addForce(ofPoint(ofRandom(-100, 100), 600.0)*particles[i]->mass);
@@ -323,7 +333,7 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
             }
 
             if(flock){ // Flocking behavior
-                particles[i]->flockingRadiusSqrd    =   flockingRadius * flockingRadius;
+                particles[i]->flockingRadiusSqrd    =   flockingRadiusSqrd;
 
                 particles[i]->separationStrength    =   separationStrength;
                 particles[i]->alignmentStrength     =   alignmentStrength;
@@ -334,12 +344,12 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
                 particles[i]->maxSpeed              =   maxSpeed;
             }
 
-            if(returnToOrigin && particleMode == GRID && !gravityInteraction) particles[i]->returnToOrigin(0.1);
+            if(returnToOrigin && particleMode == GRID && !gravityInteraction) particles[i]->returnToOrigin(100, returnToOriginForce);
 
-            if(particleMode == ANIMATIONS && animation == SNOW){
+            if(particleMode == ANIMATIONS && animation != EXPLOSION){
                 float windX = ofSignedNoise(particles[i]->pos.x * 0.003, particles[i]->pos.y * 0.006, ofGetElapsedTimef() * 0.1) * 3.0;
                 ofPoint frc;
-                frc.x = windX + ofSignedNoise(particles[i]->id, particles[i]->pos.y * 0.04) * 8.0;
+                if(animation == SNOW) frc.x = windX + ofSignedNoise(particles[i]->id, particles[i]->pos.y * 0.04) * 8.0;
                 frc.y = ofSignedNoise(particles[i]->id, particles[i]->pos.x * 0.006, ofGetElapsedTimef() * 0.2) * 3.0;
                 particles[i]->addForce(frc*particles[i]->mass);
             }
@@ -476,8 +486,8 @@ void ParticleSystem::addParticle(ofPoint pos, ofPoint vel, ofColor color, float 
         newParticle->immortal = true;
     }
     else if(particleMode == ANIMATIONS){
-        if(animation == SNOW) newParticle->damping = 0.1;
-        else newParticle->damping = 0.3;
+        if(animation == SNOW) newParticle->damping = 0.05;
+        else newParticle->damping = 0.1;
     }
 
     newParticle->setup(id, pos, vel, color, radius, lifetime);
@@ -493,7 +503,7 @@ void ParticleSystem::addParticles(int n){
         ofPoint vel = randomVector()*(velocity+randomRange(velocityRnd, velocity));
 
         if(particleMode == ANIMATIONS && (animation == RAIN || animation == SNOW)){
-            pos = ofPoint(ofRandom(width), ofRandom(-2*radius, -5*radius));
+            pos = ofPoint(ofRandom(width), ofRandom(-5*radius, -10*radius));
             vel.x = 0;
             vel.y = velocity+randomRange(velocityRnd, velocity); // make particles all be going down when born
         }
@@ -660,9 +670,9 @@ float ParticleSystem::randomRange(float percentage, float value){
     return ofRandom(-(percentage/100)*value, (percentage/100)*value);
 }
 
-irMarker* ParticleSystem::getClosestMarker(const Particle &particle, vector<irMarker> &markers, float markerRadius){
+irMarker* ParticleSystem::getClosestMarker(const Particle &particle, vector<irMarker> &markers, float interactionRadiusSqrd){
     irMarker* closestMarker = NULL;
-    float minDistSqrd = markerRadius*markerRadius;
+    float minDistSqrd = interactionRadiusSqrd;
     
     // Get closest marker to particle
     for(int markerIndex = 0; markerIndex < markers.size(); markerIndex++){
