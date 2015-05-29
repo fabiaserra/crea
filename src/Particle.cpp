@@ -43,7 +43,7 @@ Particle::Particle(){
 
     limitSpeed      = false;
     bounceDamping   = true;
-    damping         = 0.3;
+    damping         = 0.6;
 
     age             = 0;
 
@@ -165,15 +165,15 @@ void Particle::addNoise(float angle, float turbulence, float dt){
 
 void Particle::addRepulsionForce(Particle &p, float radiusSqrd, float scale){
 
-    // ----------- (1) make a vector of where this particle p is:
+    // (1) make a vector of where this particle p is:
     ofPoint posOfForce;
     posOfForce.set(p.pos.x, p.pos.y);
 
-    // ----------- (2) calculate the difference & length
+    // (2) calculate the difference & length
     ofPoint dir         = pos - posOfForce;
     float distSqrd      = pos.squareDistance(posOfForce); // faster than length or distance (no square root)
 
-    // ----------- (3) check close enough
+    // (3) check close enough
     bool closeEnough = true;
     if (radiusSqrd > 0){
         if (distSqrd > radiusSqrd){
@@ -181,7 +181,7 @@ void Particle::addRepulsionForce(Particle &p, float radiusSqrd, float scale){
         }
     }
 
-    // ----------- (4) if so, update force
+    // (4) if so, update both forces
     if (closeEnough == true){
         float pct = 1 - (distSqrd / radiusSqrd);  // stronger on the inside
         dir.normalize();
@@ -191,24 +191,24 @@ void Particle::addRepulsionForce(Particle &p, float radiusSqrd, float scale){
 }
 
 void Particle::addRepulsionForce(Particle &p, float scale){
-    // ----------- (1) make radius of repulsion equal particles radius sum
+    // (1) make radius of repulsion equal to particle's radius sum
     float radius        = this->radius + p.radius;
     float radiusSqrd    = radius*radius;
-    // ----------- (2) call addRepulsion force with the computed radius
+    // (2) call addRepulsion force with the computed radius
     addRepulsionForce(p, radiusSqrd, scale);
 }
 
 void Particle::addRepulsionForce(float x, float y, float radiusSqrd, float scale){
 
-    // ----------- (1) make a vector of where this position is:
+    // (1) make a vector of where this position is:
     ofPoint posOfForce;
     posOfForce.set(x, y);
 
-    // ----------- (2) calculate the difference & length
+    // (2) calculate the difference & length
     ofPoint dir         = pos - posOfForce;
     float distSqrd      = pos.squareDistance(posOfForce); // faster than length or distance (no square root)
 
-    // ----------- (3) check close enough
+    // (3) check close enough
     bool closeEnough = true;
     if (radiusSqrd > 0){
         if (distSqrd > radiusSqrd){
@@ -216,7 +216,7 @@ void Particle::addRepulsionForce(float x, float y, float radiusSqrd, float scale
         }
     }
 
-    // ----------- (4) if so, update force
+    // (4) if so, update force
     if (closeEnough == true){
         float pct = 1 - (distSqrd / radiusSqrd);  // stronger on the inside
         dir.normalize();
@@ -226,15 +226,15 @@ void Particle::addRepulsionForce(float x, float y, float radiusSqrd, float scale
 
 void Particle::addAttractionForce(Particle &p, float radiusSqrd, float scale){
 
-    // ----------- (1) make a vector of where this particle p is:
+    // (1) make a vector of where this particle p is:
     ofPoint posOfForce;
     posOfForce.set(p.pos.x, p.pos.y);
 
-    // ----------- (2) calculate the difference & length
+    // (2) calculate the difference & length
     ofPoint dir         = pos - posOfForce;
     float distSqrd      = pos.squareDistance(posOfForce); // faster than length or distance (no square root)
 
-    // ----------- (3) check close enough
+    // (3) check close enough
     bool closeEnough = true;
     if (radiusSqrd > 0){
         if (distSqrd > radiusSqrd){
@@ -242,7 +242,7 @@ void Particle::addAttractionForce(Particle &p, float radiusSqrd, float scale){
         }
     }
 
-    // ----------- (4) if so, update force
+    // (4) if so, update both forces
     if (closeEnough == true){
         float pct = 1 - (distSqrd / radiusSqrd);  // stronger on the inside
         dir.normalize();
@@ -253,16 +253,16 @@ void Particle::addAttractionForce(Particle &p, float radiusSqrd, float scale){
 
 void Particle::addAttractionForce(float x, float y, float radiusSqrd, float scale){
 
-    // ----------- (1) make a vector of where this position is:
+    // (1) make a vector of where this position is:
     ofPoint posOfForce;
     posOfForce.set(x, y);
 
-    // ----------- (2) calculate the difference & length
+    // (2) calculate the difference & length
 
     ofPoint dir         = pos - posOfForce;
     float distSqrd      = pos.squareDistance(posOfForce); // faster than length or distance (no square root)
 
-    // ----------- (3) check close enough
+    // (3) check close enough
 
     bool closeEnough = true;
     if (radiusSqrd > 0){
@@ -271,7 +271,7 @@ void Particle::addAttractionForce(float x, float y, float radiusSqrd, float scal
         }
     }
 
-    // ----------- (4) if so, update force
+    // (4) if so, update force
     if (closeEnough == true){
         float pct = 1 - (distSqrd / radiusSqrd);  // stronger on the inside
         dir.normalize();
@@ -286,7 +286,7 @@ void Particle::returnToOrigin(float spd){
     dirToOrigin.normalize();
     float distSqrd = pos.squareDistance(iniPos);
     if(distSqrd > 0){
-        float F = ofMap(distSqrd, 0, 100, 0, 250*spd, true);
+        float F = ofMap(distSqrd, 0, 300, 0, 250*spd, true);
         dirToOrigin *= F;
     }
     frc += dirToOrigin;
@@ -364,11 +364,11 @@ void Particle::seek(ofPoint target, float radiusSqrd){
     dirToTarget.normalize();
     float distSqrd = pos.squareDistance(target);
     if(distSqrd < radiusSqrd){
-        float F = ofMap(distSqrd, 0, radiusSqrd, 0, 70);
+        float F = ofMap(distSqrd, 0, radiusSqrd, 0, 200);
         dirToTarget *= F;
     }
     else{
-        dirToTarget *= 70.0;
+        dirToTarget *= 200.0;
     }
     frc += dirToTarget;
 }
@@ -376,7 +376,7 @@ void Particle::seek(ofPoint target, float radiusSqrd){
 void Particle::seek(ofPoint target){
     ofPoint dirToTarget = target - pos;
     dirToTarget.normalize();
-    dirToTarget *= ofRandom(15, 60);
+    dirToTarget *= ofRandom(20, 300);
     vel += dirToTarget;
 }
 
