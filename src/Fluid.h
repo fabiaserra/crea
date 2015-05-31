@@ -64,8 +64,6 @@ class Fluid{
         //--------------------------------------------------------------
         bool markersInput;          // Fluid input are the IR markers?
         bool contourInput;          // Fluid input is the depth contour?
-        bool markersInputParticles; // Particles flow input is the IR markers?
-        bool contourInputParticles; // Particles flow input is the depth contour?
         //--------------------------------------------------------------
         bool drawVelocity;
         bool drawVelocityScalar;

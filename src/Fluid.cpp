@@ -80,8 +80,6 @@ Fluid::Fluid(){
     // Input
     markersInput                 = false; // Fluid input are the IR markers?
     contourInput                 = false; // Fluid input is the depth contour?
-    markersInputParticles        = false; // Particles flow input is the IR markers?
-    contourInputParticles        = false; // Particles flow input is the depth contour?
     
     // Output
     drawVelocity                 = false;
@@ -187,13 +185,13 @@ void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour, float 
         fluid.setDensityFromVorticity(densityFromVorticity);
         fluid.setDensityFromPressure(densityFromPressure);
         
-        if(contourInput || contourInputParticles){
+        if(contourInput){
             fluid.addVelocity(contour.getOpticalFlowDecay());
             fluid.addDensity(contour.getColorMask());
             fluid.addTemperature(contour.getLuminanceMask());
         }
         
-        if(markersInput || markersInputParticles){
+        if(markersInput){
             // apply marker velocity and position forces
             for(unsigned int markerIdx = 0; markerIdx < markers.size(); markerIdx++){
                 if (!markers[markerIdx].hasDisappeared){
@@ -239,7 +237,7 @@ void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour, float 
             particleFlow.setSize(particlesSize);
             particleFlow.setSizeSpread(particlesSizeRnd);
             
-            if(contourInputParticles) particleFlow.addFlowVelocity(contour.getOpticalFlowDecay());
+            if(contourInput) particleFlow.addFlowVelocity(contour.getOpticalFlowDecay());
             particleFlow.addFluidVelocity(fluid.getVelocity());
         }
         particleFlow.update(dt);

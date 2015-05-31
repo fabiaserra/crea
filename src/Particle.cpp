@@ -401,7 +401,7 @@ void Particle::contourBounce(ofPolyline contour){
     unsigned int index;
     ofPoint contactPoint = contour.getClosestPoint(pos, &index);
     ofVec2f normal = contour.getNormalAtIndex(index);
-    vel = vel - 2*vel.dot(normal)*normal;
+    vel = vel - 2*vel.dot(normal)*normal; //reflection vector
     vel *= 0.35; // damping
 }
 

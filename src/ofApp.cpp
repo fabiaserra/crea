@@ -1125,6 +1125,14 @@ void ofApp::setupFluidSolverGUI(){
     blueSlider->setColorFill(ofColor(30, 30, 240));
     blueSlider->setColorFillHighlight(ofColor(30, 30, 150));
     guiFluid_1->addSlider("General Opacity", 0.0, 255.0, &fluid.maxOpacity);
+    
+    guiFluid_1->addSpacer();
+    guiFluid_1->addToggle("Marker", &fluid.markersInput);
+    guiFluid_1->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    guiFluid_1->setWidgetSpacing(35);
+    guiFluid_1->addToggle("Contour", &fluid.contourInput);
+    guiFluid_1->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    guiFluid_1->setWidgetSpacing(3);
 
     guiFluid_1->addSpacer();
     guiFluid_1->addLabel("Solver", OFX_UI_FONT_MEDIUM);
@@ -1276,14 +1284,6 @@ void ofApp::setupFluidExtrasGUI(){
     active = guiFluidParticles->addImageToggle("Activate Particle Flow", "icons/show.png",  &fluid.particlesActive, dim, dim);
     active->setColorBack(ofColor(150, 255));
     
-    guiFluidParticles->addSpacer();
-    guiFluidParticles->addToggle("Marker", &fluid.markersInputParticles);
-    guiFluidParticles->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    guiFluidParticles->setWidgetSpacing(35);
-    guiFluidParticles->addToggle("Contour", &fluid.contourInputParticles);
-    guiFluidParticles->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    guiFluidParticles->setWidgetSpacing(3);
-
     guiFluidParticles->addSpacer();
     guiFluidParticles->addLabel("Particle", OFX_UI_FONT_MEDIUM);
     guiFluidParticles->addSpacer();
