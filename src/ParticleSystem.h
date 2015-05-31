@@ -164,7 +164,7 @@ class ParticleSystem
         float randomRange(float percentage, float value);
         irMarker* getClosestMarker(const Particle& particle, vector<irMarker>& markers, float interactionRadiusSqrd);
         irMarker* getClosestMarker(const Particle &particle, vector<irMarker>& markers);
-        ofPoint getClosestPointInContour(const Particle& particle, const Contour& contour, unsigned int* contourIdx = NULL);
+        ofPoint getClosestPointInContour(const Particle& particle, const Contour& contour, bool onlyInside = true, unsigned int* contourIdx = NULL);
     
         void fadeIn(float dt);
         void fadeOut(float dt);
