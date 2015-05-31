@@ -86,7 +86,11 @@ void Particle::update(float dt){
 
         // Decrease particle opacity with age
         if (opacityAge) opacity *= (1.0f - (age/lifetime));
-        if (flickersAge && (age/lifetime) > 0.6 && ofRandomf() > (1.5 - age/lifetime)) opacity *= (1.2 - age/lifetime);
+        if (flickersAge){
+//            opacity *= (1.0f - (age/lifetime)*0.4);
+            if((age/lifetime) > 0.7 && ofRandomf() > (1.4 - age/lifetime))
+                opacity *= 0.5;
+        }
 
         // Change particle color with age
         if (colorAge){
@@ -95,9 +99,9 @@ void Particle::update(float dt){
         }
 
 //        // hackish way to make particles glitter when they slow down a lot
-//        if(vel.x * vel.x + vel.y * vel.y < 5) {
-//                vel.x = ofRandom(-10, 10);
-//                vel.y = ofRandom(-10, 10);
+//        if(vel.lengthSquared() < 5.0) {
+//            vel.x = ofRandom(-10, 10);
+//            vel.y = ofRandom(-10, 10);
 //        }
 
         // Bounce particle with the window margins
@@ -395,12 +399,10 @@ void Particle::marginsWrap(){
 
 void Particle::contourBounce(ofPolyline contour){
     unsigned int index;
-    if(contour.inside(pos)){
-        ofPoint contactPoint = contour.getClosestPoint(pos, &index);
-        ofVec2f normal = contour.getNormalAtIndex(index);
-        vel = vel - 2*vel.dot(normal)*normal;
-        if(bounceDamping) vel *= damping;
-    }
+    ofPoint contactPoint = contour.getClosestPoint(pos, &index);
+    ofVec2f normal = contour.getNormalAtIndex(index);
+    vel = vel - 2*vel.dot(normal)*normal;
+    vel *= 0.35; // damping
 }
 
 void Particle::kill(){
