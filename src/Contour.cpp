@@ -416,8 +416,8 @@ ofVec2f Contour::getFlowOffset(ofPoint p){
     ofVec2f offset(0,0);
     
     if(rescaledRect.inside(p_)){ // if point is inside flow texture size
-        offset.x = flowPixels[(p_.y*flowWidth+p_.x)*3 + 0]; // r
-        offset.y = flowPixels[(p_.y*flowWidth+p_.x)*3 + 1]; // g
+        offset.x = flowPixels[((int)p_.y*flowWidth+(int)p_.x)*3 + 0]; // r
+        offset.y = flowPixels[((int)p_.y*flowWidth+(int)p_.x)*3 + 1]; // g
     }
     
     return offset;
