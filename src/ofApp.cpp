@@ -1186,7 +1186,7 @@ void ofApp::setupFluidSolverGUI(){
     guiFluid_2->addLabel("FLUID CONTOUR", OFX_UI_FONT_LARGE);
     guiFluid_2->addSpacer();
     ofxUIImageToggle *activeContour;
-    activeContour = guiFluid_2->addImageToggle("Activate Fluid", "icons/show.png", &fluid.contourInput, dim, dim);
+    activeContour = guiFluid_2->addImageToggle("Activate Contour Fluid", "icons/show.png", false, dim, dim);
     activeContour->setColorBack(ofColor(150, 255));
     guiFluid_2->addSpacer();
     ofxUISlider *vMaskRedSlider = guiFluid_2->addSlider("Red", 0.0, 255.0, &contour.vMaskRed);
@@ -1215,7 +1215,7 @@ void ofApp::setupFluidExtrasGUI(){
     
     guiFluidMarkers->addSpacer();
     ofxUIImageToggle *activeMarkers;
-    activeMarkers = guiFluidMarkers->addImageToggle("Activate Marker Forces", "icons/show.png",  &fluid.markersInput, dim, dim);
+    activeMarkers = guiFluidMarkers->addImageToggle("Activate Marker Fluid", "icons/show.png",  false, dim, dim);
     activeMarkers->setColorBack(ofColor(150, 255));
     guiFluidMarkers->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     ofxUIImageButton *reset;
@@ -1456,7 +1456,7 @@ void ofApp::setupGridGUI(){
     guiGrid_2->addSpacer();
     guiGrid_2->addToggle("Interact", &gridParticles->interact);
     guiGrid_2->addSlider("Interaction Radius", 0.0, 150.0, &gridParticles->interactionRadius);
-    guiGrid_2->addSlider("Interaction Force", 0.0, 300.0, &gridParticles->interactionForce);
+    guiGrid_2->addSlider("Interaction Force", 0.0, 20.0, &gridParticles->interactionForce);
 
     guiGrid_2->addSpacer();
     guiGrid_2->addToggle("Flow Interaction", &gridParticles->flowInteraction);
@@ -1614,7 +1614,7 @@ void ofApp::addParticleInteractionGUI(ofxUICanvas* gui, ParticleSystem* ps){
     gui->addSpacer();
     gui->addToggle("Interact", &ps->interact);
     gui->addSlider("Interaction Radius", 0.0, 150.0, &ps->interactionRadius);
-    gui->addSlider("Interaction Force", 0.0, 300.0, &ps->interactionForce);
+    gui->addSlider("Interaction Force", 0.0, 20.0, &ps->interactionForce);
     gui->addSpacer();
     gui->addToggle("Flow Interaction", &ps->flowInteraction);
     gui->addToggle("Fluid Interaction", &ps->fluidInteraction);
@@ -2323,6 +2323,28 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
         if(toggle->getValue() == true){
             fluid.resetDrawForces();
+        }
+    }
+    if(e.getName() == "Activate Marker Fluid"){
+        ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
+        if(toggle->getValue() == true){
+            fluid.markersInput = true;
+            fluid.drawFluid = true;
+        }
+        else{
+            fluid.markersInput = false;
+            fluid.drawFluid = false;
+        }
+    }
+    if(e.getName() == "Activate Contour Fluid"){
+        ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
+        if(toggle->getValue() == true){
+            fluid.contourInput = true;
+            fluid.drawFluid = true;
+        }
+        else{
+            fluid.contourInput = false;
+            fluid.drawFluid = false;
         }
     }
     //-------------------------------------------------------------
