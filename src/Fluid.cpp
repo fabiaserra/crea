@@ -87,6 +87,7 @@ Fluid::Fluid(){
     drawVelocity                 = false;
     drawVelocityScalar           = false;
     drawTemperature              = false;
+    drawFluid                    = false;
 }
 
 void Fluid::setup(int width, int height, float scaleFactor, bool doFasterInternalFormat){
@@ -144,7 +145,7 @@ void Fluid::setup(int width, int height, float scaleFactor, bool doFasterInterna
     velocityField.allocate(flowWidth/4, flowHeight/4);
     
     // Allocate fluid pixels
-    fluidTexture.allocate(flowWidth, flowHeight, GL_RGB32F);
+    fluidTexture.allocate(flowWidth, flowHeight, GL_RGBA32F);
     fluidPixels.allocate(flowWidth, flowHeight, 4);
 }
 
@@ -186,13 +187,13 @@ void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour, float 
         fluid.setDensityFromVorticity(densityFromVorticity);
         fluid.setDensityFromPressure(densityFromPressure);
         
-        if(contourInput){
+        if(contourInput || contourInputParticles){
             fluid.addVelocity(contour.getOpticalFlowDecay());
             fluid.addDensity(contour.getColorMask());
             fluid.addTemperature(contour.getLuminanceMask());
         }
         
-        if(markersInput){
+        if(markersInput || markersInputParticles){
             // apply marker velocity and position forces
             for(unsigned int markerIdx = 0; markerIdx < markers.size(); markerIdx++){
                 if (!markers[markerIdx].hasDisappeared){
@@ -221,11 +222,11 @@ void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour, float 
 
         fluid.update(dt);
         
-        // Get fluid texture and save to pixels so we can operate with it
+        // Get fluid texture and save to pixels so we can operate with them
         fluidTexture = fluid.getVelocity();
         fluidTexture.readToPixels(fluidPixels);
         
-        if((markersInputParticles || contourInputParticles) && particlesActive){
+        if(particlesActive){
             // set particle flow parameters
             particleFlow.setSpeed(fluid.getSpeed());
             particleFlow.setCellSize(fluid.getCellSize());
@@ -275,13 +276,13 @@ void Fluid::draw(){
             displayScalar.draw(0, 0, width, height);
             ofPopStyle();
         }
-        
-        ofPushStyle();
-        ofEnableBlendMode(OF_BLENDMODE_ADD);
-        ofSetColor(red, green, blue, opacity);
-        fluid.draw(0, 0, width, height);
-        ofPopStyle();
-        
+        if(drawFluid){
+            ofPushStyle();
+            ofEnableBlendMode(OF_BLENDMODE_ADD);
+            ofSetColor(red, green, blue, opacity);
+            fluid.draw(0, 0, width, height);
+            ofPopStyle();
+        }
         if(particlesActive){
             ofPushStyle();
             ofEnableBlendMode(OF_BLENDMODE_ADD);
@@ -338,8 +339,8 @@ ofVec2f Fluid::getFluidOffset(ofPoint p){
     ofVec2f offset(0,0);
     
     if(rescaledRect.inside(p_)){
-        offset.x = fluidPixels[(p_.y*flowWidth+p_.x)*4 + 0]; // r
-        offset.y = fluidPixels[(p_.y*flowWidth+p_.x)*4 + 1]; // g
+        offset.x = fluidPixels[((int)p_.y*flowWidth+(int)p_.x)*4 + 0]; // r
+        offset.y = fluidPixels[((int)p_.y*flowWidth+(int)p_.x)*4 + 1]; // g
     }
     
     return offset;

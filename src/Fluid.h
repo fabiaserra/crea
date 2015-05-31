@@ -70,6 +70,7 @@ class Fluid{
         bool drawVelocity;
         bool drawVelocityScalar;
         bool drawTemperature;
+        bool drawFluid;
         //--------------------------------------------------------------
         int numMarkerForces;
         ftDrawForce* markerForces;
