@@ -1369,7 +1369,7 @@ void ofApp::setupEmitterGUI(){
     guiEmitter_1->addSpacer();
     vector<string> emitters;
     emitters.push_back("Emit all time");
-    emitters.push_back("Emit all time on contour");
+    emitters.push_back("Emit all time in contour");
     emitters.push_back("Emit only if movement");
     guiEmitter_1->addRadio("Emitters", emitters, OFX_UI_ORIENTATION_VERTICAL);
     
@@ -2365,7 +2365,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             emitterParticles->emitInMovement        = false;
         }
     }
-    if(e.getName() == "Emit all time only in contour"){
+    if(e.getName() == "Emit all time in contour"){
         ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
         if(toggle->getValue() == true){
             emitterParticles->emitAllTimeInside     = false;
