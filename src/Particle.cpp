@@ -94,15 +94,15 @@ void Particle::update(float dt){
 
         // Change particle color with age
         if (colorAge){
-            color.setSaturation(ofMap(age, 0, lifetime, 255, 128));
-            color.setHue(ofMap(age, 0, lifetime, originalHue, originalHue-80));
+            color.setBrightness(ofMap(age, 0, lifetime, 255, 180));
+            color.setHue(ofMap(age, 0, lifetime, originalHue, originalHue-100));
         }
 
-//        // hackish way to make particles glitter when they slow down a lot
-//        if(vel.lengthSquared() < 5.0) {
-//            vel.x = ofRandom(-10, 10);
-//            vel.y = ofRandom(-10, 10);
-//        }
+        // hackish way to make particles glitter when they slow down a lot
+        if(vel.lengthSquared() < 5.0) {
+            vel.x = ofRandom(-10, 10);
+            vel.y = ofRandom(-10, 10);
+        }
 
         // Bounce particle with the window margins
         if(bounces){
@@ -249,11 +249,10 @@ void Particle::returnToOrigin(float radiusSqrd, float scale){
     
     // (2) set force depending on the distance
     float pct = 1;
-    if(distSqrd > 0){
-        if(distSqrd < radiusSqrd){
-            pct = distSqrd / radiusSqrd; // decrease force when closer to origin
-        }
+    if(distSqrd < radiusSqrd){
+        pct = distSqrd / radiusSqrd; // decrease force when closer to origin
     }
+    
     // (3) update force
     dirToOrigin.normalize();
     frc += dirToOrigin * scale * pct;
