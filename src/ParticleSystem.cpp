@@ -272,10 +272,11 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
         for(int i = 0; i < particles.size(); i++){
             if(interact){ // Interact particles with input
                 if(markersInput){
-                    // Get closest marker to particle
                     irMarker* closestMarker;
-                    if(particleMode == BOIDS) closestMarker = getClosestMarker(*particles[i], markers);
-                    else closestMarker = getClosestMarker(*particles[i], markers, interactionRadiusSqrd);
+                    if(particleMode == BOIDS) // get closest marker to particle
+                        closestMarker = getClosestMarker(*particles[i], markers);
+                    else // get closest marker to particle only if particle is inside interaction area
+                        closestMarker = getClosestMarker(*particles[i], markers, interactionRadiusSqrd);
 
                     // Get direction vector to closest marker
                     // dir = closestMarker->smoothPos - particles[i]->pos;
@@ -304,8 +305,10 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
                 if(contourInput){
                     unsigned int contourIdx = -1;
                     ofPoint closestPointInContour;
-                    if(particleMode == BOIDS && seekInteraction) closestPointInContour = getClosestPointInContour(*particles[i], contour, false, &contourIdx);
-                    else closestPointInContour = getClosestPointInContour(*particles[i], contour, true, &contourIdx);
+                    if(particleMode == BOIDS && seekInteraction) // get closest point to particle
+                        closestPointInContour = getClosestPointInContour(*particles[i], contour, false, &contourIdx);
+                    else // get closest point to particle only if particle is inside contour
+                        closestPointInContour = getClosestPointInContour(*particles[i], contour, true, &contourIdx);
                     
                     if(flowInteraction){
                         ofPoint frc = contour.getFlowOffset(particles[i]->pos);
@@ -381,8 +384,6 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
             if(contourInput){
                 if(emitInMovement){
                     for(unsigned int i = 0; i < contour.diffContours.size(); i++){
-//                        addParticles(bornRate, contour.diffContours[i], contour);
-
                         // born more particles if bigger area
                         float bornNum = bornRate * abs(contour.diffContours[i].getArea())/1500.0;
                         addParticles(bornNum, contour.diffContours[i], contour);
@@ -538,13 +539,12 @@ void ParticleSystem::addParticles(int n, const irMarker& marker){
         else if(emitAllTimeContour){
             pos = marker.smoothPos + randomVector()*emitterSize;
         }
-        ofPoint vel = randomVector()*(velocity+5.0*randomRange(velocityRnd, velocity));
+        ofPoint vel = randomVector()*(velocity+5.0*randomRange(velocityRnd, velocity)); // 5.0 to increase effect
         vel += marker.velocity*(velocityMotion/100)*5.0;
 
         float initialRadius = radius + randomRange(radiusRnd, radius);
         float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
 
-//        addParticle(pos, vel, marker.color, initialRadius, lifetime);
         addParticle(pos, vel, ofColor(red, green, blue), initialRadius, lifetime);
     }
 }
@@ -556,7 +556,7 @@ void ParticleSystem::addParticles(int n, const ofPolyline& contour, Contour& flo
 
         // Create random particles inside contour polyline
         if(emitAllTimeInside || emitInMovement){
-            ofRectangle box = contour.getBoundingBox();
+            ofRectangle box = contour.getBoundingBox(); // so it is easier that the particles are born inside contour
             ofPoint center = box.getCenter();
             pos.x = center.x + (ofRandom(1.0f) - 0.5f) * box.getWidth();
             pos.y = center.y + (ofRandom(1.0f) - 0.5f) * box.getHeight();
@@ -575,21 +575,20 @@ void ParticleSystem::addParticles(int n, const ofPolyline& contour, Contour& flo
             float indexInterpolated = ofRandom(0, contour.size());
             pos = contour.getPointAtIndexInterpolated(indexInterpolated);
 
-            // use point normal vector as velocity
-            vel = contour.getNormalAtIndexInterpolated(indexInterpolated)*(velocity+2*randomRange(velocityRnd, velocity))*-1;
+            // use point normal vector as velocity direction
+            vel = -contour.getNormalAtIndexInterpolated(indexInterpolated)*(velocity+randomRange(velocityRnd, velocity));
         }
 
         if(true){
             ofPoint motionVel = flow.getFlowOffset(pos);
             vel += motionVel*(velocityMotion/100);
         }
-        else if(useContourVel){
+        else if(useContourVel){ // slower and poorer result
             ofPoint motionVel = flow.getVelocityInPoint(pos);
             vel += motionVel*(velocityMotion/100)*6;
         }
 
-        pos.x += ofRandom(-emitterSize, emitterSize);
-        pos.y += ofRandom(-emitterSize, emitterSize);
+        pos += randomVector()*emitterSize; // randomize position within a range of emitter size
 
         float initialRadius = radius + randomRange(radiusRnd, radius);
         float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
@@ -676,7 +675,7 @@ ofPoint ParticleSystem::randomVector(){
 }
 
 float ParticleSystem::randomRange(float percentage, float value){
-    return ofRandom(-(percentage/100)*value, (percentage/100)*value);
+    return ofRandom(value-(percentage/100)*value, value+(percentage/100)*value);
 }
 
 irMarker* ParticleSystem::getClosestMarker(const Particle &particle, vector<irMarker> &markers, float interactionRadiusSqrd){
