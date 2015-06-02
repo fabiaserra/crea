@@ -31,7 +31,7 @@ class Particle
         void draw();
 
         void addForce(ofPoint force);
-        void addNoise(float angle, float turbulence, float dt);
+        void addNoise(float turbulence);
         void addRepulsionForce(ofPoint posOfForce, float radiusSqrd, float scale);
         void addAttractionForce(ofPoint posOfForce, float radiusSqrd, float scale);
         void addRepulsionForce(Particle &p, float radiusSqrd, float scale);

@@ -159,10 +159,10 @@ void Particle::addForce(ofPoint force){
     frc += force;
 }
 
-void Particle::addNoise(float angle, float turbulence, float dt){
+void Particle::addNoise(float turbulence){
     // Perlin noise
-    float noise = ofNoise(pos.x * 0.005f,  pos.y * 0.005f, dt * 0.1f) * angle;
-    ofPoint noiseVector(cos(noise), sin(noise));
+    float angle = ofSignedNoise(id*0.001f, pos.x * 0.005f,  pos.y * 0.005f, ofGetElapsedTimef() * 0.1f) * 20.0f;
+    ofPoint noiseVector(cos(angle), sin(angle));
     if(!immortal) frc += noiseVector * turbulence * age; // if immortal this doesn't affect, age == 0
     else frc += noiseVector * turbulence;
 }
