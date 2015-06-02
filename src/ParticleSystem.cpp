@@ -161,13 +161,9 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
         createParticleGrid(width, height);
     }
     else if(particleMode == BOIDS){
-        radius              = 3.5;
-        radiusRnd           = 30.0;
         flock               = true;
-        interact            = true;
-        markersInput        = true;
+//        interact            = true;
         bounceDamping       = false;
-//        steer               = true;
         immortal            = true;
         addParticles(nParticles);
     }
@@ -175,7 +171,7 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
         immortal            = false;
         
         bornRate            = 8.0;
-        nParticles          = 200.0;
+//        nParticles          = 200.0;
         friction            = 0.0;
         turbulence          = 0.0;
         bounce              = false;
@@ -410,7 +406,7 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
         // ---------- (3) Add some general behavior and update the particles
         for(int i = 0; i < particles.size(); i++){
             particles[i]->addForce(gravity*particles[i]->mass);
-            particles[i]->addNoise(15.0, turbulence, dt);
+            particles[i]->addNoise(turbulence);
             
             particles[i]->opacity           = opacity;
             particles[i]->friction          = 1-friction/1000;
@@ -566,8 +562,8 @@ void ParticleSystem::addParticles(int n, const ofPolyline& contour, Contour& flo
                 pos.y = center.y + (ofRandom(1.0f) - 0.5f) * box.getHeight();
             }
 
-            // random vector
-            vel = randomVector()*(velocity+2*randomRange(velocityRnd, velocity));
+            // set velocity to random vector direction with 'velocity' as magnitude
+            vel = randomVector()*(velocity+randomRange(velocityRnd, velocity));
         }
 
         // Create particles only on the contour polyline
@@ -575,7 +571,7 @@ void ParticleSystem::addParticles(int n, const ofPolyline& contour, Contour& flo
             float indexInterpolated = ofRandom(0, contour.size());
             pos = contour.getPointAtIndexInterpolated(indexInterpolated);
 
-            // use point normal vector as velocity direction
+            // Use normal vector in surface as vel. direction so particle moves out of the contour
             vel = -contour.getNormalAtIndexInterpolated(indexInterpolated)*(velocity+randomRange(velocityRnd, velocity));
         }
 
@@ -585,7 +581,7 @@ void ParticleSystem::addParticles(int n, const ofPolyline& contour, Contour& flo
         }
         else if(useContourVel){ // slower and poorer result
             ofPoint motionVel = flow.getVelocityInPoint(pos);
-            vel += motionVel*(velocityMotion/100)*6;
+            vel += motionVel*(velocityMotion/100);
         }
 
         pos += randomVector()*emitterSize; // randomize position within a range of emitter size
@@ -663,7 +659,7 @@ void ParticleSystem::repulseParticles(){
 void ParticleSystem::flockParticles(){
     for(int i = 0; i < particles.size(); i++){
         for(int j = i-1; j >= 0; j--){
-//            if (fabs(particles[j]->pos.x - particles[i]->pos.x) > flockingRadius) break;
+            if (fabs(particles[i]->pos.x - particles[j]->pos.x) > flockingRadius) break;
             particles[i]->addFlockingForces(*particles[j]);
         }
     }
