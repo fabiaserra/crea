@@ -113,13 +113,17 @@ void Contour::setup(int width, int height, float scaleFactor){
     
     contourFinder.setSortBySize(true);  // sort contours by size
 
-    contourFinderDiff.setMinAreaRadius(10);
-    contourFinderDiff.setMaxAreaRadius(500);
-    contourFinderDiff.setAutoThreshold(true); // threshold velocity mask automatically
+    contourFinderVelMask.setMinAreaRadius(10);
+    contourFinderVelMask.setMaxAreaRadius(500);
+    contourFinderVelMask.setAutoThreshold(true); // threshold velocity mask automatically
+    
+//    contourFinderDiff.setMinAreaRadius(10);
+//    contourFinderDiff.setMaxAreaRadius(500);
+//    contourFinderDiff.setAutoThreshold(true); // threshold velocity mask automatically
 
     // allocate images
-    previous.allocate(width, height, OF_IMAGE_GRAYSCALE);
-    diff.allocate(width, height, OF_IMAGE_GRAYSCALE);
+//    previous.allocate(width, height, OF_IMAGE_GRAYSCALE);
+//    diff.allocate(width, height, OF_IMAGE_GRAYSCALE);
     
     // allocate flow texture
     flowTexture.allocate(flowWidth, flowHeight, GL_RGB32F);
@@ -139,10 +143,10 @@ void Contour::setup(int width, int height, float scaleFactor){
 void Contour::update(float dt, ofImage &depthImage){
 
     // absolute difference of previous frame and save it inside diff
-    absdiff(previous, depthImage, diff);
-    diff.update();
+//    absdiff(previous, depthImage, diff);
+//    diff.update();
 
-    copy(depthImage, previous);
+//    copy(depthImage, previous);
 
     if(doOpticalFlow){
         // Compute optical flow
@@ -162,10 +166,11 @@ void Contour::update(float dt, ofImage &depthImage){
         flowTexture = opticalFlow.getOpticalFlowDecay();
         flowTexture.readToPixels(flowPixels);
         
-        coloredDepthFbo.begin();
+        // tint binary depth image (silhouette)
+        coloredDepthFbo.begin(); 
             ofPushStyle();
-            ofClear(255, 255, 255, 0);
-            if(vMaskRandomColor){
+            ofClear(255, 255, 255, 0); // clear buffer
+            if(vMaskRandomColor){ // tint image with random colors
                 vMaskColor.setHsb(ofMap(ofNoise(ofGetElapsedTimef()*0.3), 0.1, 0.9, 0, 255, true), 255, 255);
                 vMaskRed = vMaskColor.r;
                 vMaskGreen = vMaskColor.g;
@@ -173,7 +178,7 @@ void Contour::update(float dt, ofImage &depthImage){
             }
             vMaskColor.set(vMaskRed, vMaskGreen, vMaskBlue, vMaskOpacity);
             ofSetColor(vMaskColor);
-            depthImage.draw(0, 0, width, height);
+            depthImage.draw(0, 0, width, height); // draw binary image in the buffer
             ofPopStyle();
         coloredDepthFbo.end();
         
@@ -192,16 +197,21 @@ void Contour::update(float dt, ofImage &depthImage){
     contourFinder.findContours(depthImage);
     
     // Contour Finder in the depth diff Image
-    contourFinderDiff.findContours(velocityMaskPixels);
+//    contourFinderDiff.findContours(diff);
+    
+    // Contour Finder in the velocity mask
+    contourFinderVelMask.findContours(velocityMaskPixels);
     
     int n = contourFinder.size();
-    int m = contourFinderDiff.size();
+    int m = contourFinderVelMask.size();
+//    int o = contourFinderDiff.size();
 
     // Clear vectors
     boundingRects.clear();
     convexHulls.clear();
     contours.clear();
     quads.clear();
+    vMaskContours.clear();
     diffContours.clear();
 
     // Initialize vectors
@@ -209,7 +219,8 @@ void Contour::update(float dt, ofImage &depthImage){
     convexHulls.resize(n);
     contours.resize(n);
     quads.resize(n);
-    diffContours.resize(m);
+    vMaskContours.resize(m);
+//    diffContours.resize(o);
 
     for(int i = 0; i < n; i++){
         boundingRects[i] = toOf(contourFinder.getBoundingRect(i));
@@ -229,10 +240,16 @@ void Contour::update(float dt, ofImage &depthImage){
     }
     
     for(int i = 0; i < m; i++){
-        ofPolyline diffContour;
-        diffContour = contourFinderDiff.getPolyline(i);
-        diffContours[i] = diffContour;
+        ofPolyline vMaskContour;
+        vMaskContour = contourFinderVelMask.getPolyline(i);
+        vMaskContours[i] = vMaskContour;
     }
+    
+//    for(int i = 0; i < o; i++){
+//        ofPolyline diffContour;
+//        diffContour = contourFinderDiff.getPolyline(i);
+//        diffContours[i] = diffContour;
+//    }
     
     if(isActive || isFadingOut){
         // if it is the first frame where isActive is true and we are not fading out (trick to fix a bug)
@@ -263,7 +280,7 @@ void Contour::draw(){
     if(isActive || isFadingOut){
         ofPushMatrix();
         ofTranslate(width/2.0, height/2.0);
-        ofScale(scaleContour, scaleContour); // Scale it so we can see more contour on the projection
+        ofScale(scaleContour, scaleContour);
         
         ofPushMatrix();
         ofTranslate(-width/2.0, -height/2.0);
@@ -408,7 +425,69 @@ void Contour::draw(){
         }
         ofPopStyle();
     }
-    prevContours = contours; // Save actual contour to do difference with next one
+//    prevContours = contours; // Save actual contour to do difference with next one
+    
+//    int width = 213;
+//    int height = 160;
+//
+//    ofPushStyle();
+//    ofPushMatrix();
+//    ofScale(1.0/3.0, 1.0/3.0);
+//    ofSetColor(255);
+//    ofSetLineWidth(1.0);
+//    for(int i = 0; i < vMaskContours.size(); i++){
+//        vMaskContours[i].draw();
+//    }
+//    ofPopMatrix();
+//    ofPopStyle();
+//    
+//    ofPushStyle();
+//    ofEnableBlendMode(OF_BLENDMODE_DISABLED);
+//    diff.draw(213, 0, width, height);
+//    ofPopStyle();
+    
+//    ofPushStyle();
+//    ofEnableBlendMode(OF_BLENDMODE_DISABLED);
+//    displayScalar.setSource(opticalFlow.getOpticalFlowDecay());
+//    displayScalar.draw(0, 0, width, height);
+//    ofPopStyle();
+//
+//    ofPushStyle();
+//    ofEnableBlendMode(OF_BLENDMODE_DISABLED);
+//    velocityMask.draw(width, height, width, height);
+//    ofPopStyle();
+//
+//    ofPushStyle();
+//    ofEnableBlendMode(OF_BLENDMODE_DISABLED);
+//    velocityMask.getLuminanceMask().draw(width*2, 0, width, height);
+//    ofPopStyle();
+
+//    ofPushStyle();
+//    ofPushMatrix();
+//    ofScale(1.0/3.0, 1.0/3.0);
+//    ofTranslate(213*3.0, 320*3.0);
+//    ofSetColor(255);
+//    ofSetLineWidth(1.0);
+//    for(int i = 0; i < diffContours.size(); i++){
+//        diffContours[i].draw();
+//    }
+//    ofPopMatrix();
+//    ofPopStyle();
+//
+//    ofPushStyle();
+//    ofPushMatrix();
+//    ofScale(1.0/3.0, 1.0/3.0);
+//    ofTranslate(426*3.0, 320*3.0);
+//    ofSetColor(255);
+//    ofSetLineWidth(1.0);
+//    for(int i = 0; i < contours.size(); i+=15){
+//        for(int p = 0; p < contours[i].size(); p++){
+//            ofLine(contours[i][p], contours[i][p] - getVelocityInPoint(contours[i][p]));
+//        }
+//    }
+//    ofPopMatrix();
+//    ofPopStyle();
+//    prevContours = contours; // Save actual contour to do difference with next one
 }
 
 ofVec2f Contour::getFlowOffset(ofPoint p){
@@ -421,6 +500,10 @@ ofVec2f Contour::getFlowOffset(ofPoint p){
     }
     
     return offset;
+}
+
+float Contour::getAverageFlow(){
+    return opticalFlow.getAverageFlow();
 }
 
 void Contour::computeVelocities(){
@@ -442,7 +525,7 @@ void Contour::computeVelocities(){
     }
 }
 
-ofPoint Contour::getVelocityInPoint(ofPoint curPoint){
+ofVec2f Contour::getVelocityInPoint(ofPoint curPoint){
     // Get velocity in point from closest point in prev frame
     float minDistSqrd = 600;
     ofPoint vel(0, 0);

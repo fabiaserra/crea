@@ -33,13 +33,12 @@ class Contour{
         void draw();
 
         ofVec2f getFlowOffset(ofPoint p);
-        ofPoint getAverageFlowInRegion(ofRectangle rect);
-        ofPoint getAverageVelocity();
-        ofPoint getVelocityInPoint(ofPoint curPoint);
+        float getAverageFlow();
+        ofVec2f getVelocityInPoint(ofPoint curPoint);
     
         ofTexture& getOpticalFlowDecay() {return opticalFlow.getOpticalFlowDecay();}
         ofTexture& getLuminanceMask() {return velocityMask.getLuminanceMask();}
-        ofTexture& getColorMask() {return velocityMask.getColorMask();} // the same than luminance since we dont have any color in depth img
+        ofTexture& getColorMask() {return velocityMask.getColorMask();}
             
         float getFlowWidth() {return flowWidth;}
         float getFlowHeight() {return flowHeight;}
@@ -92,8 +91,8 @@ class Contour{
         ofColor vMaskColor;
         bool vMaskRandomColor;
         //--------------------------------------------------------------
-        ofImage previous;
-        ofImage diff;
+//        ofImage previous;
+//        ofImage diff;
         //--------------------------------------------------------------
         float smoothingSize;
         float lineWidth;
@@ -102,9 +101,10 @@ class Contour{
         vector<ofRectangle> boundingRects;
         vector<ofPolyline> convexHulls;
         vector<ofPolyline> quads;
-        vector<ofPolyline> contours;
+        vector<ofPolyline> contours;    // silhouettes
         vector<ofPolyline> prevContours;
         vector<ofPolyline> diffContours;
+        vector<ofPolyline> vMaskContours;
         vector< vector<ofPoint> > velocities;
         //--------------------------------------------------------------
         bool drawBoundingRect;
@@ -128,7 +128,8 @@ class Contour{
         ftVelocityMask velocityMask;
         //--------------------------------------------------------------
         ofxCv::ContourFinder contourFinder; 
-        ofxCv::ContourFinder contourFinderDiff;
+        ofxCv::ContourFinder contourFinderVelMask;
+//        ofxCv::ContourFinder contourFinderDiff;
         //--------------------------------------------------------------
         ftDisplayScalar displayScalar;
         ftVelocityField velocityField;
