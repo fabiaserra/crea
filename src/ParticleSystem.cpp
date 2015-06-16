@@ -152,6 +152,7 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
     }
     else if(particleMode == GRID){
         interact            = true;
+        radiusRnd           = 0.0;
         returnToOrigin      = true;
         immortal            = true;
         velocity            = 0.0;
@@ -179,16 +180,16 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
         flickersAge         = false;
         
         if(animation == RAIN){
-            radius          = 0.8;
+            radius          = 0.6;
             radiusRnd       = 10.0;
             
             velocity        = 80.0;
             velocityRnd     = 20.0;
             
-            lifetime        = 3.0;
-            lifetimeRnd     = 30.0;
+            lifetime        = 1.1;
+            lifetimeRnd     = 50.0;
             
-            gravity         = ofPoint(0, 100);
+            gravity         = ofPoint(0, 80);
             bounce          = true;
         }
         else if(animation == SNOW){
@@ -452,7 +453,7 @@ void ParticleSystem::draw(){
             ofSetLineWidth(connectWidth);
             for(int i = 0; i < particles.size(); i++){
                 for(int j = i-1; j >= 0; j--){
-                    if (fabs(particles[j]->pos.x - particles[i]->pos.x) > connectDist*2) break; // to speed the loop
+                    if (fabs(particles[i]->pos.x - particles[j]->pos.x) > connectDist) break; // to speed the loop
                     if(particles[i]->pos.squareDistance(particles[j]->pos) < connectDistSqrd){
                         ofLine(particles[i]->pos, particles[j]->pos);
                     }
@@ -480,6 +481,8 @@ void ParticleSystem::addParticle(ofPoint pos, ofPoint vel, ofColor color, float 
     newParticle->drawLine       = drawLine;
     newParticle->drawStroke     = drawStroke;
     newParticle->strokeWidth    = strokeWidth;
+    
+    newParticle->friction       = 1 - friction/1000;
 
     newParticle->width = width;
     newParticle->height = height;
@@ -487,7 +490,7 @@ void ParticleSystem::addParticle(ofPoint pos, ofPoint vel, ofColor color, float 
     if(particleMode == GRID){
         newParticle->immortal = true;
     }
-    if(particleMode == BOIDS){
+    else if(particleMode == BOIDS){
         newParticle->limitSpeed = true;
         newParticle->immortal = true;
     }
