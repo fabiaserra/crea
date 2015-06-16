@@ -99,10 +99,10 @@ void Particle::update(float dt){
         }
 
         // hackish way to make particles glitter when they slow down a lot
-        if(vel.lengthSquared() < 5.0) {
-            vel.x = ofRandom(-10, 10);
-            vel.y = ofRandom(-10, 10);
-        }
+//        if(vel.lengthSquared() < 5.0) {
+//            vel.x = ofRandom(-10, 10);
+//            vel.y = ofRandom(-10, 10);
+//        }
 
         // Bounce particle with the window margins
         if(bounces){
