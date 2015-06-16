@@ -1,6 +1,6 @@
 CREA
 ====
-Interactive system that generates computer graphics using the motion data from the Kinect camera. Written for OpenFrameworks 0.8.4. 
+Interactive system that generates computer graphics using the motion data from the Kinect camera. Written for openFrameworks 0.8.4 (http://openframeworks.cc/). 
 
 External addons used:
 * ofxKinect: https://github.com/ofTheo/ofxKinect
