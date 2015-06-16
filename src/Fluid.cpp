@@ -21,7 +21,7 @@
 
 Fluid::Fluid(){
     isActive                     = false; // Fluid simulator is active?
-    particlesActive              = false; // Particle flow is active?
+    particlesActive              = false; // Fluid particles are active?
     
     // Fading in/out
     isFadingIn                   = false; // Opacity fading in?
@@ -59,7 +59,7 @@ Fluid::Fluid(){
     densityFromVorticity         = 0.0;   // -0.1 ~ 0.1
     densityFromPressure          = 0.0;   // -0.5 ~ 0.5
     
-    // Particle flow parameters
+    // Fluid particles parameters
     particlesBirthChance         = 0.1;   // 0 ~ 1
     particlesBirthVelocityChance = 0.1;   // 0 ~ 1
     particlesLifetime            = 3.0;   // 0 ~ 10
@@ -101,7 +101,7 @@ void Fluid::setup(int width, int height, float scaleFactor, bool doFasterInterna
     fluid.setup(flowWidth, flowHeight, width, height, doFasterInternalFormat);
     
     // Particles
-    particleFlow.setup(flowWidth, flowHeight, width, height);
+    fluidParticles.setup(flowWidth, flowHeight, width, height);
     
     // Create rectangle with flow size
     rescaledRect.set(0, 0, flowWidth, flowHeight);
@@ -140,11 +140,12 @@ void Fluid::setup(int width, int height, float scaleFactor, bool doFasterInterna
     
     // Allocate visualisation classes
     displayScalar.allocate(flowWidth, flowHeight);
+    densityDisplayScalar.allocate(width, height);
     velocityField.allocate(flowWidth/4, flowHeight/4);
     
     // Allocate fluid pixels
-    fluidTexture.allocate(flowWidth, flowHeight, GL_RGBA32F);
-    fluidPixels.allocate(flowWidth, flowHeight, 4);
+    fluidFlow.allocate(flowWidth, flowHeight, GL_RGBA32F);
+    fluidVelocities.allocate(flowWidth, flowHeight, 4);
 }
 
 void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour, float mouseX, float mouseY){
@@ -221,26 +222,26 @@ void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour, float 
         fluid.update(dt);
         
         // Get fluid texture and save to pixels so we can operate with them
-        fluidTexture = fluid.getVelocity();
-        fluidTexture.readToPixels(fluidPixels);
+        fluidFlow = fluid.getVelocity();
+        fluidFlow.readToPixels(fluidVelocities);
         
         if(particlesActive){
-            // set particle flow parameters
-            particleFlow.setSpeed(fluid.getSpeed());
-            particleFlow.setCellSize(fluid.getCellSize());
-            particleFlow.setBirthChance(particlesBirthChance);
-            particleFlow.setBirthVelocityChance(particlesBirthVelocityChance);
-            particleFlow.setLifeSpan(particlesLifetime);
-            particleFlow.setLifeSpanSpread(particlesLifetimeRnd);
-            particleFlow.setMass(particlesMass);
-            particleFlow.setMassSpread(particlesMassRnd);
-            particleFlow.setSize(particlesSize);
-            particleFlow.setSizeSpread(particlesSizeRnd);
+            // set fluid particles parameters
+            fluidParticles.setSpeed(fluid.getSpeed());
+            fluidParticles.setCellSize(fluid.getCellSize());
+            fluidParticles.setBirthChance(particlesBirthChance);
+            fluidParticles.setBirthVelocityChance(particlesBirthVelocityChance);
+            fluidParticles.setLifeSpan(particlesLifetime);
+            fluidParticles.setLifeSpanSpread(particlesLifetimeRnd);
+            fluidParticles.setMass(particlesMass);
+            fluidParticles.setMassSpread(particlesMassRnd);
+            fluidParticles.setSize(particlesSize);
+            fluidParticles.setSizeSpread(particlesSizeRnd);
             
-            if(contourInput) particleFlow.addFlowVelocity(contour.getOpticalFlowDecay());
-            particleFlow.addFluidVelocity(fluid.getVelocity());
+            if(contourInput) fluidParticles.addFlowVelocity(contour.getOpticalFlowDecay());
+            fluidParticles.addFluidVelocity(fluid.getVelocity());
         }
-        particleFlow.update(dt);
+        fluidParticles.update(dt);
     }
     else if(activeStarted){
         activeStarted = false;
@@ -284,9 +285,67 @@ void Fluid::draw(){
         if(particlesActive){
             ofPushStyle();
             ofEnableBlendMode(OF_BLENDMODE_ADD);
-            particleFlow.draw(0, 0, width, height);
+            fluidParticles.draw(0, 0, width, height);
             ofPopStyle();
         }
+        
+//        int width = 213;
+//        int height = 160;
+//        
+//        ofPushStyle();
+//        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
+//        displayScalar.setSource(fluid.getPressure());
+//        displayScalar.draw(0, 160, width, height);
+//        ofPopStyle();
+//        
+//        ofPushStyle();
+//        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
+//        displayScalar.setSource(fluid.getTemperature());
+//        displayScalar.draw(213, 160, width, height);
+//        ofPopStyle();
+//
+//        ofPushStyle();
+//        ofEnableBlendMode(OF_BLENDMODE_ADD);
+//        ofSetColor(red, green, blue, opacity);
+//        fluid.draw(426, 160, width, height);
+//        ofPopStyle();
+//        
+//        ofPushStyle();
+//        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
+//        displayScalar.setSource(fluid.getCurlMagnitude());
+//        displayScalar.draw(0, 320, width, height);
+//        ofPopStyle();
+//        
+//        ofPushStyle();
+//        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
+//        displayScalar.setSource(fluid.getConfinement());
+//        displayScalar.draw(213, 320, width, height);
+//        ofPopStyle();
+//        
+//        ofPushStyle();
+//        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
+//        displayScalar.setSource(fluid.getVelocity());
+//        displayScalar.draw(426, 320, width, height);
+//        ofPopStyle();
+//        
+//        
+//        ofPushStyle();
+//        ofPushMatrix();
+//        ofScale(1.0/scaleFactor, 1.0/scaleFactor);
+//        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
+//        markerForces[0].forceBuffer.draw(0, 0);
+//        ofPopMatrix();
+//        ofPopStyle();
+//        
+//        ofPushStyle();
+//        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
+//        markerForces[1].forceBuffer.draw(213, 0);
+//        ofPopStyle();
+//        
+//        ofPushStyle();
+//        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
+//        markerForces[2].forceBuffer.draw(426, 0);
+//        ofPopStyle();
     }
 }
 
@@ -315,7 +374,7 @@ void Fluid::updateDrawForces(float dt){
                     break;
                 case FT_VELOCITY:
                     fluid.addVelocity(markerForces[i].getTextureReference(), strength);
-                    particleFlow.addFlowVelocity(markerForces[i].getTextureReference(), strength);
+                    fluidParticles.addFlowVelocity(markerForces[i].getTextureReference(), strength);
                     break;
                 case FT_TEMPERATURE:
                     fluid.addTemperature(markerForces[i].getTextureReference(), strength);
@@ -337,8 +396,8 @@ ofVec2f Fluid::getFluidOffset(ofPoint p){
     ofVec2f offset(0,0);
     
     if(rescaledRect.inside(p_)){
-        offset.x = fluidPixels[((int)p_.y*flowWidth+(int)p_.x)*4 + 0]; // r
-        offset.y = fluidPixels[((int)p_.y*flowWidth+(int)p_.x)*4 + 1]; // g
+        offset.x = fluidVelocities[((int)p_.y*flowWidth+(int)p_.x)*4 + 0]; // r
+        offset.y = fluidVelocities[((int)p_.y*flowWidth+(int)p_.x)*4 + 1]; // g
     }
     
     return offset;

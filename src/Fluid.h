@@ -94,7 +94,7 @@ class Fluid{
         float densityFromVorticity;
         float densityFromPressure;
         //--------------------------------------------------------------
-        // particle flow parameters
+        // fluid particles parameters
         float particlesVelocity;
         float particlesCellSize;
         float particlesBirthChance;
@@ -118,13 +118,14 @@ class Fluid{
 
     protected:
         ftFluidSimulation fluid;
-        ftParticleFlow particleFlow;
+        ftParticleFlow fluidParticles;
         //--------------------------------------------------------------
         ftDisplayScalar displayScalar;
+        ftDisplayScalar densityDisplayScalar;
         ftVelocityField velocityField;
         //--------------------------------------------------------------
-        ofTexture fluidTexture;
-        ofFloatPixels fluidPixels;
+        ofTexture fluidFlow;
+        ofFloatPixels fluidVelocities;
         //--------------------------------------------------------------
         ofRectangle rescaledRect;
         //--------------------------------------------------------------
