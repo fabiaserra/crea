@@ -5,7 +5,6 @@ Interactive system that generates computer graphics using the motion data from t
 External addons used:
 
 ofxKinect: https://github.com/ofTheo/ofxKinect
-
 ofxFlowTools: https://github.com/moostrik/ofxFlowTools
 
 ofxCV: https://github.com/kylemcdonald/ofxCv
