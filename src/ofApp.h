@@ -38,22 +38,23 @@
 
 // VMO files
 //-----------------------
-//#define GESTURE_TRACKER
-#ifdef GESTURE_TRACKER
+// include gesture follower files (you need to have vmo.cpp, vmo.h, helper.cpp and helper.h in src)
+//#define GESTURE_FOLLOWER
+#ifdef GESTURE_FOLLOWER
 #include "vmo.h"
 #include "helper.h"
 #endif
 
-// comment this to use the recorded images
-#define KINECT_CONNECTED
+// Use the Kinect live input stream
+//#define KINECT_CONNECTED
 
-// Uncomment this to use an xml sequence file for the tracking
+// Use an xml IR Markers sequence file as input to Gesture Follower
 //#define KINECT_SEQUENCE
 
-// Uncomment this to use two windows
-#define SECOND_WINDOW
-#define PROJECTOR_RESOLUTION_X 1680
-#define PROJECTOR_RESOLUTION_Y 1050
+// Use a separate window for control interface
+//#define SECOND_WINDOW
+#define PROJECTOR_RESOLUTION_X 1024
+#define PROJECTOR_RESOLUTION_Y 768
 
 class ofApp : public ofBaseApp{
     public:
@@ -76,8 +77,8 @@ class ofApp : public ofBaseApp{
         void setupBoidsGUI();
         void setupAnimationsGUI();
 
-        void saveGUISettings(const string path, const bool saveCues);
-        void loadGUISettings(const string path, const bool interpolate, const bool loadCues);
+        void saveGUISettings(const string path, const bool isCue);
+        void loadGUISettings(const string path, const bool isCue, const bool interpolate);
         void interpolateWidgetValues();
 
         void guiEvent(ofxUIEventArgs &e);
@@ -218,7 +219,7 @@ class ofApp : public ofBaseApp{
         float trackerPersistence;
         float trackerMaxDistance;
         //------VMO Declaration-----------------------------------------
-        #ifdef GESTURE_TRACKER
+        #ifdef GESTURE_FOLLOWER
         vmo seqVmo;
         vmo::pttr pttrList;
         vmo::belief currentBf;

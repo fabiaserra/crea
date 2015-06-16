@@ -174,7 +174,7 @@ void ofApp::setup(){
     // SCALE FACTOR TO DO FLOW AND FLUID COMPUTATIONS
     float scaleFactor = 4.0;
     
-    // DEPTH CONTOUR
+    // SILHOUETTE CONTOUR
     contour.setup(kinect.width, kinect.height, scaleFactor);
     contour.setMinAreaRadius(minContourSize);
     contour.setMaxAreaRadius(maxContourSize);
@@ -195,7 +195,7 @@ void ofApp::setup(){
     // SONG
     song.loadSound("songs/ASuitableEnsemble.mp3", true);
     
-    #ifdef GESTURE_TRACKER
+    #ifdef GESTURE_FOLLOWER
     // VMO SETUP
     dimensions = 2;
     slide = 1.0;
@@ -455,7 +455,7 @@ void ofApp::update(){
     boidsParticles->update(dt, markers, contour, fluid);
     animationsParticles->update(dt, markers, contour, fluid);
     
-    #ifdef GESTURE_TRACKER
+    #ifdef GESTURE_FOLLOWER
     #ifdef KINECT_SEQUENCE
         if(isTracking){
             vector<float> obs(numMarkers*dimensions, 0.0); // Temporary code
@@ -554,9 +554,9 @@ void ofApp::update(){
                 else{
     //              prevBf = currentBf;
                     currentBf = vmo::tracking(seqVmo, currentBf, pttrList, currentFeatures, decay);
-                    cout << "current index: " << currentBf.currentIdx << endl;
+//                    cout << "current index: " << currentBf.currentIdx << endl;
                     currentPercent = sequence.getCurrentPercent(currentBf.currentIdx);
-                    cout << "current percent: " << currentPercent << endl;
+//                    cout << "current percent: " << currentPercent << endl;
 
                     if(cueList.size() != 0) {
                         int cueSegment = currentCueIndex;
@@ -591,7 +591,7 @@ void ofApp::update(){
         }
 
     #endif // KINECT_SEQUENCE
-    #endif // GESTURE_TRACKER
+    #endif // GESTURE_FOLLOWER
 }
 
 //--------------------------------------------------------------
@@ -689,9 +689,9 @@ void ofApp::draw(){
     if(drawSequenceSegments) sequence.drawSegments();
     if(drawSequencePatterns) sequence.drawPatterns(gestureUpdate);
     
-    #ifdef GESTURE_TRACKER
+    #ifdef GESTURE_FOLLOWER
         if(isTracking) sequence.drawTracking(currentBf.currentIdx);
-    #endif // GESTURE_TRACKER
+    #endif // GESTURE_FOLLOWER
     
     ofPopStyle();
     ofPopMatrix();
@@ -720,7 +720,7 @@ void ofApp::setupGUI(){
     //    uiThemecpo.set(19, 116, 125, 192);
     
     dim = 32;
-    guiWidth = 240;
+    guiWidth = 250;
     guiMargin = 2;
     
     setupHelperGUI();
@@ -748,7 +748,7 @@ void ofApp::setupHelperGUI(){
     ofxUICanvas *guiHelper = new ofxUICanvas(0, 0, guiWidth, ofGetHeight());
     guiHelper->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
     
-    guiHelper->addLabel("MENU", OFX_UI_FONT_LARGE);
+    guiHelper->addLabel("MAIN MENU", OFX_UI_FONT_LARGE);
 
     guiHelper->addSpacer();
     guiHelper->addLabel("Press number 1 to 8 to", OFX_UI_FONT_SMALL);
@@ -880,8 +880,8 @@ void ofApp::setupKinectGUI(){
     guiKinect_1->addRangeSlider("Contour Size", 0.0, 400.0, &minContourSize, &maxContourSize);
     
     guiKinect_1->addSpacer();
-    guiKinect_1->addRangeSlider("Depth Left/Right Crop", 0.0, 640.0, &depthLeftMask, &depthRightMask);
-    guiKinect_1->addRangeSlider("Depth Top/Bottom Crop", 0.0, 480.0, &depthTopMask, &depthBottomMask);
+    guiKinect_1->addRangeSlider("Left/Right Crop", 0.0, 640.0, &depthLeftMask, &depthRightMask);
+    guiKinect_1->addRangeSlider("Top/Bottom Crop", 0.0, 480.0, &depthTopMask, &depthBottomMask);
     
     guiKinect_1->addSpacer();
     guiKinect_1->addIntSlider("Depth Number of Erosions", 0, 8, &depthNumErodes);
@@ -971,7 +971,7 @@ void ofApp::setupGesturesGUI(){
     guis.push_back(guiGestures_1);
 
     ofxUICanvas *guiGestures_2 = new ofxUICanvas((guiWidth+guiMargin)*2, 0, guiWidth, ofGetHeight());
-    guiGestures_2->addLabel("GESTURE TRACKER", OFX_UI_FONT_LARGE);
+    guiGestures_2->addLabel("GESTURE FOLLOWER", OFX_UI_FONT_LARGE);
     guiGestures_2->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
     guiGestures_2->addSpacer();
     guiGestures_2->addImageButton("Start vmo", "icons/play.png", false, dim, dim)->setColorBack(ofColor(150, 255));
@@ -1059,8 +1059,8 @@ void ofApp::setupOpticalFlowGUI(){
     
     guiFlow->addSpacer();
     guiFlow->addSlider("Flow Strength", 0.0, 100.0, &contour.flowStrength);
-    guiFlow->addIntSlider("Offset", 1, 10, &contour.flowOffset);
-    guiFlow->addSlider("Lambda", 0.001, 0.1, &contour.flowLambda);
+//    guiFlow->addIntSlider("Offset", 1, 10, &contour.flowOffset);
+//    guiFlow->addSlider("Lambda", 0.001, 0.1, &contour.flowLambda);
     guiFlow->addSlider("Threshold", 0.0, 0.2, &contour.flowThreshold);
     
     guiFlow->addToggle("Inverse X", &contour.flowInverseX);
@@ -1082,7 +1082,7 @@ void ofApp::setupOpticalFlowGUI(){
     guiFlow->addSpacer();
     guiFlow->addSlider("Mask Strength", 0.0, 10.0, &contour.vMaskStrength);
     guiFlow->addIntSlider("Blur Passes", 0, 10, &contour.vMaskBlurPasses);
-    guiFlow->addSlider("Blur Radius", 0.0, 10.0, &contour.vMaskBlurRadius);
+    guiFlow->addSlider("Blur Radius", 0.0, 20.0, &contour.vMaskBlurRadius);
     guiFlow->addSpacer();
     
     guiFlow->addLabel("Debug", OFX_UI_FONT_MEDIUM);
@@ -1127,7 +1127,7 @@ void ofApp::setupFluidSolverGUI(){
     guiFluid_1->addSlider("General Opacity", 0.0, 255.0, &fluid.maxOpacity);
     
     guiFluid_1->addSpacer();
-    guiFluid_1->addToggle("Marker", &fluid.markersInput);
+    guiFluid_1->addToggle("IR Marker", &fluid.markersInput);
     guiFluid_1->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     guiFluid_1->setWidgetSpacing(35);
     guiFluid_1->addToggle("Contour", &fluid.contourInput);
@@ -1142,7 +1142,7 @@ void ofApp::setupFluidSolverGUI(){
     guiFluid_1->addIntSlider("Num Jacobi Iterations", 1, 100., &fluid.numJacobiIterations);
     guiFluid_1->addSlider("Viscosity", 0.0, 1.0, &fluid.viscosity)->setLabelPrecision(5);
     guiFluid_1->addSlider("Vorticity", 0.0, 1.0, &fluid.vorticity)->setLabelPrecision(5);
-    guiFluid_1->addSlider("Dissipation", 0.0, 0.02, &fluid.dissipation)->setLabelPrecision(5);
+    guiFluid_1->addSlider("Dissipation", 0.0, 0.08, &fluid.dissipation)->setLabelPrecision(5);
     
     guiFluid_1->addSpacer();
     guiFluid_1->addLabel("Advanced Dissipation", OFX_UI_FONT_MEDIUM);
@@ -1253,9 +1253,6 @@ void ofApp::setupFluidExtrasGUI(){
     guiFluidMarkers->addSpacer();
     guiFluidMarkers->addLabel("Force 2: Velocity", OFX_UI_FONT_MEDIUM);
     guiFluidMarkers->addSpacer();
-    guiFluidMarkers->addSlider("x", -1.0, 1.0, &fluid.markerForceForces[1].x);
-    guiFluidMarkers->addSlider("y", -1.0, 1.0, &fluid.markerForceForces[1].y);
-    guiFluidMarkers->addSpacer();
     guiFluidMarkers->addSlider("Velocity Strength", 0.0, 5.0, &fluid.markerForceStrengths[1]);
     guiFluidMarkers->addSlider("Velocity Radius", 0.0, 0.1, &fluid.markerForceRadiuses[1])->setLabelPrecision(2);
     guiFluidMarkers->addSlider("Velocity Edge", 0.0, 1.0, &fluid.markerForceEdges[1]);
@@ -1263,9 +1260,7 @@ void ofApp::setupFluidExtrasGUI(){
     guiFluidMarkers->addSpacer();
     guiFluidMarkers->addLabel("Force 3: Temperature", OFX_UI_FONT_MEDIUM);
     guiFluidMarkers->addSpacer();
-    guiFluidMarkers->addSlider("temp", 0.0, 1.0, &fluid.markerForceForces[2].x);
-    guiFluidMarkers->addSpacer();
-    guiFluidMarkers->addSlider("Temperature Strength", 0.0, 5.0, &fluid.markerForceStrengths[2]);
+    guiFluidMarkers->addSlider("Temperature", 0.0, 1.0, &fluid.markerForceForces[2].x);
     guiFluidMarkers->addSlider("Temperature Radius", 0.0, 0.1, &fluid.markerForceRadiuses[2])->setLabelPrecision(2);
     guiFluidMarkers->addSlider("Temperature Edge", 0.0, 1.0, &fluid.markerForceEdges[2]);
     guiFluidMarkers->addSpacer();
@@ -1306,7 +1301,7 @@ void ofApp::setupFluidExtrasGUI(){
 //--------------------------------------------------------------
 void ofApp::setupContourGUI(){
     ofxUICanvas *guiContour = new ofxUICanvas((guiWidth+guiMargin)*3, 0, guiWidth, ofGetHeight());
-    guiContour->addLabel("DEPTH CONTOUR", OFX_UI_FONT_LARGE);
+    guiContour->addLabel("SILHOUETTE CONTOUR", OFX_UI_FONT_LARGE);
     guiContour->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
     
     guiContour->addSpacer();
@@ -1400,7 +1395,6 @@ void ofApp::setupEmitterGUI(){
     
     addParticleInteractionGUI(guiEmitter_2  , emitterParticles);
 
-
     guiEmitter_2->autoSizeToFitWidgets();
     guiEmitter_2->setVisible(false);
     ofAddListener(guiEmitter_2->newGUIEvent, this, &ofApp::guiEvent);
@@ -1417,7 +1411,6 @@ void ofApp::setupGridGUI(){
     
     guiGrid_1->addLabel("Grid", OFX_UI_FONT_MEDIUM);
     guiGrid_1->addSpacer();
-    guiGrid_1->addSlider("Radius", 0.1, 25.0, &gridParticles->radius);
     guiGrid_1->addIntSlider("Resolution", 1, 20, &gridParticles->gridRes);
     
     guiGrid_1->addSpacer();
@@ -1434,13 +1427,16 @@ void ofApp::setupGridGUI(){
     guiGrid_1->addToggle("Connected", &gridParticles->drawConnections);
     guiGrid_1->addSlider("Connect Dist", 5.0, 100.0, &gridParticles->connectDist);
     guiGrid_1->addSlider("Connect Line Width", 1.0, 5.0, &gridParticles->connectWidth);
+    guiGrid_1->addSlider("Radius", 0.1, 25.0, &gridParticles->radius);
     guiGrid_1->addSpacer();
     guiGrid_1->addLabel("Physics", OFX_UI_FONT_MEDIUM);
     guiGrid_1->addSpacer();
     guiGrid_1->addSlider("Friction", 0.0, 100.0, &gridParticles->friction);
     guiGrid_1->addToggle("Return to Origin", &gridParticles->returnToOrigin);
     guiGrid_1->addSlider("Return to Origin Force", 0.0, 50.0, &gridParticles->returnToOriginForce);
-
+    guiGrid_1->addSpacer();
+    guiGrid_1->addToggle("Repulse", &gridParticles->repulse);
+    guiGrid_1->addSlider("Repulse Dist", 1.0, 50.0, &gridParticles->repulseDist);
     guiGrid_1->addSpacer();
     
     guiGrid_1->autoSizeToFitWidgets();
@@ -1467,10 +1463,6 @@ void ofApp::setupGridGUI(){
     guiGrid_2->addToggle("Repulse Interaction", &gridParticles->repulseInteraction);
     guiGrid_2->addSpacer();
 
-    guiGrid_2->addToggle("Repulse", &gridParticles->repulse);
-    guiGrid_2->addSlider("Repulse Dist", 1.0, 50.0, &gridParticles->repulseDist);
-    guiGrid_2->addSpacer();
-    
     guiGrid_2->autoSizeToFitWidgets();
     guiGrid_2->setVisible(false);
     ofAddListener(guiGrid_2->newGUIEvent, this, &ofApp::guiEvent);
@@ -1487,7 +1479,7 @@ void ofApp::setupBoidsGUI(){
 
     guiBoids_1->addLabel("Flocking", OFX_UI_FONT_MEDIUM);
     guiBoids_1->addSpacer();
-    guiBoids_1->addIntSlider("Number of particles", 100, 2000, &boidsParticles->nParticles);
+    guiBoids_1->addIntSlider("Number of particles", 20, 2000, &boidsParticles->nParticles);
     guiBoids_1->addSlider("Flocking Radius", 10.0, 100.0, &boidsParticles->flockingRadius);
     lowThresh = guiBoids_1->addSlider("Lower Threshold", 0.025, 1.0, &boidsParticles->lowThresh);
     lowThresh->setLabelPrecision(3);
@@ -1541,14 +1533,16 @@ void ofApp::setupAnimationsGUI(){
     guiAnimations_1->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
 
     addParticleBasicsGUI(guiAnimations_1, animationsParticles);
-
+    
+    guiAnimations_1->addLabel("Animation", OFX_UI_FONT_MEDIUM);
+    guiAnimations_1->addSpacer();
     vector<string> animations;
     animations.push_back("Rain");
     animations.push_back("Snow");
     animations.push_back("Explosion");
     guiAnimations_1->addRadio("Animations", animations, OFX_UI_ORIENTATION_HORIZONTAL);
     
-    addParticleInteractionGUI(guiAnimations_1, animationsParticles);
+    guiAnimations_1->addSpacer();
     guiAnimations_1->addLabel("Rain and Snow", OFX_UI_FONT_MEDIUM);
     guiAnimations_1->addSpacer();
     guiAnimations_1->addSlider("Particles/sec", 0.0, 20.0, &animationsParticles->bornRate);
@@ -1556,12 +1550,10 @@ void ofApp::setupAnimationsGUI(){
     
     guiAnimations_1->addLabel("Explosion", OFX_UI_FONT_MEDIUM);
     guiAnimations_1->addSpacer();
-    guiAnimations_1->addIntSlider("Number of particles", 100, 2000, &animationsParticles->nParticles);
+    guiAnimations_1->addIntSlider("Number of particles", 20, 2000, &animationsParticles->nParticles);
     guiAnimations_1->addSpacer();
     
-    guiAnimations_1->addSlider("Velocity", 0.0, 100.0, &animationsParticles->velocity);
-    guiAnimations_1->addSlider("Velocity Random[%]", 0.0, 100.0, &animationsParticles->velocityRnd);
-    guiAnimations_1->addSpacer();
+    addParticleInteractionGUI(guiAnimations_1, animationsParticles);
     
     guiAnimations_1->autoSizeToFitWidgets();
     guiAnimations_1->setVisible(false);
@@ -1599,7 +1591,7 @@ void ofApp::addParticleBasicsGUI(ofxUICanvas* gui, ParticleSystem* ps){
     gui->addSlider("Opacity", 0.0, 255.0, &ps->maxOpacity);
     gui->addSpacer();
     
-    gui->addToggle("Marker", &ps->markersInput);
+    gui->addToggle("IR Marker", &ps->markersInput);
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui->setWidgetSpacing(35);
     gui->addToggle("Contour", &ps->contourInput);
@@ -1666,6 +1658,7 @@ void ofApp::addParticlePhysicsGUI(ofxUICanvas* gui, ParticleSystem* ps){
     gui->addToggle("Infinite", &ps->infiniteWalls);
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui->setWidgetSpacing(3);
+    gui->addSpacer();
     gui->addToggle("Repulse", &ps->repulse);
     gui->addSlider("Repulse Dist", 1.0, 50.0, &ps->repulseDist);
     gui->addSpacer();
@@ -1695,7 +1688,7 @@ void ofApp::addParticlePhysicsGUI(ofxUICanvas* gui, ParticleSystem* ps){
 // 20: guiAnimations_2
 
 //--------------------------------------------------------------
-void ofApp::saveGUISettings(const string path, const bool isACue){
+void ofApp::saveGUISettings(const string path, const bool isCue){
 
     // Create directory if this doesnt exist
     ofFile file(path);
@@ -1716,13 +1709,13 @@ void ofApp::saveGUISettings(const string path, const bool isACue){
         //  5: guiGestures_2
         //  6: guiCueList
         // panels 2, 3, 4 and 5 and 6 are settings that for now we dont want to save in a cue file
-        if(isACue && guiIndex >= 2 && guiIndex <= 6) continue;
+        if(isCue && guiIndex >= 2 && guiIndex <= 6) continue;
 
         XML->pushTag("GUI", guiIndex);
         vector<ofxUIWidget*> widgets = g->getWidgets();
         for(int i = 0; i < widgets.size(); i++){
             // Don't want to save transition frames for cues
-            if(isACue && widgets[i]->getName() == "Transition Frames") continue;
+            if(isCue && widgets[i]->getName() == "Transition Frames") continue;
             // kind number 20 is ofxUIImageToggle
             // kind number 12 is ofxUITextInput, for which we don't want to save the state
             if(widgets[i]->hasState() && widgets[i]->getKind() != 12){
@@ -1739,7 +1732,7 @@ void ofApp::saveGUISettings(const string path, const bool isACue){
     }
 
     // Save Cues if it is not a cue
-    if(!isACue){
+    if(!isCue){
         XML->addTag("CUES");
         XML->pushTag("CUES", 0);
         XML->setValue("Active", currentCueIndex, 0);
@@ -1754,7 +1747,7 @@ void ofApp::saveGUISettings(const string path, const bool isACue){
 }
 
 //--------------------------------------------------------------
-void ofApp::loadGUISettings(const string path, const bool interpolate, const bool isACue){
+void ofApp::loadGUISettings(const string path, const bool isCue, const bool interpolate){
 
     ofxXmlSettings *XML = new ofxXmlSettings();
     if(!XML->loadFile(path)){
@@ -1779,7 +1772,7 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
             continue;
         }
         // Panel 2, 3, 4, 5 and 6 are settings we dont want to load from a cue file
-        if(isACue && guiIndex >= 2 && guiIndex <= 6){
+        if(isCue && guiIndex >= 2 && guiIndex <= 6){
            guiIndex++;
            continue;
         }
@@ -1833,7 +1826,7 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
     }
 
     // Load cue list if it is not a cue
-    if(!isACue){
+    if(!isCue){
         XML->pushTag("CUES");
         int numCues = XML->getNumTags("Cue");
         cueList.clear();
@@ -1856,7 +1849,7 @@ void ofApp::loadGUISettings(const string path, const bool interpolate, const boo
             string cueFileName = ofFilePath::getBaseName(cueList[currentCueIndex]);
             cueName->setTextString(cueFileName);
             cueName->setVisible(true);
-            loadGUISettings(cueList[currentCueIndex], false, true);
+            loadGUISettings(cueList[currentCueIndex], true, false);
             
             resetCueSliders();
         }
@@ -2028,7 +2021,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         contour.setMinAreaRadius(minContourSize);
         contour.setMaxAreaRadius(maxContourSize);
     }
-    if(e.getName() == "Depth Left/Right Crop" || e.getName() == "Depth Top/Bottom Crop"){
+    if(e.getName() == "Left/Right Crop" || e.getName() == "Top/Bottom Crop"){
         depthCroppingMask = Mat::ones(480, 640, CV_8UC1);
         for(int i = 0; i < (int)depthLeftMask; i++){
             for(int j = 0; j < depthCroppingMask.rows; j++){
@@ -2171,7 +2164,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         }
     }
     //-------------------------------------------------------------
-    // GESTURE TRACKER
+    // GESTURE FOLLOWER
     //-------------------------------------------------------------
     if(e.getName() == "Start vmo"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
@@ -2234,7 +2227,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             if(!interpolatingWidgets) saveGUISettings(cueList[currentCueIndex], true);
             if(currentCueIndex-1 >= 0) currentCueIndex--;
             else if(currentCueIndex-1 < 0) currentCueIndex = cueList.size()-1;
-            loadGUISettings(cueList[currentCueIndex], false, true);
+            loadGUISettings(cueList[currentCueIndex], true, false);
             string cueFileName = ofFilePath::getBaseName(cueList[currentCueIndex]);
             cueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
             cueName->setTextString(cueFileName);
@@ -2247,7 +2240,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             if(!interpolatingWidgets) saveGUISettings(cueList[currentCueIndex], true);
             if(currentCueIndex+1 < cueList.size()) currentCueIndex++;
             else if(currentCueIndex+1 == cueList.size()) currentCueIndex = 0;
-            loadGUISettings(cueList[currentCueIndex], false, true);
+            loadGUISettings(cueList[currentCueIndex], true, false);
             string cueFileName = ofFilePath::getBaseName(cueList[currentCueIndex]);
             cueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
             cueName->setTextString(cueFileName);
@@ -2259,7 +2252,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             ofFileDialogResult result = ofSystemLoadDialog("Select cue file.", false, ofToDataPath("cues/"));
             if(result.bSuccess){
                 if(cueList.size() == 0) currentCueIndex = 0;
-                loadGUISettings(result.getPath(), false, true);
+                loadGUISettings(result.getPath(), true, false);
                 string cuePath = "cues/"+ofFilePath::getFileName(result.getPath());
                 saveGUISettings(cuePath, true);
                 cueList[currentCueIndex] = cuePath;
@@ -2288,7 +2281,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
                 cueName->setVisible(false);
             }
             else{
-                loadGUISettings(cueList[currentCueIndex], false, true);
+                loadGUISettings(cueList[currentCueIndex], true, false);
                 string cueFileName = ofFilePath::getBaseName(cueList[currentCueIndex]);
                 cueIndexLabel->setLabel(ofToString(currentCueIndex)+".");
                 cueName->setTextString(cueFileName);
