@@ -291,10 +291,12 @@ void Sequence::drawPattern(const int patternPosition, const int patternIdx, floa
     ofRect(0, 0, width, height);
 
     // Contour pattern window box
+    ofPushStyle();
     ofSetColor(255, opacity);
     ofSetLineWidth(2);
     ofNoFill();
     ofRect(0, 0, width, height);
+    ofPopStyle();
 
     for(int markerIdx = 0; markerIdx < numMarkers; markerIdx++){
         // Pattern lines
@@ -356,7 +358,6 @@ void Sequence::drawTracking(int currentIdx){
             currentPoint = markersPosition[markerIdx][currentIdx];
 
             ofFill();
-//            c.setBrightness(255);
             ofSetColor(c);
             ofCircle(currentPoint, 5);
 
