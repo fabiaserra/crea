@@ -2,8 +2,7 @@ CREA
 ====
 Interactive system that generates computer graphics using the motion data from the Kinect camera. Written for openFrameworks 0.8.4 (http://openframeworks.cc/). 
 
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=D07h5T6-29I
-" target="_blank"><img src="http://img.youtube.com/vi/D07h5T6-29I/0.jpg" 
+<a href="https://www.youtube.com/watch?v=D07h5T6-29I" target="_blank"><img src="http://img.youtube.com/vi/D07h5T6-29I/0.jpg" 
 alt="CREA VIDEO" width="480" height="360" border="5" /></a>
 
 External addons used:
