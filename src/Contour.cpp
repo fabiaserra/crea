@@ -399,7 +399,7 @@ void Contour::draw(){
         displayScalar.draw(0, 0, width, height);
         ofPopStyle();
     }
-    if(drawVelMaskContour){
+    if(drawVelMask){
         ofPushStyle();
         ofEnableBlendMode(OF_BLENDMODE_DISABLED);
         velocityMask.draw(0, 0, width, height);
@@ -407,10 +407,10 @@ void Contour::draw(){
     }
     if(drawVelMaskContour){
         ofPushStyle();
-        ofSetColor(255, 0, 0);
-        ofSetLineWidth(2.5);
-        for(int i = 0; i < diffContours.size(); i++){
-            diffContours[i].draw();
+        ofSetColor(255);
+        ofSetLineWidth(1.5);
+        for(int i = 0; i < vMaskContours.size(); i++){
+            vMaskContours[i].draw();
         }
         ofPopStyle();
     }
