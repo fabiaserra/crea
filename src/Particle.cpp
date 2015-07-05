@@ -29,6 +29,7 @@ Particle::Particle(){
     immortal        = false;
 
     bounces         = false;
+    bounceTop       = true;
     steers          = false;
     infiniteWalls   = false;
 
@@ -352,10 +353,10 @@ void Particle::marginsBounce(){
         vel.y *= -1.0;
         isBouncing = true;
     }
-//    else if(pos.y < radius){
-//        pos.y = radius;
-//        vel.y *= -1.0;
-//    }
+    else if(bounceTop && pos.y < radius){
+        pos.y = radius;
+        vel.y *= -1.0;
+    }
 
     if (isBouncing && bounceDamping){
         vel *= damping;
@@ -402,6 +403,7 @@ void Particle::contourBounce(ofPolyline contour){
     ofVec2f normal = contour.getNormalAtIndex(index);
     vel = vel - 2*vel.dot(normal)*normal; //reflection vector
     vel *= 0.35; // damping
+    age += 0.5;
 }
 
 void Particle::kill(){

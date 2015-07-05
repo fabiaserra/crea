@@ -199,7 +199,7 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
             velocity        = 40.0;
             velocityRnd     = 20.0;
             
-            lifetime        = 7.0;
+            lifetime        = 2.8;
             lifetimeRnd     = 30.0;
             
             gravity         = ofPoint(0, 15);
@@ -209,7 +209,7 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
             radius          = 6.0;
             radiusRnd       = 50.0;
             
-            velocity        = 1100.0;
+            velocity        = 1600.0;
             velocityRnd     = 30.0;
             
             lifetime        = 5.0;
@@ -288,7 +288,7 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
                         else if(repulseInteraction) particles[i]->addRepulsionForce(closestMarker->smoothPos, interactionRadiusSqrd, interactionForce);
                         else if(attractInteraction) particles[i]->addAttractionForce(closestMarker->smoothPos, interactionRadiusSqrd, interactionForce);
                         else if(seekInteraction){
-                            particles[i]->seek(closestMarker->smoothPos, interactionRadiusSqrd, interactionForce*4.0);
+                            particles[i]->seek(closestMarker->smoothPos, interactionRadiusSqrd, interactionForce*10.0);
                         }
                         else if(gravityInteraction){
                             particles[i]->addForce(ofPoint(ofRandom(-100, 100), 500.0)*particles[i]->mass);
@@ -320,7 +320,7 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
                             particles[i]->addRepulsionForce(closestPointInContour, interactionRadiusSqrd, interactionForce);
                         }
                         else if(seekInteraction){
-                            particles[i]->seek(closestPointInContour, interactionRadiusSqrd, interactionForce*4.0);
+                            particles[i]->seek(closestPointInContour, interactionRadiusSqrd, interactionForce*10.0);
                         }
                         else if(gravityInteraction){
                             particles[i]->addForce(ofPoint(ofRandom(-100, 100), 500.0)*particles[i]->mass);
@@ -380,10 +380,10 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
             }
             if(contourInput){
                 if(emitInMovement){
-                    for(unsigned int i = 0; i < contour.diffContours.size(); i++){
+                    for(unsigned int i = 0; i < contour.vMaskContours.size(); i++){
                         // born more particles if bigger area
-                        float bornNum = bornRate * abs(contour.diffContours[i].getArea())/1500.0;
-                        addParticles(bornNum, contour.diffContours[i], contour);
+                        float bornNum = bornRate * abs(contour.vMaskContours[i].getArea())/1500.0;
+                        addParticles(bornNum, contour.vMaskContours[i], contour);
                     }
                 }
                 else{
@@ -453,7 +453,7 @@ void ParticleSystem::draw(){
             ofSetLineWidth(connectWidth);
             for(int i = 0; i < particles.size(); i++){
                 for(int j = i-1; j >= 0; j--){
-                    if (fabs(particles[i]->pos.x - particles[j]->pos.x) > connectDist) break; // to speed the loop
+//                    if (fabs(particles[i]->pos.x - particles[j]->pos.x) > connectDist) break; // to speed the loop
                     if(particles[i]->pos.squareDistance(particles[j]->pos) < connectDistSqrd){
                         ofLine(particles[i]->pos, particles[j]->pos);
                     }
@@ -497,6 +497,7 @@ void ParticleSystem::addParticle(ofPoint pos, ofPoint vel, ofColor color, float 
     else if(particleMode == ANIMATIONS){
         if(animation == SNOW) newParticle->damping = 0.05;
         else newParticle->damping = 0.2;
+        newParticle->bounceTop = false;
     }
 
     newParticle->setup(id, pos, vel, color, radius, lifetime);

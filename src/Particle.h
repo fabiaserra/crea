@@ -91,6 +91,7 @@ class Particle
         bool bounceDamping;     // Decrease velocity when particle bounces?
 
         bool bounces;           // Particle bounces with the window margins?
+        bool bounceTop;         // Particle bounces with top margin?
         bool steers;            // Particle steers direction before touching the walls?
         bool infiniteWalls;     // Particle goes back to the opposite wall?
 // --------------------------------------------------------------
