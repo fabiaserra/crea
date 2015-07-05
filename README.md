@@ -79,7 +79,7 @@ To use _CREA_ you will need:
   #define GESTURE_FOLLOWER
   ```
   
-  In order to use an offline sequence of \textit{IR Markers} as input to the Gesture Follower this line has to be uncommented:
+  In order to use an offline sequence of IR Markers as input to the Gesture Follower this line has to be uncommented:
   ```c
   // Use an xml IR Markers sequence file as input to Gesture Follower
   #define KINECT_SEQUENCE
