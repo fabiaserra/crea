@@ -52,9 +52,9 @@
 //#define KINECT_SEQUENCE
 
 // Use a separate window for control interface
-//#define SECOND_WINDOW
-#define PROJECTOR_RESOLUTION_X 1024
-#define PROJECTOR_RESOLUTION_Y 768
+#define SECOND_WINDOW
+#define PROJECTOR_RESOLUTION_X 640
+#define PROJECTOR_RESOLUTION_Y 480
 
 class ofApp : public ofBaseApp{
     public:
