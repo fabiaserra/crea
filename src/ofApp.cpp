@@ -36,7 +36,7 @@ void ofApp::setup(){
         // running the command below positions an undecorated window to display on a second
         // monitor or projector. this is a good way to set up a fullscreen display, while
         // retaining a control window in the primary monitor.
-        secondWindow.setup("second window", ofGetScreenWidth(), 0, PROJECTOR_RESOLUTION_X, PROJECTOR_RESOLUTION_Y, true);
+        secondWindow.setup("second window", ofGetScreenWidth(), 0, PROJECTOR_RESOLUTION_X, PROJECTOR_RESOLUTION_Y, false);
 //        secondWindow.setup("second window", 10, 0, PROJECTOR_RESOLUTION_X, PROJECTOR_RESOLUTION_Y, true);
     #endif
 
@@ -1516,7 +1516,24 @@ void ofApp::setupBoidsGUI(){
     guiBoids_2->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
     guiBoids_2->addSpacer();
 
-    addParticlePropertiesGUI(guiBoids_2, boidsParticles);
+    guiBoids_2->addLabel("Particle", OFX_UI_FONT_MEDIUM);
+    guiBoids_2->addSpacer();
+    guiBoids_2->addToggle("Empty", &boidsParticles->isEmpty);
+    guiBoids_2->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    guiBoids_2->setWidgetSpacing(10);
+    guiBoids_2->addToggle("Line", &boidsParticles->drawLine);
+    guiBoids_2->addToggle("Stroke", &boidsParticles->drawStroke);
+    guiBoids_2->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    guiBoids_2->setWidgetSpacing(3);
+    guiBoids_2->addSlider("Stroke Line Width", 1.0, 5.0, &boidsParticles->strokeWidth);
+    guiBoids_2->addToggle("Connected", &boidsParticles->drawConnections);
+    guiBoids_2->addSlider("Connect Dist", 5.0, 100.0, &boidsParticles->connectDist);
+    guiBoids_2->addSlider("Connect Line Width", 1.0, 5.0, &boidsParticles->connectWidth);
+    guiBoids_2->addSpacer();
+    guiBoids_2->addSlider("Radius", 0.1, 25.0, &boidsParticles->radius);
+    guiBoids_2->addSlider("Radius Random[%]", 0.0, 100.0, &boidsParticles->radiusRnd);
+    guiBoids_2->addSpacer();
+    
     addParticleInteractionGUI(guiBoids_2, boidsParticles);
 
     guiBoids_2->autoSizeToFitWidgets();
@@ -2321,22 +2338,22 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     if(e.getName() == "Activate Marker Fluid"){
         ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
         if(toggle->getValue() == true){
-            fluid.markersInput = true;
+//            fluid.markersInput = true;
             fluid.drawFluid = true;
         }
         else{
-            fluid.markersInput = false;
+//            fluid.markersInput = false;
             fluid.drawFluid = false;
         }
     }
     if(e.getName() == "Activate Contour Fluid"){
         ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
         if(toggle->getValue() == true){
-            fluid.contourInput = true;
+//            fluid.contourInput = true;
             fluid.drawFluid = true;
         }
         else{
-            fluid.contourInput = false;
+//            fluid.contourInput = false;
             fluid.drawFluid = false;
         }
     }
