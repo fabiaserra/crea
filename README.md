@@ -47,9 +47,12 @@ To use _CREA_ you will need:
   void	setBlurPasses(int value) {blurPasses.set(value);}
   void	setBlurRadius(float value) {blurRadius.set(value);}
   ```
-6. Create a new openFrameworks project using the [project generator](http://www.openframeworks.cc/tutorials/introduction/002\_projectGenerator.html) tool that is inside the openFrameworks root folder . Name it _crea_ (same name as repository folder you downloaded before) and make sure all these addons are enabled in the list of addons shown: ofxKinect, ofxCv, ofxOpenCV, ofxFlowTools, ofxUI, ofxXmlSettings and ofxSecondWindow.
+6. Create a new openFrameworks project using the [project generator](http://www.openframeworks.cc/tutorials/introduction/002\_projectGenerator.html) tool that is inside the openFrameworks root folder. Name it _crea_ (same name as repository folder you downloaded before) and make sure all these addons are enabled in the list of addons shown: ofxKinect, ofxCv, ofxOpenCV, ofxFlowTools, ofxUI, ofxXmlSettings and ofxSecondWindow.
+
 7. Go to _apps/myApps_ and inside the folder _crea_ you should see a new file. This file is the project file and depending on your development environment it has extension .sln (Visual Studio), .xcodeproj (Xcode), or .workspace (Code::Blocks).
+
 8. Open the file with your development environment.
+
 9. Inside ofApp.h there are a set of macros to change some basic features that are set by default. 
   
   If we want to use a separate window for the control interface this line of code has to be uncommented:
