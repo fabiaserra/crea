@@ -294,9 +294,9 @@ void ofApp::setup(){
     setupGUI();
     
     // ALLOCATE FBO AND FILL WITH BG COLOR
-    fbo.allocate(kinect.width, kinect.height, GL_RGB32F_ARB);
+    fbo.allocate(kinect.width, kinect.height, GL_RGBA32F_ARB);
     fbo.begin();
-    ofClear(red, green, blue);
+    ofClear(255, 255, 255, 0);
     fbo.end();
 
     fadeAmount = 40;
@@ -644,18 +644,19 @@ void ofApp::draw(){
         fbo.begin();
 
         // Draw semi-transparent white rectangle to slightly clear buffer (depends on the history value)
-        ofSetColor(red, green, blue, fadeAmount);
         ofFill();
-        ofRectangle(0, 0, kinect.width, kinect.height);
+        ofSetColor(red, green, blue, fadeAmount);
+        ofRect(0, 0, kinect.width, kinect.height);
 
         // Graphics
+        ofNoFill();
         ofSetColor(255);
         contour.draw();
         emitterParticles->draw();
         gridParticles->draw();
         boidsParticles->draw();
         animationsParticles->draw();
-
+        
         fbo.end();
 
         // Draw buffer (graphics) on the screen
@@ -2006,7 +2007,9 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
         if(button->getValue() == true){
             loadGUISettings("settings/defaultSettings.xml", false, false);
+            settingsFilename->setLabel("defaultSettings.xml");
         }
+        resetCueSliders();
     }
     if(e.getName() == "Load Song"){
         ofxUIImageButton *button = (ofxUIImageButton *) e.widget;
@@ -2240,7 +2243,6 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             
             // Reset cue slider widgets
             resetCueSliders();
-
         }
     }
     if(e.getName() == "Save Cue"){
