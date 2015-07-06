@@ -67,6 +67,8 @@ class Fluid{
         //--------------------------------------------------------------
         bool drawVelocity;
         bool drawVelocityScalar;
+        bool drawPressure;
+        bool drawVorticity;
         bool drawTemperature;
         bool drawFluid;
         //--------------------------------------------------------------

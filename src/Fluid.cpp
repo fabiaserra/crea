@@ -84,6 +84,8 @@ Fluid::Fluid(){
     // Output
     drawVelocity                 = false;
     drawVelocityScalar           = false;
+    drawPressure                 = false;
+    drawVorticity                = false;
     drawTemperature              = false;
     drawFluid                    = false;
 }
@@ -268,10 +270,24 @@ void Fluid::draw(){
             displayScalar.draw(0, 0, width, height);
             ofPopStyle();
         }
+        if(drawPressure){
+            ofPushStyle();
+            ofEnableBlendMode(OF_BLENDMODE_DISABLED);
+            displayScalar.setSource(fluid.getPressure());
+            displayScalar.draw(0, 0, width, height);
+            ofPopStyle();
+        }
         if(drawTemperature){
             ofPushStyle();
             ofEnableBlendMode(OF_BLENDMODE_DISABLED);
             displayScalar.setSource(fluid.getTemperature());
+            displayScalar.draw(0, 0, width, height);
+            ofPopStyle();
+        }
+        if(drawVorticity){
+            ofPushStyle();
+            ofEnableBlendMode(OF_BLENDMODE_DISABLED);
+            displayScalar.setSource(fluid.getConfinement());
             displayScalar.draw(0, 0, width, height);
             ofPopStyle();
         }
@@ -289,46 +305,6 @@ void Fluid::draw(){
             ofPopStyle();
         }
         
-//        int width = 213;
-//        int height = 160;
-//        
-//        ofPushStyle();
-//        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
-//        displayScalar.setSource(fluid.getPressure());
-//        displayScalar.draw(0, 160, width, height);
-//        ofPopStyle();
-//        
-//        ofPushStyle();
-//        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
-//        displayScalar.setSource(fluid.getTemperature());
-//        displayScalar.draw(213, 160, width, height);
-//        ofPopStyle();
-//
-//        ofPushStyle();
-//        ofEnableBlendMode(OF_BLENDMODE_ADD);
-//        ofSetColor(red, green, blue, opacity);
-//        fluid.draw(426, 160, width, height);
-//        ofPopStyle();
-//        
-//        ofPushStyle();
-//        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
-//        displayScalar.setSource(fluid.getCurlMagnitude());
-//        displayScalar.draw(0, 320, width, height);
-//        ofPopStyle();
-//        
-//        ofPushStyle();
-//        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
-//        displayScalar.setSource(fluid.getConfinement());
-//        displayScalar.draw(213, 320, width, height);
-//        ofPopStyle();
-//        
-//        ofPushStyle();
-//        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
-//        displayScalar.setSource(fluid.getVelocity());
-//        displayScalar.draw(426, 320, width, height);
-//        ofPopStyle();
-//        
-//        
 //        ofPushStyle();
 //        ofPushMatrix();
 //        ofScale(1.0/scaleFactor, 1.0/scaleFactor);

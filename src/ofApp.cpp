@@ -299,7 +299,7 @@ void ofApp::setup(){
     ofClear(255, 255, 255, 0);
     fbo.end();
 
-    fadeAmount = 40;
+    fadeAmount = 80;
     useFBO = false;
 
     // CREATE DIRECTORIES IN /DATA IF THEY DONT EXIST
@@ -645,7 +645,7 @@ void ofApp::draw(){
 
         // Draw semi-transparent white rectangle to slightly clear buffer (depends on the history value)
         ofFill();
-        ofSetColor(red, green, blue, fadeAmount);
+        ofSetColor(red, green, blue, ofMap(fadeAmount, 0, 100, 250, 0));
         ofRect(0, 0, kinect.width, kinect.height);
 
         // Graphics
@@ -851,7 +851,7 @@ void ofApp::setupBasicsGUI(){
     guiBasics->addLabel("FBO", OFX_UI_FONT_MEDIUM);
     guiBasics->addSpacer();
     guiBasics->addToggle("Use FBO", &useFBO);
-    guiBasics->addIntSlider("FBO Fade Amount", 0, 50, &fadeAmount);
+    guiBasics->addIntSlider("FBO Fade Amount", 0, 100, &fadeAmount);
 
     guiBasics->addSpacer();
     guiBasics->addLabel("Music", OFX_UI_FONT_MEDIUM);
@@ -922,10 +922,6 @@ void ofApp::setupKinectGUI(){
     guiKinect_2->addRangeSlider("Markers Size", 0.0, 150.0, &minMarkerSize, &maxMarkerSize);
     
     guiKinect_2->addSpacer();
-    guiKinect_2->addSlider("Tracker Persistence", 5.0, 500.0, &trackerPersistence);
-    guiKinect_2->addSlider("Tracker Max Distance", 5.0, 500.0, &trackerMaxDistance);
-    
-    guiKinect_2->addSpacer();
     guiKinect_2->addRangeSlider("IR Left/Right Crop", 0.0, 640.0, &irLeftMask, &irRightMask);
     guiKinect_2->addRangeSlider("IR Top/Bottom Crop", 0.0, 480.0, &irTopMask, &irBottomMask);
     
@@ -933,6 +929,10 @@ void ofApp::setupKinectGUI(){
     guiKinect_2->addIntSlider("IR Number of Erosions", 0, 8, &irNumErodes);
     guiKinect_2->addIntSlider("IR Number of Dilations", 0, 8, &irNumDilates);
     guiKinect_2->addIntSlider("IR Blur Size", 0, 41, &irBlurValue);
+    
+    guiKinect_2->addSpacer();
+    guiKinect_2->addSlider("Tracker Persistence", 5.0, 500.0, &trackerPersistence);
+    guiKinect_2->addSlider("Tracker Max Distance", 5.0, 500.0, &trackerMaxDistance);
     
     guiKinect_2->addSpacer();
     guiKinect_2->addImage("IR Original", &irOriginal, kinect.width/6, kinect.height/6, true);
@@ -1202,7 +1202,9 @@ void ofApp::setupFluidSolverGUI(){
     guiFluid_2->addSpacer();
     guiFluid_2->addToggle("Show Fluid Velocities", &fluid.drawVelocity);
     guiFluid_2->addToggle("Show Fluid Velocities Scalar", &fluid.drawVelocityScalar);
+    guiFluid_2->addToggle("Show Pressure", &fluid.drawPressure);
     guiFluid_2->addToggle("Show Temperature", &fluid.drawTemperature);
+    guiFluid_2->addToggle("Show Vorticity Confinement", &fluid.drawVorticity);
     
     guiFluid_2->addSpacer();
     guiFluid_2->addLabel("FLUID CONTOUR", OFX_UI_FONT_LARGE);
@@ -1275,6 +1277,7 @@ void ofApp::setupFluidExtrasGUI(){
     guiFluidMarkers->addLabel("Force 3: Temperature", OFX_UI_FONT_MEDIUM);
     guiFluidMarkers->addSpacer();
     guiFluidMarkers->addSlider("Temperature", 0.0, 1.0, &fluid.markerForceForces[2].x);
+    guiFluidMarkers->addSlider("Temperature Strength", 0.0, 5.0, &fluid.markerForceStrengths[2]);
     guiFluidMarkers->addSlider("Temperature Radius", 0.0, 0.1, &fluid.markerForceRadiuses[2])->setLabelPrecision(2);
     guiFluidMarkers->addSlider("Temperature Edge", 0.0, 1.0, &fluid.markerForceEdges[2]);
     guiFluidMarkers->addSpacer();

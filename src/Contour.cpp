@@ -425,7 +425,7 @@ void Contour::draw(){
         }
         ofPopStyle();
     }
-//    prevContours = contours; // Save actual contour to do difference with next one
+    prevContours = contours; // Save actual contour to do difference with next one
     
 //    int width = 213;
 //    int height = 160;
