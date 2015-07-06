@@ -186,6 +186,7 @@ class ofApp : public ofBaseApp{
         //--------------------------------------------------------------
         ofColor uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo;
         //--------------------------------------------------------------
+        vector< ofxUILabel *> labelTabs;      // Labels of the main menu tabs
         ofxUIImageToggle *recordingSequence;  // Toggle to record gestures sequence
         ofxUILabel *songFilename;             // Name of the song
         ofxUILabel *settingsFilename;         // Name of the settings

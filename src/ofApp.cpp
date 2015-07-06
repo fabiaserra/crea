@@ -287,7 +287,7 @@ void ofApp::setup(){
 
     currentBf = vmo::vmo::belief();
 //    prevBf = vmo::vmo::belief();
-//
+
     #endif
     
     // SETUP GUI
@@ -763,36 +763,49 @@ void ofApp::setupHelperGUI(){
     guiHelper->addSpacer();
 
     guiHelper->addSpacer();
-    guiHelper->addLabel("1. BASICS + KINECT", OFX_UI_FONT_MEDIUM);
+    ofxUILabel *basicsLabel = guiHelper->addLabel("1. BASICS + KINECT", OFX_UI_FONT_MEDIUM);
+    labelTabs.push_back(basicsLabel);
     guiHelper->addSpacer();
     
     guiHelper->addSpacer();
-    guiHelper->addLabel("2. GESTURES + CUE LIST", OFX_UI_FONT_MEDIUM);
+    ofxUILabel *gesturesLabel = guiHelper->addLabel("2. GESTURES + CUE LIST", OFX_UI_FONT_MEDIUM);
+    labelTabs.push_back(gesturesLabel);
     guiHelper->addSpacer();
 
     guiHelper->addSpacer();
-    guiHelper->addLabel("3. FLOW + FLUID SOLVER", OFX_UI_FONT_MEDIUM);
+    ofxUILabel *fluidLabel = guiHelper->addLabel("3. FLOW + FLUID SOLVER", OFX_UI_FONT_MEDIUM);
+    labelTabs.push_back(fluidLabel);
     guiHelper->addSpacer();
     
     guiHelper->addSpacer();
-    guiHelper->addLabel("4. FLUID 2 + CONTOUR", OFX_UI_FONT_MEDIUM);
+    ofxUILabel *fluid2ndLabel = guiHelper->addLabel("4. FLUID 2 + CONTOUR", OFX_UI_FONT_MEDIUM);
+    labelTabs.push_back(fluid2ndLabel);
     guiHelper->addSpacer();
     
     guiHelper->addSpacer();
-    guiHelper->addLabel("5. PARTICLE EMITTER", OFX_UI_FONT_MEDIUM);
+    ofxUILabel *emitterLabel = guiHelper->addLabel("5. PARTICLE EMITTER", OFX_UI_FONT_MEDIUM);
+    labelTabs.push_back(emitterLabel);
     guiHelper->addSpacer();
     
     guiHelper->addSpacer();
-    guiHelper->addLabel("6. PARTICLE GRID", OFX_UI_FONT_MEDIUM);
+    ofxUILabel *gridLabel = guiHelper->addLabel("6. PARTICLE GRID", OFX_UI_FONT_MEDIUM);
+    labelTabs.push_back(gridLabel);
     guiHelper->addSpacer();
     
     guiHelper->addSpacer();
-    guiHelper->addLabel("7. PARTICLE BOIDS", OFX_UI_FONT_MEDIUM);
+    ofxUILabel *boidsLabel = guiHelper->addLabel("7. PARTICLE BOIDS", OFX_UI_FONT_MEDIUM);
+    labelTabs.push_back(boidsLabel);
     guiHelper->addSpacer();
     
     guiHelper->addSpacer();
-    guiHelper->addLabel("8. PARTICLE ANIMATIONS", OFX_UI_FONT_MEDIUM);
+    ofxUILabel *animationsLabel = guiHelper->addLabel("8. PARTICLE ANIMATIONS", OFX_UI_FONT_MEDIUM);
+    labelTabs.push_back(animationsLabel);
     guiHelper->addSpacer();
+    
+    for(int i = 0; i < labelTabs.size(); i++){
+        if(i == 0) labelTabs[i]->setColorFill(ofColor(255, 255, 255));
+        else labelTabs[i]->setColorFill(ofColor(150, 150, 150));
+    }
     
 //    guiHelper->autoSizeToFitWidgets();
     ofAddListener(guiHelper->newGUIEvent, this, &ofApp::guiEvent);
@@ -2479,6 +2492,10 @@ void ofApp::keyPressed(int key){
                 else (*it)->setVisible(false);
                 idx++;
             }
+            for(int i = 0; i < labelTabs.size(); i++){
+                if(i == 0) labelTabs[i]->setColorFill(ofColor(255, 255, 255));
+                else labelTabs[i]->setColorFill(ofColor(150, 150, 150));
+            }
         }
         else if(key == '2'){
             int idx = 0;
@@ -2486,6 +2503,10 @@ void ofApp::keyPressed(int key){
                 if(idx == 0 || idx == 4 || idx == 5 || idx == 6) (*it)->setVisible(true);
                 else (*it)->setVisible(false);
                 idx++;
+            }
+            for(int i = 0; i < labelTabs.size(); i++){
+                if(i == 1) labelTabs[i]->setColorFill(ofColor(255, 255, 255));
+                else labelTabs[i]->setColorFill(ofColor(150, 150, 150));
             }
         }
         else if(key == '3'){
@@ -2495,6 +2516,10 @@ void ofApp::keyPressed(int key){
                 else (*it)->setVisible(false);
                 idx++;
             }
+            for(int i = 0; i < labelTabs.size(); i++){
+                if(i == 2) labelTabs[i]->setColorFill(ofColor(255, 255, 255));
+                else labelTabs[i]->setColorFill(ofColor(150, 150, 150));
+            }
         }
         else if(key == '4'){
             int idx = 0;
@@ -2502,6 +2527,10 @@ void ofApp::keyPressed(int key){
                 if(idx == 0 || idx == 10 || idx == 11 || idx == 12) (*it)->setVisible(true);
                 else (*it)->setVisible(false);
                 idx++;
+            }
+            for(int i = 0; i < labelTabs.size(); i++){
+                if(i == 3) labelTabs[i]->setColorFill(ofColor(255, 255, 255));
+                else labelTabs[i]->setColorFill(ofColor(150, 150, 150));
             }
         }
         else if(key == '5'){
@@ -2512,6 +2541,10 @@ void ofApp::keyPressed(int key){
                 else (*it)->setVisible(false);
                 idx++;
             }
+            for(int i = 0; i < labelTabs.size(); i++){
+                if(i == 4) labelTabs[i]->setColorFill(ofColor(255, 255, 255));
+                else labelTabs[i]->setColorFill(ofColor(150, 150, 150));
+            }
         }
         else if(key == '6'){
             currentParticleSystem = 1;
@@ -2520,6 +2553,10 @@ void ofApp::keyPressed(int key){
                 if(idx == 0 || idx == 15 || idx == 16) (*it)->setVisible(true);
                 else (*it)->setVisible(false);
                 idx++;
+            }
+            for(int i = 0; i < labelTabs.size(); i++){
+                if(i == 5) labelTabs[i]->setColorFill(ofColor(255, 255, 255));
+                else labelTabs[i]->setColorFill(ofColor(150, 150, 150));
             }
         }
         else if(key == '7'){
@@ -2530,6 +2567,10 @@ void ofApp::keyPressed(int key){
                 else (*it)->setVisible(false);
                 idx++;
             }
+            for(int i = 0; i < labelTabs.size(); i++){
+                if(i == 6) labelTabs[i]->setColorFill(ofColor(255, 255, 255));
+                else labelTabs[i]->setColorFill(ofColor(150, 150, 150));
+            }
         }
         else if(key == '8'){
             currentParticleSystem = 3;
@@ -2538,6 +2579,10 @@ void ofApp::keyPressed(int key){
                 if(idx == 0 || idx == 19 || idx == 20) (*it)->setVisible(true);
                 else (*it)->setVisible(false);
                 idx++;
+            }
+            for(int i = 0; i < labelTabs.size(); i++){
+                if(i == 7) labelTabs[i]->setColorFill(ofColor(255, 255, 255));
+                else labelTabs[i]->setColorFill(ofColor(150, 150, 150));
             }
         }
         else if(key == ' '){
