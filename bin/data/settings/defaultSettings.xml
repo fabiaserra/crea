@@ -1,0 +1,1486 @@
+<GUI></GUI>
+<GUI>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Red</Name>
+        <Value>0.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Green</Name>
+        <Value>0.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Blue</Name>
+        <Value>0.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Gradient</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>42</Kind>
+        <Name>Transition Frames</Name>
+        <Value>20</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Use FBO</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>42</Kind>
+        <Name>FBO Fade Amount</Name>
+        <Value>40</Value>
+    </Widget>
+    <Widget>
+        <Kind>20</Kind>
+        <Name>Loop Song</Name>
+        <Value>1</Value>
+    </Widget>
+</GUI>
+<GUI>
+    <Widget>
+        <Kind>17</Kind>
+        <Name>Flip Kinect</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>6</Kind>
+        <Name>Clipping Range</Name>
+        <HighValue>4000.000000000</HighValue>
+        <LowValue>500.000000000</LowValue>
+    </Widget>
+    <Widget>
+        <Kind>6</Kind>
+        <Name>Threshold Range</Name>
+        <HighValue>255.000000000</HighValue>
+        <LowValue>165.000000000</LowValue>
+    </Widget>
+    <Widget>
+        <Kind>6</Kind>
+        <Name>Contour Size</Name>
+        <HighValue>250.000000000</HighValue>
+        <LowValue>20.000000000</LowValue>
+    </Widget>
+    <Widget>
+        <Kind>6</Kind>
+        <Name>Left/Right Crop</Name>
+        <HighValue>640.000000000</HighValue>
+        <LowValue>0.000000000</LowValue>
+    </Widget>
+    <Widget>
+        <Kind>6</Kind>
+        <Name>Top/Bottom Crop</Name>
+        <HighValue>480.000000000</HighValue>
+        <LowValue>0.000000000</LowValue>
+    </Widget>
+    <Widget>
+        <Kind>42</Kind>
+        <Name>Depth Number of Erosions</Name>
+        <Value>2</Value>
+    </Widget>
+    <Widget>
+        <Kind>42</Kind>
+        <Name>Depth Number of Dilations</Name>
+        <Value>4</Value>
+    </Widget>
+    <Widget>
+        <Kind>42</Kind>
+        <Name>Depth Blur Size</Name>
+        <Value>7</Value>
+    </Widget>
+</GUI>
+<GUI>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>IR Threshold</Name>
+        <Value>70.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>6</Kind>
+        <Name>Markers Size</Name>
+        <HighValue>80.000000000</HighValue>
+        <LowValue>5.000000000</LowValue>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Tracker Persistence</Name>
+        <Value>200.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Tracker Max Distance</Name>
+        <Value>300.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>6</Kind>
+        <Name>IR Left/Right Crop</Name>
+        <HighValue>640.000000000</HighValue>
+        <LowValue>0.000000000</LowValue>
+    </Widget>
+    <Widget>
+        <Kind>6</Kind>
+        <Name>IR Top/Bottom Crop</Name>
+        <HighValue>480.000000000</HighValue>
+        <LowValue>0.000000000</LowValue>
+    </Widget>
+    <Widget>
+        <Kind>42</Kind>
+        <Name>IR Number of Erosions</Name>
+        <Value>1</Value>
+    </Widget>
+    <Widget>
+        <Kind>42</Kind>
+        <Name>IR Number of Dilations</Name>
+        <Value>3</Value>
+    </Widget>
+    <Widget>
+        <Kind>42</Kind>
+        <Name>IR Blur Size</Name>
+        <Value>21</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Show Markers</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Show Markers Path</Name>
+        <Value>0</Value>
+    </Widget>
+</GUI>
+<GUI>
+    <Widget>
+        <Kind>20</Kind>
+        <Name>Record Sequence</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>20</Kind>
+        <Name>Play Sequence</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Show Sequence Segmentation</Name>
+        <Value>0</Value>
+    </Widget>
+</GUI>
+<GUI>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Decay</Name>
+        <Value>0.010000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Slide</Name>
+        <Value>1.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Show patterns inside sequence</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Show patterns</Name>
+        <Value>0</Value>
+    </Widget>
+</GUI>
+<GUI></GUI>
+<GUI>
+    <Widget>
+        <Kind>20</Kind>
+        <Name>Activate Flow</Name>
+        <Value>1</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Flow Strength</Name>
+        <Value>10.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Threshold</Name>
+        <Value>0.039999999</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Inverse X</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Inverse Y</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Time Blur Active</Name>
+        <Value>1</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Time Blur Decay</Name>
+        <Value>0.100000001</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Time Blur Radius</Name>
+        <Value>2.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Show Optical Flow</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Show Scalar</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Mask Strength</Name>
+        <Value>10.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>42</Kind>
+        <Name>Blur Passes</Name>
+        <Value>1</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Blur Radius</Name>
+        <Value>5.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Show Velocity Mask</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Show Velocity Mask Contour</Name>
+        <Value>0</Value>
+    </Widget>
+</GUI>
+<GUI>
+    <Widget>
+        <Kind>20</Kind>
+        <Name>Activate Fluid</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>General Red</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>General Green</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>General Blue</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>General Opacity</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>IR Marker</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Contour</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Speed</Name>
+        <Value>10.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Cell Size</Name>
+        <Value>1.250000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>42</Kind>
+        <Name>Num Jacobi Iterations</Name>
+        <Value>40</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Viscosity</Name>
+        <Value>0.005000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Vorticity</Name>
+        <Value>0.100000001</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Dissipation</Name>
+        <Value>0.010000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Velocity Offset</Name>
+        <Value>0.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Density Offset</Name>
+        <Value>0.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Temperature Offset</Name>
+        <Value>0.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Sigma</Name>
+        <Value>0.050000001</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Weight</Name>
+        <Value>0.050000001</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Ambient Temperature</Name>
+        <Value>0.000000000</Value>
+    </Widget>
+</GUI>
+<GUI>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Gravity X</Name>
+        <Value>0.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Gravity Y</Name>
+        <Value>0.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Clamp Force</Name>
+        <Value>0.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Density</Name>
+        <Value>1.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Velocity</Name>
+        <Value>1.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Temperature</Name>
+        <Value>1.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Density from Pressure</Name>
+        <Value>0.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Density from Vorticity</Name>
+        <Value>0.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Show Fluid Velocities</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Show Fluid Velocities Scalar</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Show Temperature</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>20</Kind>
+        <Name>Activate Contour Fluid</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Red</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Green</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Blue</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Opacity</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Random colors</Name>
+        <Value>0</Value>
+    </Widget>
+</GUI>
+<GUI>
+    <Widget>
+        <Kind>20</Kind>
+        <Name>Activate Marker Fluid</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Red</Name>
+        <Value>0.280000001</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Green</Name>
+        <Value>0.589999974</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Blue</Name>
+        <Value>1.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Opacity</Name>
+        <Value>0.569999993</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Random color</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Density Strength</Name>
+        <Value>2.422950029</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Density Radius</Name>
+        <Value>0.014098301</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Density Edge</Name>
+        <Value>1.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Velocity Strength</Name>
+        <Value>0.965229988</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Velocity Radius</Name>
+        <Value>0.014618899</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Velocity Edge</Name>
+        <Value>1.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Temperature</Name>
+        <Value>1.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Temperature Radius</Name>
+        <Value>0.024510000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Temperature Edge</Name>
+        <Value>1.000000000</Value>
+    </Widget>
+</GUI>
+<GUI>
+    <Widget>
+        <Kind>20</Kind>
+        <Name>Activate Particle Flow</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Birth Chance</Name>
+        <Value>0.100000001</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Birth Velocity Chance</Name>
+        <Value>0.099999994</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Lifetime</Name>
+        <Value>3.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Lifetime Random</Name>
+        <Value>0.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Mass</Name>
+        <Value>1.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Mass Random</Name>
+        <Value>0.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Size</Name>
+        <Value>1.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Size Random</Name>
+        <Value>0.000000000</Value>
+    </Widget>
+</GUI>
+<GUI>
+    <Widget>
+        <Kind>20</Kind>
+        <Name>Activate Contour</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Red</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Green</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Blue</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Opacity</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Bounding Rectangle</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Bounding Rectangle Line</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Convex Hull</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Convex Hull Line</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Silhouette</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Silhouette Line</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Smoothing Size</Name>
+        <Value>0.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Line Width</Name>
+        <Value>1.500000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Scale</Name>
+        <Value>1.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Show Contour Velocities</Name>
+        <Value>0</Value>
+    </Widget>
+</GUI>
+<GUI>
+    <Widget>
+        <Kind>20</Kind>
+        <Name>Activate Particles</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Red</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Green</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Blue</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Opacity</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>IR Marker</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Contour</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Particles/sec</Name>
+        <Value>5.000000477</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Velocity</Name>
+        <Value>20.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Velocity Random[%]</Name>
+        <Value>20.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Velocity from Motion[%]</Name>
+        <Value>50.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Emitter Size</Name>
+        <Value>3.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Emit all time</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Emit all time in contour</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Emit only if movement</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Friction</Name>
+        <Value>5.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Gravity X</Name>
+        <Value>0.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Gravity Y</Name>
+        <Value>0.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Turbulence</Name>
+        <Value>0.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Bounces</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Steers</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Infinite</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Repulse</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Repulse Dist</Name>
+        <Value>15.000000954</Value>
+    </Widget>
+</GUI>
+<GUI>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Empty</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Line</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Stroke</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Stroke Line Width</Name>
+        <Value>1.200000048</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Connected</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Connect Dist</Name>
+        <Value>15.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Connect Line Width</Name>
+        <Value>1.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Lifetime</Name>
+        <Value>5.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Life Random[%]</Name>
+        <Value>20.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Radius</Name>
+        <Value>3.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Radius Random[%]</Name>
+        <Value>50.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Size</Name>
+        <Value>1</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Alpha</Name>
+        <Value>1</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Flickers</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Color</Name>
+        <Value>1</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Interact</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Interaction Radius</Name>
+        <Value>80.000007629</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Interaction Force</Name>
+        <Value>20.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Flow Interaction</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Fluid Interaction</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Seek Interaction</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Gravity Interaction</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Attract Interaction</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Repulse Interaction</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Bounce Interaction</Name>
+        <Value>0</Value>
+    </Widget>
+</GUI>
+<GUI>
+    <Widget>
+        <Kind>20</Kind>
+        <Name>Activate Particles</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Red</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Green</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Blue</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Opacity</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>IR Marker</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Contour</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>42</Kind>
+        <Name>Resolution</Name>
+        <Value>10</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Empty</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Line</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Stroke</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Stroke Line Width</Name>
+        <Value>1.200000048</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Connected</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Connect Dist</Name>
+        <Value>15.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Connect Line Width</Name>
+        <Value>1.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Radius</Name>
+        <Value>3.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Friction</Name>
+        <Value>100.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Return to Origin</Name>
+        <Value>1</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Return to Origin Force</Name>
+        <Value>10.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Repulse</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Repulse Dist</Name>
+        <Value>15.000000954</Value>
+    </Widget>
+</GUI>
+<GUI>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Interact</Name>
+        <Value>1</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Interaction Radius</Name>
+        <Value>80.000007629</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Interaction Force</Name>
+        <Value>20.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Flow Interaction</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Fluid Interaction</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Seek Interaction</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Gravity Interaction</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Attract Interaction</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Repulse Interaction</Name>
+        <Value>0</Value>
+    </Widget>
+</GUI>
+<GUI>
+    <Widget>
+        <Kind>20</Kind>
+        <Name>Activate Particles</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Red</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Green</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Blue</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Opacity</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>IR Marker</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Contour</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>42</Kind>
+        <Name>Number of particles</Name>
+        <Value>300</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Flocking Radius</Name>
+        <Value>60.000003815</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Lower Threshold</Name>
+        <Value>0.133300006</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Higher Threshold</Name>
+        <Value>0.686699986</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Max speed</Name>
+        <Value>80.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Separation Strength</Name>
+        <Value>0.010000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Attraction Strength</Name>
+        <Value>0.004000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Alignment Strength</Name>
+        <Value>0.010000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Friction</Name>
+        <Value>5.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Gravity X</Name>
+        <Value>0.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Gravity Y</Name>
+        <Value>0.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Turbulence</Name>
+        <Value>0.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Bounces</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Steers</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Infinite</Name>
+        <Value>0</Value>
+    </Widget>
+</GUI>
+<GUI>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Empty</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Line</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Stroke</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Stroke Line Width</Name>
+        <Value>1.200000048</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Connected</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Connect Dist</Name>
+        <Value>15.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Connect Line Width</Name>
+        <Value>1.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Radius</Name>
+        <Value>3.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Radius Random[%]</Name>
+        <Value>50.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Interact</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Interaction Radius</Name>
+        <Value>80.000007629</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Interaction Force</Name>
+        <Value>20.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Flow Interaction</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Fluid Interaction</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Seek Interaction</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Gravity Interaction</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Attract Interaction</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Repulse Interaction</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Bounce Interaction</Name>
+        <Value>0</Value>
+    </Widget>
+</GUI>
+<GUI>
+    <Widget>
+        <Kind>20</Kind>
+        <Name>Activate Particles</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Red</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Green</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Blue</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Opacity</Name>
+        <Value>255.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>IR Marker</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Contour</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Rain</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Snow</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Explosion</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Particles/sec</Name>
+        <Value>8.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>42</Kind>
+        <Name>Number of particles</Name>
+        <Value>300</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Interact</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Interaction Radius</Name>
+        <Value>80.000007629</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Interaction Force</Name>
+        <Value>20.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Flow Interaction</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Fluid Interaction</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Seek Interaction</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Gravity Interaction</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Attract Interaction</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Repulse Interaction</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Bounce Interaction</Name>
+        <Value>0</Value>
+    </Widget>
+</GUI>
+<GUI>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Empty</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Line</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Stroke</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Stroke Line Width</Name>
+        <Value>1.200000048</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Connected</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Connect Dist</Name>
+        <Value>15.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Connect Line Width</Name>
+        <Value>1.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Lifetime</Name>
+        <Value>1.100000024</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Life Random[%]</Name>
+        <Value>50.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Radius</Name>
+        <Value>0.600000024</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Radius Random[%]</Name>
+        <Value>10.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Friction</Name>
+        <Value>0.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Gravity X</Name>
+        <Value>0.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Gravity Y</Name>
+        <Value>80.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Turbulence</Name>
+        <Value>0.000000000</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Bounces</Name>
+        <Value>1</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Steers</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Infinite</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>2</Kind>
+        <Name>Repulse</Name>
+        <Value>0</Value>
+    </Widget>
+    <Widget>
+        <Kind>4</Kind>
+        <Name>Repulse Dist</Name>
+        <Value>15.000000954</Value>
+    </Widget>
+</GUI>
+<CUES>
+    <Active>-1</Active>
+</CUES>
