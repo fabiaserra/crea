@@ -36,7 +36,7 @@ void ofApp::setup(){
         // running the command below positions an undecorated window to display on a second
         // monitor or projector. this is a good way to set up a fullscreen display, while
         // retaining a control window in the primary monitor.
-        secondWindow.setup("second window", ofGetScreenWidth(), 0, PROJECTOR_RESOLUTION_X, PROJECTOR_RESOLUTION_Y, false);
+        secondWindow.setup("second window", ofGetScreenWidth(), 0, PROJECTOR_RESOLUTION_X, PROJECTOR_RESOLUTION_Y, true);
 //        secondWindow.setup("second window", 10, 0, PROJECTOR_RESOLUTION_X, PROJECTOR_RESOLUTION_Y, true);
     #endif
 
