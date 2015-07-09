@@ -1376,7 +1376,7 @@ void ofApp::setupEmitterGUI(){
     guiEmitter_1->addSlider("Particles/sec", 0.0, 150.0, &emitterParticles->bornRate);
     guiEmitter_1->addSlider("Velocity", 0.0, 100.0, &emitterParticles->velocity);
     guiEmitter_1->addSlider("Velocity Random[%]", 0.0, 100.0, &emitterParticles->velocityRnd);
-    guiEmitter_1->addSlider("Velocity from Motion[%]", 0.0, 100.0, &emitterParticles->velocityMotion);
+    guiEmitter_1->addSlider("Velocity from Motion[%]", -100.0, 100.0, &emitterParticles->velocityMotion);
     guiEmitter_1->addSlider("Emitter Size", 0.0, 60.0, &emitterParticles->emitterSize);
     guiEmitter_1->addSpacer();
     vector<string> emitters;
@@ -1469,7 +1469,7 @@ void ofApp::setupGridGUI(){
     guiGrid_2->addSpacer();
     guiGrid_2->addToggle("Interact", &gridParticles->interact);
     guiGrid_2->addSlider("Interaction Radius", 0.0, 150.0, &gridParticles->interactionRadius);
-    guiGrid_2->addSlider("Interaction Force", 0.0, 20.0, &gridParticles->interactionForce);
+    guiGrid_2->addSlider("Interaction Force", 0.0, 40.0, &gridParticles->interactionForce);
 
     guiGrid_2->addSpacer();
     guiGrid_2->addToggle("Flow Interaction", &gridParticles->flowInteraction);
@@ -1503,9 +1503,9 @@ void ofApp::setupBoidsGUI(){
     highThresh = guiBoids_1->addSlider("Higher Threshold", 0.025, 1.0, &boidsParticles->highThresh);
     highThresh->setLabelPrecision(3);
     guiBoids_1->addSlider("Max speed", 1.0, 600.0, &boidsParticles->maxSpeed);
-    guiBoids_1->addSlider("Separation Strength", 0.001, 0.1, &boidsParticles->separationStrength)->setLabelPrecision(3);
-    guiBoids_1->addSlider("Attraction Strength", 0.001, 0.1, &boidsParticles->attractionStrength)->setLabelPrecision(3);
-    guiBoids_1->addSlider("Alignment Strength", 0.001, 0.1, &boidsParticles->alignmentStrength)->setLabelPrecision(3);
+    guiBoids_1->addSlider("Separation Strength", 0.001, 0.3, &boidsParticles->separationStrength)->setLabelPrecision(3);
+    guiBoids_1->addSlider("Attraction Strength", 0.001, 0.3, &boidsParticles->attractionStrength)->setLabelPrecision(3);
+    guiBoids_1->addSlider("Alignment Strength", 0.001, 0.3, &boidsParticles->alignmentStrength)->setLabelPrecision(3);
     
     guiBoids_1->addSpacer();
     guiBoids_1->addLabel("Physics", OFX_UI_FONT_MEDIUM);
@@ -1596,8 +1596,22 @@ void ofApp::setupAnimationsGUI(){
     
     ofxUICanvas *guiAnimations_2 = new ofxUICanvas((guiWidth+guiMargin)*2, 0, guiWidth, ofGetHeight());
     guiAnimations_2->setUIColors(uiThemecb, uiThemeco, uiThemecoh, uiThemecf, uiThemecfh, uiThemecp, uiThemecpo);
+    
     guiAnimations_2->addSpacer();
     addParticlePropertiesGUI(guiAnimations_2, animationsParticles);
+    
+    guiAnimations_2->addLabel("Time Behavior", OFX_UI_FONT_MEDIUM);
+    guiAnimations_2->addSpacer();
+    guiAnimations_2->addToggle("Size", &animationsParticles->sizeAge);
+    guiAnimations_2->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    guiAnimations_2->setWidgetSpacing(10);
+    guiAnimations_2->addToggle("Alpha", &animationsParticles->opacityAge);
+    guiAnimations_2->addToggle("Flickers", &animationsParticles->flickersAge);
+    guiAnimations_2->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    guiAnimations_2->setWidgetSpacing(3);
+    guiAnimations_2->addToggle("Color", &animationsParticles->colorAge);
+    guiAnimations_2->addSpacer();
+    
     addParticlePhysicsGUI(guiAnimations_2, animationsParticles);
 
     guiAnimations_2->autoSizeToFitWidgets();
@@ -1640,7 +1654,7 @@ void ofApp::addParticleInteractionGUI(ofxUICanvas* gui, ParticleSystem* ps){
     gui->addSpacer();
     gui->addToggle("Interact", &ps->interact);
     gui->addSlider("Interaction Radius", 0.0, 150.0, &ps->interactionRadius);
-    gui->addSlider("Interaction Force", 0.0, 20.0, &ps->interactionForce);
+    gui->addSlider("Interaction Force", 0.0, 40.0, &ps->interactionForce);
     gui->addSpacer();
     gui->addToggle("Flow Interaction", &ps->flowInteraction);
     gui->addToggle("Fluid Interaction", &ps->fluidInteraction);
@@ -2296,6 +2310,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
                 cueName->setTextString(cueFileName);
                 cueName->setVisible(true);
             }
+            resetCueSliders();
         }
     }
     if(e.getName() == "Delete Cue"){
@@ -2378,9 +2393,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
     //-------------------------------------------------------------
     // CONTOUR
     //-------------------------------------------------------------
-//    if(e.getName() == "Activate Contour"){
-//        contour.doFading = true;
-//    }
+
     //-------------------------------------------------------------
     // PARTICLES
     //-------------------------------------------------------------
@@ -2437,6 +2450,12 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         if(toggle->getValue() == true){
             animationsParticles->setAnimation(EXPLOSION);
             animationsParticles->bornParticles();
+        }
+    }
+    if(e.getName() == "Gravity Interaction"){
+        ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
+        if(toggle->getValue() == true){
+            particleSystems[currentParticleSystem]->resetTouchedParticles();
         }
     }
 }

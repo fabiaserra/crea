@@ -46,7 +46,7 @@
 #endif
 
 // Use the Kinect live input stream
-//#define KINECT_CONNECTED
+#define KINECT_CONNECTED
 
 // Use an xml IR Markers sequence file as input to Gesture Follower
 //#define KINECT_SEQUENCE
