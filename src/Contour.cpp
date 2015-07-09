@@ -417,8 +417,8 @@ void Contour::draw(){
     if(drawVelocities){
         ofPushStyle();
         ofSetColor(255, 0, 0);
-        ofSetLineWidth(2);
-        for(int i = 0; i < contours.size(); i+=6){
+        ofSetLineWidth(1.5);
+        for(int i = 0; i < contours.size(); i+=10){
             for(int p = 0; p < contours[i].size(); p++){
                 ofLine(contours[i][p], contours[i][p] - getVelocityInPoint(contours[i][p]));
             }
@@ -426,68 +426,6 @@ void Contour::draw(){
         ofPopStyle();
     }
     prevContours = contours; // Save actual contour to do difference with next one
-    
-//    int width = 213;
-//    int height = 160;
-//
-//    ofPushStyle();
-//    ofPushMatrix();
-//    ofScale(1.0/3.0, 1.0/3.0);
-//    ofSetColor(255);
-//    ofSetLineWidth(1.0);
-//    for(int i = 0; i < vMaskContours.size(); i++){
-//        vMaskContours[i].draw();
-//    }
-//    ofPopMatrix();
-//    ofPopStyle();
-//    
-//    ofPushStyle();
-//    ofEnableBlendMode(OF_BLENDMODE_DISABLED);
-//    diff.draw(213, 0, width, height);
-//    ofPopStyle();
-    
-//    ofPushStyle();
-//    ofEnableBlendMode(OF_BLENDMODE_DISABLED);
-//    displayScalar.setSource(opticalFlow.getOpticalFlowDecay());
-//    displayScalar.draw(0, 0, width, height);
-//    ofPopStyle();
-//
-//    ofPushStyle();
-//    ofEnableBlendMode(OF_BLENDMODE_DISABLED);
-//    velocityMask.draw(width, height, width, height);
-//    ofPopStyle();
-//
-//    ofPushStyle();
-//    ofEnableBlendMode(OF_BLENDMODE_DISABLED);
-//    velocityMask.getLuminanceMask().draw(width*2, 0, width, height);
-//    ofPopStyle();
-
-//    ofPushStyle();
-//    ofPushMatrix();
-//    ofScale(1.0/3.0, 1.0/3.0);
-//    ofTranslate(213*3.0, 320*3.0);
-//    ofSetColor(255);
-//    ofSetLineWidth(1.0);
-//    for(int i = 0; i < diffContours.size(); i++){
-//        diffContours[i].draw();
-//    }
-//    ofPopMatrix();
-//    ofPopStyle();
-//
-//    ofPushStyle();
-//    ofPushMatrix();
-//    ofScale(1.0/3.0, 1.0/3.0);
-//    ofTranslate(426*3.0, 320*3.0);
-//    ofSetColor(255);
-//    ofSetLineWidth(1.0);
-//    for(int i = 0; i < contours.size(); i+=15){
-//        for(int p = 0; p < contours[i].size(); p++){
-//            ofLine(contours[i][p], contours[i][p] - getVelocityInPoint(contours[i][p]));
-//        }
-//    }
-//    ofPopMatrix();
-//    ofPopStyle();
-//    prevContours = contours; // Save actual contour to do difference with next one
 }
 
 ofVec2f Contour::getFlowOffset(ofPoint p){
