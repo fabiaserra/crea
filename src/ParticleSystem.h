@@ -48,6 +48,7 @@ class ParticleSystem
         void removeParticles(int n);
         void killParticles();
         void bornParticles();
+        void resetTouchedParticles();
 
         void setAnimation(Animation animation);
 

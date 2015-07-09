@@ -43,6 +43,7 @@ Particle::Particle(){
     strokeWidth     = 1.2;
 
     limitSpeed      = false;
+    maxSpeed        = 120.0;
     bounceDamping   = true;
     damping         = 0.6;
 
@@ -89,7 +90,7 @@ void Particle::update(float dt){
         if (opacityAge) opacity *= (1.0f - (age/lifetime));
         if (flickersAge){
 //            opacity *= (1.0f - (age/lifetime)*0.4);
-            if((age/lifetime) > 0.7 && ofRandomf() > (1.4 - age/lifetime))
+            if((age/lifetime) > 0.75 && ofRandomf() > (1.4 - age/lifetime))
                 opacity *= 0.5;
         }
 
@@ -370,14 +371,14 @@ void Particle::marginsSteer(){
         vel.x -= ofMap(pos.x, width-margin, width, maxSpeed/1000.0, maxSpeed/10.0);
     }
     else if(pos.x < margin){
-        vel.x += ofMap(pos.x, 0, margin, maxSpeed/1000.0, maxSpeed/10.0);
+        vel.x += ofMap(pos.x, 0, margin, maxSpeed/10.0, maxSpeed/1000.0);
     }
 
     if(pos.y > height-margin){
         vel.y -= ofMap(pos.y, height-margin, height, maxSpeed/1000.0, maxSpeed/10.0);
     }
     else if(pos.y < margin){
-        vel.y += ofMap(pos.y, 0, margin, maxSpeed/1000.0, maxSpeed/10.0);
+        vel.y += ofMap(pos.y, 0, margin, maxSpeed/10.0, maxSpeed/10.0);
     }
 }
 

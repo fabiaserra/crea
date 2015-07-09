@@ -171,22 +171,21 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
     else if(particleMode == ANIMATIONS){
         immortal            = false;
         
-        bornRate            = 8.0;
-//        nParticles          = 200.0;
         friction            = 0.0;
         turbulence          = 0.0;
         bounce              = false;
         opacityAge          = true;
+        sizeAge             = false;
         flickersAge         = false;
         
         if(animation == RAIN){
-            radius          = 0.6;
+            radius          = 0.65;
             radiusRnd       = 10.0;
             
             velocity        = 80.0;
             velocityRnd     = 20.0;
             
-            lifetime        = 1.1;
+            lifetime        = 1.3;
             lifetimeRnd     = 50.0;
             
             gravity         = ofPoint(0, 80);
@@ -206,19 +205,20 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
             bounce          = true;
         }
         else if(animation == EXPLOSION){
-            radius          = 6.0;
-            radiusRnd       = 50.0;
+            radius          = 7.0;
+            radiusRnd       = 80.0;
             
-            velocity        = 1600.0;
-            velocityRnd     = 30.0;
+            velocity        = 700.0;
+            velocityRnd     = 70.0;
             
-            lifetime        = 5.0;
-            lifetimeRnd     = 0.0;
+            lifetime        = 1.6;
+            lifetimeRnd     = 40.0;
             
-            gravity         = ofPoint(0, 80);
-            friction        = 80.0;
-            turbulence      = 1.5;
+            gravity         = ofPoint(0, 100);
+            friction        = 90.0;
+            turbulence      = 15.0;
             flickersAge     = true;
+            sizeAge         = true;
             opacityAge      = false;
             addParticles(nParticles);
         }
@@ -293,6 +293,13 @@ void ParticleSystem::update(float dt, vector<irMarker>& markers, Contour& contou
                         else if(gravityInteraction){
                             particles[i]->addForce(ofPoint(ofRandom(-100, 100), 500.0)*particles[i]->mass);
                             particles[i]->isTouched = true;
+                        }
+                        else if(bounceInteraction){
+                            unsigned int contourIdx = -1;
+                            ofPoint closestPointInContour = getClosestPointInContour(*particles[i], contour, true, &contourIdx);
+                            if(closestPointInContour != ofPoint(-1, -1)){
+                                if(contourIdx != -1) particles[i]->contourBounce(contour.contours[contourIdx]);
+                            }
                         }
                     }
                     else if(gravityInteraction && particles[i]->isTouched){
@@ -518,9 +525,9 @@ void ParticleSystem::addParticles(int n){
             vel.y = velocity+randomRange(velocityRnd, velocity); // make particles all be going down when born
         }
         else if(particleMode == ANIMATIONS && animation == EXPLOSION){
-            pos = ofPoint(ofRandom(width), ofRandom(height+radius, height+radius*10));
+            pos = ofPoint(ofRandom(width), ofRandom(height, height+radius*15));
             vel.x = 0;
-            vel.y = -velocity+randomRange(velocityRnd, velocity); // make particles all be going up when born
+            vel.y = -velocity-randomRange(velocityRnd, velocity); // make particles all be going up when born
         }
 
         float initialRadius = radius + randomRange(radiusRnd, radius);
@@ -539,8 +546,9 @@ void ParticleSystem::addParticles(int n, const irMarker& marker){
         else if(emitAllTimeContour){
             pos = marker.smoothPos + randomVector()*emitterSize;
         }
-        ofPoint vel = randomVector()*(velocity+5.0*randomRange(velocityRnd, velocity)); // 5.0 to increase effect
-        vel += marker.velocity*(velocityMotion/100)*5.0;
+        ofPoint randomVel = randomVector()*(velocity+randomRange(velocityRnd, velocity));
+        ofPoint motionVel = marker.velocity*(velocity/5.0+randomRange(velocityRnd, velocity/5.0)); // /5.0 to reduce effect
+        ofPoint vel = randomVel*(velocityRnd/100.0) + motionVel*(velocityMotion/100.0);
 
         float initialRadius = radius + randomRange(radiusRnd, radius);
         float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
@@ -552,7 +560,7 @@ void ParticleSystem::addParticles(int n, const irMarker& marker){
 void ParticleSystem::addParticles(int n, const ofPolyline& contour, Contour& flow){
     for(int i = 0; i < n; i++){
 
-        ofPoint pos, vel;
+        ofPoint pos, randomVel, motionVel, vel;
 
         // Create random particles inside contour polyline
         if(emitAllTimeInside || emitInMovement){
@@ -567,7 +575,7 @@ void ParticleSystem::addParticles(int n, const ofPolyline& contour, Contour& flo
             }
 
             // set velocity to random vector direction with 'velocity' as magnitude
-            vel = randomVector()*(velocity+randomRange(velocityRnd, velocity));
+            randomVel = randomVector()*(velocity+randomRange(velocityRnd, velocity));
         }
 
         // Create particles only on the contour polyline
@@ -576,18 +584,16 @@ void ParticleSystem::addParticles(int n, const ofPolyline& contour, Contour& flo
             pos = contour.getPointAtIndexInterpolated(indexInterpolated);
 
             // Use normal vector in surface as vel. direction so particle moves out of the contour
-            vel = -contour.getNormalAtIndexInterpolated(indexInterpolated)*(velocity+randomRange(velocityRnd, velocity));
+            randomVel = -contour.getNormalAtIndexInterpolated(indexInterpolated)*(velocity+randomRange(velocityRnd, velocity));
         }
 
-        if(true){
-            ofPoint motionVel = flow.getFlowOffset(pos);
-            vel += motionVel*(velocityMotion/100);
+        if(true){ // get velocity vector in particle pos
+            motionVel = flow.getFlowOffset(pos)*(velocity*5.0+randomRange(velocityRnd, velocity*5.0));
         }
         else if(useContourVel){ // slower and poorer result
-            ofPoint motionVel = flow.getVelocityInPoint(pos);
-            vel += motionVel*(velocityMotion/100);
+            motionVel = flow.getVelocityInPoint(pos)*(velocity*5.0+randomRange(velocityRnd, velocity*5.0));
         }
-
+        vel = randomVel*(velocityRnd/100.0) + motionVel*(velocityMotion/100.0);
         pos += randomVector()*emitterSize; // randomize position within a range of emitter size
 
         float initialRadius = radius + randomRange(radiusRnd, radius);
@@ -624,6 +630,12 @@ void ParticleSystem::removeParticles(int n){
 void ParticleSystem::killParticles(){
     for(int i = 0; i < particles.size(); i++){
         particles[i]->immortal = false;
+    }
+}
+
+void ParticleSystem::resetTouchedParticles(){
+    for(int i = 0; i < particles.size(); i++){
+        particles[i]->isTouched = false;
     }
 }
 
