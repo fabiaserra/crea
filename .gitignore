@@ -113,8 +113,6 @@ crea.xcodeproj/xcshareddata/xcschemes/crea Debug.xcscheme
 
 crea.xcodeproj/xcshareddata/xcschemes/crea Release.xcscheme
 
-bin/data/cues
-bin/data/settings
 bin/data/kinect/depth2
 bin/data/kinect/depth3
 bin/data/kinect/depth4
