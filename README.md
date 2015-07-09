@@ -5,6 +5,8 @@ Interactive system that generates computer graphics using the motion data from t
 <a href="https://www.youtube.com/watch?v=D07h5T6-29I" target="_blank"><img src="http://img.youtube.com/vi/D07h5T6-29I/0.jpg" 
 alt="CREA VIDEO" width="480" height="360" border="5" /></a>
 
+Video tutorial explaining the interface: https://www.youtube.com/watch?v=i2qrqvZc22Y
+
 ##Requirements
 To use _CREA_ you will need:
 * A Windows, Mac OS X or Linux computer with modern graphics.
