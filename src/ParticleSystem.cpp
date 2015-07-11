@@ -33,7 +33,7 @@ ParticleSystem::ParticleSystem(){
     startFadeIn         = false;        // Fade in has started?
     startFadeOut        = false;        // Fade out has started?
     elapsedFadeTime     = 0.0;          // Elapsed time of fade
-    fadeTime            = 2.0;          // Transition time of fade
+    fadeTime            = 1.2;          // Transition time of fade
     
     // Opacity
     opacity             = 0.0;          // Actual opacity of the particles

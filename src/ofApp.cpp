@@ -1949,8 +1949,8 @@ void ofApp::interpolateWidgetValues(){
             if(currentValue == targetValue){
                 canDelete = true;
             }
-//            else if((w->getKind() == 2 || w->getKind() == 20) && nInterpolatedFrames > maxTransitionFrames/2.0){
-            else if(w->getKind() == 2 || w->getKind() == 20){
+            else if((w->getKind() == 2 || w->getKind() == 20) && nInterpolatedFrames > maxTransitionFrames/2.0){
+//            else if(w->getKind() == 2 || w->getKind() == 20){
                 XML->setValue("Value", targetValue, 0);
                 w->loadState(XML);
                 g->triggerEvent(w);

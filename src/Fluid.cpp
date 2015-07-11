@@ -29,7 +29,7 @@ Fluid::Fluid(){
     startFadeIn                  = false; // Fade in has started?
     startFadeOut                 = false; // Fade out has started?
     elapsedFadeTime              = 0.0;   // Elapsed time of fade
-    fadeTime                     = 2.0;   // Transition time of fade
+    fadeTime                     = 1.2;   // Transition time of fade
     
     // Color properties
     red                          = 255.0;
@@ -305,7 +305,6 @@ void Fluid::draw(){
             fluidParticles.draw(0, 0, width, height);
             ofPopStyle();
         }
-        
 //        ofPushStyle();
 //        ofPushMatrix();
 //        ofScale(1.0/scaleFactor, 1.0/scaleFactor);
