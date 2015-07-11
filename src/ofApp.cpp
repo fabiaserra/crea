@@ -36,7 +36,7 @@ void ofApp::setup(){
         // running the command below positions an undecorated window to display on a second
         // monitor or projector. this is a good way to set up a fullscreen display, while
         // retaining a control window in the primary monitor.
-        secondWindow.setup("second window", ofGetScreenWidth(), 0, PROJECTOR_RESOLUTION_X, PROJECTOR_RESOLUTION_Y, true);
+        secondWindow.setup("second window", ofGetScreenWidth(), 0, PROJECTOR_RESOLUTION_X, PROJECTOR_RESOLUTION_Y, false);
 //        secondWindow.setup("second window", 10, 0, PROJECTOR_RESOLUTION_X, PROJECTOR_RESOLUTION_Y, true);
     #endif
 
@@ -1210,7 +1210,7 @@ void ofApp::setupFluidSolverGUI(){
     guiFluid_2->addLabel("FLUID CONTOUR", OFX_UI_FONT_LARGE);
     guiFluid_2->addSpacer();
     ofxUIImageToggle *activeContour;
-    activeContour = guiFluid_2->addImageToggle("Activate Contour Fluid", "icons/show.png", false, dim, dim);
+    activeContour = guiFluid_2->addImageToggle("Activate Contour Fluid", "icons/show.png", &fluid.drawContourFluid, dim, dim);
     activeContour->setColorBack(ofColor(150, 255));
     guiFluid_2->addSpacer();
     ofxUISlider *vMaskRedSlider = guiFluid_2->addSlider("Red", 0.0, 255.0, &contour.vMaskRed);
@@ -1239,7 +1239,7 @@ void ofApp::setupFluidExtrasGUI(){
     
     guiFluidMarkers->addSpacer();
     ofxUIImageToggle *activeMarkers;
-    activeMarkers = guiFluidMarkers->addImageToggle("Activate Marker Fluid", "icons/show.png",  false, dim, dim);
+    activeMarkers = guiFluidMarkers->addImageToggle("Activate Marker Fluid", "icons/show.png",  &fluid.drawMarkerFluid, dim, dim);
     activeMarkers->setColorBack(ofColor(150, 255));
     guiFluidMarkers->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     ofxUIImageButton *reset;
@@ -1841,7 +1841,8 @@ void ofApp::loadGUISettings(const string path, const bool isCue, const bool inte
                         values.push_back(rangeSlider->getValueHigh());
                         values.push_back(XML->getValue("LowValue", -1.0, 0));
                         values.push_back(XML->getValue("HighValue", -1.0, 0));
-                        widgetsToUpdate[widget] = values;
+                        pair< ofxUICanvas *, ofxUIWidget *> actualWidget(g, widget);
+                        widgetsToUpdate[actualWidget] = values;
                     }
                     else{
                         ofxXmlSettings *tmpXML = new ofxXmlSettings();
@@ -1849,7 +1850,8 @@ void ofApp::loadGUISettings(const string path, const bool isCue, const bool inte
                         float currentValue = tmpXML->getValue("Value", -1.0, 0);
                         values.push_back(currentValue);
                         values.push_back(XML->getValue("Value", -1.0, 0));
-                        widgetsToUpdate[widget] = values;
+                        pair< ofxUICanvas *, ofxUIWidget *> actualWidget(g, widget);
+                        widgetsToUpdate[actualWidget] = values;
                         delete tmpXML;
                     }
                 }
@@ -1859,10 +1861,11 @@ void ofApp::loadGUISettings(const string path, const bool isCue, const bool inte
                     interpolatingWidgets = false;
                     nInterpolatedFrames = 0;
                     // Delete all widgets from the map
-                    map<ofxUIWidget *, vector<float> >::iterator it = widgetsToUpdate.begin();
+                    map< pair<ofxUICanvas *, ofxUIWidget *>, vector<float> >::iterator it = widgetsToUpdate.begin();
                     while(it != widgetsToUpdate.end()){
-                        delete it->first;
-                        widgetsToUpdate.erase(it);
+                        map< pair<ofxUICanvas *, ofxUIWidget *>, vector<float> >::iterator toErase = it;
+                        ++it;
+                        widgetsToUpdate.erase(toErase);
                     }
                     widgetsToUpdate.clear();
                 }
@@ -1912,9 +1915,10 @@ void ofApp::interpolateWidgetValues(){
 
     nInterpolatedFrames++;
 
-    map<ofxUIWidget *, vector<float> >::iterator it = widgetsToUpdate.begin();
+    map< pair<ofxUICanvas *, ofxUIWidget *>, vector<float> >::iterator it = widgetsToUpdate.begin();
     while (it != widgetsToUpdate.end()){
-        ofxUIWidget * w = it->first;
+        ofxUICanvas * g = it->first.first;
+        ofxUIWidget * w = it->first.second;
         vector<float> values = it->second;
         ofxXmlSettings *XML = new ofxXmlSettings();
         bool canDelete = false;
@@ -1930,6 +1934,7 @@ void ofApp::interpolateWidgetValues(){
             XML->setValue("HighValue", currentHighValue, 0);
             XML->setValue("LowValue", currentLowValue, 0);
             w->loadState(XML);
+            g->triggerEvent(w);
         }
         else{
             w->saveState(XML);
@@ -1938,21 +1943,24 @@ void ofApp::interpolateWidgetValues(){
             float currentValue = ofMap(nInterpolatedFrames*(1.0/(float)maxTransitionFrames), 0.0, 1.0, initialValue, targetValue, true);
             XML->setValue("Value", currentValue, 0);
             w->loadState(XML);
+            g->triggerEvent(w);
             // kind 2 is a toggle and 20 is ofxUIImageToggle, so they only can have 0 or 1 value
             // We switch the value in half maxTransitionFrames frames
             if(currentValue == targetValue){
                 canDelete = true;
             }
-            else if((w->getKind() == 2 || w->getKind() == 20) && nInterpolatedFrames > maxTransitionFrames/2.0){
+//            else if((w->getKind() == 2 || w->getKind() == 20) && nInterpolatedFrames > maxTransitionFrames/2.0){
+            else if(w->getKind() == 2 || w->getKind() == 20){
                 XML->setValue("Value", targetValue, 0);
                 w->loadState(XML);
+                g->triggerEvent(w);
                 canDelete = true;
             }
         }
 
         // If values are already target value we delete them from the map
         if(canDelete){
-            map<ofxUIWidget *, vector<float> >::iterator toErase = it;
+            map< pair<ofxUICanvas *, ofxUIWidget *>, vector<float> >::iterator toErase = it;
             ++it;
             widgetsToUpdate.erase(toErase);
         }
@@ -2368,28 +2376,28 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
             fluid.resetDrawForces();
         }
     }
-    if(e.getName() == "Activate Marker Fluid"){
-        ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
-        if(toggle->getValue() == true){
-//            fluid.markersInput = true;
-            fluid.drawFluid = true;
-        }
-        else{
-//            fluid.markersInput = false;
-            fluid.drawFluid = false;
-        }
-    }
-    if(e.getName() == "Activate Contour Fluid"){
-        ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
-        if(toggle->getValue() == true){
-//            fluid.contourInput = true;
-            fluid.drawFluid = true;
-        }
-        else{
-//            fluid.contourInput = false;
-            fluid.drawFluid = false;
-        }
-    }
+//    if(e.getName() == "Activate Marker Fluid"){
+//        ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
+//        if(toggle->getValue() == true){
+////            fluid.markersInput = true;
+//            fluid.drawFluid = true;
+//        }
+//        else{
+////            fluid.markersInput = false;
+//            fluid.drawFluid = false;
+//        }
+//    }
+//    if(e.getName() == "Activate Contour Fluid"){
+//        ofxUIImageToggle *toggle = (ofxUIImageToggle *) e.widget;
+//        if(toggle->getValue() == true){
+////            fluid.contourInput = true;
+//            fluid.drawFluid = true;
+//        }
+//        else{
+////            fluid.contourInput = false;
+//            fluid.drawFluid = false;
+//        }
+//    }
     //-------------------------------------------------------------
     // CONTOUR
     //-------------------------------------------------------------
