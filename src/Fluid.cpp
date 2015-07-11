@@ -87,7 +87,8 @@ Fluid::Fluid(){
     drawPressure                 = false;
     drawVorticity                = false;
     drawTemperature              = false;
-    drawFluid                    = false;
+    drawMarkerFluid              = false;
+    drawContourFluid             = false;
 }
 
 void Fluid::setup(int width, int height, float scaleFactor, bool doFasterInternalFormat){
@@ -291,7 +292,7 @@ void Fluid::draw(){
             displayScalar.draw(0, 0, width, height);
             ofPopStyle();
         }
-        if(drawFluid){
+        if(drawMarkerFluid || drawContourFluid){
             ofPushStyle();
             ofEnableBlendMode(OF_BLENDMODE_ADD);
             ofSetColor(red, green, blue, opacity);
