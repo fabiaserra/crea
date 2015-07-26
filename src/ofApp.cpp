@@ -618,28 +618,6 @@ void ofApp::draw(){
     ofTranslate(kinectRect.x, kinectRect.y);
     ofScale(reScale, reScale);
 
-//    // Kinect images
-//    depthOriginal.draw(0, 0, 160, 120);
-//    depthImage.draw(160, 0, 160, 120);
-//    
-//    irOriginal.draw(320, 0, 160, 120);
-//    irImage.draw(480, 0, 160, 120);
-//    
-//    grayThreshFar.draw(0, 120, 160, 120);
-//    grayThreshNear.draw(160, 120, 160, 120);
-//    
-//    ofPushMatrix();
-//    ofScale(0.25, 0.25);
-//    ofTranslate(640*2, 480);
-//    irMarkerFinder.draw();
-//    ofPopMatrix();
-//    
-//    ofPushMatrix();
-//    ofScale(0.25, 0.25);
-//    ofTranslate(0, 480*2);
-//    contour.draw();
-//    ofPopMatrix();
-
     if(useFBO){
         fbo.begin();
 
