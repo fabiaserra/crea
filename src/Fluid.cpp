@@ -142,9 +142,9 @@ void Fluid::setup(int width, int height, float scaleFactor, bool doFasterInterna
     }
     
     // Allocate visualisation classes
-    displayScalar.allocate(flowWidth, flowHeight);
-    densityDisplayScalar.allocate(width, height);
-    velocityField.allocate(flowWidth/4, flowHeight/4);
+    displayScalar.setup(flowWidth, flowHeight);
+    densityDisplayScalar.setup(width, height);
+    velocityField.setup(flowWidth/4, flowHeight/4);
     
     // Allocate fluid pixels
     fluidFlow.allocate(flowWidth, flowHeight, GL_RGBA32F);
@@ -260,7 +260,7 @@ void Fluid::draw(){
         if(drawVelocity){
             ofPushStyle();
             ofEnableBlendMode(OF_BLENDMODE_ADD);
-            velocityField.setSource(fluid.getVelocity());
+            velocityField.setVelocity(fluid.getVelocity());
             velocityField.draw(0, 0, width, height);
             ofPopStyle();
         }

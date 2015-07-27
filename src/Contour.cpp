@@ -104,8 +104,8 @@ void Contour::setup(int width, int height, float scaleFactor){
     opticalFlow.setStrength(100.0);
     velocityMask.setup(width, height);
     
-    displayScalar.allocate(flowWidth, flowHeight);
-    velocityField.allocate(flowWidth / 4, flowHeight / 4);
+    displayScalar.setup(flowWidth, flowHeight);
+    velocityField.setup(flowWidth / 4, flowHeight / 4);
 //    velocityField.setLineSmooth(true);
     
     // Create rectangle with flow size
@@ -388,7 +388,7 @@ void Contour::draw(){
 //            }
 //        }
         ofEnableBlendMode(OF_BLENDMODE_ADD);
-        velocityField.setSource(opticalFlow.getOpticalFlowDecay());
+        velocityField.setVelocity(opticalFlow.getOpticalFlowDecay());
         velocityField.draw(0, 0, width, height);
         ofPopStyle();
     }
@@ -440,8 +440,8 @@ ofVec2f Contour::getFlowOffset(ofPoint p){
     return offset;
 }
 
-float Contour::getAverageFlow(){
-    return opticalFlow.getAverageFlow();
+ofVec2f Contour::getAverageFlow(){
+//    return opticalFlow.getAverageFlow();
 }
 
 void Contour::computeVelocities(){

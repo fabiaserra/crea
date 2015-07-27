@@ -33,7 +33,7 @@ class Contour{
         void draw();
 
         ofVec2f getFlowOffset(ofPoint p);
-        float getAverageFlow();
+        ofVec2f getAverageFlow();
         ofVec2f getVelocityInPoint(ofPoint curPoint);
     
         ofTexture& getOpticalFlowDecay() {return opticalFlow.getOpticalFlowDecay();}
