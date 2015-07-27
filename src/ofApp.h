@@ -39,7 +39,7 @@
 // VMO files
 //-----------------------
 // include gesture follower files (you need to have vmo.cpp, vmo.h, helper.cpp and helper.h in src)
-#define GESTURE_FOLLOWER
+//#define GESTURE_FOLLOWER
 #ifdef GESTURE_FOLLOWER
 #include "vmo.h"
 #include "helper.h"
