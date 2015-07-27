@@ -29,29 +29,20 @@ To use _CREA_ you will need:
 
 3. The _bin_ folder contains also an executable file of _CREA_ after you compile it. If this file has the '\_debug' suffix means that the project was compiled in the Debug mode of compilation, which lets you debug the project by using breakpoints and other debugging tools. Projects compiled in the Debug mode can work very slowly so always compile it in the Release mode if you use _CREA_ in a live performance.
 
-4. Download the list of required addons and place them inside the _addons_ folder:
-  * __ofxKinect__: https://github.com/ofTheo/ofxKinect
+4. Download the list of required addons and place them inside the _addons_ folder, only ofxCv and ofxSecondWindow (I have included the rest to _src_ so the updates of the addons do not affect the project):
+  * __ofxKinect__ (comes with OFX): https://github.com/ofTheo/ofxKinect
   * __ofxCv__: https://github.com/kylemcdonald/ofxCv
-  * __ofxFlowTools__: https://github.com/moostrik/ofxFlowTools
-  * __ofxUI__: https://github.com/rezaali/ofxUI
+  * __ofxFlowTools__ (included in src): https://github.com/moostrik/ofxFlowTools
+  * __ofxUI__ (included in src): https://github.com/rezaali/ofxUI
   * __ofxSecondWindow__: https://github.com/genekogan/ofxSecondWindow
 
-5. After downloading ofxFlowTools, open the __ftVelocityMask.h__ file (inside the _src/mask_ folder) and add the following lines of code:
-  ```c
-  float	getStrength() {return strength.get();} // added
-  int	getBlurPasses() {return blurPasses.get();}
-  float	getBlurRadius() {return blurRadius.get();}
-  void	setStrength(float value) {strength.set(value);} // added
-  void	setBlurPasses(int value) {blurPasses.set(value);}
-  void	setBlurRadius(float value) {blurRadius.set(value);}
-  ```
-6. Create a new openFrameworks project using the [project generator](http://www.openframeworks.cc/tutorials/introduction/002\_projectGenerator.html) tool that is inside the openFrameworks root folder. Name it _crea_ (same name as repository folder you downloaded before) and make sure all these addons are enabled in the list of addons shown: ofxKinect, ofxCv, ofxOpenCV, ofxFlowTools, ofxUI, ofxXmlSettings and ofxSecondWindow.
+5. Create a new openFrameworks project using the [project generator](http://www.openframeworks.cc/tutorials/introduction/002\_projectGenerator.html) tool that is inside the openFrameworks root folder. Name it _crea_ (same name as repository folder you downloaded before) and make sure all these addons are enabled in the list of addons shown: ofxKinect, ofxCv, ofxOpenCV, ofxXmlSettings and ofxSecondWindow.
 
-7. Go to _apps/myApps_ and inside the folder _crea_ you should see a new file. This file is the project file and depending on your development environment it has extension .sln (Visual Studio), .xcodeproj (Xcode), or .workspace (Code::Blocks).
+6. Go to _apps/myApps_ and inside the folder _crea_ you should see a new file. This file is the project file and depending on your development environment it has extension .sln (Visual Studio), .xcodeproj (Xcode), or .workspace (Code::Blocks).
 
-8. Open the file with your development environment.
+7. Open the file with your development environment.
 
-9. Inside ofApp.h there are a set of macros to change some basic features that are set by default. 
+8. Inside ofApp.h there are a set of macros to change some basic features that are set by default. 
   
   If we want to use a separate window for the control interface this line of code has to be uncommented:
   ```c
@@ -82,4 +73,4 @@ To use _CREA_ you will need:
   // Use an xml IR Markers sequence file as input to Gesture Follower
   #define KINECT_SEQUENCE
   ```
-10. Compile the project and enjoy _CREA_.
+9. Compile the project and enjoy _CREA_.
