@@ -150,7 +150,7 @@ void Contour::update(float dt, ofImage &depthImage){
 
     if(doOpticalFlow){
         // Compute optical flow
-        opticalFlow.setSource(depthImage.getTextureReference());
+        opticalFlow.setSource(depthImage.getTexture());
         opticalFlow.setStrength(flowStrength);
         opticalFlow.setOffset(flowOffset);
         opticalFlow.setLambda(flowLambda);
@@ -182,10 +182,9 @@ void Contour::update(float dt, ofImage &depthImage){
             ofPopStyle();
         coloredDepthFbo.end();
         
-        velocityMask.setDensity(coloredDepthFbo.getTextureReference()); // to change mask color
-//        velocityMask.setDensity(depthImage.getTextureReference());
+        velocityMask.setDensity(coloredDepthFbo.getTexture()); // to change mask color
         velocityMask.setVelocity(opticalFlow.getOpticalFlow());
-        velocityMask.setStrength(vMaskStrength);
+//        velocityMask.setStrength(vMaskStrength);
         velocityMask.setBlurPasses(vMaskBlurPasses);
         velocityMask.setBlurRadius(vMaskBlurRadius);
         velocityMask.update();
@@ -292,7 +291,7 @@ void Contour::draw(){
             ofSetLineWidth(lineWidth);
             if(drawBoundingRectLine) ofNoFill();
             for(int i = 0; i < boundingRects.size(); i++)
-                ofRect(boundingRects[i]);
+                ofDrawRectangle(boundingRects[i]);
             ofPopStyle();
         }
         if(drawConvexHull){
@@ -365,7 +364,7 @@ void Contour::draw(){
                     ofPoint point = contours[i].getPointAtPercent(p/1000.0);
                     float floatIndex = p/1000.0 * (numPoints-1);
                     ofVec3f tangent = contours[i].getTangentAtIndexInterpolated(floatIndex) * tangentLength;
-                    ofLine(point-tangent/2, point+tangent/2);
+                    ofDrawLine(point-tangent/2, point+tangent/2);
                 }
             }
             ofPopStyle();
@@ -420,7 +419,7 @@ void Contour::draw(){
         ofSetLineWidth(1.5);
         for(int i = 0; i < contours.size(); i+=10){
             for(int p = 0; p < contours[i].size(); p++){
-                ofLine(contours[i][p], contours[i][p] - getVelocityInPoint(contours[i][p]));
+                ofDrawLine(contours[i][p], contours[i][p] - getVelocityInPoint(contours[i][p]));
             }
         }
         ofPopStyle();

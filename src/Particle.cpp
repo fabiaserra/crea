@@ -135,22 +135,22 @@ void Particle::draw(){
         if(!drawLine){
             int resolution = ofMap(fabs(radius), 0, 10, 6, 22, true);
             ofSetCircleResolution(resolution);
-            ofCircle(pos, radius);
+            ofDrawCircle(pos, radius);
             if(drawStroke){
                 ofPushStyle();
                 ofNoFill();
                 ofSetLineWidth(strokeWidth);
                 ofSetColor(0, opacity);
-                ofCircle(pos, radius);
+                ofDrawCircle(pos, radius);
                 ofPopStyle();
             }
         }
         else{
-//            if(pos.squareDistance(prevPos) >= 25) ofLine(pos, pos-vel.getNormalized()*5);
-//            else ofLine(pos, prevPos);
+//            if(pos.squareDistance(prevPos) >= 25) ofDrawLine(pos, pos-vel.getNormalized()*5);
+//            else ofDrawLine(pos, prevPos);
 //            prevPos = pos;
             ofSetLineWidth(ofMap(radius, 0, 15, 1, 5, true));
-            ofLine(pos, pos-vel.getNormalized()*radius);
+            ofDrawLine(pos, pos-vel.getNormalized()*radius);
         }
 
         ofPopStyle();

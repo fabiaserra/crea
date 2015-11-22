@@ -193,7 +193,7 @@ void ofApp::setup(){
     drawMarkersPath = false;
 
     // SONG
-    song.loadSound("songs/ASuitableEnsemble.mp3", true);
+    song.load("songs/ASuitableEnsemble.mp3", true);
     
     #ifdef GESTURE_FOLLOWER
     // VMO SETUP
@@ -372,9 +372,9 @@ void ofApp::update(){
     // Nothing will happen here if the kinect is unplugged
     kinect.update();
     if(kinect.isFrameNew()){
-        depthOriginal.setFromPixels(kinect.getDepthPixels(), kinect.getWidth(), kinect.getHeight(), OF_IMAGE_GRAYSCALE);
+        depthOriginal.setFromPixels(kinect.getDepthPixels());
         if(flipKinect) depthOriginal.mirror(false, true);
-        irOriginal.setFromPixels(kinect.getPixels(), kinect.getWidth(), kinect.getHeight(), OF_IMAGE_GRAYSCALE);
+        irOriginal.setFromPixels(kinect.getPixels());
         if(flipKinect) irOriginal.mirror(false, true);
     }
 
@@ -624,7 +624,7 @@ void ofApp::draw(){
         // Draw semi-transparent white rectangle to slightly clear buffer (depends on the history value)
         ofFill();
         ofSetColor(red, green, blue, ofMap(fadeAmount, 0, 100, 250, 0));
-        ofRect(0, 0, kinect.width, kinect.height);
+        ofDrawRectangle(0, 0, kinect.width, kinect.height);
 
         // Graphics
         ofNoFill();
@@ -2019,7 +2019,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         if(button->getValue() == true){
             ofFileDialogResult result = ofSystemLoadDialog("Select an audio file.", false, ofToDataPath("songs/"));
             if(result.bSuccess){
-                song.loadSound(result.getPath(), true);
+                song.load(result.getPath(), true);
                 songFilename->setLabel(ofFilePath::getFileName(result.getPath()));
             }
         }

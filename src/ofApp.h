@@ -25,7 +25,6 @@
 #include "ofxUI.h"
 #include "ofxCv.h"
 #include "ofxKinect.h"
-#include "ofxSecondWindow.h"
 #include "ofxFlowTools.h"
 
 // Classes
@@ -52,7 +51,7 @@
 //#define KINECT_SEQUENCE
 
 // Use a separate window for control interface
-#define SECOND_WINDOW
+//#define SECOND_WINDOW
 #define PROJECTOR_RESOLUTION_X 640
 #define PROJECTOR_RESOLUTION_Y 480
 
@@ -180,7 +179,7 @@ class ofApp : public ofBaseApp{
         bool drawMarkers;
         bool drawMarkersPath;
         //--------------------------------------------------------------
-        ofxSecondWindow secondWindow;
+//        ofxSecondWindow secondWindow;
         //--------------------------------------------------------------
         vector<ofxUICanvas *> guis;
         //--------------------------------------------------------------
