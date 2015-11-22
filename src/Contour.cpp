@@ -57,7 +57,7 @@ Contour::Contour()
     flowTimeBlurRadius  = 2.0;   // 0 ~ 10
     
     // velocity mask settings
-    vMaskStrength       = 10.0;  // 0 ~ 10
+//    vMaskStrength       = 10.0;  // 0 ~ 10
     vMaskBlurPasses     = 1;     // 0 ~ 10
     vMaskBlurRadius     = 5.0;   // 0 ~ 10
     vMaskRed            = 255.0;
@@ -79,7 +79,6 @@ Contour::Contour()
     drawConvexHullLine   = false;
     drawSilhouette       = false;
     drawSilhouetteLine   = false;
-    drawQuads            = false;
     drawTangentLines     = false;
 
     // debug
@@ -209,7 +208,6 @@ void Contour::update(float dt, ofImage &depthImage){
     boundingRects.clear();
     convexHulls.clear();
     contours.clear();
-    quads.clear();
     vMaskContours.clear();
     diffContours.clear();
 
@@ -217,7 +215,6 @@ void Contour::update(float dt, ofImage &depthImage){
     boundingRects.resize(n);
     convexHulls.resize(n);
     contours.resize(n);
-    quads.resize(n);
     vMaskContours.resize(m);
 //    diffContours.resize(o);
 
@@ -232,10 +229,6 @@ void Contour::update(float dt, ofImage &depthImage){
         contour = contourFinder.getPolyline(i);
         contour = contour.getSmoothed(smoothingSize, 0.5);
         contours[i] = contour;
-
-//        ofPolyline quad;
-//        quad = toOf(contourFinder.getFitQuad(i));
-//        quads[i] = quad;
     }
     
     for(int i = 0; i < m; i++){
@@ -335,23 +328,10 @@ void Contour::draw(){
             ofSetColor(ofColor(red, green, blue), opacity);
             ofSetLineWidth(lineWidth);
             for(int i = 0; i < contours.size(); i++){
-//                if(i == 0) ofSetColor(255, 0, 0);
-//                else if(i == 1) ofSetColor(0, 255, 0);
-//                else ofSetColor(0, 0, 255);
                 contours[i].draw();
             }
             ofPopStyle();
         }
-
-//        if(drawQuads){
-//            ofPushStyle();
-//            ofSetColor(ofColor(red, green, blue), opacity);
-//            ofSetLineWidth(lineWidth);
-//            for(int i = 0; i < quads.size(); i++){
-//                quads[i].draw();
-//            }
-//            ofPopStyle();
-//        }
         
         if(drawTangentLines){
             ofPushStyle();
@@ -383,7 +363,7 @@ void Contour::draw(){
 //            for (int j = 0; j < height; j+=4){
 //                ofPoint p = ofPoint(i,j);
 //                ofVec2f vel = getFlowOffset(p);
-//                ofLine(ofVec2f(i, j), ofVec2f(i, j)+vel);
+//                ofDrawLine(ofVec2f(i, j), ofVec2f(i, j)+vel);
 //            }
 //        }
         ofEnableBlendMode(OF_BLENDMODE_ADD);

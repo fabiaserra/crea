@@ -305,23 +305,6 @@ void Fluid::draw(){
             fluidParticles.draw(0, 0, width, height);
             ofPopStyle();
         }
-//        ofPushStyle();
-//        ofPushMatrix();
-//        ofScale(1.0/scaleFactor, 1.0/scaleFactor);
-//        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
-//        markerForces[0].forceBuffer.draw(0, 0);
-//        ofPopMatrix();
-//        ofPopStyle();
-//        
-//        ofPushStyle();
-//        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
-//        markerForces[1].forceBuffer.draw(213, 0);
-//        ofPopStyle();
-//        
-//        ofPushStyle();
-//        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
-//        markerForces[2].forceBuffer.draw(426, 0);
-//        ofPopStyle();
     }
 }
 

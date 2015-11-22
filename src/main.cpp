@@ -16,35 +16,6 @@
  * You should have received a copy of the Affero GNU General Public License
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
-//
-//#include "ofMain.h"
-//#include "ofApp.h"
-//#include "ofAppGLFWWindow.h"
-//
-////========================================================================
-//int main( ){
-//    ofGLFWWindowSettings settings;
-//    settings.width = 600;
-//    settings.height = 600;
-//    settings.setPosition(ofVec2f(300,0));
-//    settings.resizable = true;
-//    shared_ptr<ofAppBaseWindow> mainWindow = ofCreateWindow(settings);
-//    
-//    settings.width = 300;
-//    settings.height = 300;
-//    settings.setPosition(ofVec2f(0,0));
-//    settings.resizable = false;
-//    shared_ptr<ofAppBaseWindow> guiWindow = ofCreateWindow(settings);
-//    guiWindow->setVerticalSync(false);
-//    
-//    shared_ptr<ofApp> mainApp(new ofApp);
-//    mainApp->setupGui();
-//    ofAddListener(guiWindow->events().draw,mainApp.get(),&ofApp::drawGui);
-//    
-//    ofRunApp(mainWindow, mainApp);
-//    ofRunMainLoop();
-//    
-//}
 
 #include "ofMain.h"
 #include "ofApp.h"

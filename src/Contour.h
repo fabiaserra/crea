@@ -83,7 +83,7 @@ class Contour{
         float flowTimeBlurDecay;
         float flowTimeBlurRadius;
         //--------------------------------------------------------------
-        float vMaskStrength;
+//        float vMaskStrength;
         int vMaskBlurPasses;
         float vMaskBlurRadius;
         float vMaskRed, vMaskGreen, vMaskBlue;
@@ -100,7 +100,6 @@ class Contour{
         //--------------------------------------------------------------
         vector<ofRectangle> boundingRects;
         vector<ofPolyline> convexHulls;
-        vector<ofPolyline> quads;
         vector<ofPolyline> contours;    // silhouettes
         vector<ofPolyline> prevContours;
         vector<ofPolyline> diffContours;
@@ -113,7 +112,6 @@ class Contour{
         bool drawConvexHullLine;
         bool drawSilhouette;
         bool drawSilhouetteLine;
-        bool drawQuads;
         bool drawTangentLines;
         //--------------------------------------------------------------
         bool drawFlow;
