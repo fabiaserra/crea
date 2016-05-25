@@ -133,8 +133,9 @@ class Contour{
         ftVelocityField velocityField;
         //--------------------------------------------------------------
         ofRectangle rescaledRect;
-        ofTexture flowTexture;
+        ofFbo flowFbo;
         ofFloatPixels flowPixels;
+        ofFbo velocityMaskFbo;
         ofPixels velocityMaskPixels;
         ofFbo coloredDepthFbo;
         //--------------------------------------------------------------

@@ -70,7 +70,7 @@ void ofApp::setup(){
         // Load all recorded depth images in "data/depth01/"
         for(int i = 0; i < totalImages; i++){
             ofImage *img = new ofImage();
-            img->loadImage(depthFolder + dir.getName(i));
+            img->load(depthFolder + dir.getName(i));
             img->setImageType(OF_IMAGE_GRAYSCALE);
             savedDepthImages[i] = img;
         }
@@ -83,7 +83,7 @@ void ofApp::setup(){
         // Load all recorded IR images in "data/ir01/"
         for(int i = 0; i < totalImages; i++){
             ofImage *img = new ofImage();
-            img->loadImage(irFolder + dir.getName(i));
+            img->load(irFolder + dir.getName(i));
             img->setImageType(OF_IMAGE_GRAYSCALE);
             savedIrImages[i] = img;
         }
@@ -360,10 +360,10 @@ void ofApp::update(){
         int i = MIN((int)(percent*n), n-1);
 
         ofImage *depthImg = savedDepthImages.at(i);
-        depthOriginal.setFromPixels(depthImg->getPixels(), depthImg->getWidth(), depthImg->getHeight(), OF_IMAGE_GRAYSCALE);
+        depthOriginal.setFromPixels(depthImg->getPixels());
         if(flipKinect) depthOriginal.mirror(false, true);
         ofImage *irImg = savedIrImages.at(i);
-        irOriginal.setFromPixels(irImg->getPixels(), irImg->getWidth(), irImg->getHeight(), OF_IMAGE_GRAYSCALE);
+        irOriginal.setFromPixels(irImg->getPixels());
         if(flipKinect) irOriginal.mirror(false, true);
     #endif // KINECT_CONNECTED
 

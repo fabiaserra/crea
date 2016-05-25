@@ -124,12 +124,13 @@ void Contour::setup(int width, int height, float scaleFactor){
 //    previous.allocate(width, height, OF_IMAGE_GRAYSCALE);
 //    diff.allocate(width, height, OF_IMAGE_GRAYSCALE);
     
-    // allocate flow texture
-    flowTexture.allocate(flowWidth, flowHeight, GL_RGB32F);
+    // allocate flow fbo
+    flowFbo.allocate(flowWidth, flowHeight, GL_RGB32F);
     flowPixels.allocate(flowWidth, flowHeight, 3);
     
-    // velocity mask pixels
+    // velocity mask
     velocityMaskPixels.allocate(flowWidth, flowHeight, 4);
+    velocityMaskFbo.allocate(flowWidth, flowHeight, GL_RGBA32F);
     
     // allocate FBO
     coloredDepthFbo.allocate(width, height, GL_RGBA32F);
@@ -161,9 +162,15 @@ void Contour::update(float dt, ofImage &depthImage){
         opticalFlow.setTimeBlurDecay(flowTimeBlurDecay);
         opticalFlow.update(dt);
         
-        // Save flow texture and get its pixels to read velocities
-        flowTexture = opticalFlow.getOpticalFlowDecay();
-        flowTexture.readToPixels(flowPixels);
+        // Save flow fbo and get its pixels to read velocities
+        flowFbo.begin();
+        ofPushStyle();
+        ofClear(255, 255, 255, 0); // clear buffer
+        opticalFlow.getOpticalFlowDecay().draw(0, 0, flowWidth, flowHeight);
+        ofPopStyle();
+        flowFbo.end();
+        
+        flowFbo.readToPixels(flowPixels);
         
         // tint binary depth image (silhouette)
         coloredDepthFbo.begin(); 
@@ -188,7 +195,15 @@ void Contour::update(float dt, ofImage &depthImage){
         velocityMask.setBlurRadius(vMaskBlurRadius);
         velocityMask.update();
         
-        velocityMask.getTextureReference().readToPixels(velocityMaskPixels);
+        // Save velocityMask fbo and get its pixels to read velocities
+        velocityMaskFbo.begin();
+        ofPushStyle();
+        ofClear(255, 255, 255, 0); // clear buffer
+        velocityMask.getTexture().draw(0, 0, flowWidth, flowHeight);
+        ofPopStyle();
+        velocityMaskFbo.end();
+        
+        velocityMaskFbo.readToPixels(velocityMaskPixels);
     }
     
     // Contour Finder in the depth Image

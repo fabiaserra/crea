@@ -26,7 +26,6 @@
 #include "ofxCv.h"
 #include "ofxKinect.h"
 #include "ofxFlowTools.h"
-#include "ofxSecondWindow.h"
 
 // Classes
 //-----------------------
@@ -46,13 +45,13 @@
 #endif
 
 // Use the Kinect live input stream
-#define KINECT_CONNECTED
+//#define KINECT_CONNECTED
 
 // Use an xml IR Markers sequence file as input to Gesture Follower
 //#define KINECT_SEQUENCE
 
 // Use a separate window for control interface
-#define SECOND_WINDOW
+//#define SECOND_WINDOW
 #define PROJECTOR_RESOLUTION_X 640
 #define PROJECTOR_RESOLUTION_Y 480
 
@@ -180,7 +179,7 @@ class ofApp : public ofBaseApp{
         bool drawMarkers;
         bool drawMarkersPath;
         //--------------------------------------------------------------
-        ofxSecondWindow secondWindow;
+//        ofxSecondWindow secondWindow;
         //--------------------------------------------------------------
         vector<ofxUICanvas *> guis;
         //--------------------------------------------------------------
