@@ -40,8 +40,6 @@ void ofApp::setup(){
 //        secondWindow.setup("second window", 10, 0, PROJECTOR_RESOLUTION_X, PROJECTOR_RESOLUTION_Y, true);
     #endif
 
-    ofHideCursor(); // trick to show the cursor icon (see mouseMoved())
-
     // Number of IR markers
     numMarkers = 1;
 
@@ -72,7 +70,7 @@ void ofApp::setup(){
         // Load all recorded depth images in "data/depth01/"
         for(int i = 0; i < totalImages; i++){
             ofImage *img = new ofImage();
-            img->loadImage(depthFolder + dir.getName(i));
+            img->load(depthFolder + dir.getName(i));
             img->setImageType(OF_IMAGE_GRAYSCALE);
             savedDepthImages[i] = img;
         }
@@ -85,7 +83,7 @@ void ofApp::setup(){
         // Load all recorded IR images in "data/ir01/"
         for(int i = 0; i < totalImages; i++){
             ofImage *img = new ofImage();
-            img->loadImage(irFolder + dir.getName(i));
+            img->load(irFolder + dir.getName(i));
             img->setImageType(OF_IMAGE_GRAYSCALE);
             savedIrImages[i] = img;
         }
@@ -193,7 +191,7 @@ void ofApp::setup(){
     drawMarkersPath = false;
 
     // SONG
-    song.loadSound("songs/ASuitableEnsemble.mp3", true);
+    song.load("songs/ASuitableEnsemble.mp3", true);
     
     #ifdef GESTURE_FOLLOWER
     // VMO SETUP
@@ -362,19 +360,19 @@ void ofApp::update(){
         int i = MIN((int)(percent*n), n-1);
 
         ofImage *depthImg = savedDepthImages.at(i);
-        depthOriginal.setFromPixels(depthImg->getPixels(), depthImg->getWidth(), depthImg->getHeight(), OF_IMAGE_GRAYSCALE);
+        depthOriginal.setFromPixels(depthImg->getPixels());
         if(flipKinect) depthOriginal.mirror(false, true);
         ofImage *irImg = savedIrImages.at(i);
-        irOriginal.setFromPixels(irImg->getPixels(), irImg->getWidth(), irImg->getHeight(), OF_IMAGE_GRAYSCALE);
+        irOriginal.setFromPixels(irImg->getPixels());
         if(flipKinect) irOriginal.mirror(false, true);
     #endif // KINECT_CONNECTED
 
     // Nothing will happen here if the kinect is unplugged
     kinect.update();
     if(kinect.isFrameNew()){
-        depthOriginal.setFromPixels(kinect.getDepthPixels(), kinect.getWidth(), kinect.getHeight(), OF_IMAGE_GRAYSCALE);
+        depthOriginal.setFromPixels(kinect.getDepthPixels());
         if(flipKinect) depthOriginal.mirror(false, true);
-        irOriginal.setFromPixels(kinect.getPixels(), kinect.getWidth(), kinect.getHeight(), OF_IMAGE_GRAYSCALE);
+        irOriginal.setFromPixels(kinect.getPixels());
         if(flipKinect) irOriginal.mirror(false, true);
     }
 
@@ -554,9 +552,7 @@ void ofApp::update(){
                 else{
     //              prevBf = currentBf;
                     currentBf = vmo::tracking(seqVmo, currentBf, pttrList, currentFeatures, decay);
-//                    cout << "current index: " << currentBf.currentIdx << endl;
                     currentPercent = sequence.getCurrentPercent(currentBf.currentIdx);
-//                    cout << "current percent: " << currentPercent << endl;
 
                     if(cueList.size() != 0) {
                         int cueSegment = currentCueIndex;
@@ -624,7 +620,7 @@ void ofApp::draw(){
         // Draw semi-transparent white rectangle to slightly clear buffer (depends on the history value)
         ofFill();
         ofSetColor(red, green, blue, ofMap(fadeAmount, 0, 100, 250, 0));
-        ofRect(0, 0, kinect.width, kinect.height);
+        ofDrawRectangle(0, 0, kinect.width, kinect.height);
 
         // Graphics
         ofNoFill();
@@ -677,6 +673,7 @@ void ofApp::draw(){
     
     #ifdef SECOND_WINDOW
         secondWindow.end();
+        secondWindow.show();
         ofBackground(0);
     #endif
     
@@ -685,18 +682,11 @@ void ofApp::draw(){
 
 //--------------------------------------------------------------
 void ofApp::setupGUI(){
-    // GUI COLORS
-    //    uiThemecb.set(128, 210), uiThemeco.set(192, 255), uiThemecoh.set(192, 255);
-    //    uiThemecf.set(255, 255); uiThemecfh.set(160, 255), uiThemecp.set(128, 192);
-    //    uiThemecpo.set(255, 192);
     
+    // GUI COLORS
     uiThemecb.set(64, 192), uiThemeco.set(192, 192), uiThemecoh.set(128, 192);
     uiThemecf.set(240, 255); uiThemecfh.set(128, 255), uiThemecp.set(96, 192);
     uiThemecpo.set(255, 192);
-    
-    //    uiThemecb.set(41, 34, 31, 192), uiThemeco.set(19, 116, 125, 192), uiThemecoh.set(41, 34, 31, 192);
-    //    uiThemecf.set(252, 53, 76, 255); uiThemecfh.set(252, 247, 197, 255), uiThemecp.set(10, 191, 188, 192);
-    //    uiThemecpo.set(19, 116, 125, 192);
     
     dim = 32;
     guiWidth = 250;
@@ -1072,7 +1062,7 @@ void ofApp::setupOpticalFlowGUI(){
     
     guiFlow->addLabel("VELOCITY MASK", OFX_UI_FONT_LARGE);
     guiFlow->addSpacer();
-    guiFlow->addSlider("Mask Strength", 0.0, 10.0, &contour.vMaskStrength);
+//    guiFlow->addSlider("Mask Strength", 0.0, 10.0, &contour.vMaskStrength);
     guiFlow->addIntSlider("Blur Passes", 0, 10, &contour.vMaskBlurPasses);
     guiFlow->addSlider("Blur Radius", 0.0, 20.0, &contour.vMaskBlurRadius);
     guiFlow->addSpacer();
@@ -2019,7 +2009,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e){
         if(button->getValue() == true){
             ofFileDialogResult result = ofSystemLoadDialog("Select an audio file.", false, ofToDataPath("songs/"));
             if(result.bSuccess){
-                song.loadSound(result.getPath(), true);
+                song.load(result.getPath(), true);
                 songFilename->setLabel(ofFilePath::getFileName(result.getPath()));
             }
         }
@@ -2636,7 +2626,6 @@ void ofApp::keyReleased(int key){
 }
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y ){
-    ofShowCursor();
 }
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button){

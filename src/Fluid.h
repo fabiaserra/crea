@@ -128,6 +128,7 @@ class Fluid{
         ftVelocityField velocityField;
         //--------------------------------------------------------------
         ofTexture fluidFlow;
+        ofFbo fluidFbo;
         ofFloatPixels fluidVelocities;
         //--------------------------------------------------------------
         ofRectangle rescaledRect;
