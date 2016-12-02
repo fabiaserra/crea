@@ -26,6 +26,7 @@
 #include "ofxCv.h"
 #include "ofxKinect.h"
 #include "ofxFlowTools.h"
+#include "ofxSyphon.h"
 
 // Classes
 //-----------------------
@@ -238,4 +239,12 @@ class ofApp : public ofBaseApp{
         bool isTracking;
         float currentPercent;
         map<int, float> gestureUpdate;
+        //------ofxSyphone------------------------------------------------
+    
+        ofTexture tex;
+    
+        ofxSyphonServer mainOutputSyphonServer;
+        ofxSyphonServer individualTextureSyphonServer;
+    
+        ofxSyphonClient mClient;
 };
