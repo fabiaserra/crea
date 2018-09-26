@@ -462,7 +462,7 @@ void ParticleSystem::draw(){
                 for(int j = i-1; j >= 0; j--){
 //                    if (fabs(particles[i]->pos.x - particles[j]->pos.x) > connectDist) break; // to speed the loop
                     if(particles[i]->pos.squareDistance(particles[j]->pos) < connectDistSqrd){
-                        ofLine(particles[i]->pos, particles[j]->pos);
+                        ofDrawLine(particles[i]->pos, particles[j]->pos);
                     }
                 }
             }

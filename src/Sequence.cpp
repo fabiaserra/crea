@@ -26,7 +26,7 @@ Sequence::Sequence(){
     playhead = 0;
     elapsedTime = 0;
     maxPatternsWindow = 10;
-    verdana.loadFont("fonts/verdana.ttf", 80, true, true);
+    verdana.load("fonts/verdana.ttf", 80, true, true);
 }
 
 void Sequence::setup(const int numMarkers){
@@ -94,7 +94,7 @@ void Sequence::draw(){
             ofFill();
             c.setBrightness(150);
             ofSetColor(c);
-            ofCircle(currentPoint, 3);
+            ofDrawCircle(currentPoint, 3);
         }
     }
     ofPopStyle();
@@ -230,7 +230,7 @@ void Sequence::drawPatterns(map<int, float>& currentPatterns){
                 // Pattern current processing point
                 c.setBrightness(150);
                 ofSetColor(c, 255);
-                ofCircle(currentPoint, 3);
+                ofDrawCircle(currentPoint, 3);
             }
         }
     }
@@ -288,14 +288,14 @@ void Sequence::drawPattern(const int patternPosition, const int patternIdx, floa
     // Background pattern window box
     ofSetColor(0);
     ofFill();
-    ofRect(0, 0, width, height);
+    ofDrawRectangle(0, 0, width, height);
 
     // Contour pattern window box
     ofPushStyle();
     ofSetColor(255, opacity);
     ofSetLineWidth(2);
     ofNoFill();
-    ofRect(0, 0, width, height);
+    ofDrawRectangle(0, 0, width, height);
     ofPopStyle();
 
     for(int markerIdx = 0; markerIdx < numMarkers; markerIdx++){
@@ -321,7 +321,7 @@ void Sequence::drawPattern(const int patternPosition, const int patternIdx, floa
 
             // Pattern current processing point
             ofSetColor(240, 0, 20, opacity);
-            ofCircle(currentPoint, 10);
+            ofDrawCircle(currentPoint, 10);
         }
     }
 
@@ -359,7 +359,7 @@ void Sequence::drawTracking(int currentIdx){
 
             ofFill();
             ofSetColor(c);
-            ofCircle(currentPoint, 5);
+            ofDrawCircle(currentPoint, 5);
 
         }
         ofPopStyle();

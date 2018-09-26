@@ -63,7 +63,7 @@ void irMarker::draw(){
         size = ofMap(ofGetElapsedTimef() - startedDying, 0, dyingTime, size, 0, true);
     }
     ofSetColor(color);
-    ofCircle(currentPos, size);
+    ofDrawCircle(currentPos, size);
     ofSetColor(color.getInverted());
     ofDrawBitmapString(ofToString(label), currentPos.x-2, currentPos.y+2);
     ofPopStyle();

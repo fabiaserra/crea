@@ -101,7 +101,7 @@ void Fluid::setup(int width, int height, float scaleFactor, bool doFasterInterna
     this->flowHeight = height/scaleFactor;
     
     // Fluid
-    fluid.setup(flowWidth, flowHeight, width, height, doFasterInternalFormat);
+    fluid.setup(flowWidth, flowHeight, width, height);
     
     // Particles
     fluidParticles.setup(flowWidth, flowHeight, width, height);
@@ -146,8 +146,13 @@ void Fluid::setup(int width, int height, float scaleFactor, bool doFasterInterna
     densityDisplayScalar.setup(width, height);
     velocityField.setup(flowWidth/4, flowHeight/4);
     
+    // Allocate fluid texture
+//    fluidFlow.allocate(flowWidth, flowHeight, GL_RGBA32F);
+    
+    // allocate fluid FBO
+    fluidFbo.allocate(flowWidth, flowWidth, GL_RGBA32F);
+    
     // Allocate fluid pixels
-    fluidFlow.allocate(flowWidth, flowHeight, GL_RGBA32F);
     fluidVelocities.allocate(flowWidth, flowHeight, 4);
 }
 
@@ -225,8 +230,14 @@ void Fluid::update(float dt, vector<irMarker> &markers, Contour &contour, float 
         fluid.update(dt);
         
         // Get fluid texture and save to pixels so we can operate with them
-        fluidFlow = fluid.getVelocity();
-        fluidFlow.readToPixels(fluidVelocities);
+        fluidFbo.begin();
+        ofPushStyle();
+        ofClear(255, 255, 255, 0); // clear buffer
+        fluid.getVelocity().draw(0, 0, flowWidth, flowHeight);
+        ofPopStyle();
+        fluidFbo.end();
+        
+        fluidFbo.readToPixels(fluidVelocities);
         
         if(particlesActive){
             // set fluid particles parameters
@@ -305,23 +316,6 @@ void Fluid::draw(){
             fluidParticles.draw(0, 0, width, height);
             ofPopStyle();
         }
-//        ofPushStyle();
-//        ofPushMatrix();
-//        ofScale(1.0/scaleFactor, 1.0/scaleFactor);
-//        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
-//        markerForces[0].forceBuffer.draw(0, 0);
-//        ofPopMatrix();
-//        ofPopStyle();
-//        
-//        ofPushStyle();
-//        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
-//        markerForces[1].forceBuffer.draw(213, 0);
-//        ofPopStyle();
-//        
-//        ofPushStyle();
-//        ofEnableBlendMode(OF_BLENDMODE_DISABLED);
-//        markerForces[2].forceBuffer.draw(426, 0);
-//        ofPopStyle();
     }
 }
 
@@ -346,20 +340,20 @@ void Fluid::updateDrawForces(float dt){
             }
             switch (markerForces[i].getType()){
                 case FT_DENSITY:
-                    fluid.addDensity(markerForces[i].getTextureReference(), strength);
+                    fluid.addDensity(markerForces[i].getTexture(), strength);
                     break;
                 case FT_VELOCITY:
-                    fluid.addVelocity(markerForces[i].getTextureReference(), strength);
-                    fluidParticles.addFlowVelocity(markerForces[i].getTextureReference(), strength);
+                    fluid.addVelocity(markerForces[i].getTexture(), strength);
+                    fluidParticles.addFlowVelocity(markerForces[i].getTexture(), strength);
                     break;
                 case FT_TEMPERATURE:
-                    fluid.addTemperature(markerForces[i].getTextureReference(), strength);
+                    fluid.addTemperature(markerForces[i].getTexture(), strength);
                     break;
                 case FT_PRESSURE:
-                    fluid.addPressure(markerForces[i].getTextureReference(), strength);
+                    fluid.addPressure(markerForces[i].getTexture(), strength);
                     break;
                 case FT_OBSTACLE:
-                    fluid.addTempObstacle(markerForces[i].getTextureReference());
+                    fluid.addTempObstacle(markerForces[i].getTexture());
                 default:
                     break;
             }
@@ -375,7 +369,7 @@ ofVec2f Fluid::getFluidOffset(ofPoint p){
         offset.x = fluidVelocities[((int)p_.y*flowWidth+(int)p_.x)*4 + 0]; // r
         offset.y = fluidVelocities[((int)p_.y*flowWidth+(int)p_.x)*4 + 1]; // g
     }
-    
+        
     return offset;
 }
 

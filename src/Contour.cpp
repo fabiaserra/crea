@@ -57,7 +57,7 @@ Contour::Contour()
     flowTimeBlurRadius  = 2.0;   // 0 ~ 10
     
     // velocity mask settings
-    vMaskStrength       = 10.0;  // 0 ~ 10
+//    vMaskStrength       = 10.0;  // 0 ~ 10
     vMaskBlurPasses     = 1;     // 0 ~ 10
     vMaskBlurRadius     = 5.0;   // 0 ~ 10
     vMaskRed            = 255.0;
@@ -79,7 +79,6 @@ Contour::Contour()
     drawConvexHullLine   = false;
     drawSilhouette       = false;
     drawSilhouetteLine   = false;
-    drawQuads            = false;
     drawTangentLines     = false;
 
     // debug
@@ -125,12 +124,13 @@ void Contour::setup(int width, int height, float scaleFactor){
 //    previous.allocate(width, height, OF_IMAGE_GRAYSCALE);
 //    diff.allocate(width, height, OF_IMAGE_GRAYSCALE);
     
-    // allocate flow texture
-    flowTexture.allocate(flowWidth, flowHeight, GL_RGB32F);
+    // allocate flow fbo
+    flowFbo.allocate(flowWidth, flowHeight, GL_RGB32F);
     flowPixels.allocate(flowWidth, flowHeight, 3);
     
-    // velocity mask pixels
+    // velocity mask
     velocityMaskPixels.allocate(flowWidth, flowHeight, 4);
+    velocityMaskFbo.allocate(flowWidth, flowHeight, GL_RGBA32F);
     
     // allocate FBO
     coloredDepthFbo.allocate(width, height, GL_RGBA32F);
@@ -150,7 +150,7 @@ void Contour::update(float dt, ofImage &depthImage){
 
     if(doOpticalFlow){
         // Compute optical flow
-        opticalFlow.setSource(depthImage.getTextureReference());
+        opticalFlow.setSource(depthImage.getTexture());
         opticalFlow.setStrength(flowStrength);
         opticalFlow.setOffset(flowOffset);
         opticalFlow.setLambda(flowLambda);
@@ -162,9 +162,15 @@ void Contour::update(float dt, ofImage &depthImage){
         opticalFlow.setTimeBlurDecay(flowTimeBlurDecay);
         opticalFlow.update(dt);
         
-        // Save flow texture and get its pixels to read velocities
-        flowTexture = opticalFlow.getOpticalFlowDecay();
-        flowTexture.readToPixels(flowPixels);
+        // Save flow fbo and get its pixels to read velocities
+        flowFbo.begin();
+        ofPushStyle();
+        ofClear(255, 255, 255, 0); // clear buffer
+        opticalFlow.getOpticalFlowDecay().draw(0, 0, flowWidth, flowHeight);
+        ofPopStyle();
+        flowFbo.end();
+        
+        flowFbo.readToPixels(flowPixels);
         
         // tint binary depth image (silhouette)
         coloredDepthFbo.begin(); 
@@ -182,15 +188,22 @@ void Contour::update(float dt, ofImage &depthImage){
             ofPopStyle();
         coloredDepthFbo.end();
         
-        velocityMask.setDensity(coloredDepthFbo.getTextureReference()); // to change mask color
-//        velocityMask.setDensity(depthImage.getTextureReference());
+        velocityMask.setDensity(coloredDepthFbo.getTexture()); // to change mask color
         velocityMask.setVelocity(opticalFlow.getOpticalFlow());
-        velocityMask.setStrength(vMaskStrength);
+//        velocityMask.setStrength(vMaskStrength);
         velocityMask.setBlurPasses(vMaskBlurPasses);
         velocityMask.setBlurRadius(vMaskBlurRadius);
         velocityMask.update();
         
-        velocityMask.getTextureReference().readToPixels(velocityMaskPixels);
+        // Save velocityMask fbo and get its pixels to read velocities
+        velocityMaskFbo.begin();
+        ofPushStyle();
+        ofClear(255, 255, 255, 0); // clear buffer
+        velocityMask.getTexture().draw(0, 0, flowWidth, flowHeight);
+        ofPopStyle();
+        velocityMaskFbo.end();
+        
+        velocityMaskFbo.readToPixels(velocityMaskPixels);
     }
     
     // Contour Finder in the depth Image
@@ -210,7 +223,6 @@ void Contour::update(float dt, ofImage &depthImage){
     boundingRects.clear();
     convexHulls.clear();
     contours.clear();
-    quads.clear();
     vMaskContours.clear();
     diffContours.clear();
 
@@ -218,7 +230,6 @@ void Contour::update(float dt, ofImage &depthImage){
     boundingRects.resize(n);
     convexHulls.resize(n);
     contours.resize(n);
-    quads.resize(n);
     vMaskContours.resize(m);
 //    diffContours.resize(o);
 
@@ -233,10 +244,6 @@ void Contour::update(float dt, ofImage &depthImage){
         contour = contourFinder.getPolyline(i);
         contour = contour.getSmoothed(smoothingSize, 0.5);
         contours[i] = contour;
-
-//        ofPolyline quad;
-//        quad = toOf(contourFinder.getFitQuad(i));
-//        quads[i] = quad;
     }
     
     for(int i = 0; i < m; i++){
@@ -292,7 +299,7 @@ void Contour::draw(){
             ofSetLineWidth(lineWidth);
             if(drawBoundingRectLine) ofNoFill();
             for(int i = 0; i < boundingRects.size(); i++)
-                ofRect(boundingRects[i]);
+                ofDrawRectangle(boundingRects[i]);
             ofPopStyle();
         }
         if(drawConvexHull){
@@ -336,23 +343,10 @@ void Contour::draw(){
             ofSetColor(ofColor(red, green, blue), opacity);
             ofSetLineWidth(lineWidth);
             for(int i = 0; i < contours.size(); i++){
-//                if(i == 0) ofSetColor(255, 0, 0);
-//                else if(i == 1) ofSetColor(0, 255, 0);
-//                else ofSetColor(0, 0, 255);
                 contours[i].draw();
             }
             ofPopStyle();
         }
-
-//        if(drawQuads){
-//            ofPushStyle();
-//            ofSetColor(ofColor(red, green, blue), opacity);
-//            ofSetLineWidth(lineWidth);
-//            for(int i = 0; i < quads.size(); i++){
-//                quads[i].draw();
-//            }
-//            ofPopStyle();
-//        }
         
         if(drawTangentLines){
             ofPushStyle();
@@ -365,7 +359,7 @@ void Contour::draw(){
                     ofPoint point = contours[i].getPointAtPercent(p/1000.0);
                     float floatIndex = p/1000.0 * (numPoints-1);
                     ofVec3f tangent = contours[i].getTangentAtIndexInterpolated(floatIndex) * tangentLength;
-                    ofLine(point-tangent/2, point+tangent/2);
+                    ofDrawLine(point-tangent/2, point+tangent/2);
                 }
             }
             ofPopStyle();
@@ -384,7 +378,7 @@ void Contour::draw(){
 //            for (int j = 0; j < height; j+=4){
 //                ofPoint p = ofPoint(i,j);
 //                ofVec2f vel = getFlowOffset(p);
-//                ofLine(ofVec2f(i, j), ofVec2f(i, j)+vel);
+//                ofDrawLine(ofVec2f(i, j), ofVec2f(i, j)+vel);
 //            }
 //        }
         ofEnableBlendMode(OF_BLENDMODE_ADD);
@@ -420,7 +414,7 @@ void Contour::draw(){
         ofSetLineWidth(1.5);
         for(int i = 0; i < contours.size(); i+=10){
             for(int p = 0; p < contours[i].size(); p++){
-                ofLine(contours[i][p], contours[i][p] - getVelocityInPoint(contours[i][p]));
+                ofDrawLine(contours[i][p], contours[i][p] - getVelocityInPoint(contours[i][p]));
             }
         }
         ofPopStyle();

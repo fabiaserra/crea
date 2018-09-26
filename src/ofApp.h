@@ -25,8 +25,8 @@
 #include "ofxUI.h"
 #include "ofxCv.h"
 #include "ofxKinect.h"
-#include "ofxSecondWindow.h"
 #include "ofxFlowTools.h"
+#include "ofxSyphon.h"
 
 // Classes
 //-----------------------
@@ -46,13 +46,13 @@
 #endif
 
 // Use the Kinect live input stream
-#define KINECT_CONNECTED
+//#define KINECT_CONNECTED
 
 // Use an xml IR Markers sequence file as input to Gesture Follower
 //#define KINECT_SEQUENCE
 
 // Use a separate window for control interface
-#define SECOND_WINDOW
+//#define SECOND_WINDOW
 #define PROJECTOR_RESOLUTION_X 640
 #define PROJECTOR_RESOLUTION_Y 480
 
@@ -180,7 +180,7 @@ class ofApp : public ofBaseApp{
         bool drawMarkers;
         bool drawMarkersPath;
         //--------------------------------------------------------------
-        ofxSecondWindow secondWindow;
+//        ofxSecondWindow secondWindow;
         //--------------------------------------------------------------
         vector<ofxUICanvas *> guis;
         //--------------------------------------------------------------
@@ -199,14 +199,11 @@ class ofApp : public ofBaseApp{
         ofxUITextInput *cueName;              // Name of the cue
         ofxUISlider *lowThresh;               // Flocking lower threshold
         ofxUISlider *highThresh;              // Flocking higher threshold
-//        ofxUISortableList *cueSortableList;   // Sortable list to see all the cues and be able to reorder them
         vector< pair<ofxUILabel *, ofxUIRangeSlider*> > cueSliders; // Cue sliders to assign to long sequence
         //--------------------------------------------------------------
         float dim;                            // Size of GUI elements
         float guiWidth;
         float guiMargin;
-        //--------------------------------------------------------------
-//        shared_ptr<GuiApp> gui;
         //--------------------------------------------------------------
         float red, green, blue;
         bool bgGradient;
@@ -242,4 +239,12 @@ class ofApp : public ofBaseApp{
         bool isTracking;
         float currentPercent;
         map<int, float> gestureUpdate;
+        //------ofxSyphone------------------------------------------------
+    
+        ofTexture tex;
+    
+        ofxSyphonServer mainOutputSyphonServer;
+        ofxSyphonServer individualTextureSyphonServer;
+    
+        ofxSyphonClient mClient;
 };

@@ -1,5 +1,8 @@
+ofxCv
+ofxFlowTools
 ofxKinect
 ofxOpenCv
-ofxCv
-ofxXmlSettings
 ofxSecondWindow
+ofxSyphon
+ofxUI
+ofxXmlSettings
