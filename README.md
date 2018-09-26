@@ -7,6 +7,13 @@ alt="CREA VIDEO" width="480" height="360" border="5" /></a>
 
 Video tutorial explaining the interface: https://www.youtube.com/watch?v=i2qrqvZc22Y
 
+##OF 0.9.3 Update
+Since OF released its new version (0.9+) most of the addons that I used were updated/deprecated and it is quite hard to keep up with all the changes. The addon I was using to have a separate window for the GUI, ofxSecondWindow, is deprecated, as well as ofxUI. I have created a separate branch (https://github.com/fabiaserra/crea/tree/OF0.9) that compiles with 0.9.3 and most of the features should work fine, although you won’t have two separate windows and you will see the UI and the output graphics in the same one (you can hide the UI clicking the ‘h’ key).
+
+However, if you really need to have two separate windows, this functionality now comes out of the box from OF (you can see an example in "examples/events/multiWindowsExample" in your openFrameworks folder) but to use this you will also need to change the UI library (recommended to use ofxGui, which is built into OF) and quite a bit of the structure of the code.
+
+Happy coding!!
+
 ##Requirements
 To use _CREA_ you will need:
 * A Windows, Mac OS X or Linux computer with modern graphics.

@@ -26,7 +26,18 @@ using namespace cv;
 void ofApp::setup(){
 
     ofSetFrameRate(60);
+    ofSetCircleResolution(50);
     // ofSetVerticalSync(false);
+    
+    // setup Syphon
+    ofSetWindowTitle("ofxSyphon");
+    
+    mainOutputSyphonServer.setName("Screen Out");
+    individualTextureSyphonServer.setName("Texture Output");
+    
+    mClient.setup();
+    mClient.set("", "Simple Server");
+    tex.allocate(200, 100, GL_RGBA);
     
     #ifdef SECOND_WINDOW
         // the arguments for the second window are its initial x and y position,
@@ -592,6 +603,10 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
+    // Clear with alpha, so we can capture via syphon and composite elsewhere should we want.
+    glClearColor(0.0, 0.0, 0.0, 0.0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
     
     #ifdef SECOND_WINDOW
         secondWindow.begin();
@@ -678,6 +693,11 @@ void ofApp::draw(){
     #endif
     
     if(drawSequencePatternsSeparate) sequence.drawPatternsSeparate(gestureUpdate);
+    
+    // Syphon Stuff
+    mClient.draw(50, 50);
+    mainOutputSyphonServer.publishScreen();
+    individualTextureSyphonServer.publishTexture(&tex);
 }
 
 //--------------------------------------------------------------
@@ -2483,6 +2503,11 @@ void ofApp::keyPressed(int key){
         else if(key == 'h'){
             for(vector<ofxUICanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
                 (*it)->setVisible(false);
+            }
+        }
+        else if(key == 'H'){
+            for(vector<ofxUICanvas *>::iterator it = guis.begin(); it != guis.end(); ++it){
+                (*it)->setVisible(true);
             }
         }
         else if(key == '1'){
