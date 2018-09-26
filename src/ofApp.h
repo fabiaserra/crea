@@ -53,12 +53,6 @@ public:
 	void update();
 	void draw();
 
-	// void saveGUISettings(const string path, const bool isCue);
-	// void loadGUISettings(const string path, const bool isCue, const bool interpolate);
-	// void interpolateWidgetValues();
-
-	// void guiEvent(ofxUIEventArgs &e);
-
 	void exit();
 
 	void keyPressed(int key);
@@ -70,13 +64,6 @@ public:
 	void windowResized(int w, int h);
 	void dragEvent(ofDragInfo dragInfo);
 	void gotMessage(ofMessage msg);
-
-	// void addParticleBasicsGUI(ofxUICanvas* gui, ParticleSystem* ps);
-	// void addParticleInteractionGUI(ofxUICanvas* gui, ParticleSystem* ps);
-	// void addParticlePropertiesGUI(ofxUICanvas* gui, ParticleSystem* ps);
-	// void addParticlePhysicsGUI(ofxUICanvas* gui, ParticleSystem* ps);
-
-	// void resetCueSliders();
 
 private:  
 	float m_time0; // Time value for computing dt
@@ -136,9 +123,7 @@ private:
 	// ParticleSystem m_animationsParticles;
 	vector<ParticleSystem> m_particleSystems;
 	int m_currentParticleSystem;
-	
-	// ofSoundPlayer m_song; // Song
-	
+
 	// // Interpolation
 	// bool m_interpolatingWidgets;
 	// int m_maxTransitionFrames;
@@ -165,31 +150,4 @@ private:
 	// float m_maxMarkerSize;
 	// float m_trackerPersistence;
 	// float m_trackerMaxDistance;
-	
-	// ofxSecondWindow m_secondWindow;
-	
- //    // GUI
- //    vector<ofxUICanvas*> m_guis;
-
- //    float m_dim; // Size of GUI elements
- //    float m_guiWidth;
- //    float m_guiMargin;
-	
- //    ofColor m_uiThemecb;
- //    ofColor m_uiThemeco;
- //    ofColor m_uiThemecoh;
- //    ofColor m_uiThemecf;
-	// ofColor m_uiThemecfh;
-	// ofColor m_uiThemecp;
-	// ofColor m_uiThemecpo;
-	
-	// vector<ofxUILabel*> m_labelTabs; // Labels of the main menu tabs
-	// ofxUILabel *m_songFilename; // Name of the song
-	// ofxUILabel *m_settingsFilename; // Name of the settings
-	// ofxUILabel *m_sequenceDuration; // Duration of the sequence in seconds
-	// ofxUILabel *m_sequenceNumFrames; // Number of frames of the sequence
-	// ofxUILabel *m_sequenceNumMarkers; // Number of markers of the sequence
-
-	// ofxUISlider *m_lowThresh; // Flocking lower threshold
-	// ofxUISlider *m_highThresh; // Flocking higher threshold
 };
