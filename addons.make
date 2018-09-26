@@ -1,5 +1,4 @@
+ofxGui
 ofxKinect
 ofxOpenCv
-ofxCv
 ofxXmlSettings
-ofxSecondWindow
